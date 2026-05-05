@@ -21,6 +21,7 @@ import {
   type RaceRollResult,
   type StatBlock,
 } from './races.js';
+import { canCircle, nextCircleRequirement, primarySkillForGuild, totalSkillRanks } from './progression.js';
 import { WebSocketServer, WebSocket } from 'ws';
 
 type TokenClaims = {
@@ -481,38 +482,6 @@ function grantSkillPool(character: CharacterRecord, skillId: string, amount: num
   return true;
 }
 
-function totalSkillRanks(character: CharacterRecord) {
-  return Object.values(character.skills).reduce((sum, skill) => sum + skill.rank, 0);
-}
-
-function nextCircleRequirement(character: CharacterRecord) {
-  const nextCircle = character.circle + 1;
-  return {
-    nextCircle,
-    totalRanks: nextCircle * 3,
-    primaryRank: nextCircle * 2,
-  };
-}
-
-function primarySkillForGuild(guildId: string) {
-  if (guildId === 'barbarian') return 'melee';
-  if (guildId === 'bard') return 'performance';
-  if (guildId === 'fighter') return 'melee';
-  if (guildId === 'mage') return 'scholarship';
-  if (guildId === 'moon_mage') return 'scholarship';
-  if (guildId === 'necromancer') return 'magic';
-  if (guildId === 'paladin') return 'tactics';
-  if (guildId === 'ranger') return 'survival';
-  if (guildId === 'scout') return 'survival';
-  if (guildId === 'rogue') return 'evasion';
-  if (guildId === 'thief') return 'stealth';
-  if (guildId === 'trader') return 'trading';
-  if (guildId === 'warrior_mage') return 'magic';
-  if (guildId === 'cleric') return 'first_aid';
-  if (guildId === 'empath') return 'empathy';
-  return 'athletics';
-}
-
 function buildCircleStatus(character: CharacterRecord) {
   const requirement = nextCircleRequirement(character);
   const primarySkillId = primarySkillForGuild(character.guildId);
@@ -522,12 +491,6 @@ function buildCircleStatus(character: CharacterRecord) {
     `Next Circle ${requirement.nextCircle}: total skill ranks ${totalSkillRanks(character)}/${requirement.totalRanks}.`,
     `${primarySkill?.name ?? 'Primary skill'} rank ${primarySkill?.rank ?? 0}/${requirement.primaryRank}.`,
   ];
-}
-
-function canCircle(character: CharacterRecord) {
-  const requirement = nextCircleRequirement(character);
-  const primarySkill = character.skills[primarySkillForGuild(character.guildId)];
-  return totalSkillRanks(character) >= requirement.totalRanks && (primarySkill?.rank ?? 0) >= requirement.primaryRank;
 }
 
 function isTrainingRoom(room: Room) {

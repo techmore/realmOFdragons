@@ -247,3 +247,16 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add first real unit-level command tests by extracting pure combat/progression helpers or adding a local in-process command harness, so failures do not all require HTTP smoke setup.
+
+Implementation Notes - 2026-05-05, Unit-Level Progression Tests
+
+Completed in the current Node/React prototype:
+
+- Extracted pure progression helpers into `server/src/progression.ts`.
+- Added `npm --prefix server run test:unit` with direct TypeScript assertions for guild primary skill mapping, total skill ranks, circle requirements, and circle eligibility.
+- Updated root `npm run test:unit`.
+- Updated `npm run agent:check` to run unit tests before the isolated API smoke suite.
+
+Next priority:
+
+- Extract combat math/range helpers into a pure module and add unit coverage for range shifting, advantage bounds, and stance/balance effects.

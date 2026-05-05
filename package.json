@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "npm --prefix server run build && npm --prefix frontend run build",
+    "test:unit": "npm --prefix server run test:unit",
     "smoke:api": "npm --prefix server run smoke:api",
-    "agent:check": "npm run build && node scripts/with-test-server.mjs npm run smoke:api && node scripts/agent-check.mjs",
+    "agent:check": "npm run build && npm run test:unit && node scripts/with-test-server.mjs npm run smoke:api && node scripts/agent-check.mjs",
     "agent:prompt": "node scripts/agent-prompt.mjs",
     "agent:next": "node scripts/agent-prompt.mjs"
   }
