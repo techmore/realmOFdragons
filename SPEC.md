@@ -228,3 +228,22 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Split the monolithic API smoke script into focused command suites so route coverage, economy coverage, progression coverage, and combat coverage can run independently and fail with tighter diagnostics.
+
+Implementation Notes - 2026-05-05, Focused API Smoke Suites
+
+Completed in the current Node/React prototype:
+
+- Refactored `server/scripts/smoke-api.ts` from one linear flow into shared setup plus named suites.
+- `npm run smoke:api` still runs the full end-to-end coverage path.
+- Added focused server smoke commands:
+  `smoke:identity`
+  `smoke:scripts`
+  `smoke:progression`
+  `smoke:economy`
+  `smoke:combat`
+- Focused suites create isolated accounts/characters and fail closer to the affected feature area.
+- The full suite still validates the complete identity, scripts, progression, economy, combat, and incapacitation flow.
+
+Next priority:
+
+- Add first real unit-level command tests by extracting pure combat/progression helpers or adding a local in-process command harness, so failures do not all require HTTP smoke setup.

@@ -1,5 +1,7 @@
 type JsonObject = Record<string, unknown>;
 
+type SmokeSuite = 'all' | 'identity' | 'scripts' | 'progression' | 'economy' | 'combat';
+
 interface AuthTokens {
   accessToken: string;
 }
@@ -54,6 +56,16 @@ interface ScriptRecord {
   id: string;
 }
 
+interface SmokeContext {
+  accessToken: string;
+  account: string;
+  races: RaceSummary[];
+  character: CharacterSummary;
+  summary: Record<string, unknown>;
+}
+
+const suites: SmokeSuite[] = ['all', 'identity', 'scripts', 'progression', 'economy', 'combat'];
+const requestedSuite = (process.argv[2] ?? 'all') as SmokeSuite;
 const baseUrl = (process.env.DR_API_BASE_URL ?? 'http://localhost:4000').replace(/\/+$/, '');
 const password = 'smoke-password-01';
 const unique = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -137,13 +149,8 @@ async function advanceToCircle(
     let result = await command(accessToken, current.id, 'circle');
     current = result.character;
 
-    if (current.circle >= targetCircle) {
-      break;
-    }
-
-    if (result.events.some((event) => event.includes('advance to Circle'))) {
-      continue;
-    }
+    if (current.circle >= targetCircle) break;
+    if (result.events.some((event) => event.includes('advance to Circle'))) continue;
 
     const ready = await command(accessToken, current.id, 'wait 900');
     current = ready.character;
@@ -162,7 +169,7 @@ async function advanceToCircle(
   return current;
 }
 
-async function main(): Promise<void> {
+async function createContext(): Promise<SmokeContext> {
   await request<JsonObject>('/health');
 
   const races = await request<{ races: RaceSummary[] }>('/v1/races');
@@ -179,27 +186,47 @@ async function main(): Promise<void> {
   });
   assert(login.accessToken, 'Expected login access token.');
 
-  let character = await request<CharacterSummary>('/v1/characters', {
+  const character = await request<CharacterSummary>('/v1/characters', {
     method: 'POST',
     headers: authHeaders(login.accessToken),
     body: JSON.stringify({ name: `Smoke${unique.slice(-6)}`, race: races.races[0].name }),
   });
 
-  for (const race of races.races) {
-    character = await request<CharacterSummary>(`/v1/characters/${character.id}/reroll`, {
+  return {
+    accessToken: login.accessToken,
+    account: email,
+    races: races.races,
+    character,
+    summary: {
+      account: email,
+      suite: requestedSuite,
+    },
+  };
+}
+
+async function runIdentitySuite(context: SmokeContext): Promise<void> {
+  let current = context.character;
+
+  for (const race of context.races) {
+    current = await request<CharacterSummary>(`/v1/characters/${current.id}/reroll`, {
       method: 'POST',
-      headers: authHeaders(login.accessToken),
+      headers: authHeaders(context.accessToken),
       body: JSON.stringify({ race: race.name }),
     });
     assert(
-      character.race === race.id || character.race.toLowerCase() === race.name.toLowerCase(),
-      `Expected reroll race ${race.name}, got ${character.race}`,
+      current.race === race.id || current.race.toLowerCase() === race.name.toLowerCase(),
+      `Expected reroll race ${race.name}, got ${current.race}`,
     );
   }
 
+  context.character = current;
+  context.summary.racesRolled = context.races.length;
+}
+
+async function runScriptSuite(context: SmokeContext): Promise<void> {
   const script = await request<ScriptRecord>('/v1/scripts', {
     method: 'POST',
-    headers: authHeaders(login.accessToken),
+    headers: authHeaders(context.accessToken),
     body: JSON.stringify({
       name: `Smoke route prep ${unique}`,
       description: 'Reusable API smoke script created by npm run smoke:api.',
@@ -210,144 +237,178 @@ async function main(): Promise<void> {
 
   const scriptRun = await request<{ steps: unknown[] }>(`/v1/scripts/${script.id}/run`, {
     method: 'POST',
-    headers: authHeaders(login.accessToken),
-    body: JSON.stringify({ characterId: character.id, continueOnError: false, paceMs: 0 }),
+    headers: authHeaders(context.accessToken),
+    body: JSON.stringify({ characterId: context.character.id, continueOnError: false, paceMs: 0 }),
   });
   assert(scriptRun.steps.length === 3, `Expected 3 script steps, got ${scriptRun.steps.length}`);
 
+  context.summary.scriptSteps = scriptRun.steps.length;
+}
+
+async function runProgressionSuite(context: SmokeContext): Promise<void> {
   const guilds = await request<{ guilds: GuildSummary[] }>('/v1/world/guilds');
   assert(guilds.guilds.length >= 1, 'Expected at least one guild room.');
 
+  let current = context.character;
   for (const guild of guilds.guilds) {
-    character = await walkTo(login.accessToken, character, guild.roomId);
-    const joined = await command(login.accessToken, character.id, 'join guild');
+    current = await walkTo(context.accessToken, current, guild.roomId);
+    const joined = await command(context.accessToken, current.id, 'join guild');
     assert(joined.events.some((event) => event.includes('registered')), `Expected to join ${guild.name}.`);
-    character = joined.character;
+    current = joined.character;
   }
 
-  character = await walkTo(login.accessToken, character, guilds.guilds[0].roomId);
-  character = (await command(login.accessToken, character.id, 'join guild')).character;
-  character = await advanceToCircle(login.accessToken, character, 10);
+  current = await walkTo(context.accessToken, current, guilds.guilds[0].roomId);
+  current = (await command(context.accessToken, current.id, 'join guild')).character;
+  current = await advanceToCircle(context.accessToken, current, 10);
 
+  context.character = current;
+  context.summary.guildRoomsWalked = guilds.guilds.length;
+  context.summary.circleReached = current.circle;
+}
+
+async function runEconomySuite(context: SmokeContext): Promise<void> {
   const shops = await request<{ shops: ShopRoomSummary[] }>('/v1/world/shops');
   assert(shops.shops.length >= 1, 'Expected at least one shop room.');
+
+  let current = context.character;
   let testedShopEconomy = false;
 
   for (const shopRoom of shops.shops) {
-    character = await walkTo(login.accessToken, character, shopRoom.roomId);
-    const shop = await command(login.accessToken, character.id, 'shop');
+    current = await walkTo(context.accessToken, current, shopRoom.roomId);
+    const shop = await command(context.accessToken, current.id, 'shop');
     assert(shop.events.some((event) => event.includes(shopRoom.shop.name)), `Expected shop listing for ${shopRoom.shop.name}`);
-    character = shop.character;
+    current = shop.character;
 
     if (!testedShopEconomy && shopRoom.shop.items.length > 0) {
       const item = shopRoom.shop.items[0];
-      const ready = await command(login.accessToken, character.id, 'wait 900');
-      character = ready.character;
-      const inventoryBefore = character.inventory.length;
-      const bought = await command(login.accessToken, character.id, `shop buy ${item.code}`);
+      current = (await command(context.accessToken, current.id, 'wait 900')).character;
+      const inventoryBefore = current.inventory.length;
+      const bought = await command(context.accessToken, current.id, `shop buy ${item.code}`);
       assert(bought.events.some((event) => event.includes(`You buy ${item.name}`)), `Expected buy output for ${item.name}`);
       assert(bought.character.inventory.length === inventoryBefore + 1, `Expected inventory to gain ${item.code}`);
 
-      await command(login.accessToken, bought.character.id, 'wait 450');
+      await command(context.accessToken, bought.character.id, 'wait 450');
 
-      const sold = await command(login.accessToken, bought.character.id, `shop sell ${item.code}`);
+      const sold = await command(context.accessToken, bought.character.id, `shop sell ${item.code}`);
       assert(sold.events.some((event) => event.includes(`You sell ${item.name}`)), `Expected sell output for ${item.name}`);
       assert(sold.character.inventory.length === inventoryBefore, `Expected inventory to remove ${item.code}`);
-      character = sold.character;
+      current = sold.character;
       testedShopEconomy = true;
     }
   }
 
   assert(testedShopEconomy, 'Expected to buy and sell at least one shop item.');
+  context.character = current;
+  context.summary.shopRoomsWalked = shops.shops.length;
+  context.summary.shopEconomyChecked = true;
+}
 
-  character = await walkTo(login.accessToken, character, 'crossing-RV02-002');
-  character = (await command(login.accessToken, character.id, 'wait 900')).character;
+async function runCombatSuite(context: SmokeContext): Promise<void> {
+  let current = await walkTo(context.accessToken, context.character, 'crossing-RV02-002');
+  current = (await command(context.accessToken, current.id, 'wait 900')).character;
 
-  let result = await command(login.accessToken, character.id, 'advance');
+  let result = await command(context.accessToken, current.id, 'advance');
   assert(result.character.combat?.range, 'Expected combat to start after advance.');
-  character = result.character;
+  current = result.character;
 
-  result = await command(login.accessToken, character.id, 'range');
+  result = await command(context.accessToken, current.id, 'range');
   assert(result.events.some((event) => event.includes('You are at')), 'Expected range command output.');
 
-  result = await command(login.accessToken, character.id, 'wait 900');
-  character = result.character;
+  current = (await command(context.accessToken, current.id, 'wait 900')).character;
 
-  if (character.combat?.range !== 'melee') {
-    result = await command(login.accessToken, character.id, 'advance');
-    character = result.character;
-    await command(login.accessToken, character.id, 'wait 900');
+  if (current.combat?.range !== 'melee') {
+    result = await command(context.accessToken, current.id, 'advance');
+    current = result.character;
+    await command(context.accessToken, current.id, 'wait 900');
   }
 
-  result = await command(login.accessToken, character.id, 'circle');
+  result = await command(context.accessToken, current.id, 'circle');
   assert(result.events.some((event) => event.includes('circle')), 'Expected circle maneuver output.');
   assert(typeof result.character.combat?.advantage === 'number', 'Expected combat advantage in character payload.');
 
-  result = await command(login.accessToken, result.character.id, 'wait 900');
-  character = result.character;
+  current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
 
-  result = await command(login.accessToken, character.id, 'jab');
+  result = await command(context.accessToken, current.id, 'jab');
   assert(result.events.some((event) => event.includes('jab') || event.includes('too far away')), 'Expected jab maneuver output.');
 
-  result = await command(login.accessToken, result.character.id, 'wait 900');
-  character = result.character;
+  current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
 
-  if (character.combat) {
-    result = await command(login.accessToken, character.id, 'defend');
+  if (current.combat) {
+    result = await command(context.accessToken, current.id, 'defend');
     assert(result.events.some((event) => event.includes('guard')), 'Expected defend recovery output.');
 
-    result = await command(login.accessToken, result.character.id, 'wait 900');
-    character = result.character;
+    current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
 
-    result = await command(login.accessToken, character.id, 'flee');
+    result = await command(context.accessToken, current.id, 'flee');
     assert(result.events.some((event) => event.includes('flee')), 'Expected flee output.');
     assert(!result.character.combat, 'Expected flee to clear combat.');
-    character = result.character;
+    current = result.character;
 
-    await command(login.accessToken, character.id, 'wait 900');
+    await command(context.accessToken, current.id, 'wait 900');
 
-    result = await command(login.accessToken, character.id, 'advance');
-    character = result.character;
-    await command(login.accessToken, character.id, 'wait 900');
-    if (character.combat?.range !== 'melee') {
-      result = await command(login.accessToken, character.id, 'advance');
-      character = result.character;
-      await command(login.accessToken, character.id, 'wait 900');
+    result = await command(context.accessToken, current.id, 'advance');
+    current = result.character;
+    await command(context.accessToken, current.id, 'wait 900');
+    if (current.combat?.range !== 'melee') {
+      result = await command(context.accessToken, current.id, 'advance');
+      current = result.character;
+      await command(context.accessToken, current.id, 'wait 900');
     }
   }
 
-  result = await command(login.accessToken, result.character.id, 'wait 900');
-  character = result.character;
+  current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
 
-  result = await command(login.accessToken, character.id, 'bash');
+  result = await command(context.accessToken, current.id, 'bash');
   assert(result.events.some((event) => event.includes('bash') || event.includes('too far away')), 'Expected bash maneuver output.');
 
   const incapacitated = await request<{ character: CharacterSummary }>(`/v1/test/characters/${result.character.id}/state`, {
     method: 'POST',
-    headers: authHeaders(login.accessToken),
+    headers: authHeaders(context.accessToken),
     body: JSON.stringify({ healthCurrent: 0, clearCombat: true }),
   });
   assert(incapacitated.character.health.current === 0, 'Expected fixture to set health to 0.');
 
-  const blocked = await command(login.accessToken, incapacitated.character.id, 'attack');
+  const blocked = await command(context.accessToken, incapacitated.character.id, 'attack');
   assert(blocked.events.some((event) => event.includes('incapacitated')), 'Expected incapacitated command block.');
 
-  const rested = await command(login.accessToken, incapacitated.character.id, 'rest');
+  const rested = await command(context.accessToken, incapacitated.character.id, 'rest');
   assert(rested.character.health.current > 0, 'Expected rest to recover health from incapacitation.');
   assert(rested.events.some((event) => event.includes('recover')), 'Expected rest recovery output.');
-  result = rested;
+
+  context.character = rested.character;
+  context.summary.finalCombat = rested.character.combat ?? null;
+  context.summary.finalRoom = rested.character.roomId;
+  context.summary.combatChecked = true;
+}
+
+async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void> {
+  if (suite === 'identity') await runIdentitySuite(context);
+  if (suite === 'scripts') await runScriptSuite(context);
+  if (suite === 'progression') await runProgressionSuite(context);
+  if (suite === 'economy') await runEconomySuite(context);
+  if (suite === 'combat') await runCombatSuite(context);
+  if (suite === 'all') {
+    await runIdentitySuite(context);
+    await runScriptSuite(context);
+    await runProgressionSuite(context);
+    await runEconomySuite(context);
+    await runCombatSuite(context);
+  }
+}
+
+async function main(): Promise<void> {
+  assert(suites.includes(requestedSuite), `Unknown smoke suite "${requestedSuite}". Expected one of: ${suites.join(', ')}`);
+
+  const context = await createContext();
+  await runSuite(context, requestedSuite);
 
   console.log(
     JSON.stringify(
       {
         ok: true,
-        account: email,
-        racesRolled: races.races.length,
-        guildRoomsWalked: guilds.guilds.length,
-        circleReached: result.character.circle,
-        shopRoomsWalked: shops.shops.length,
-        finalRoom: result.character.roomId,
-        finalCombat: result.character.combat ?? null,
+        ...context.summary,
+        finalRoom: context.character.roomId,
+        finalCombat: context.character.combat ?? null,
       },
       null,
       2,
