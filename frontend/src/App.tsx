@@ -193,6 +193,15 @@ type ApiCharacterList = {
   characters: Character[];
 };
 
+type GameStatusPanelsProps = {
+  character: Character | null;
+  room: Room | null;
+  selectedCharacter: Character | null;
+  skillEntries: Array<[string, CharacterSkill]>;
+  loading?: boolean;
+  onCommand?: (command: string) => void;
+};
+
 const API_BASE = 'http://localhost:4000/v1';
 
 const keyMap: Record<string, string> = {
@@ -393,6 +402,134 @@ function findPathBetweenRooms(worldRooms: Record<string, Room>, start: string, d
     }
   }
   return [];
+}
+
+function GameStatusPanels({
+  character,
+  room,
+  selectedCharacter,
+  skillEntries,
+  loading = false,
+  onCommand = () => undefined,
+}: GameStatusPanelsProps) {
+  return (
+    <>
+      <section className="panel room">
+        <h2>Room</h2>
+        {room ? (
+          <>
+            <p>{room.description}</p>
+            <div className="prompts">
+              {room.prompts.map((prompt) => <p key={prompt}>{prompt}</p>)}
+            </div>
+            <h3>Exits</h3>
+            <div className="exit-list">
+              {room.exits.map((exit) => (
+                <button type="button" key={exit.destination + exit.direction} onClick={() => onCommand(exit.direction.toLowerCase())}>
+                  {exit.direction}
+                </button>
+              ))}
+            </div>
+            {room.shop ? (
+              <>
+                <h3>{room.shop.name}</h3>
+                <ul>
+                  {room.shop.items.map((item) => (
+                    <li key={item.code}>
+                      <button type="button" onClick={() => onCommand(`shop buy ${item.code}`)}>
+                        buy {item.code}
+                      </button>
+                      <span>{item.name} ({item.price} {item.currency})</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
+          </>
+        ) : (
+          <p className="subtle">Load a character to see room details.</p>
+        )}
+      </section>
+
+      <section className="panel">
+        <h2>Controls</h2>
+        <div className="action-grid">
+          {['look', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'shop', 'join guild', 'combat', 'attack', 'defend', 'flee', 'rest'].map((entry) => (
+            <button type="button" key={entry} onClick={() => onCommand(entry)} disabled={loading || !character}>
+              {entry}
+            </button>
+          ))}
+        </div>
+        <div className="dpad-grid" role="group" aria-label="Directional movement controls">
+          {directionButtons.map((button) => (
+            <button
+              type="button"
+              key={button.command}
+              className={button.command === 'exits' || button.command === 'look' ? 'dpad-wide' : ''}
+              onClick={() => onCommand(button.command)}
+              title={button.title}
+              disabled={loading || !character}
+            >
+              {button.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="panel equip">
+        <h2>Character</h2>
+        <p>{selectedCharacter ? `${selectedCharacter.name} | ${selectedCharacter.raceDisplayName} | ${selectedCharacter.roleTitle}` : 'No character selected'}</p>
+        <p>{character ? `${character.guildName} | Circle ${character.circle}` : 'No guild data'}</p>
+        <p>{character ? `Stance ${character.stance} | Balance ${character.balance}` : 'No combat posture'}</p>
+        <div className="stat-grid">
+          {character ? (
+            <>
+              <span>STR {character.stats.strength}</span>
+              <span>REF {character.stats.reflex}</span>
+              <span>AGI {character.stats.agility}</span>
+              <span>DIS {character.stats.discipline}</span>
+              <span>STA {character.stats.stamina}</span>
+              <span>WIS {character.stats.wisdom}</span>
+              <span>INT {character.stats.intelligence}</span>
+              <span>CHA {character.stats.charisma}</span>
+            </>
+          ) : null}
+        </div>
+        <h3>Hands</h3>
+        <p>Right: {character?.hands.right ?? 'empty'}</p>
+        <p>Left: {character?.hands.left ?? 'empty'}</p>
+        <h3>Skills</h3>
+        <ul>
+          {skillEntries.map(([id, skill]) => (
+            <li key={id}>{skill.name}: {skill.rank} ({skill.pool})</li>
+          ))}
+        </ul>
+        <h3>Inventory</h3>
+        <ul>
+          {(character?.inventory ?? []).map((item, index) => (
+            <li key={`${item}-${index}`}>
+              <span>{item}</span>
+              <button
+                type="button"
+                onClick={() => onCommand(`shop sell ${item}`)}
+                disabled={!!room && room.shop === undefined}
+              >
+                sell
+              </button>
+            </li>
+          ))}
+        </ul>
+        {character?.combat ? (
+          <>
+            <h3>Combat</h3>
+            <p>{character.combat.targetName}: {character.combat.targetHp}/{character.combat.targetMaxHp}</p>
+            <p>Range: {character.combat.range}</p>
+            <p>Advantage: {character.combat.advantage}</p>
+          </>
+        ) : null}
+      </section>
+    </>
+  );
 }
 
 function App() {
@@ -1028,120 +1165,14 @@ function App() {
           </article>
 
           <aside className="side-pane">
-            <section className="panel room">
-              <h2>Room</h2>
-              {room ? (
-                <>
-                  <p>{room.description}</p>
-                  <div className="prompts">
-                    {room.prompts.map((prompt) => <p key={prompt}>{prompt}</p>)}
-                  </div>
-                  <h3>Exits</h3>
-                  <div className="exit-list">
-                    {room.exits.map((exit) => (
-                      <button type="button" key={exit.destination + exit.direction} onClick={() => void runCommand(exit.direction.toLowerCase())}>
-                        {exit.direction}
-                      </button>
-                    ))}
-                  </div>
-                  {room.shop ? (
-                    <>
-                      <h3>{room.shop.name}</h3>
-                      <ul>
-                        {room.shop.items.map((item) => (
-                          <li key={item.code}>
-                            <button type="button" onClick={() => void runCommand(`shop buy ${item.code}`)}>
-                              buy {item.code}
-                            </button>
-                            <span>{item.name} ({item.price} {item.currency})</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : null}
-                </>
-              ) : (
-                <p className="subtle">Load a character to see room details.</p>
-              )}
-            </section>
-
-            <section className="panel">
-              <h2>Controls</h2>
-              <div className="action-grid">
-                {['look', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'shop', 'join guild', 'combat', 'attack', 'defend', 'flee', 'rest'].map((entry) => (
-                  <button type="button" key={entry} onClick={() => void runCommand(entry)} disabled={loading || !character}>
-                    {entry}
-                  </button>
-                ))}
-              </div>
-              <div className="dpad-grid" role="group" aria-label="Directional movement controls">
-                {directionButtons.map((button) => (
-                  <button
-                    type="button"
-                    key={button.command}
-                    className={button.command === 'exits' || button.command === 'look' ? 'dpad-wide' : ''}
-                    onClick={() => void runCommand(button.command)}
-                    title={button.title}
-                    disabled={loading || !character}
-                  >
-                    {button.label}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section className="panel equip">
-              <h2>Character</h2>
-              <p>{selectedCharacter ? `${selectedCharacter.name} | ${selectedCharacter.raceDisplayName} | ${selectedCharacter.roleTitle}` : 'No character selected'}</p>
-              <p>{character ? `${character.guildName} | Circle ${character.circle}` : 'No guild data'}</p>
-              <p>{character ? `Stance ${character.stance} | Balance ${character.balance}` : 'No combat posture'}</p>
-              <div className="stat-grid">
-                {character ? (
-                  <>
-                    <span>STR {character.stats.strength}</span>
-                    <span>REF {character.stats.reflex}</span>
-                    <span>AGI {character.stats.agility}</span>
-                    <span>DIS {character.stats.discipline}</span>
-                    <span>STA {character.stats.stamina}</span>
-                    <span>WIS {character.stats.wisdom}</span>
-                    <span>INT {character.stats.intelligence}</span>
-                    <span>CHA {character.stats.charisma}</span>
-                  </>
-                ) : null}
-              </div>
-              <h3>Hands</h3>
-              <p>Right: {character?.hands.right ?? 'empty'}</p>
-              <p>Left: {character?.hands.left ?? 'empty'}</p>
-              <h3>Skills</h3>
-              <ul>
-                {skillEntries.map(([id, skill]) => (
-                  <li key={id}>{skill.name}: {skill.rank} ({skill.pool})</li>
-                ))}
-              </ul>
-              <h3>Inventory</h3>
-              <ul>
-                {(character?.inventory ?? []).map((item, index) => (
-                  <li key={`${item}-${index}`}>
-                    <span>{item}</span>
-                    <button
-                      type="button"
-                      onClick={() => void runCommand(`shop sell ${item}`)}
-                      disabled={!!room && room.shop === undefined}
-                    >
-                      sell
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              {character?.combat ? (
-                <>
-                  <h3>Combat</h3>
-                  <p>{character.combat.targetName}: {character.combat.targetHp}/{character.combat.targetMaxHp}</p>
-                  <p>Range: {character.combat.range}</p>
-                  <p>Advantage: {character.combat.advantage}</p>
-                </>
-              ) : null}
-            </section>
+            <GameStatusPanels
+              character={character}
+              room={room}
+              selectedCharacter={selectedCharacter}
+              skillEntries={skillEntries}
+              loading={loading}
+              onCommand={(entry) => void runCommand(entry)}
+            />
           </aside>
         </section>
 
@@ -1263,4 +1294,5 @@ function App() {
   );
 }
 
-export { App };
+export { App, GameStatusPanels };
+export type { Character, CharacterSkill, Room };

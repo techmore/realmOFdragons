@@ -275,3 +275,17 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add focused frontend smoke or component-level checks for command input, quick commands, inventory/hands display, and combat status rendering.
+
+Implementation Notes - 2026-05-05, Frontend UI Smoke
+
+Completed in the current Node/React prototype:
+
+- Extracted `GameStatusPanels` from the main React app so core MUD UI state can be rendered directly.
+- Added `npm --prefix frontend run smoke:ui`.
+- Added static render assertions for room prompts/exits, shop buy controls, quick commands, D-pad controls, character stats, hands, inventory, and combat status.
+- Updated root `npm run smoke:ui`.
+- Updated `npm run agent:check` to run frontend UI smoke before API smoke.
+
+Next priority:
+
+- Improve frontend command/input coverage by adding a small browser-level smoke for login, character creation, command submission, and D-pad/keyboard navigation against the isolated fixture server.
