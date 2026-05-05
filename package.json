@@ -9,6 +9,7 @@
     "smoke:ui": "npm --prefix frontend run smoke:ui",
     "smoke:browser": "npm --prefix frontend run smoke:browser",
     "smoke:api": "npm --prefix server run smoke:api",
+    "ci:check": "npm run build && npm run test:unit && npm run smoke:ui && node scripts/with-test-server.mjs npm run smoke:api",
     "agent:check": "npm run build && npm run test:unit && npm run smoke:ui && node scripts/with-test-app.mjs npm run smoke:browser && node scripts/with-test-server.mjs npm run smoke:api && node scripts/agent-check.mjs",
     "agent:prompt": "node scripts/agent-prompt.mjs",
     "agent:next": "node scripts/agent-prompt.mjs"

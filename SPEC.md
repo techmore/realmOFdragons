@@ -304,3 +304,16 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add GitHub Actions CI for build, unit tests, frontend static smoke, and API smoke with fixture server; browser smoke can be optional or macOS-only because it depends on local Chrome.
+
+Implementation Notes - 2026-05-05, GitHub Actions CI
+
+Completed in the current Node/React prototype:
+
+- Added `npm run ci:check` as a Linux-safe CI entrypoint.
+- CI coverage includes server build, frontend build, server unit tests, frontend static UI smoke, and API smoke through the fixture server harness.
+- Added `.github/workflows/ci.yml` for pushes to `main` and pull requests.
+- CI intentionally excludes browser smoke for now because the current browser script targets local Chrome; browser smoke remains part of local `npm run agent:check`.
+
+Next priority:
+
+- Make browser smoke CI-compatible by using Playwright-managed Chromium on Linux or conditionally detecting installed browsers.
