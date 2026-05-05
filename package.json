@@ -1,0 +1,13 @@
+{
+  "name": "realm-of-dragons-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm --prefix server run build && npm --prefix frontend run build",
+    "smoke:api": "npm --prefix server run smoke:api",
+    "agent:check": "npm run build && npm run smoke:api && node scripts/agent-check.mjs",
+    "agent:prompt": "node scripts/agent-prompt.mjs",
+    "agent:next": "node scripts/agent-prompt.mjs"
+  }
+}
