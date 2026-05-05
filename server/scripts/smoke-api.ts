@@ -15,6 +15,7 @@ interface CharacterSummary {
   race: string;
   roomId: string;
   circle: number;
+  inventory: string[];
   combat?: {
     range: 'missile' | 'pole' | 'melee';
     advantage: number;
@@ -38,6 +39,10 @@ interface ShopRoomSummary {
   shop: {
     code: string;
     name: string;
+    items: Array<{
+      code: string;
+      name: string;
+    }>;
   };
 }
 
@@ -104,9 +109,11 @@ async function walkTo(accessToken: string, character: CharacterSummary, roomId: 
   let current = character;
 
   for (const step of steps) {
+    const ready = await command(accessToken, current.id, 'wait 900');
+    current = ready.character;
+
     const moved = await command(accessToken, current.id, step);
     current = moved.character;
-    await command(accessToken, current.id, 'wait 900');
   }
 
   assert(current.roomId === roomId, `Expected to arrive at ${roomId}, got ${current.roomId}`);
@@ -133,6 +140,9 @@ async function advanceToCircle(
     if (result.events.some((event) => event.includes('advance to Circle'))) {
       continue;
     }
+
+    const ready = await command(accessToken, current.id, 'wait 900');
+    current = ready.character;
 
     result = await command(accessToken, current.id, 'train');
     current = result.character;
@@ -217,15 +227,37 @@ async function main(): Promise<void> {
 
   const shops = await request<{ shops: ShopRoomSummary[] }>('/v1/world/shops');
   assert(shops.shops.length >= 1, 'Expected at least one shop room.');
+  let testedShopEconomy = false;
 
   for (const shopRoom of shops.shops) {
     character = await walkTo(login.accessToken, character, shopRoom.roomId);
     const shop = await command(login.accessToken, character.id, 'shop');
     assert(shop.events.some((event) => event.includes(shopRoom.shop.name)), `Expected shop listing for ${shopRoom.shop.name}`);
     character = shop.character;
+
+    if (!testedShopEconomy && shopRoom.shop.items.length > 0) {
+      const item = shopRoom.shop.items[0];
+      const ready = await command(login.accessToken, character.id, 'wait 900');
+      character = ready.character;
+      const inventoryBefore = character.inventory.length;
+      const bought = await command(login.accessToken, character.id, `shop buy ${item.code}`);
+      assert(bought.events.some((event) => event.includes(`You buy ${item.name}`)), `Expected buy output for ${item.name}`);
+      assert(bought.character.inventory.length === inventoryBefore + 1, `Expected inventory to gain ${item.code}`);
+
+      await command(login.accessToken, bought.character.id, 'wait 450');
+
+      const sold = await command(login.accessToken, bought.character.id, `shop sell ${item.code}`);
+      assert(sold.events.some((event) => event.includes(`You sell ${item.name}`)), `Expected sell output for ${item.name}`);
+      assert(sold.character.inventory.length === inventoryBefore, `Expected inventory to remove ${item.code}`);
+      character = sold.character;
+      testedShopEconomy = true;
+    }
   }
 
+  assert(testedShopEconomy, 'Expected to buy and sell at least one shop item.');
+
   character = await walkTo(login.accessToken, character, 'crossing-RV02-002');
+  character = (await command(login.accessToken, character.id, 'wait 900')).character;
 
   let result = await command(login.accessToken, character.id, 'advance');
   assert(result.character.combat?.range, 'Expected combat to start after advance.');
@@ -252,6 +284,33 @@ async function main(): Promise<void> {
 
   result = await command(login.accessToken, character.id, 'jab');
   assert(result.events.some((event) => event.includes('jab') || event.includes('too far away')), 'Expected jab maneuver output.');
+
+  result = await command(login.accessToken, result.character.id, 'wait 900');
+  character = result.character;
+
+  if (character.combat) {
+    result = await command(login.accessToken, character.id, 'defend');
+    assert(result.events.some((event) => event.includes('guard')), 'Expected defend recovery output.');
+
+    result = await command(login.accessToken, result.character.id, 'wait 900');
+    character = result.character;
+
+    result = await command(login.accessToken, character.id, 'flee');
+    assert(result.events.some((event) => event.includes('flee')), 'Expected flee output.');
+    assert(!result.character.combat, 'Expected flee to clear combat.');
+    character = result.character;
+
+    await command(login.accessToken, character.id, 'wait 900');
+
+    result = await command(login.accessToken, character.id, 'advance');
+    character = result.character;
+    await command(login.accessToken, character.id, 'wait 900');
+    if (character.combat?.range !== 'melee') {
+      result = await command(login.accessToken, character.id, 'advance');
+      character = result.character;
+      await command(login.accessToken, character.id, 'wait 900');
+    }
+  }
 
   result = await command(login.accessToken, result.character.id, 'wait 900');
   character = result.character;

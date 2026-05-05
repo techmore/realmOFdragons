@@ -201,3 +201,17 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Split broad smoke coverage into faster focused command suites, starting with combat recovery/death edge cases and shop buy/sell economy assertions.
+
+Implementation Notes - 2026-05-05, Economy And Combat Recovery Smoke
+
+Completed in the current Node/React prototype:
+
+- Expanded `npm run smoke:api` with a shop economy assertion.
+- The smoke script now buys one catalog item, verifies inventory growth, sells it back, and verifies inventory removal.
+- Hardened path walking in the smoke harness so command roundtime is cleared before route steps.
+- Expanded combat command coverage with `defend` and `flee`.
+- The smoke script verifies `flee` clears active combat, then re-enters combat for continued maneuver checks.
+
+Next priority:
+
+- Add deterministic death/incapacitation command coverage. This likely needs a test-only fixture route or local command runner so the suite can create near-death combat state without relying on random monster damage.
