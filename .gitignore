@@ -9,3 +9,4 @@ server/data/*.json
 server/data/*.tmp
 frontend/dist/
 server/dist/
+artifacts/

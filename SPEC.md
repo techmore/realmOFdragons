@@ -317,3 +317,17 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Make browser smoke CI-compatible by using Playwright-managed Chromium on Linux or conditionally detecting installed browsers.
+
+Implementation Notes - 2026-05-05, Check Telemetry Artifacts
+
+Completed in the current Node/React prototype:
+
+- Added `scripts/run-checks.mjs` to run CI/local checks with structured telemetry.
+- `npm run ci:check` now records build, unit, UI smoke, and API smoke step telemetry.
+- `npm run agent:check` now records local build, unit, UI smoke, browser smoke, API smoke, and git status telemetry.
+- Telemetry includes command lines, exit codes, durations, output tails, and a Markdown summary.
+- GitHub Actions now uploads `artifacts/telemetry` as the `check-telemetry` artifact.
+
+Next priority:
+
+- Make browser smoke CI-compatible by using Playwright-managed Chromium on Linux or conditionally detecting installed browsers.
