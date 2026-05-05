@@ -260,6 +260,7 @@ const PORT = Number(process.env.PORT) || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 const ACCESS_TTL = '15m';
 const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const TEST_FIXTURES_ENABLED = process.env.DR_TEST_FIXTURES === '1';
 
 const socketsByCharacter = new Map<string, Set<WebSocket>>();
 
@@ -2024,6 +2025,45 @@ app.get('/v1/characters/:characterId/state', authRequired, async (req: Authentic
   const room = worldRooms[resolved.character.roomId];
   return res.json({
     character: sanitizeCharacter(resolved.character),
+    room,
+  });
+});
+
+app.post('/v1/test/characters/:characterId/state', authRequired, async (req: AuthenticatedRequest, res: Response) => {
+  if (!TEST_FIXTURES_ENABLED) {
+    return res.status(404).json({ error: 'Test fixtures are disabled.' });
+  }
+
+  const character = await storage.getCharacter(req.params.characterId);
+  if (!character) return res.status(404).json({ error: 'Character not found.' });
+  if (character.accountId !== req.auth!.sub) {
+    return res.status(403).json({ error: 'Character access denied.' });
+  }
+
+  const resolved = ensureCharacterShape(character).character;
+  const healthCurrent = req.body?.healthCurrent;
+  const roomId = String(req.body?.roomId ?? '').trim();
+  const clearActiveCombat = req.body?.clearCombat === true;
+
+  if (typeof healthCurrent === 'number' && Number.isFinite(healthCurrent)) {
+    resolved.health.current = Math.max(0, Math.min(resolved.health.max, Math.floor(healthCurrent)));
+  }
+
+  if (roomId) {
+    if (!worldRooms[roomId]) return res.status(400).json({ error: `Unknown room id: ${roomId}` });
+    resolved.roomId = roomId;
+  }
+
+  if (clearActiveCombat) {
+    clearCombat(resolved);
+  }
+
+  setActionCooldown(resolved, 0);
+  await storage.saveCharacter(resolved);
+
+  const room = worldRooms[resolved.roomId];
+  return res.json({
+    character: sanitizeCharacter(resolved),
     room,
   });
 });

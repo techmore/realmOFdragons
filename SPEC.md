@@ -215,3 +215,16 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add deterministic death/incapacitation command coverage. This likely needs a test-only fixture route or local command runner so the suite can create near-death combat state without relying on random monster damage.
+
+Implementation Notes - 2026-05-05, Deterministic Incapacitation Smoke
+
+Completed in the current Node/React prototype:
+
+- Added a fixture-only API route guarded by `DR_TEST_FIXTURES=1`.
+- Added a repo-level test-server harness that runs smoke coverage against an isolated server on port 4100 with fixtures enabled.
+- Updated `npm run agent:check` to start the isolated fixture server, run API smoke, and shut it down.
+- Expanded `npm run smoke:api` to set a character to 0 health deterministically, verify normal commands are blocked while incapacitated, and verify `rest` recovers health.
+
+Next priority:
+
+- Split the monolithic API smoke script into focused command suites so route coverage, economy coverage, progression coverage, and combat coverage can run independently and fail with tighter diagnostics.

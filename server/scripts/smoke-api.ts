@@ -16,6 +16,10 @@ interface CharacterSummary {
   roomId: string;
   circle: number;
   inventory: string[];
+  health: {
+    current: number;
+    max: number;
+  };
   combat?: {
     range: 'missile' | 'pole' | 'melee';
     advantage: number;
@@ -317,6 +321,21 @@ async function main(): Promise<void> {
 
   result = await command(login.accessToken, character.id, 'bash');
   assert(result.events.some((event) => event.includes('bash') || event.includes('too far away')), 'Expected bash maneuver output.');
+
+  const incapacitated = await request<{ character: CharacterSummary }>(`/v1/test/characters/${result.character.id}/state`, {
+    method: 'POST',
+    headers: authHeaders(login.accessToken),
+    body: JSON.stringify({ healthCurrent: 0, clearCombat: true }),
+  });
+  assert(incapacitated.character.health.current === 0, 'Expected fixture to set health to 0.');
+
+  const blocked = await command(login.accessToken, incapacitated.character.id, 'attack');
+  assert(blocked.events.some((event) => event.includes('incapacitated')), 'Expected incapacitated command block.');
+
+  const rested = await command(login.accessToken, incapacitated.character.id, 'rest');
+  assert(rested.character.health.current > 0, 'Expected rest to recover health from incapacitation.');
+  assert(rested.events.some((event) => event.includes('recover')), 'Expected rest recovery output.');
+  result = rested;
 
   console.log(
     JSON.stringify(
