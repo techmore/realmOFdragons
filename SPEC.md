@@ -260,3 +260,18 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Extract combat math/range helpers into a pure module and add unit coverage for range shifting, advantage bounds, and stance/balance effects.
+
+Implementation Notes - 2026-05-05, Unit-Level Combat Tests
+
+Completed in the current Node/React prototype:
+
+- Extracted pure combat helpers into `server/src/combat.ts`.
+- Added unit assertions for range normalization/formatting/shifting.
+- Added unit assertions for advantage normalization, advantage bounds, and advantage labels.
+- Added unit assertions for balance normalization, balance changes, and balance labels.
+- Added unit assertions for stance normalization and stance profile tradeoffs.
+- Refactored the API command loop to use the extracted combat helpers.
+
+Next priority:
+
+- Add focused frontend smoke or component-level checks for command input, quick commands, inventory/hands display, and combat status rendering.

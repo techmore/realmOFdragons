@@ -22,6 +22,21 @@ import {
   type StatBlock,
 } from './races.js';
 import { canCircle, nextCircleRequirement, primarySkillForGuild, totalSkillRanks } from './progression.js';
+import {
+  STANCE_PROFILES,
+  type CombatRangeName,
+  type StanceName,
+  applyBalanceChange,
+  formatAdvantage,
+  formatBalance,
+  formatRange,
+  normalizeAdvantage,
+  normalizeBalance,
+  normalizeRange,
+  normalizeStance,
+  shiftAdvantageValue,
+  shiftCombatRange,
+} from './combat.js';
 import { WebSocketServer, WebSocket } from 'ws';
 
 type TokenClaims = {
@@ -150,34 +165,6 @@ const GUILD_NAMES: Record<string, string> = {
   cleric: 'Cleric Guild',
   empath: 'Empath Guild',
 };
-
-const BALANCE_LABELS = [
-  'hopelessly unbalanced',
-  'off balance',
-  'solidly balanced',
-  'very balanced',
-  'incredibly balanced',
-] as const;
-
-const STANCE_PROFILES = {
-  balanced: { attack: 0, defense: 0, damage: 0, cost: 1, label: 'balanced stance' },
-  offensive: { attack: 8, defense: -8, damage: 2, cost: 2, label: 'offensive stance' },
-  defensive: { attack: -3, defense: 10, damage: -1, cost: 1, label: 'defensive stance' },
-  evasive: { attack: -6, defense: 14, damage: -2, cost: 1, label: 'evasive stance' },
-} as const;
-
-type StanceName = keyof typeof STANCE_PROFILES;
-
-const COMBAT_RANGES = ['missile', 'pole', 'melee'] as const;
-type CombatRangeName = typeof COMBAT_RANGES[number];
-
-const ADVANTAGE_LABELS = new Map<number, string>([
-  [-2, 'your opponent has overwhelming advantage'],
-  [-1, 'your opponent has the edge'],
-  [0, 'neither combatant has advantage'],
-  [1, 'you have the edge'],
-  [2, 'you have overwhelming advantage'],
-]);
 
 const SCRIPT_PRESETS: ScriptPreset[] = [
   {
@@ -353,43 +340,12 @@ function calculateHealth(stats: StatBlock, current?: number) {
   return { current: normalizedCurrent, max };
 }
 
-function normalizeBalance(raw: unknown): CharacterRecord['balance'] {
-  const value = Math.max(0, Math.min(4, Math.floor(Number(raw) || 0)));
-  return value as CharacterRecord['balance'];
-}
-
-function normalizeStance(raw: unknown): CharacterRecord['stance'] {
-  const value = String(raw ?? '').toLowerCase();
-  return value in STANCE_PROFILES ? (value as StanceName) : 'balanced';
-}
-
-function formatBalance(balance: CharacterRecord['balance']) {
-  return BALANCE_LABELS[normalizeBalance(balance)];
-}
-
 function recoverBalance(character: CharacterRecord, amount: number) {
-  character.balance = normalizeBalance(character.balance + Math.max(0, Math.floor(amount)));
+  character.balance = applyBalanceChange(character.balance, Math.max(0, Math.floor(amount)));
 }
 
 function reduceBalance(character: CharacterRecord, amount: number) {
-  character.balance = normalizeBalance(character.balance - Math.max(0, Math.floor(amount)));
-}
-
-function normalizeRange(raw: unknown): CombatRangeName {
-  const value = String(raw ?? '').toLowerCase();
-  return COMBAT_RANGES.includes(value as CombatRangeName) ? (value as CombatRangeName) : 'missile';
-}
-
-function formatRange(range: CombatRangeName) {
-  if (range === 'missile') return 'missile range';
-  if (range === 'pole') return 'pole range';
-  return 'melee range';
-}
-
-function shiftCombatRange(range: CombatRangeName, direction: 'advance' | 'retreat') {
-  const current = COMBAT_RANGES.indexOf(range);
-  const next = direction === 'advance' ? Math.min(COMBAT_RANGES.length - 1, current + 1) : Math.max(0, current - 1);
-  return COMBAT_RANGES[next];
+  character.balance = applyBalanceChange(character.balance, -Math.max(0, Math.floor(amount)));
 }
 
 function findCombatTemplate(character: CharacterRecord) {
@@ -413,17 +369,9 @@ function ensureCombatShape(character: CharacterRecord): boolean {
   return changed;
 }
 
-function normalizeAdvantage(raw: unknown) {
-  return Math.max(-2, Math.min(2, Math.floor(Number(raw) || 0)));
-}
-
-function formatAdvantage(advantage: number) {
-  return ADVANTAGE_LABELS.get(normalizeAdvantage(advantage)) ?? ADVANTAGE_LABELS.get(0)!;
-}
-
 function shiftAdvantage(character: CharacterRecord, amount: number) {
   if (!character.combat) return;
-  character.combat.advantage = normalizeAdvantage((character.combat.advantage ?? 0) + amount);
+  character.combat.advantage = shiftAdvantageValue(character.combat.advantage, amount);
 }
 
 function buildStarterSkills(): CharacterRecord['skills'] {
