@@ -102,6 +102,7 @@ type CharacterCombatSnapshot = {
   defendUntil: number;
   nextAttackAt: number;
   range: CombatRangeName;
+  advantage: number;
 };
 
 const MAX_SCRIPT_INPUT_COMMANDS = 200;
@@ -168,6 +169,14 @@ type StanceName = keyof typeof STANCE_PROFILES;
 
 const COMBAT_RANGES = ['missile', 'pole', 'melee'] as const;
 type CombatRangeName = typeof COMBAT_RANGES[number];
+
+const ADVANTAGE_LABELS = new Map<number, string>([
+  [-2, 'your opponent has overwhelming advantage'],
+  [-1, 'your opponent has the edge'],
+  [0, 'neither combatant has advantage'],
+  [1, 'you have the edge'],
+  [2, 'you have overwhelming advantage'],
+]);
 
 const SCRIPT_PRESETS: ScriptPreset[] = [
   {
@@ -388,12 +397,31 @@ function findCombatTemplate(character: CharacterRecord) {
 
 function ensureCombatShape(character: CharacterRecord): boolean {
   if (!character.combat) return false;
+  let changed = false;
   const normalizedRange = normalizeRange(character.combat.range);
   if (character.combat.range !== normalizedRange) {
     character.combat.range = normalizedRange;
-    return true;
+    changed = true;
   }
-  return false;
+  const normalizedAdvantage = normalizeAdvantage(character.combat.advantage);
+  if (character.combat.advantage !== normalizedAdvantage) {
+    character.combat.advantage = normalizedAdvantage;
+    changed = true;
+  }
+  return changed;
+}
+
+function normalizeAdvantage(raw: unknown) {
+  return Math.max(-2, Math.min(2, Math.floor(Number(raw) || 0)));
+}
+
+function formatAdvantage(advantage: number) {
+  return ADVANTAGE_LABELS.get(normalizeAdvantage(advantage)) ?? ADVANTAGE_LABELS.get(0)!;
+}
+
+function shiftAdvantage(character: CharacterRecord, amount: number) {
+  if (!character.combat) return;
+  character.combat.advantage = normalizeAdvantage((character.combat.advantage ?? 0) + amount);
 }
 
 function buildStarterSkills(): CharacterRecord['skills'] {
@@ -574,6 +602,66 @@ function applyEnemyPressure(character: CharacterRecord, template: EnemyTemplate,
     return applyMeleeRetaliation(character, template, now, events);
   }
   return false;
+}
+
+function resolvePlayerManeuver(
+  character: CharacterRecord,
+  template: EnemyTemplate,
+  maneuver: 'jab' | 'bash',
+  now: number,
+  events: string[],
+) {
+  if (!character.combat) return false;
+  const range = normalizeRange(character.combat.range);
+  if (maneuver === 'bash' && range !== 'melee') {
+    events.push(`You need melee range to bash. Current range: ${formatRange(range)}.`);
+    return false;
+  }
+  if (maneuver === 'jab' && range === 'missile') {
+    events.push(`You are too far away to jab. Current range: ${formatRange(range)}.`);
+    return false;
+  }
+
+  const stanceProfile = STANCE_PROFILES[character.stance];
+  const balanceBonus = (character.balance - 2) * 5;
+  const advantageBonus = normalizeAdvantage(character.combat.advantage) * 7;
+  const maneuverBonus = maneuver === 'jab' ? 8 : -4;
+  const playerAttack = evaluateToHit(
+    character.stats.strength + character.stats.agility + character.stats.reflex,
+    stanceProfile.attack + balanceBonus + advantageBonus + maneuverBonus,
+  );
+
+  if (playerAttack.hit) {
+    const damage = resolveAttackDamage(
+      character.stats.strength,
+      character.stats.discipline + stanceProfile.damage + (maneuver === 'bash' ? 3 : -1),
+      template.damageMin,
+      template.damageMax,
+    );
+    character.combat.targetHp = Math.max(0, character.combat.targetHp - damage);
+    events.push(`You ${maneuver} ${character.combat.targetName} for ${damage} (${playerAttack.roll}/${playerAttack.threshold}).`);
+    shiftAdvantage(character, maneuver === 'bash' ? 1 : 0);
+    grantSkillPool(character, 'melee', maneuver === 'bash' ? 3 : 2, events);
+  } else {
+    events.push(`You fail to land your ${maneuver}.`);
+    shiftAdvantage(character, -1);
+  }
+
+  reduceBalance(character, maneuver === 'bash' ? 2 : 1);
+  events.push(`Position: ${formatAdvantage(character.combat.advantage)}.`);
+  events.push(`Balance: ${formatBalance(character.balance)}.`);
+
+  if (character.combat.targetHp <= 0) {
+    events.push(`${character.combat.targetName} collapses.`);
+    character.inventory.push(`${character.combat.targetName} fang`);
+    grantSkillPool(character, 'survival', 2, events);
+    clearCombat(character);
+    setActionCooldown(character, 700);
+    return true;
+  }
+
+  applyMeleeRetaliation(character, template, now, events);
+  return true;
 }
 
 function ensureCharacterShape(character: CharacterRecord): { character: CharacterRecord; changed: boolean } {
@@ -782,6 +870,7 @@ function buildCharacterCombat(character: CharacterRecord, requestedTarget?: stri
     defendUntil: 0,
     nextAttackAt: 0,
     range: 'missile',
+    advantage: 0,
   };
 }
 
@@ -834,6 +923,7 @@ function buildCombatEvents(character: CharacterRecord): string[] {
     `Combat target: ${character.combat.targetName}`,
     `Target HP: ${character.combat.targetHp}/${character.combat.targetMaxHp}`,
     `Range: ${formatRange(normalizeRange(character.combat.range))}`,
+    `Position: ${formatAdvantage(character.combat.advantage)}`,
     `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
     `Ready in: ${Math.max(0, character.roundtimeMs)}ms`,
   ];
@@ -985,7 +1075,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     command === 'inv' ||
     command === 'score' ||
     command === 'skills' ||
-    command === 'circle' ||
+    (command === 'circle' && !resolvedCharacter.combat) ||
     command === 'balance' ||
     command === 'range' ||
     command === 'roll' ||
@@ -1037,7 +1127,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'help') {
     events.push(
-      'Commands: look, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
     return { character: sanitizeCharacter(resolvedCharacter), room, events };
@@ -1066,6 +1156,25 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'circle') {
+    if (resolvedCharacter.combat) {
+      if (normalizeRange(resolvedCharacter.combat.range) === 'missile') {
+        events.push('You are too far away to circle your target.');
+        return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      }
+      shiftAdvantage(resolvedCharacter, 1);
+      recoverBalance(resolvedCharacter, 1);
+      grantSkillPool(resolvedCharacter, 'tactics', 2, events);
+      setActionCooldown(resolvedCharacter, 500);
+      modified = true;
+      events.push(`You circle for a better angle. Position: ${formatAdvantage(resolvedCharacter.combat.advantage)}.`);
+      events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
+      const template = findCombatTemplate(resolvedCharacter);
+      if (template) {
+        applyEnemyPressure(resolvedCharacter, template, Date.now(), events);
+      }
+      await persist();
+      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    }
     events.push(...buildCircleStatus(resolvedCharacter));
     if (canCircle(resolvedCharacter)) {
       resolvedCharacter.circle += 1;
@@ -1074,6 +1183,32 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       events.push(`You advance to Circle ${resolvedCharacter.circle}.`);
       await persist();
     }
+    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+  }
+
+  if (command === 'jab' || command === 'bash') {
+    if (!resolvedCharacter.combat) {
+      events.push('You are not currently in combat.');
+      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    }
+    const template = findCombatTemplate(resolvedCharacter);
+    if (!template) {
+      clearCombat(resolvedCharacter);
+      modified = true;
+      events.push('Your target vanished from the world.');
+      await persist();
+      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    }
+    resolvePlayerManeuver(resolvedCharacter, template, command, Date.now(), events);
+    if (resolvedCharacter.health.current <= 0) {
+      clearCombat(resolvedCharacter);
+      setActionCooldown(resolvedCharacter, 1500);
+      events.push('You have fallen unconscious and can no longer act.');
+    } else if (resolvedCharacter.combat) {
+      setActionCooldown(resolvedCharacter, command === 'bash' ? 900 : 550);
+    }
+    modified = true;
+    await persist();
     return { character: sanitizeCharacter(resolvedCharacter), room, events };
   }
 
@@ -1280,9 +1415,10 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     const target = resolvedCharacter.combat;
     const stanceProfile = STANCE_PROFILES[resolvedCharacter.stance];
     const balanceBonus = (resolvedCharacter.balance - 2) * 5;
+    const advantageBonus = normalizeAdvantage(resolvedCharacter.combat.advantage) * 7;
     const playerAttack = evaluateToHit(
       resolvedCharacter.stats.strength + resolvedCharacter.stats.agility + resolvedCharacter.stats.reflex,
-      (requestedTarget ? -2 : 0) + stanceProfile.attack + balanceBonus,
+      (requestedTarget ? -2 : 0) + stanceProfile.attack + balanceBonus + advantageBonus,
     );
 
     if (playerAttack.hit) {
@@ -1293,6 +1429,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         template.damageMax,
       );
       target.targetHp = Math.max(0, target.targetHp - damage);
+      shiftAdvantage(resolvedCharacter, 1);
       modified = true;
       events.push(`You hit ${target.targetName} for ${damage} (${playerAttack.roll}/${playerAttack.threshold}).`);
       if (target.targetHp <= 0) {
@@ -1307,8 +1444,10 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       }
     } else {
       events.push(`You miss ${target.targetName}.`);
+      shiftAdvantage(resolvedCharacter, -1);
     }
     reduceBalance(resolvedCharacter, stanceProfile.cost);
+    events.push(`Position: ${formatAdvantage(resolvedCharacter.combat.advantage)}.`);
     events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
 
     applyMeleeRetaliation(resolvedCharacter, template, now, events);

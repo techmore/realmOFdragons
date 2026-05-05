@@ -15,6 +15,7 @@ interface CombatState {
   defendUntil: number;
   nextAttackAt: number;
   range: CombatRange;
+  advantage: number;
 }
 
 export type CombatStance = 'balanced' | 'offensive' | 'defensive' | 'evasive';

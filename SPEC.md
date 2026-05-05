@@ -155,3 +155,20 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add explicit combat position/advantage state and maneuvers, starting with simple `circle`, `jab`, and `bash` verbs gated by range/balance.
+
+Implementation Notes - 2026-05-05, Advantage And Maneuvers
+
+Completed in the current Node/React prototype:
+
+- Added active combat advantage state from -2 to +2.
+- Combat output now reports position advantage.
+- `circle` is now a combat positioning maneuver while engaged, and remains a circle-progress command when not in combat.
+- Added `jab` and `bash` maneuvers.
+- `jab` works from pole or melee range and is easier to land.
+- `bash` requires melee range, hits harder, and costs more balance.
+- Advantage now affects basic attack and maneuver accuracy.
+- Basic attacks and maneuvers shift advantage on hit/miss.
+
+Next priority:
+
+- Add command-oriented tests for combat flows and move smoke tests out of ad hoc shell snippets into reusable project scripts.
