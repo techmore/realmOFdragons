@@ -14,6 +14,7 @@ interface CharacterSummary {
   name: string;
   race: string;
   roomId: string;
+  circle: number;
   combat?: {
     range: 'missile' | 'pole' | 'melee';
     advantage: number;
@@ -112,6 +113,41 @@ async function walkTo(accessToken: string, character: CharacterSummary, roomId: 
   return current;
 }
 
+async function advanceToCircle(
+  accessToken: string,
+  character: CharacterSummary,
+  targetCircle: number,
+): Promise<CharacterSummary> {
+  let current = character;
+  let attempts = 0;
+
+  while (current.circle < targetCircle && attempts < 800) {
+    attempts += 1;
+    let result = await command(accessToken, current.id, 'circle');
+    current = result.character;
+
+    if (current.circle >= targetCircle) {
+      break;
+    }
+
+    if (result.events.some((event) => event.includes('advance to Circle'))) {
+      continue;
+    }
+
+    result = await command(accessToken, current.id, 'train');
+    current = result.character;
+    assert(
+      result.events.some((event) => event.includes('drill') || event.includes('improves')),
+      `Expected training output while advancing, got: ${result.events.join(' | ')}`,
+    );
+
+    await command(accessToken, current.id, 'wait 900');
+  }
+
+  assert(current.circle >= targetCircle, `Expected Circle ${targetCircle}, got Circle ${current.circle}`);
+  return current;
+}
+
 async function main(): Promise<void> {
   await request<JsonObject>('/health');
 
@@ -170,7 +206,14 @@ async function main(): Promise<void> {
 
   for (const guild of guilds.guilds) {
     character = await walkTo(login.accessToken, character, guild.roomId);
+    const joined = await command(login.accessToken, character.id, 'join guild');
+    assert(joined.events.some((event) => event.includes('registered')), `Expected to join ${guild.name}.`);
+    character = joined.character;
   }
+
+  character = await walkTo(login.accessToken, character, guilds.guilds[0].roomId);
+  character = (await command(login.accessToken, character.id, 'join guild')).character;
+  character = await advanceToCircle(login.accessToken, character, 10);
 
   const shops = await request<{ shops: ShopRoomSummary[] }>('/v1/world/shops');
   assert(shops.shops.length >= 1, 'Expected at least one shop room.');
@@ -223,6 +266,7 @@ async function main(): Promise<void> {
         account: email,
         racesRolled: races.races.length,
         guildRoomsWalked: guilds.guilds.length,
+        circleReached: result.character.circle,
         shopRoomsWalked: shops.shops.length,
         finalRoom: result.character.roomId,
         finalCombat: result.character.combat ?? null,

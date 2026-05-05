@@ -188,3 +188,16 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Expand command-oriented coverage into repeatable assertions for character advancement through circle 10, including guild joins, XP pools, training commands, and combat recovery/death edge cases.
+
+Implementation Notes - 2026-05-05, Circle 10 Progression Smoke
+
+Completed in the current Node/React prototype:
+
+- Expanded `npm run smoke:api` to join every configured guild while walking guild rooms.
+- The smoke script returns to the first guild and advances through the live command loop to Circle 10.
+- Circle advancement uses normal `train`, `wait`, and `circle` commands instead of direct state mutation.
+- The script asserts training output and final circle state, making character progression regressions easier to catch.
+
+Next priority:
+
+- Split broad smoke coverage into faster focused command suites, starting with combat recovery/death edge cases and shop buy/sell economy assertions.
