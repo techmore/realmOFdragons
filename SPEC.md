@@ -289,3 +289,18 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Improve frontend command/input coverage by adding a small browser-level smoke for login, character creation, command submission, and D-pad/keyboard navigation against the isolated fixture server.
+
+Implementation Notes - 2026-05-05, Browser-Level Frontend Smoke
+
+Completed in the current Node/React prototype:
+
+- Made the frontend API base configurable with `VITE_API_BASE`.
+- Added `npm --prefix frontend run smoke:browser`.
+- Added a repo-level test app harness that starts an isolated fixture API server and Vite dev server together.
+- Browser smoke uses local Chrome through Playwright Core.
+- Browser coverage registers an account, logs in, creates a character, submits a typed `look` command, clicks the `range` quick command, and uses numpad movement.
+- Updated `npm run agent:check` to run browser smoke before API smoke.
+
+Next priority:
+
+- Add GitHub Actions CI for build, unit tests, frontend static smoke, and API smoke with fixture server; browser smoke can be optional or macOS-only because it depends on local Chrome.

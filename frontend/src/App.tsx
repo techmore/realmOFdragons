@@ -202,7 +202,7 @@ type GameStatusPanelsProps = {
   onCommand?: (command: string) => void;
 };
 
-const API_BASE = 'http://localhost:4000/v1';
+const API_BASE = (import.meta.env?.VITE_API_BASE as string | undefined) ?? 'http://localhost:4000/v1';
 
 const keyMap: Record<string, string> = {
   Digit8: 'n',
