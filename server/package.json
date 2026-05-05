@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "smoke:api": "tsx scripts/smoke-api.ts"
   },
   "dependencies": {
     "argon2": "^0.41.1",

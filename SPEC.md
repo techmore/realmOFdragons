@@ -172,3 +172,19 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add command-oriented tests for combat flows and move smoke tests out of ad hoc shell snippets into reusable project scripts.
+
+Implementation Notes - 2026-05-05, API Smoke Coverage
+
+Completed in the current Node/React prototype:
+
+- Added `npm run smoke:api` in the server package.
+- The smoke script exercises the real REST API instead of local implementation internals.
+- Coverage includes health check, account registration, login, character creation, and rerolling through every configured race.
+- Coverage includes saved script creation and script execution.
+- Coverage includes path-driven walking to every configured guild room.
+- Coverage includes path-driven walking to every configured shop room and checking local shop output.
+- Coverage includes entering the Crossing hunting area and running range, advance, circle, jab, and bash combat commands.
+
+Next priority:
+
+- Expand command-oriented coverage into repeatable assertions for character advancement through circle 10, including guild joins, XP pools, training commands, and combat recovery/death edge cases.
