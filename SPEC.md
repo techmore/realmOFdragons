@@ -141,3 +141,17 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add simple monster AI pressure during range changes: creatures should try to close or strike based on range/aggression, so advance/retreat becomes tactical rather than static.
+
+Implementation Notes - 2026-05-05, Monster Range Pressure
+
+Completed in the current Node/React prototype:
+
+- Creatures now apply pressure during combat waits and range changes.
+- At missile/pole range, creatures can press inward based on aggression.
+- At melee range, creatures can strike when their attack timer is ready.
+- Retreat can recover balance but no longer guarantees distance if the creature presses in.
+- Advance and wait can now trigger enemy positioning pressure.
+
+Next priority:
+
+- Add explicit combat position/advantage state and maneuvers, starting with simple `circle`, `jab`, and `bash` verbs gated by range/balance.

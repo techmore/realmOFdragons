@@ -381,6 +381,11 @@ function shiftCombatRange(range: CombatRangeName, direction: 'advance' | 'retrea
   return COMBAT_RANGES[next];
 }
 
+function findCombatTemplate(character: CharacterRecord) {
+  if (!character.combat) return undefined;
+  return ENEMY_TEMPLATES.find((entry) => entry.id === character.combat?.targetId);
+}
+
 function ensureCombatShape(character: CharacterRecord): boolean {
   if (!character.combat) return false;
   const normalizedRange = normalizeRange(character.combat.range);
@@ -521,6 +526,54 @@ function trainCharacter(character: CharacterRecord, room: Room, requestedSkill: 
   }
   events.push(`You drill ${skill.name}.`);
   return true;
+}
+
+function applyMeleeRetaliation(character: CharacterRecord, template: EnemyTemplate, now: number, events: string[]) {
+  if (!character.combat) return false;
+  const stanceProfile = STANCE_PROFILES[character.stance];
+  const balanceBonus = (character.balance - 2) * 5;
+  const retaliation = evaluateToHit(
+    template.attack * 8,
+    -Math.floor((character.stats.discipline + character.stats.wisdom) / 5) - stanceProfile.defense - balanceBonus,
+  );
+  if (retaliation.hit) {
+    const rawDamage = randomInt(template.damageMin, template.damageMax + 1);
+    const defended = character.combat.defendUntil > now;
+    const stanceMitigation = character.stance === 'defensive' ? 1 : character.stance === 'evasive' ? 2 : 0;
+    const damage = Math.max(0, rawDamage - (defended ? 2 : 0) - stanceMitigation);
+    events.push(`${character.combat.targetName} attacks for ${damage}.`);
+    character.health.current = Math.max(0, character.health.current - damage);
+    grantSkillPool(character, 'evasion', defended ? 2 : 1, events);
+    events.push(`You now have ${character.health.current}/${character.health.max} health.`);
+    if (damage >= 6) {
+      events.push('You take a hard hit.');
+    }
+  } else {
+    events.push(`${character.combat.targetName} misses its strike.`);
+  }
+  character.combat.nextAttackAt = now + 900;
+  return true;
+}
+
+function applyEnemyPressure(character: CharacterRecord, template: EnemyTemplate, now: number, events: string[]) {
+  if (!character.combat) return false;
+  const range = normalizeRange(character.combat.range);
+  if (range !== 'melee') {
+    const pressureRoll = randomInt(1, 101);
+    if (pressureRoll <= template.aggression) {
+      const nextRange = shiftCombatRange(range, 'advance');
+      character.combat.range = nextRange;
+      events.push(`${character.combat.targetName} presses in to ${formatRange(nextRange)}.`);
+      return true;
+    }
+    events.push(`${character.combat.targetName} holds at ${formatRange(range)}.`);
+    return false;
+  }
+
+  if (character.combat.nextAttackAt <= now) {
+    return applyMeleeRetaliation(character, template, now, events);
+  }
+  return false;
 }
 
 function ensureCharacterShape(character: CharacterRecord): { character: CharacterRecord; changed: boolean } {
@@ -958,6 +1011,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       } else {
         events.push(`You wait for ${sleepMs}ms. Balance: ${formatBalance(resolvedCharacter.balance)}.`);
       }
+      const template = findCombatTemplate(resolvedCharacter);
+      if (template && applyEnemyPressure(resolvedCharacter, template, Date.now(), events)) {
+        modified = true;
+        if (resolvedCharacter.health.current <= 0) {
+          clearCombat(resolvedCharacter);
+          setActionCooldown(resolvedCharacter, 1500);
+          events.push('You have fallen unconscious and can no longer act.');
+        }
+      }
     }
     await persist();
     return { character: sanitizeCharacter(resolvedCharacter), room, events };
@@ -1105,7 +1167,18 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       events.push(`You advance to ${formatRange(nextRange)}.`);
       events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
     }
-    setActionCooldown(resolvedCharacter, 500);
+    const template = findCombatTemplate(resolvedCharacter);
+    if (template) {
+      applyEnemyPressure(resolvedCharacter, template, Date.now(), events);
+      if (resolvedCharacter.health.current <= 0) {
+        clearCombat(resolvedCharacter);
+        setActionCooldown(resolvedCharacter, 1500);
+        events.push('You have fallen unconscious and can no longer act.');
+      }
+    }
+    if (resolvedCharacter.health.current > 0) {
+      setActionCooldown(resolvedCharacter, 500);
+    }
     modified = true;
     await persist();
     return { character: sanitizeCharacter(resolvedCharacter), room, events };
@@ -1128,7 +1201,18 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       events.push(`You retreat to ${formatRange(nextRange)}.`);
       events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
     }
-    setActionCooldown(resolvedCharacter, 500);
+    const template = findCombatTemplate(resolvedCharacter);
+    if (template) {
+      applyEnemyPressure(resolvedCharacter, template, Date.now(), events);
+      if (resolvedCharacter.health.current <= 0) {
+        clearCombat(resolvedCharacter);
+        setActionCooldown(resolvedCharacter, 1500);
+        events.push('You have fallen unconscious and can no longer act.');
+      }
+    }
+    if (resolvedCharacter.health.current > 0) {
+      setActionCooldown(resolvedCharacter, 500);
+    }
     modified = true;
     await persist();
     return { character: sanitizeCharacter(resolvedCharacter), room, events };
@@ -1227,36 +1311,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     reduceBalance(resolvedCharacter, stanceProfile.cost);
     events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
 
-    const retaliation = evaluateToHit(
-      template.attack * 8,
-      -Math.floor((resolvedCharacter.stats.discipline + resolvedCharacter.stats.wisdom) / 5) - stanceProfile.defense - balanceBonus,
-    );
-    if (retaliation.hit) {
-      const rawDamage = randomInt(template.damageMin, template.damageMax + 1);
-      const defended = target.defendUntil > now;
-      const stanceMitigation = resolvedCharacter.stance === 'defensive' ? 1 : resolvedCharacter.stance === 'evasive' ? 2 : 0;
-      const damage = Math.max(0, rawDamage - (defended ? 2 : 0) - stanceMitigation);
-      events.push(`${target.targetName} attacks for ${damage}.`);
-      resolvedCharacter.health.current = Math.max(0, resolvedCharacter.health.current - damage);
-      grantSkillPool(resolvedCharacter, 'evasion', defended ? 2 : 1, events);
+    applyMeleeRetaliation(resolvedCharacter, template, now, events);
+    if (resolvedCharacter.health.current <= 0) {
+      clearCombat(resolvedCharacter);
+      setActionCooldown(resolvedCharacter, 1500);
       modified = true;
-      events.push(`You now have ${resolvedCharacter.health.current}/${resolvedCharacter.health.max} health.`);
-      if (resolvedCharacter.health.current <= 0) {
-        clearCombat(resolvedCharacter);
-        setActionCooldown(resolvedCharacter, 1500);
-        modified = true;
-        events.push('You have fallen unconscious and can no longer act.');
-        await persist();
-        return { character: sanitizeCharacter(resolvedCharacter), room, events };
-      }
-      if (damage >= 6) {
-        events.push('You take a hard hit.');
-      }
-    } else {
-      events.push(`${target.targetName} misses its strike.`);
+      events.push('You have fallen unconscious and can no longer act.');
+      await persist();
+      return { character: sanitizeCharacter(resolvedCharacter), room, events };
     }
-
-    target.nextAttackAt = now + 900;
     modified = true;
     setActionCooldown(resolvedCharacter, template.aggression >= 60 ? 900 : 650);
     await persist();
