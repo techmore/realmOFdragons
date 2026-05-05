@@ -101,6 +101,7 @@ type CharacterCombatSnapshot = {
   targetMaxHp: number;
   defendUntil: number;
   nextAttackAt: number;
+  range: CombatRangeName;
 };
 
 const MAX_SCRIPT_INPUT_COMMANDS = 200;
@@ -164,6 +165,9 @@ const STANCE_PROFILES = {
 } as const;
 
 type StanceName = keyof typeof STANCE_PROFILES;
+
+const COMBAT_RANGES = ['missile', 'pole', 'melee'] as const;
+type CombatRangeName = typeof COMBAT_RANGES[number];
 
 const SCRIPT_PRESETS: ScriptPreset[] = [
   {
@@ -360,6 +364,33 @@ function reduceBalance(character: CharacterRecord, amount: number) {
   character.balance = normalizeBalance(character.balance - Math.max(0, Math.floor(amount)));
 }
 
+function normalizeRange(raw: unknown): CombatRangeName {
+  const value = String(raw ?? '').toLowerCase();
+  return COMBAT_RANGES.includes(value as CombatRangeName) ? (value as CombatRangeName) : 'missile';
+}
+
+function formatRange(range: CombatRangeName) {
+  if (range === 'missile') return 'missile range';
+  if (range === 'pole') return 'pole range';
+  return 'melee range';
+}
+
+function shiftCombatRange(range: CombatRangeName, direction: 'advance' | 'retreat') {
+  const current = COMBAT_RANGES.indexOf(range);
+  const next = direction === 'advance' ? Math.min(COMBAT_RANGES.length - 1, current + 1) : Math.max(0, current - 1);
+  return COMBAT_RANGES[next];
+}
+
+function ensureCombatShape(character: CharacterRecord): boolean {
+  if (!character.combat) return false;
+  const normalizedRange = normalizeRange(character.combat.range);
+  if (character.combat.range !== normalizedRange) {
+    character.combat.range = normalizedRange;
+    return true;
+  }
+  return false;
+}
+
 function buildStarterSkills(): CharacterRecord['skills'] {
   return Object.fromEntries(
     STARTER_SKILLS.map(([id, name]) => [id, { name, rank: 0, pool: 0 }]),
@@ -523,6 +554,9 @@ function ensureCharacterShape(character: CharacterRecord): { character: Characte
     }
     const stance = normalizeStance(character.stance);
     const balance = normalizeBalance(character.balance);
+    if (ensureCombatShape(character)) {
+      changed = true;
+    }
     if (character.stance !== stance || character.balance !== balance) {
       character.stance = stance;
       character.balance = balance;
@@ -546,6 +580,7 @@ function ensureCharacterShape(character: CharacterRecord): { character: Characte
   ensureProgressionShape(character);
   character.stance = normalizeStance(character.stance);
   character.balance = normalizeBalance(character.balance ?? 3);
+  ensureCombatShape(character);
   changed = true;
   return { character, changed };
 }
@@ -693,6 +728,7 @@ function buildCharacterCombat(character: CharacterRecord, requestedTarget?: stri
     targetMaxHp: maxHp,
     defendUntil: 0,
     nextAttackAt: 0,
+    range: 'missile',
   };
 }
 
@@ -744,6 +780,7 @@ function buildCombatEvents(character: CharacterRecord): string[] {
   return [
     `Combat target: ${character.combat.targetName}`,
     `Target HP: ${character.combat.targetHp}/${character.combat.targetMaxHp}`,
+    `Range: ${formatRange(normalizeRange(character.combat.range))}`,
     `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
     `Ready in: ${Math.max(0, character.roundtimeMs)}ms`,
   ];
@@ -897,6 +934,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     command === 'skills' ||
     command === 'circle' ||
     command === 'balance' ||
+    command === 'range' ||
     command === 'roll' ||
     command === 'shop' ||
     command === 'join guild' ||
@@ -937,7 +975,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'help') {
     events.push(
-      'Commands: look, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
     return { character: sanitizeCharacter(resolvedCharacter), room, events };
@@ -1003,6 +1041,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     return { character: sanitizeCharacter(resolvedCharacter), room, events };
   }
 
+  if (command === 'range') {
+    if (!resolvedCharacter.combat) {
+      events.push('You are not engaged with a target.');
+    } else {
+      events.push(`You are at ${formatRange(normalizeRange(resolvedCharacter.combat.range))} from ${resolvedCharacter.combat.targetName}.`);
+    }
+    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+  }
+
   if (command === 'train' || command.startsWith('train ')) {
     const requestedSkill = command.startsWith('train ') ? command.slice(6).trim().replace(/\s+/g, '_') : '';
     if (trainCharacter(resolvedCharacter, room, requestedSkill, events)) {
@@ -1029,6 +1076,60 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     setActionCooldown(resolvedCharacter, 300);
     modified = true;
     events.push(`You guard and recover your footing. Balance: ${formatBalance(resolvedCharacter.balance)}.`);
+    await persist();
+    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+  }
+
+  if (command === 'advance' || command.startsWith('advance ')) {
+    const requestedTarget = command.startsWith('advance ') ? command.slice(8).trim() : '';
+    if (!resolvedCharacter.combat) {
+      const combat = buildCharacterCombat(resolvedCharacter, requestedTarget);
+      if (!combat) {
+        events.push('There are no immediate targets in this location.');
+        await persist();
+        return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      }
+      resolvedCharacter.combat = combat;
+      events.push(`You begin advancing on ${combat.targetName}.`);
+    }
+
+    const combat = resolvedCharacter.combat;
+    const currentRange = normalizeRange(combat.range);
+    const nextRange = shiftCombatRange(currentRange, 'advance');
+    if (nextRange === currentRange) {
+      events.push(`You are already at ${formatRange(currentRange)}.`);
+    } else {
+      combat.range = nextRange;
+      reduceBalance(resolvedCharacter, 1);
+      grantSkillPool(resolvedCharacter, 'tactics', 1, events);
+      events.push(`You advance to ${formatRange(nextRange)}.`);
+      events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
+    }
+    setActionCooldown(resolvedCharacter, 500);
+    modified = true;
+    await persist();
+    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+  }
+
+  if (command === 'retreat') {
+    if (!resolvedCharacter.combat) {
+      events.push('You are not currently in combat.');
+      await persist();
+      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    }
+    const currentRange = normalizeRange(resolvedCharacter.combat.range);
+    const nextRange = shiftCombatRange(currentRange, 'retreat');
+    if (nextRange === currentRange) {
+      events.push(`You are already out at ${formatRange(currentRange)}.`);
+    } else {
+      resolvedCharacter.combat.range = nextRange;
+      recoverBalance(resolvedCharacter, 1);
+      grantSkillPool(resolvedCharacter, 'evasion', 1, events);
+      events.push(`You retreat to ${formatRange(nextRange)}.`);
+      events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
+    }
+    setActionCooldown(resolvedCharacter, 500);
+    modified = true;
     await persist();
     return { character: sanitizeCharacter(resolvedCharacter), room, events };
   }
@@ -1062,6 +1163,14 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     }
 
     if (!resolvedCharacter.combat) {
+      await persist();
+      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    }
+
+    const attackRange = normalizeRange(resolvedCharacter.combat.range);
+    if (attackRange !== 'melee') {
+      events.push(`You are too far away to strike. Current range: ${formatRange(attackRange)}.`);
+      events.push('Advance to melee range first.');
       await persist();
       return { character: sanitizeCharacter(resolvedCharacter), room, events };
     }

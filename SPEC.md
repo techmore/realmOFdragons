@@ -121,3 +121,23 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add combat range and engagement verbs: advance, retreat, range status, and range-gated attack behavior.
+
+Implementation Notes - 2026-05-05, Combat Range
+
+Completed in the current Node/React prototype:
+
+- Added persistent combat range on active encounters: missile, pole, melee.
+- New combat starts at missile range.
+- Added commands:
+  range
+  advance
+  advance <target>
+  retreat
+- Basic melee attack is now range-gated and requires melee range.
+- Advance closes distance missile -> pole -> melee and costs balance.
+- Retreat opens distance melee -> pole -> missile and recovers balance.
+- Combat status and the web UI now expose current range.
+
+Next priority:
+
+- Add simple monster AI pressure during range changes: creatures should try to close or strike based on range/aggression, so advance/retreat becomes tactical rather than static.

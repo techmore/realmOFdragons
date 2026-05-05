@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import type { RoomId } from './world.js';
 import type { StatBlock } from './races.js';
 
+export type CombatRange = 'missile' | 'pole' | 'melee';
+
 interface CombatState {
   targetId: string;
   targetName: string;
@@ -12,6 +14,7 @@ interface CombatState {
   targetMaxHp: number;
   defendUntil: number;
   nextAttackAt: number;
+  range: CombatRange;
 }
 
 export type CombatStance = 'balanced' | 'offensive' | 'defensive' | 'evasive';

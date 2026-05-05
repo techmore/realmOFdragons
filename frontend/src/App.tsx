@@ -66,6 +66,7 @@ type CombatState = {
   targetMaxHp: number;
   defendUntil: number;
   nextAttackAt: number;
+  range: 'missile' | 'pole' | 'melee';
 };
 
 type Character = {
@@ -1019,7 +1020,7 @@ function App() {
                 value={command}
                 onChange={(event) => setCommand(event.target.value)}
                 onKeyDown={onKeyDown}
-                placeholder="look | exits | score | skills | stance defensive | balance | attack | shop buy <code>"
+                placeholder="look | exits | score | range | advance | retreat | stance defensive | attack"
               />
             </form>
             {status && <p className="subtle">{status}</p>}
@@ -1066,7 +1067,7 @@ function App() {
             <section className="panel">
               <h2>Controls</h2>
               <div className="action-grid">
-                {['look', 'score', 'skills', 'circle', 'balance', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'shop', 'join guild', 'combat', 'attack', 'defend', 'flee', 'rest'].map((entry) => (
+                {['look', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'shop', 'join guild', 'combat', 'attack', 'defend', 'flee', 'rest'].map((entry) => (
                   <button type="button" key={entry} onClick={() => void runCommand(entry)} disabled={loading || !character}>
                     {entry}
                   </button>
@@ -1135,6 +1136,7 @@ function App() {
                 <>
                   <h3>Combat</h3>
                   <p>{character.combat.targetName}: {character.combat.targetHp}/{character.combat.targetMaxHp}</p>
+                  <p>Range: {character.combat.range}</p>
                 </>
               ) : null}
             </section>
