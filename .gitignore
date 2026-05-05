@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+.env
+.env.local
+.env.*.local
+server/data/*.json
+server/data/*.tmp
+frontend/dist/
+server/dist/
