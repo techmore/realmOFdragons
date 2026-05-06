@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted pathfinding into pure world helpers with unit coverage for same-room routes, reachable exits, reverse traversal, unreachable rooms, and unknown destinations.
+- The `/v1/world/path` route now uses world-owned pathfinding instead of an Express-local BFS helper.
 - Extracted movement command direction normalization and movement decision/output into pure world helpers with unit coverage for aliases, `go` prefixes, successful movement, broken exits, and unknown commands.
 - The Express movement handler now applies world-owned movement decisions while retaining route-local room mutation, athletics gain, cooldown, and persistence.
 - Extracted `shop sell` command decision/output into pure economy helpers with unit coverage for no shop, missing code, not carried, shop refusal, carried inventory sales, damaged ammo salvage, and ammo-pouch single-shot sales.
@@ -189,7 +191,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract pathfinding into pure world helpers with unit coverage.
+- Extract room survey formatting into pure world helpers with unit coverage.
 
 Core Philosophy
 

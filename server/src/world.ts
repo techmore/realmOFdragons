@@ -595,3 +595,45 @@ export function resolveMovementDecision(
     events: [`You go ${direction} to ${nextRoom.title}.`],
   };
 }
+
+export function findPathToRoom(
+  startRoomId: RoomId,
+  destinationRoomId: RoomId,
+  rooms: Record<RoomId, Room> = worldRooms,
+): string[] {
+  if (startRoomId === destinationRoomId) return [];
+
+  const startRoom = rooms[startRoomId];
+  const destinationRoom = rooms[destinationRoomId];
+  if (!startRoom || !destinationRoom) return [];
+
+  const queue: RoomId[] = [startRoom.id];
+  const predecessor = new Map<RoomId, { from: RoomId; command: string }>();
+  const visited = new Set<RoomId>([startRoom.id]);
+
+  while (queue.length > 0) {
+    const roomId = queue.shift()!;
+    const room = rooms[roomId];
+    if (!room) continue;
+
+    for (const exit of room.exits) {
+      if (visited.has(exit.destination)) continue;
+      visited.add(exit.destination);
+      predecessor.set(exit.destination, { from: roomId, command: exit.direction });
+      if (exit.destination === destinationRoomId) {
+        const route: string[] = [];
+        let cursor: RoomId | undefined = destinationRoomId;
+        while (cursor && cursor !== startRoom.id) {
+          const step = predecessor.get(cursor);
+          if (!step) break;
+          route.unshift(step.command);
+          cursor = step.from;
+        }
+        return route;
+      }
+      queue.push(exit.destination);
+    }
+  }
+
+  return [];
+}

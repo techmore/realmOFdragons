@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { normalizeDirection, resolveMovementDecision, type Room } from '../src/world.js';
+import { findPathToRoom, normalizeDirection, resolveMovementDecision, type Room } from '../src/world.js';
 
 const start: Room = {
   id: 'test-start',
@@ -22,7 +22,16 @@ const north: Room = {
   exits: [{ direction: 'south', destination: 'test-start', details: 'Back.' }],
 };
 
-const rooms = { [start.id]: start, [north.id]: north };
+const east: Room = {
+  id: 'test-east',
+  code: { town: 'test', square: 'EA01', zone: 'test-zone' },
+  title: 'East Room',
+  description: 'An eastern room.',
+  prompts: [],
+  exits: [],
+};
+
+const rooms = { [start.id]: start, [north.id]: north, [east.id]: east };
 
 assert.equal(normalizeDirection('n'), 'north');
 assert.equal(normalizeDirection('go n'), 'north');
@@ -51,4 +60,10 @@ assert.deepEqual(resolveMovementDecision('dance', start, rooms), {
   events: ['Unknown command: dance'],
 });
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:world', movementDecisionChecked: true }, null, 2));
+assert.deepEqual(findPathToRoom('test-start', 'test-start', rooms), []);
+assert.deepEqual(findPathToRoom('test-start', 'test-north', rooms), ['north']);
+assert.deepEqual(findPathToRoom('test-north', 'test-start', rooms), ['south']);
+assert.deepEqual(findPathToRoom('test-start', 'test-east', rooms), []);
+assert.deepEqual(findPathToRoom('test-start', 'test-missing', rooms), []);
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:world', movementDecisionChecked: true, pathfindingChecked: true }, null, 2));
