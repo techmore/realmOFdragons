@@ -1,6 +1,6 @@
 type JsonObject = Record<string, unknown>;
 
-type SmokeSuite = 'all' | 'identity' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
+type SmokeSuite = 'all' | 'identity' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
 
 const canonicalGuildIds = [
   'barbarian',
@@ -119,7 +119,7 @@ interface SmokeContext {
   summary: Record<string, unknown>;
 }
 
-const suites: SmokeSuite[] = ['all', 'identity', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'combat'];
+const suites: SmokeSuite[] = ['all', 'identity', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'combat'];
 const requestedSuite = (process.argv[2] ?? 'all') as SmokeSuite;
 const baseUrl = (process.env.DR_API_BASE_URL ?? 'http://localhost:4000').replace(/\/+$/, '');
 const password = 'smoke-password-01';
@@ -278,6 +278,54 @@ async function runIdentitySuite(context: SmokeContext): Promise<void> {
   context.character = current;
   context.summary.racesRolled = context.races.length;
   context.summary.circleOneRacesChecked = context.races.length;
+}
+
+async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
+  const guilds = await request<{ guilds: GuildSummary[] }>('/v1/world/guilds');
+  const canonicalGuilds = canonicalGuildIds.map((guildId) => {
+    const guild = guilds.guilds.find((entry) => entry.id === guildId);
+    assert(guild, `Expected canonical DragonRealms-style guild ${guildId} to be present.`);
+    return guild;
+  });
+
+  let combinationsChecked = 0;
+  const raceNamesChecked = new Set<string>();
+  const guildIdsChecked = new Set<string>();
+
+  for (const race of context.races) {
+    raceNamesChecked.add(race.name);
+
+    for (const guild of canonicalGuilds) {
+      const character = await request<CharacterSummary>('/v1/characters', {
+        method: 'POST',
+        headers: authHeaders(context.accessToken),
+        body: JSON.stringify({
+          name: `Mx${combinationsChecked}${unique.slice(-5)}`.slice(0, 40),
+          race: race.name,
+        }),
+      });
+      assert(
+        character.race === race.id || character.race.toLowerCase() === race.name.toLowerCase(),
+        `Expected matrix character race ${race.name}, got ${character.race}.`,
+      );
+      assert(character.circle === 1, `Expected new ${race.name} character to start Circle 1, got Circle ${character.circle}.`);
+
+      const arrived = await walkTo(context.accessToken, character, guild.roomId);
+      const joined = await command(context.accessToken, arrived.id, 'join guild');
+      assert(joined.events.some((event) => event.includes('registered')), `Expected ${race.name} to join ${guild.name}.`);
+      assert(joined.character.circle === 1, `Expected ${race.name}/${guild.name} to remain Circle 1 after joining.`);
+      assert(joined.character.race === character.race, `Expected ${race.name}/${guild.name} join to preserve race.`);
+
+      combinationsChecked += 1;
+      guildIdsChecked.add(guild.id);
+      context.character = joined.character;
+    }
+  }
+
+  context.summary.raceGuildMatrixChecked = combinationsChecked;
+  context.summary.raceGuildMatrixRaceCount = raceNamesChecked.size;
+  context.summary.raceGuildMatrixGuildCount = guildIdsChecked.size;
+  context.summary.raceGuildMatrixCircle = 1;
 }
 
 async function runScriptSuite(context: SmokeContext): Promise<void> {
@@ -764,6 +812,7 @@ async function runDamagedAmmoSuite(context: SmokeContext): Promise<void> {
 
 async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void> {
   if (suite === 'identity') await runIdentitySuite(context);
+  if (suite === 'race-guild-matrix') await runRaceGuildMatrixSuite(context);
   if (suite === 'scripts') await runScriptSuite(context);
   if (suite === 'progression') await runProgressionSuite(context);
   if (suite === 'economy') await runEconomySuite(context);
@@ -772,6 +821,7 @@ async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void>
   if (suite === 'combat') await runCombatSuite(context);
   if (suite === 'all') {
     await runIdentitySuite(context);
+    await runRaceGuildMatrixSuite(context);
     await runScriptSuite(context);
     await runProgressionSuite(context);
     await runEconomySuite(context);

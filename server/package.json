@@ -10,6 +10,7 @@
     "test:unit": "tsx scripts/unit-progression.ts && tsx scripts/unit-combat.ts && tsx scripts/unit-economy.ts && tsx scripts/unit-items.ts",
     "smoke:api": "tsx scripts/smoke-api.ts all",
     "smoke:identity": "tsx scripts/smoke-api.ts identity",
+    "smoke:race-guild-matrix": "tsx scripts/smoke-api.ts race-guild-matrix",
     "smoke:scripts": "tsx scripts/smoke-api.ts scripts",
     "smoke:progression": "tsx scripts/smoke-api.ts progression",
     "smoke:economy": "tsx scripts/smoke-api.ts economy",

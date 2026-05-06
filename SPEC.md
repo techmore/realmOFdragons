@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added a focused `race-guild-matrix` API smoke suite that creates every DragonRealms race against every canonical DragonRealms guild.
+- Full API smoke now verifies 121 race/guild Circle 1 combinations across 11 races and 11 guilds.
+- Added an `npm --prefix server run smoke:race-guild-matrix` command for targeted race/guild validation.
 - Normalized prototype-only Fighter, Mage, Scout, and Rogue halls into non-guild tutorial/support halls while preserving routes and shops.
 - `/v1/world/guilds` now exposes only the canonical DragonRealms-style 11 guild identities.
 - The web quick guild route buttons now list only canonical guilds; tutorial/support halls remain reachable through movement and tour routing.
@@ -96,7 +99,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add a focused race/guild matrix smoke suite that creates or rerolls every race and verifies Circle 1 canonical guild joining coverage without relying on a single character's final guild state.
+- Start tightening character stat generation toward DragonRealms correctness by documenting and supporting explicit classic-random versus modern-fixed racial stat modes.
 
 Core Philosophy
 
