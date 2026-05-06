@@ -801,6 +801,11 @@ function buildRoomTargets(roomId: RoomId): RoomTarget[] {
   }));
 }
 
+function findRoomEnemyByName(roomId: RoomId, requestedTarget: string): EnemyTemplate | undefined {
+  const normalizedTarget = requestedTarget.toLowerCase().trim();
+  return getRoomEnemies(roomId).find((enemy) => enemy.name.toLowerCase() === normalizedTarget);
+}
+
 function buildCommandResult(character: CharacterRecord, room: Room, events: string[]): CommandResult {
   return {
     character: sanitizeCharacter(character),
@@ -823,13 +828,41 @@ function buildEnemyScanEvents(roomId: RoomId): string[] {
   ];
 }
 
+function buildTargetDetailEvents(character: CharacterRecord, requestedTarget: string): string[] {
+  const combat = character.combat;
+  const targetName = requestedTarget || combat?.targetName || '';
+  const template = targetName ? findRoomEnemyByName(character.roomId, targetName) : undefined;
+
+  if (!template) {
+    if (targetName) {
+      return [`You do not see ${targetName} here. Use scan to list immediate targets.`];
+    }
+    return ['Target what? Use target <name> or appraise <target>.'];
+  }
+
+  const isEngagedTarget = combat?.targetId === template.id;
+  const range = isEngagedTarget ? formatRange(normalizeRange(combat.range)) : 'not yet engaged';
+  const vitality = isEngagedTarget ? `${combat.targetHp}/${combat.targetMaxHp}` : `${template.maxHp} baseline`;
+  const suggestedVerb = isEngagedTarget
+    ? normalizeRange(combat.range) === 'melee'
+      ? `attack ${template.name}`
+      : 'advance'
+    : `advance ${template.name}`;
+
+  return [
+    `Target: ${template.name}`,
+    `Vitality: ${vitality}.`,
+    `Aggression: ${template.aggression}.`,
+    `Range: ${range}.`,
+    `Suggested next verb: ${suggestedVerb}.`,
+  ];
+}
+
 function buildCharacterCombat(character: CharacterRecord, requestedTarget?: string): CharacterCombatSnapshot | null {
   const enemies = getRoomEnemies(character.roomId);
   if (!enemies.length) return null;
 
-  const target = requestedTarget
-    ? enemies.find((entry) => entry.name.toLowerCase() === requestedTarget.toLowerCase())
-    : enemies[0];
+  const target = requestedTarget ? findRoomEnemyByName(character.roomId, requestedTarget) : enemies[0];
   if (!target) return null;
 
   const maxHp = target.maxHp + randomInt(0, 4);
@@ -1039,9 +1072,14 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   const commandReady = canActNow(resolvedCharacter);
   const passiveCommand =
     command === 'help' ||
+    command === 'help scan' ||
+    command === 'help targets' ||
     command === 'look' ||
     command === 'l' ||
     command === 'scan' ||
+    command === 'target' ||
+    command.startsWith('target ') ||
+    command.startsWith('appraise ') ||
     command === 'exits' ||
     command === 'inventory' ||
     command === 'inv' ||
@@ -1226,6 +1264,16 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     } else {
       events.push(`You are at ${formatRange(normalizeRange(resolvedCharacter.combat.range))} from ${resolvedCharacter.combat.targetName}.`);
     }
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
+  if (command === 'target' || command.startsWith('target ') || command.startsWith('appraise ')) {
+    const requestedTarget = command.startsWith('target ')
+      ? command.slice(7).trim()
+      : command.startsWith('appraise ')
+        ? command.slice(9).trim()
+        : '';
+    events.push(...buildTargetDetailEvents(resolvedCharacter, requestedTarget));
     return buildCommandResult(resolvedCharacter, room, events);
   }
 

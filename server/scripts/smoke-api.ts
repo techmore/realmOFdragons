@@ -324,6 +324,11 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   assert(result.events.some((event) => event.includes('advance <target>')), 'Expected help scan target action guidance.');
   assert(result.events.some((event) => event.includes('Vitality estimates')), 'Expected help scan metadata guidance.');
 
+  result = await command(context.accessToken, current.id, 'target forage wolf-cub');
+  assert(result.events.some((event) => event.includes('Target: forage wolf-cub')), 'Expected target details name.');
+  assert(result.events.some((event) => event.includes('Vitality: 10 baseline')), 'Expected target baseline vitality.');
+  assert(result.events.some((event) => event.includes('Suggested next verb: advance forage wolf-cub')), 'Expected target advance suggestion.');
+
   result = await command(context.accessToken, current.id, 'look');
   assert(result.events.some((event) => event.includes('forage wolf-cub')), 'Expected hunting room look to list forage wolf-cub.');
   assert(result.targets.some((target) => target.name === 'forage wolf-cub'), 'Expected look response target forage wolf-cub.');
@@ -347,6 +352,9 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
 
   result = await command(context.accessToken, current.id, 'range');
   assert(result.events.some((event) => event.includes('You are at')), 'Expected range command output.');
+
+  result = await command(context.accessToken, current.id, 'target');
+  assert(result.events.some((event) => event.includes('Range:')), 'Expected engaged target range details.');
 
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
 

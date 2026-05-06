@@ -393,6 +393,20 @@ Next priority:
 
 - Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
 
+Implementation Notes - 2026-05-05, Target Details Command
+
+Completed in the current Node/React prototype:
+
+- Added passive `target` and `target <name>` commands.
+- Added `appraise <target>` as an alias for target inspection.
+- Target details report vitality, aggression, current engagement range, and a suggested next verb.
+- Target inspection works both before engagement for room targets and during combat for the active target.
+- API smoke verifies target details before engagement and range details after engagement.
+
+Next priority:
+
+- Surface target details in the web UI with a one-click details action and browser/static smoke coverage, while keeping typed `target <name>` as the canonical command.
+
 Implementation Notes - 2026-05-05, Scan Help Branch
 
 Completed in the current Node/React prototype:
