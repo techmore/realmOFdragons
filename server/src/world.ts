@@ -53,6 +53,10 @@ export interface Guild {
 
 export type RoomId = string;
 
+export type MovementDecision =
+  | { moved: true; direction: string; nextRoom: Room; events: string[] }
+  | { moved: false; reason: 'broken_exit' | 'unknown_command'; direction: string; events: string[] };
+
 export const worldRooms: Record<RoomId, Room> = {
   "crossing-TG01-001": {
     id: "crossing-TG01-001",
@@ -549,3 +553,45 @@ export const directionAliases: Record<string, string> = {
   enter: "enter",
   out: "exit",
 };
+
+export function normalizeDirection(input: string): string {
+  const normalized = input.toLowerCase().trim();
+  if (directionAliases[normalized]) return directionAliases[normalized];
+  const cleaned = normalized.replace(/^go\s+/, '');
+  if (directionAliases[cleaned]) return directionAliases[cleaned];
+  return cleaned;
+}
+
+export function resolveMovementDecision(
+  command: string,
+  room: Room,
+  rooms: Record<RoomId, Room> = worldRooms,
+): MovementDecision {
+  const direction = normalizeDirection(command);
+  const target = room.exits.find((exit) => exit.direction.toLowerCase() === direction);
+  if (!target) {
+    return {
+      moved: false,
+      reason: 'unknown_command',
+      direction,
+      events: [`Unknown command: ${command}`],
+    };
+  }
+
+  const nextRoom = rooms[target.destination];
+  if (!nextRoom) {
+    return {
+      moved: false,
+      reason: 'broken_exit',
+      direction,
+      events: ['That path is broken in the world data.'],
+    };
+  }
+
+  return {
+    moved: true,
+    direction,
+    nextRoom,
+    events: [`You go ${direction} to ${nextRoom.title}.`],
+  };
+}

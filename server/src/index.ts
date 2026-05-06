@@ -7,8 +7,8 @@ import { createServer } from 'node:http';
 import {
   Room,
   RoomId,
-  directionAliases,
   guilds,
+  resolveMovementDecision,
   worldRooms,
 } from './world.js';
 import { FileStorage, LoginSession, AccountRecord, CharacterRecord, ScriptRecord } from './storage.js';
@@ -1162,14 +1162,6 @@ function buildScriptRecord(accountId: string, name: string, commands: string[], 
   };
 }
 
-function normalizeDirection(input: string): string {
-  const normalized = input.toLowerCase().trim();
-  if (directionAliases[normalized]) return directionAliases[normalized];
-  const cleaned = normalized.replace(/^go\s+/, '');
-  if (directionAliases[cleaned]) return directionAliases[cleaned];
-  return cleaned;
-}
-
 async function processCommand(characterId: string, rawCommand: string): Promise<CommandResult | null> {
   const character = await storage.getCharacter(characterId);
   if (!character) return null;
@@ -1916,25 +1908,19 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
-  const direction = normalizeDirection(command);
-  const target = room.exits.find((exit) => exit.direction.toLowerCase() === direction);
-  if (target) {
-    const nextRoom = worldRooms[target.destination];
-    if (!nextRoom) {
-      events.push('That path is broken in the world data.');
-    } else {
-      resolvedCharacter.roomId = nextRoom.id;
+  const movement = resolveMovementDecision(command, room);
+  if (movement.moved) {
+      resolvedCharacter.roomId = movement.nextRoom.id;
       events.push(...applySkillPoolGain(resolvedCharacter, 'athletics', 1).events);
       setActionCooldown(resolvedCharacter, 350);
       modified = true;
-      events.push(`You go ${direction} to ${nextRoom.title}.`);
+      events.push(...movement.events);
       if (modified) {
         await storage.saveCharacter(resolvedCharacter);
       }
-      return buildCommandResult(resolvedCharacter, nextRoom, events);
-    }
+      return buildCommandResult(resolvedCharacter, movement.nextRoom, events);
   } else {
-    events.push(`Unknown command: ${command}`);
+    events.push(...movement.events);
   }
 
   return buildCommandResult(resolvedCharacter, room, events);
