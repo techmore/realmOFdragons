@@ -36,13 +36,13 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: frontend
 
-      - name: Build, unit test, and smoke
+      - name: Build, unit test, browser smoke, script smoke, and API smoke
         run: npm run ci:check
 
-      - name: Upload telemetry
+      - name: Upload check telemetry (build/unit/browser/script/API)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: check-telemetry
+          name: check-telemetry-build-unit-browser-script-api
           path: artifacts/telemetry
           if-no-files-found: error

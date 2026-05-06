@@ -34,7 +34,7 @@ Run the full local agent check:
 npm run agent:check
 ```
 
-This runs build, unit tests, static UI smoke, browser smoke, focused target smoke, full API smoke, agent prompt smoke, and git status telemetry.
+This runs build, unit tests, static UI smoke, browser smoke, focused target smoke, focused script smoke, full API smoke, agent prompt smoke, and git status telemetry.
 
 Run the CI-shaped check:
 
@@ -42,7 +42,7 @@ Run the CI-shaped check:
 npm run ci:check
 ```
 
-This omits local-only git status and runs the checks used by GitHub Actions.
+This omits local-only target smoke, agent prompt smoke, and git status. It does run build, unit tests, static UI smoke, browser smoke, focused script smoke, and full API smoke, matching the checks used by GitHub Actions.
 
 ## Focused smoke scripts
 
@@ -55,11 +55,12 @@ node scripts/with-test-server.mjs npm --prefix server run smoke:combat
 node scripts/with-test-server.mjs npm --prefix server run smoke:economy
 node scripts/with-test-server.mjs npm --prefix server run smoke:progression
 node scripts/with-test-server.mjs npm --prefix server run smoke:identity
-node scripts/with-test-server.mjs npm --prefix server run smoke:scripts
 node scripts/with-test-server.mjs npm --prefix server run smoke:api
 ```
 
 The focused `smoke:targets` suite is the fastest target-regression path. It covers `scan`, structured room target payloads, `help targets`, `target <name>`, `appraise <target>`, engagement, and bare `target` range details.
+
+The focused `smoke:scripts` suite is the fastest script-regression path. It covers script create, run, list, delete, post-delete removal, and lifecycle telemetry.
 
 Browser smoke runs against both the API and web UI:
 
@@ -84,6 +85,8 @@ This verifies that `npm run agent:prompt` reads the authoritative `Current Statu
 ## Telemetry artifacts
 
 `npm run agent:check` and `npm run ci:check` write ignored telemetry files under `artifacts/telemetry`.
+
+GitHub Actions uploads those files as the `check-telemetry-build-unit-browser-script-api` artifact after `npm run ci:check`.
 
 Primary artifacts:
 

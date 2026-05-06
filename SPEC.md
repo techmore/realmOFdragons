@@ -10,13 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- CI and local telemetry now run a focused `script-smoke` step.
-- Script coverage summary prefers focused script smoke payloads over full API smoke payloads.
-- Markdown telemetry and README now distinguish focused script smoke from browser preset-save coverage.
+- README now documents that `ci:check` includes focused script smoke.
+- README now documents the CI telemetry artifact name and focused `smoke:scripts` scope.
+- GitHub workflow step and artifact names now reflect build, unit, browser, script, and API smoke coverage.
 
 Current next priority:
 
-- Add focused script smoke telemetry to CI documentation and verify the GitHub workflow artifact description matches the expanded check set.
+- Add a small CI smoke assertion or documentation note for `coverage-summary.json` consumers so automation can fail fast when expected coverage sections are missing.
 
 Core Philosophy
 
@@ -515,6 +515,20 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add focused script smoke telemetry to CI documentation and verify the GitHub workflow artifact description matches the expanded check set.
+
+Implementation Notes - 2026-05-06, CI Script Telemetry Documentation
+
+Completed in the current Node/React prototype:
+
+- README now states that `npm run ci:check` includes focused script smoke.
+- README documents focused `smoke:scripts` as the fastest script-regression path.
+- README documents the GitHub Actions telemetry artifact as `check-telemetry-build-unit-browser-script-api`.
+- GitHub workflow step names now explicitly mention browser smoke, script smoke, and API smoke.
+- GitHub telemetry artifact name now matches the expanded check set.
+
+Next priority:
+
+- Add a small CI smoke assertion or documentation note for `coverage-summary.json` consumers so automation can fail fast when expected coverage sections are missing.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 
