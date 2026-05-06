@@ -29,10 +29,13 @@ Completed current slice:
 - Ranged shots now resolve deterministic recovery outcomes: intact, damaged, or lost.
 - Damaged arrows can be scavenged as broken ammunition inventory rather than usable ammo.
 - Smoke telemetry now tracks damaged/lost ammo outcome coverage.
+- Damaged recovered arrows now appraise as salvage with broken-ammunition descriptions.
+- Shops that stock the matching intact ammunition can buy damaged arrows for scrap value.
+- Economy smoke telemetry now tracks damaged ammo appraisal and resale coverage.
 
 Current next priority:
 
-- Add item appraisal/sell handling for damaged recovered ammunition so broken arrows participate in the economy.
+- Add focused damaged-ammo smoke suite or browser UI coverage for damaged recovered ammunition in item details.
 
 Core Philosophy
 

@@ -405,10 +405,28 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
   assert(arrowSell.character.ammoPouch?.['itm-sting-arrow'] === 4, 'Expected ammo pouch count to decrement on resale.');
   current = arrowSell.character;
 
+  const damagedSeed = await request<CommandResult>(`/v1/test/characters/${current.id}/state`, {
+    method: 'POST',
+    headers: authHeaders(context.accessToken),
+    body: JSON.stringify({ inventoryAppend: ['damaged-itm-sting-arrow'] }),
+  });
+  current = damagedSeed.character;
+
+  const damagedAppraisal = await command(context.accessToken, current.id, 'appraise damaged-itm-sting-arrow');
+  assert(damagedAppraisal.events.some((event) => event.includes('Item: damaged practice arrow')), 'Expected damaged arrow appraisal name.');
+  assert(damagedAppraisal.events.some((event) => event.includes('Category: salvage')), 'Expected damaged arrow salvage category.');
+  assert(damagedAppraisal.events.some((event) => event.includes('broken ranged ammunition')), 'Expected damaged arrow broken ammo description.');
+
+  const damagedSell = await command(context.accessToken, damagedAppraisal.character.id, 'shop sell damaged-itm-sting-arrow');
+  assert(damagedSell.events.some((event) => event.includes('You sell damaged practice arrow')), 'Expected damaged arrow sale output.');
+  assert(!damagedSell.character.inventory.includes('damaged-itm-sting-arrow'), 'Expected damaged arrow removed from inventory after sale.');
+  current = damagedSell.character;
+
   context.character = current;
   context.summary.shopRoomsWalked = shops.shops.length;
   context.summary.shopEconomyChecked = true;
   context.summary.ammoSellChecked = true;
+  context.summary.damagedAmmoEconomyChecked = true;
   context.summary.itemDetailsChecked = true;
   context.summary.equipmentChecked = true;
   context.summary.equipmentSlotsChecked = true;

@@ -77,6 +77,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Script create/run/delete lifecycle | ${coverage.gameplay.scriptLifecycleChecked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
     lines.push(`| Ammo stack resale | ${coverage.gameplay.ammoSellChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Damaged ammo economy | ${coverage.gameplay.damagedAmmoEconomyChecked ? 'yes' : 'no'} |`);
     lines.push(`| Structured item details | ${coverage.gameplay.itemDetailsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Starter equipment verbs | ${coverage.gameplay.equipmentChecked ? 'yes' : 'no'} |`);
     lines.push(`| Structured equipment slots | ${coverage.gameplay.equipmentSlotsChecked ? 'yes' : 'no'} |`);
@@ -193,6 +194,7 @@ function coverageSummary(results) {
         (scriptPayload.scriptDeletedChecked ?? apiPayload.scriptDeletedChecked) === true,
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
       ammoSellChecked: apiPayload.ammoSellChecked === true,
+      damagedAmmoEconomyChecked: apiPayload.damagedAmmoEconomyChecked === true,
       itemDetailsChecked: apiPayload.itemDetailsChecked === true,
       equipmentChecked: apiPayload.equipmentChecked === true,
       equipmentSlotsChecked: apiPayload.equipmentSlotsChecked === true,
@@ -271,6 +273,7 @@ function assertCoverageShape(coverage) {
   expect(coverage.gameplay.combatChecked === true, 'gameplay.combatChecked');
   expect(coverage.gameplay.shopEconomyChecked === true, 'gameplay.shopEconomyChecked');
   expect(coverage.gameplay.ammoSellChecked === true, 'gameplay.ammoSellChecked');
+  expect(coverage.gameplay.damagedAmmoEconomyChecked === true, 'gameplay.damagedAmmoEconomyChecked');
   expect(coverage.gameplay.itemDetailsChecked === true, 'gameplay.itemDetailsChecked');
   expect(coverage.gameplay.equipmentChecked === true, 'gameplay.equipmentChecked');
   expect(coverage.gameplay.equipmentSlotsChecked === true, 'gameplay.equipmentSlotsChecked');

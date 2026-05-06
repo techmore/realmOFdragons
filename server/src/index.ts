@@ -1175,6 +1175,15 @@ function displayNameFromCode(code: string): string {
     .trim();
 }
 
+function isDamagedAmmoCode(code: string) {
+  const normalized = code.toLowerCase();
+  return normalized.startsWith('damaged-itm-') || normalized.startsWith('damaged itm-');
+}
+
+function originalAmmoCodeFromDamaged(code: string) {
+  return code.toLowerCase().replace(/^damaged[- ]/, '');
+}
+
 function findShopItem(code: string) {
   const lowered = code.toLowerCase();
   for (const room of Object.values(worldRooms)) {
@@ -1194,13 +1203,17 @@ function findForageItem(code: string) {
 }
 
 function resolveItemDetail(code: string, room: Room, character: CharacterRecord): ItemDetail {
+  const damagedAmmo = isDamagedAmmoCode(code);
+  const originalAmmoCode = damagedAmmo ? originalAmmoCodeFromDamaged(code) : code;
   const starter = STARTER_ITEM_DETAILS[code.toLowerCase()];
-  const shopItem = findShopItem(code);
+  const shopItem = findShopItem(originalAmmoCode);
   const forageItem = findForageItem(code);
-  const name = starter?.name ?? shopItem?.name ?? forageItem?.name ?? displayNameFromCode(code);
-  const category = starter?.category ?? inferItemCategory(code, name);
-  const source = starter?.source ?? (shopItem ? 'shop' : forageItem ? 'forage' : code.toLowerCase().includes('fang') ? 'loot' : 'unknown');
-  const value = starter?.value ?? shopItem?.price ?? Math.max(1, forageItem?.difficulty ?? 1);
+  const name = damagedAmmo
+    ? `damaged ${shopItem?.name ?? displayNameFromCode(originalAmmoCode)}`
+    : starter?.name ?? shopItem?.name ?? forageItem?.name ?? displayNameFromCode(code);
+  const category = damagedAmmo ? 'salvage' : starter?.category ?? inferItemCategory(code, name);
+  const source = damagedAmmo ? 'loot' : starter?.source ?? (shopItem ? 'shop' : forageItem ? 'forage' : code.toLowerCase().includes('fang') ? 'loot' : 'unknown');
+  const value = damagedAmmo ? 1 : starter?.value ?? shopItem?.price ?? Math.max(1, forageItem?.difficulty ?? 1);
   const currency = starter?.currency ?? shopItem?.currency ?? 'trias';
 
   return {
@@ -1209,7 +1222,9 @@ function resolveItemDetail(code: string, room: Room, character: CharacterRecord)
     category,
     description:
       starter?.description ??
-      (source === 'shop'
+      (damagedAmmo
+        ? `${name} is broken ranged ammunition. It cannot be fired, but an ammunition seller may buy it for scrap.`
+        : source === 'shop'
         ? `${name} is cataloged shop gear suitable for early Crossing play.`
         : source === 'forage'
           ? `${name} is a simple foraged material found near the Crossing.`
@@ -1943,7 +1958,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     }
     for (const [ammoCode, count] of recoverableEntries) {
       if (ammoCode.startsWith('damaged-')) {
-        const recoveredCode = ammoCode.replace(/^damaged-/, 'damaged ');
+        const recoveredCode = ammoCode;
         for (let index = 0; index < count; index += 1) {
           resolvedCharacter.inventory.push(recoveredCode);
         }
@@ -2493,11 +2508,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       }
     } else {
       const itemCode = resolvedCharacter.inventory[inventoryIndex];
-      const catalogItem = room.shop.items.find((entry) => entry.code === itemCode);
+      const damagedAmmo = isDamagedAmmoCode(itemCode);
+      const catalogItem = room.shop.items.find((entry) => entry.code === (damagedAmmo ? originalAmmoCodeFromDamaged(itemCode) : itemCode));
       if (!catalogItem) {
         events.push(`This shop does not buy ${itemCode}.`);
       } else {
-        const sellPrice = Math.max(1, Math.floor(catalogItem.price * SHOP_SELL_RATE));
+        const itemDetail = resolveItemDetail(itemCode, room, resolvedCharacter);
+        const sellPrice = damagedAmmo
+          ? Math.max(1, Math.floor((catalogItem.price / (resolveItemDetail(catalogItem.code, room, resolvedCharacter).bundleSize ?? 5)) * 0.25))
+          : Math.max(1, Math.floor(catalogItem.price * SHOP_SELL_RATE));
         resolvedCharacter.inventory.splice(inventoryIndex, 1);
         if (resolvedCharacter.hands.left === itemCode) {
           resolvedCharacter.hands.left = null;
@@ -2509,7 +2528,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         grantSkillPool(resolvedCharacter, 'trading', 1, events);
         modified = true;
         setActionCooldown(resolvedCharacter, 450);
-        events.push(`You sell ${catalogItem.name} for ${sellPrice} ${catalogItem.currency}.`);
+        events.push(`You sell ${itemDetail.name} for ${sellPrice} ${catalogItem.currency}.`);
         events.push(`Wallet: ${formatWallet(resolvedCharacter.wallet)}.`);
       }
     }
@@ -2955,6 +2974,7 @@ app.post('/v1/test/characters/:characterId/state', authRequired, async (req: Aut
   const healthCurrent = req.body?.healthCurrent;
   const roomId = String(req.body?.roomId ?? '').trim();
   const clearActiveCombat = req.body?.clearCombat === true;
+  const inventoryAppend = Array.isArray(req.body?.inventoryAppend) ? req.body.inventoryAppend : [];
 
   if (typeof healthCurrent === 'number' && Number.isFinite(healthCurrent)) {
     resolved.health.current = Math.max(0, Math.min(resolved.health.max, Math.floor(healthCurrent)));
@@ -2967,6 +2987,12 @@ app.post('/v1/test/characters/:characterId/state', authRequired, async (req: Aut
 
   if (clearActiveCombat) {
     clearCombat(resolved);
+  }
+
+  for (const itemCode of inventoryAppend) {
+    if (typeof itemCode === 'string' && itemCode.trim()) {
+      resolved.inventory.push(itemCode.trim());
+    }
   }
 
   setActionCooldown(resolved, 0);
