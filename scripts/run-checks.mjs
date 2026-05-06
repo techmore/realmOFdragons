@@ -80,6 +80,21 @@ function markdownSummary(results, coverage) {
     lines.push(`| Shop rooms walked | ${coverage.gameplay.shopRoomsWalked} |`);
     lines.push(`| Circle reached | ${coverage.gameplay.circleReached} |`);
     lines.push(`| Browser command count | ${coverage.frontend.browserCommandCount} |`);
+
+    lines.push('');
+    lines.push('## Script Coverage');
+    lines.push('');
+    lines.push('| Area | Covered |');
+    lines.push('| --- | --- |');
+    lines.push(`| API script create | ${coverage.scripts.created ? 'yes' : 'no'} |`);
+    lines.push(`| API script run | ${coverage.scripts.ran ? 'yes' : 'no'} |`);
+    lines.push(`| API script delete | ${coverage.scripts.deleted ? 'yes' : 'no'} |`);
+    lines.push(`| API script lifecycle | ${coverage.scripts.lifecycle ? 'yes' : 'no'} |`);
+    lines.push(`| Browser preset save | ${coverage.scripts.browserPresetSaved ? 'yes' : 'no'} |`);
+    lines.push('');
+    lines.push('| Metric | Value |');
+    lines.push('| --- | ---: |');
+    lines.push(`| API script run steps | ${coverage.scripts.steps} |`);
   }
 
   lines.push('');
@@ -166,6 +181,17 @@ function coverageSummary(results) {
       agentPromptCurrentStatusChecked: agentPromptPayload.currentStatusPriorityChecked === true,
       finalRoom: apiPayload.finalRoom ?? null,
       finalCombatActive: Boolean(apiPayload.finalCombat),
+    },
+    scripts: {
+      steps: apiPayload.scriptSteps ?? 0,
+      created: apiPayload.scriptCreatedChecked === true,
+      ran: apiPayload.scriptRunChecked === true,
+      deleted: apiPayload.scriptDeletedChecked === true,
+      lifecycle:
+        apiPayload.scriptCreatedChecked === true &&
+        apiPayload.scriptRunChecked === true &&
+        apiPayload.scriptDeletedChecked === true,
+      browserPresetSaved: browserPayload.scriptPresetSaved === true,
     },
     frontend: {
       staticUiSmoke: byName.get('frontend-ui-smoke')?.exitCode === 0,

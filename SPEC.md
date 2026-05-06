@@ -10,13 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- API smoke now verifies script create, run, list, delete, and post-delete removal.
-- API smoke reports script lifecycle coverage fields.
-- Coverage summary, Markdown telemetry, and README coverage fields now include script lifecycle coverage.
+- Markdown telemetry now includes a dedicated Script Coverage section.
+- `coverage-summary.json` now includes a structured `scripts` block.
+- README documents the `scripts` coverage summary fields.
 
 Current next priority:
 
-- Add a focused `scripts` telemetry row to Markdown/count summaries so script lifecycle coverage is easier to distinguish from general API smoke.
+- Add focused script lifecycle coverage to CI telemetry, not just local `agent:check`, or document why local-only browser script coverage remains local.
 
 Core Philosophy
 
@@ -488,6 +488,19 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add a focused `scripts` telemetry row to Markdown/count summaries so script lifecycle coverage is easier to distinguish from general API smoke.
+
+Implementation Notes - 2026-05-06, Script Coverage Telemetry Section
+
+Completed in the current Node/React prototype:
+
+- Markdown telemetry now includes a dedicated Script Coverage section.
+- Script Coverage reports API create, run, delete, full lifecycle, browser preset save, and API script run step count.
+- `coverage-summary.json` now includes a structured `scripts` block with `steps`, `created`, `ran`, `deleted`, `lifecycle`, and `browserPresetSaved`.
+- README documents the script-specific coverage summary fields.
+
+Next priority:
+
+- Add focused script lifecycle coverage to CI telemetry, not just local `agent:check`, or document why local-only browser script coverage remains local.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

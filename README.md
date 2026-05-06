@@ -88,7 +88,7 @@ Primary artifacts:
 
 - `summary.json`: complete step results with command lines, exit codes, durations, and output tails.
 - `summary.md`: human-readable check report with step status, gameplay coverage booleans, and gameplay counts.
-- `coverage-summary.json`: compact machine-readable coverage summary for agents and trend tooling.
+- `coverage-summary.json`: compact machine-readable coverage summary for agents and trend tooling, including `gameplay`, `scripts`, and `frontend` sections.
 - `<step>.json`: per-step telemetry for build, tests, smokes, prompt generation, and git status.
 
 Coverage fields currently distinguish broad combat coverage from target-specific coverage:
@@ -102,6 +102,12 @@ Coverage fields currently distinguish broad combat coverage from target-specific
 - `gameplay.scriptCreatedChecked`
 - `gameplay.scriptRunChecked`
 - `gameplay.scriptDeletedChecked`
+- `scripts.steps`
+- `scripts.created`
+- `scripts.ran`
+- `scripts.deleted`
+- `scripts.lifecycle`
+- `scripts.browserPresetSaved`
 - `frontend.staticCommandDiscoveryChecked`
 - `frontend.browserCommandDiscoveryVisible`
 - `frontend.browserScriptDiscoveryVisible`
