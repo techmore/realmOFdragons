@@ -69,9 +69,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       charisma: 0,
     },
     roles: [
-      { id: 'adaptive', title: 'Adaptive', rollModifiers: {} },
-      { id: 'frontline', title: 'Frontline', rollModifiers: { strength: 2, stamina: 1, charisma: -1 } },
-      { id: 'versatile', title: 'Versatile', rollModifiers: { agility: 1, reflex: 1, wisdom: 1 } },
+      { id: 'adaptive', title: 'Private classic-random test profile A', rollModifiers: {} },
+      { id: 'frontline', title: 'Private classic-random test profile B', rollModifiers: { strength: 2, stamina: 1, charisma: -1 } },
+      { id: 'versatile', title: 'Private classic-random test profile C', rollModifiers: { agility: 1, reflex: 1, wisdom: 1 } },
     ],
     minStat: 16,
     maxStat: 40,
@@ -87,9 +87,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       charisma: 1,
     },
     roles: [
-      { id: 'scout', title: 'Scout', rollModifiers: { agility: 1, reflex: 1, stamina: -1 } },
-      { id: 'arts', title: 'Scholar', rollModifiers: { intelligence: 2, wisdom: 1, charisma: 1 } },
-      { id: 'blade', title: 'Quickblade', rollModifiers: { agility: 2, reflex: 1, discipline: -1 } },
+      { id: 'scout', title: 'Private classic-random test profile A', rollModifiers: { agility: 1, reflex: 1, stamina: -1 } },
+      { id: 'arts', title: 'Private classic-random test profile B', rollModifiers: { intelligence: 2, wisdom: 1, charisma: 1 } },
+      { id: 'blade', title: 'Private classic-random test profile C', rollModifiers: { agility: 2, reflex: 1, discipline: -1 } },
     ],
     minStat: 17,
     maxStat: 41,
@@ -105,9 +105,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       reflex: -1,
     },
     roles: [
-      { id: 'guardian', title: 'Guardian', rollModifiers: { strength: 2, stamina: 1 } },
-      { id: 'craft', title: 'Craftmaster', rollModifiers: { discipline: 2, wisdom: 1, agility: -1 } },
-      { id: 'miner', title: 'Breach', rollModifiers: { stamina: 1, reflex: -1 } },
+      { id: 'guardian', title: 'Private classic-random test profile A', rollModifiers: { strength: 2, stamina: 1 } },
+      { id: 'craft', title: 'Private classic-random test profile B', rollModifiers: { discipline: 2, wisdom: 1, agility: -1 } },
+      { id: 'miner', title: 'Private classic-random test profile C', rollModifiers: { stamina: 1, reflex: -1 } },
     ],
     minStat: 18,
     maxStat: 42,
@@ -123,9 +123,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       strength: -1,
     },
     roles: [
-      { id: 'sage', title: 'Sage', rollModifiers: { wisdom: 2, intelligence: 2, discipline: 1 } },
-      { id: 'binder', title: 'Binder', rollModifiers: { charisma: 1, wisdom: 1 } },
-      { id: 'mender', title: 'Mender', rollModifiers: { intelligence: 1, agility: -1 } },
+      { id: 'sage', title: 'Private classic-random test profile A', rollModifiers: { wisdom: 2, intelligence: 2, discipline: 1 } },
+      { id: 'binder', title: 'Private classic-random test profile B', rollModifiers: { charisma: 1, wisdom: 1 } },
+      { id: 'mender', title: 'Private classic-random test profile C', rollModifiers: { intelligence: 1, agility: -1 } },
     ],
     minStat: 16,
     maxStat: 40,
@@ -141,9 +141,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       reflex: -1,
     },
     roles: [
-      { id: 'brawler', title: 'Brawler', rollModifiers: { strength: 2, discipline: -1 } },
-      { id: 'wrestler', title: 'Wrestler', rollModifiers: { stamina: 1, strength: 1 } },
-      { id: 'beat', title: 'Breaker', rollModifiers: { reflex: -1, discipline: 1 } },
+      { id: 'brawler', title: 'Private classic-random test profile A', rollModifiers: { strength: 2, discipline: -1 } },
+      { id: 'wrestler', title: 'Private classic-random test profile B', rollModifiers: { stamina: 1, strength: 1 } },
+      { id: 'beat', title: 'Private classic-random test profile C', rollModifiers: { reflex: -1, discipline: 1 } },
     ],
     minStat: 20,
     maxStat: 46,
@@ -159,9 +159,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       discipline: -1,
     },
     roles: [
-      { id: 'skirmish', title: 'Skirmisher', rollModifiers: { agility: 2, reflex: 2 } },
-      { id: 'trader', title: 'Broker', rollModifiers: { charisma: 2, intelligence: 1 } },
-      { id: 'lightfoot', title: 'Lightfoot', rollModifiers: { agility: 1, stamina: -1 } },
+      { id: 'skirmish', title: 'Private classic-random test profile A', rollModifiers: { agility: 2, reflex: 2 } },
+      { id: 'trader', title: 'Private classic-random test profile B', rollModifiers: { charisma: 2, intelligence: 1 } },
+      { id: 'lightfoot', title: 'Private classic-random test profile C', rollModifiers: { agility: 1, stamina: -1 } },
     ],
     minStat: 16,
     maxStat: 40,
@@ -178,9 +178,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       agility: -1,
     },
     roles: [
-      { id: 'seer', title: 'Seer', rollModifiers: { wisdom: 2, intelligence: 1 } },
-      { id: 'rider', title: 'Rider', rollModifiers: { agility: 1, reflex: 1, strength: -1 } },
-      { id: 'warden', title: 'Warden', rollModifiers: { stamina: 1, discipline: 1 } },
+      { id: 'seer', title: 'Private classic-random test profile A', rollModifiers: { wisdom: 2, intelligence: 1 } },
+      { id: 'rider', title: 'Private classic-random test profile B', rollModifiers: { agility: 1, reflex: 1, strength: -1 } },
+      { id: 'warden', title: 'Private classic-random test profile C', rollModifiers: { stamina: 1, discipline: 1 } },
     ],
     minStat: 16,
     maxStat: 40,
@@ -196,9 +196,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       discipline: -1,
     },
     roles: [
-      { id: 'striker', title: 'Striker', rollModifiers: { reflex: 2, agility: 2 } },
-      { id: 'trance', title: 'Trancefighter', rollModifiers: { wisdom: 1, discipline: -1 } },
-      { id: 'watch', title: 'Watchkeeper', rollModifiers: { discipline: 1, wisdom: 1 } },
+      { id: 'striker', title: 'Private classic-random test profile A', rollModifiers: { reflex: 2, agility: 2 } },
+      { id: 'trance', title: 'Private classic-random test profile B', rollModifiers: { wisdom: 1, discipline: -1 } },
+      { id: 'watch', title: 'Private classic-random test profile C', rollModifiers: { discipline: 1, wisdom: 1 } },
     ],
     minStat: 16,
     maxStat: 40,
@@ -214,9 +214,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       reflex: -1,
     },
     roles: [
-      { id: 'seer', title: 'Visionary', rollModifiers: { wisdom: 2, intelligence: 1 } },
-      { id: 'healer', title: 'Healer', rollModifiers: { wisdom: 1, charisma: 1 } },
-      { id: 'guide', title: 'Guide', rollModifiers: { discipline: 1, stamina: -1 } },
+      { id: 'seer', title: 'Private classic-random test profile A', rollModifiers: { wisdom: 2, intelligence: 1 } },
+      { id: 'healer', title: 'Private classic-random test profile B', rollModifiers: { wisdom: 1, charisma: 1 } },
+      { id: 'guide', title: 'Private classic-random test profile C', rollModifiers: { discipline: 1, stamina: -1 } },
     ],
     minStat: 16,
     maxStat: 40,
@@ -232,9 +232,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       stamina: -1,
     },
     roles: [
-      { id: 'tinker', title: 'Tinkerer', rollModifiers: { intelligence: 2, reflex: 1 } },
-      { id: 'inquisitor', title: 'Inquisitive', rollModifiers: { wisdom: 1, discipline: 1 } },
-      { id: 'ambush', title: 'Ambusher', rollModifiers: { agility: 1, reflex: 1, strength: -1 } },
+      { id: 'tinker', title: 'Private classic-random test profile A', rollModifiers: { intelligence: 2, reflex: 1 } },
+      { id: 'inquisitor', title: 'Private classic-random test profile B', rollModifiers: { wisdom: 1, discipline: 1 } },
+      { id: 'ambush', title: 'Private classic-random test profile C', rollModifiers: { agility: 1, reflex: 1, strength: -1 } },
     ],
     minStat: 16,
     maxStat: 40,
@@ -250,9 +250,9 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
       reflex: -1,
     },
     roles: [
-      { id: 'berserker', title: 'Berserker', rollModifiers: { strength: 2, stamina: 1, discipline: -1 } },
-      { id: 'crusher', title: 'Crusher', rollModifiers: { discipline: 1, strength: 1 } },
-      { id: 'warden', title: 'Warden', rollModifiers: { charisma: -1, wisdom: -1, stamina: 1 } },
+      { id: 'berserker', title: 'Private classic-random test profile A', rollModifiers: { strength: 2, stamina: 1, discipline: -1 } },
+      { id: 'crusher', title: 'Private classic-random test profile B', rollModifiers: { discipline: 1, strength: 1 } },
+      { id: 'warden', title: 'Private classic-random test profile C', rollModifiers: { charisma: -1, wisdom: -1, stamina: 1 } },
     ],
     minStat: 18,
     maxStat: 44,
@@ -383,7 +383,7 @@ export function rollCharacterForRace(raceInput: string, mode: StatGenerationMode
 
   trace.push(`Race selected: ${race.name}`);
   trace.push('Stat generation mode: classic_random');
-  trace.push(`Role selected: ${selectedRole.title} (${selectedRole.id})`);
+  trace.push(`Private classic-random test profile selected: ${selectedRole.title} (${selectedRole.id})`);
 
   for (const statName of STAT_NAMES) {
     const statBase = rollBase();

@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Private classic-random role labels are now explicitly marked as non-default test profiles.
+- Classic-random roll traces now say `Private classic-random test profile selected` instead of exposing archetype language.
+- Race unit coverage now asserts classic-random labels/traces remain private test-profile language.
 - Public race descriptions now use DragonRealms-clean fixed-stat summaries instead of prototype archetype language.
 - Unit and API smoke coverage now reject prototype wording in public race descriptions.
 - Character creation API now rejects `guild`/`guildId` payloads; guilds must be joined in-world at a registrar.
@@ -120,7 +123,7 @@ Completed current slice:
 
 Current next priority:
 
-- Replace internal prototype race role labels with private classic-random labels that are clearly marked non-default/test-only.
+- Add migration/shape cleanup for stored characters with old prototype role titles so old file-backed data is normalized when loaded.
 
 Core Philosophy
 

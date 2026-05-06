@@ -36,6 +36,8 @@ for (const race of races) {
 
   const classicRoll = rollCharacterForRace(race.name, 'classic_random');
   assert.equal(classicRoll.statGenerationMode, 'classic_random');
+  assert.equal(classicRoll.roleTitle.startsWith('Private classic-random test profile '), true);
+  assert.equal(classicRoll.trace.some((entry) => entry.startsWith('Private classic-random test profile selected:')), true);
 }
 
 console.log(JSON.stringify({ ok: true, suite: 'unit:races', fixedRaceStatsChecked: races.length }, null, 2));
