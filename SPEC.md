@@ -20,10 +20,12 @@ Completed current slice:
 - Ranged `fire`/`shoot` now require a loaded shot and report empty-quiver/unloaded states.
 - Web controls and character panels now expose ammo readiness.
 - Smoke telemetry now tracks ranged reload readiness.
+- Shop resale now supports selling one shot from an ammo pouch stack when the local shop stocks that ammo.
+- Economy smoke telemetry now verifies ammo stack resale and remaining pouch counts.
 
 Current next priority:
 
-- Add ammunition recovery and selling rules so spent/recovered arrows and ammo stacks participate in the economy consistently.
+- Add ammunition recovery from missed shots or post-combat scavenging so ranged combat can return recoverable arrows into ammo stacks.
 
 Core Philosophy
 

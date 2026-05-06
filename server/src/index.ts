@@ -2376,7 +2376,23 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       (entry) => entry.toLowerCase() === lowered || entry.toLowerCase().replace(/\s+/g, '-') === lowered,
     );
     if (inventoryIndex < 0) {
-      events.push(`You are not carrying "${code}".`);
+      const catalogItem = room.shop.items.find(
+        (entry) => entry.code.toLowerCase() === lowered || entry.name.toLowerCase() === lowered,
+      );
+      const itemDetail = catalogItem ? resolveItemDetail(catalogItem.code, room, resolvedCharacter) : undefined;
+      if (!catalogItem || itemDetail?.category !== 'ammo' || countAmmo(resolvedCharacter, catalogItem.code) <= 0) {
+        events.push(`You are not carrying "${code}".`);
+      } else {
+        const bundleSize = itemDetail.bundleSize ?? 1;
+        const sellPrice = Math.max(1, Math.floor((catalogItem.price / bundleSize) * SHOP_SELL_RATE));
+        consumeAmmo(resolvedCharacter, catalogItem.code);
+        earnFunds(resolvedCharacter.wallet, catalogItem.currency, sellPrice);
+        grantSkillPool(resolvedCharacter, 'trading', 1, events);
+        modified = true;
+        setActionCooldown(resolvedCharacter, 450);
+        events.push(`You sell one ${catalogItem.name} from your ammo pouch for ${sellPrice} ${catalogItem.currency}. ${countAmmo(resolvedCharacter, catalogItem.code)} remain.`);
+        events.push(`Wallet: ${formatWallet(resolvedCharacter.wallet)}.`);
+      }
     } else {
       const itemCode = resolvedCharacter.inventory[inventoryIndex];
       const catalogItem = room.shop.items.find((entry) => entry.code === itemCode);

@@ -392,9 +392,22 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
   }
 
   assert(testedShopEconomy, 'Expected to buy and sell at least one shop item.');
+
+  current = await walkTo(context.accessToken, current, 'crossing-MA01-002');
+  current = (await command(context.accessToken, current.id, 'wait 900')).character;
+  const arrowBuy = await command(context.accessToken, current.id, 'shop buy itm-sting-arrow');
+  assert(arrowBuy.character.ammoPouch?.['itm-sting-arrow'] === 5, 'Expected ammo stack before ammo resale.');
+  current = (await command(context.accessToken, arrowBuy.character.id, 'wait 450')).character;
+  const arrowSell = await command(context.accessToken, current.id, 'shop sell itm-sting-arrow');
+  assert(arrowSell.events.some((event) => event.includes('You sell one practice arrow from your ammo pouch')), 'Expected ammo pouch sell output.');
+  assert(arrowSell.events.some((event) => event.includes('4 remain')), 'Expected ammo pouch sell remaining count.');
+  assert(arrowSell.character.ammoPouch?.['itm-sting-arrow'] === 4, 'Expected ammo pouch count to decrement on resale.');
+  current = arrowSell.character;
+
   context.character = current;
   context.summary.shopRoomsWalked = shops.shops.length;
   context.summary.shopEconomyChecked = true;
+  context.summary.ammoSellChecked = true;
   context.summary.itemDetailsChecked = true;
   context.summary.equipmentChecked = true;
   context.summary.equipmentSlotsChecked = true;
@@ -408,11 +421,12 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   assert(result.itemDetails.some((item) => item.code === 'itm-practice-bow' && item.weaponRange === 'ranged'), 'Expected practice bow ranged metadata.');
   current = (await command(context.accessToken, result.character.id, 'wait 450')).character;
 
+  const arrowStackBeforeCombatBuy = current.ammoPouch?.['itm-sting-arrow'] ?? 0;
   result = await command(context.accessToken, current.id, 'shop buy itm-sting-arrow');
   assert(result.events.some((event) => event.includes('You buy practice arrow')), 'Expected to buy practice arrow.');
   assert(result.events.some((event) => event.includes('(5 bundled)')), 'Expected practice arrow bundle buy output.');
-  assert(result.character.ammoPouch?.['itm-sting-arrow'] === 5, 'Expected practice arrows to enter ammo pouch as a stack.');
-  assert(result.itemDetails.some((item) => item.code === 'itm-sting-arrow' && item.category === 'ammo' && item.quantity === 5), 'Expected practice arrow ammo quantity metadata.');
+  assert(result.character.ammoPouch?.['itm-sting-arrow'] === arrowStackBeforeCombatBuy + 5, 'Expected practice arrows to enter ammo pouch as a stack.');
+  assert(result.itemDetails.some((item) => item.code === 'itm-sting-arrow' && item.category === 'ammo' && item.quantity === arrowStackBeforeCombatBuy + 5), 'Expected practice arrow ammo quantity metadata.');
   current = (await command(context.accessToken, result.character.id, 'wait 450')).character;
 
   result = await command(context.accessToken, current.id, 'stow right');
@@ -424,13 +438,13 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   current = (await command(context.accessToken, result.character.id, 'wait 300')).character;
 
   result = await command(context.accessToken, current.id, 'ammo');
-  assert(result.events.some((event) => event.includes('Ammo pouch: itm-sting-arrow x5')), 'Expected ammo command to show quiver count.');
+  assert(result.events.some((event) => event.includes(`Ammo pouch: itm-sting-arrow x${arrowStackBeforeCombatBuy + 5}`)), 'Expected ammo command to show quiver count.');
   assert(result.events.some((event) => event.includes('practice bow is not loaded')), 'Expected ammo command to show unloaded bow state.');
 
   result = await command(context.accessToken, current.id, 'reload');
   assert(result.events.some((event) => event.includes('You load practice arrow into practice bow')), 'Expected reload output.');
-  assert(result.events.some((event) => event.includes('4 remain in your quiver')), 'Expected reload to report remaining quiver count.');
-  assert(result.character.ammoPouch?.['itm-sting-arrow'] === 4, 'Expected reload to move one arrow out of the pouch.');
+  assert(result.events.some((event) => event.includes(`${arrowStackBeforeCombatBuy + 4} remain in your quiver`)), 'Expected reload to report remaining quiver count.');
+  assert(result.character.ammoPouch?.['itm-sting-arrow'] === arrowStackBeforeCombatBuy + 4, 'Expected reload to move one arrow out of the pouch.');
   assert(result.character.loadedAmmo?.['itm-practice-bow'] === 'itm-sting-arrow', 'Expected practice bow loaded ammo state.');
   current = (await command(context.accessToken, result.character.id, 'wait 350')).character;
 
@@ -487,7 +501,7 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   result = await command(context.accessToken, current.id, 'fire');
   assert(result.events.some((event) => event.includes('You attack with practice bow (ranged weapon')), 'Expected ranged weapon attack output.');
   assert(result.events.some((event) => event.includes('You loose loaded practice arrow')), 'Expected ranged attack to fire loaded practice arrow.');
-  assert(result.events.some((event) => event.includes('4 remain')), 'Expected ranged attack to report remaining ammo.');
+  assert(result.events.some((event) => event.includes(`${arrowsBefore} remain`)), 'Expected ranged attack to report remaining ammo.');
   assert((result.character.ammoPouch?.['itm-sting-arrow'] ?? 0) === arrowsBefore, 'Expected loaded ranged attack not to double-consume pouch ammo.');
   assert(!result.character.loadedAmmo?.['itm-practice-bow'], 'Expected ranged attack to clear loaded ammo state.');
   assert(!result.events.some((event) => event.includes('too far away')), 'Expected ranged weapon to attack from pole or missile range.');
