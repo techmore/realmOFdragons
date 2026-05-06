@@ -4,6 +4,15 @@ export const SHOP_SELL_RATE = 0.75;
 export const DAMAGED_AMMO_SELL_RATE = 0.25;
 export const DEFAULT_AMMO_BUNDLE_SIZE = 5;
 
+export type CurrencyWallet = Record<RoomShopItem['currency'], number>;
+
+export type ShopPurchaseResolution = {
+  item: RoomShopItem;
+  delivery: 'ammoPouch' | 'inventory';
+  quantity: number;
+  affordable: boolean;
+};
+
 export function isDamagedAmmoCode(code: string): boolean {
   const normalized = code.toLowerCase();
   return normalized.startsWith('damaged-itm-') || normalized.startsWith('damaged itm-');
@@ -26,6 +35,25 @@ export function findLocalShopSaleItem(items: RoomShopItem[], code: string): Room
       entry.code.toLowerCase() === lowered ||
       entry.name.toLowerCase() === lowered,
   );
+}
+
+export function findLocalShopBuyItem(items: RoomShopItem[], code: string): RoomShopItem | undefined {
+  const lowered = code.toLowerCase();
+  return items.find((entry) => entry.code.toLowerCase() === lowered || entry.name.toLowerCase() === lowered);
+}
+
+export function canAfford(wallet: CurrencyWallet, item: RoomShopItem): boolean {
+  return wallet[item.currency] >= item.price;
+}
+
+export function resolveShopPurchase(item: RoomShopItem, wallet: CurrencyWallet, itemCategory: string, bundleSize = DEFAULT_AMMO_BUNDLE_SIZE): ShopPurchaseResolution {
+  const delivery = itemCategory === 'ammo' ? 'ammoPouch' : 'inventory';
+  return {
+    item,
+    delivery,
+    quantity: delivery === 'ammoPouch' ? bundleSize : 1,
+    affordable: canAfford(wallet, item),
+  };
 }
 
 export function estimateAmmoPouchSalePrice(item: RoomShopItem, bundleSize = DEFAULT_AMMO_BUNDLE_SIZE): number {

@@ -57,10 +57,12 @@ Completed current slice:
 - Added unit coverage for backend shop sale matching, damaged ammo sale mapping, inventory resale, and ammo pouch resale.
 - Extracted server item detail resolution into `server/src/items.ts`.
 - Added unit coverage for starter gear, shop ranged gear, ammo pouch quantities, damaged ammo salvage, forage items, unknown gear, and item detail list composition.
+- Extracted pure shop buy matching, affordability, and purchase delivery decisions into `server/src/economy.ts`.
+- Expanded economy unit coverage for buy-by-name lookup, no damaged-item buy matching, affordability, ammo-bundle delivery, and inventory delivery.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting shop buy rules or inventory/equipment command mutations.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting inventory/equipment command mutations.
 
 Core Philosophy
 

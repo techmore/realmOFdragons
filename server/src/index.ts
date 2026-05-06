@@ -38,11 +38,14 @@ import {
   shiftCombatRange,
 } from './combat.js';
 import {
+  canAfford,
   estimateAmmoPouchSalePrice,
   estimateInventorySalePrice,
+  findLocalShopBuyItem,
   findLocalShopSaleItem,
   isDamagedAmmoCode,
   originalAmmoCodeFromDamaged,
+  resolveShopPurchase,
 } from './economy.js';
 import { buildItemDetails, displayNameFromCode, resolveItemDetail, type ItemDetail } from './items.js';
 import { WebSocketServer, WebSocket } from 'ws';
@@ -363,10 +366,6 @@ function normalizeWallet(
 
 function formatWallet(wallet: CharacterRecord['wallet']) {
   return `Plat ${wallet.plat}, Trias ${wallet.trias}, Lucan ${wallet.lucan}, Silk ${wallet.silk}`;
-}
-
-function hasFunds(wallet: CharacterRecord['wallet'], currency: keyof CharacterRecord['wallet'], cost: number) {
-  return wallet[currency] >= cost;
 }
 
 function spendFunds(wallet: CharacterRecord['wallet'], currency: keyof CharacterRecord['wallet'], cost: number) {
@@ -2251,26 +2250,24 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     if (!room.shop) {
       events.push('No shop is present here.');
     } else {
-      const lowered = code.toLowerCase();
-      const item = room.shop.items.find(
-        (entry) => entry.code.toLowerCase() === lowered || entry.name.toLowerCase() === lowered,
-      );
+      const item = findLocalShopBuyItem(room.shop.items, code);
       if (!item) {
         events.push(`I could not find "${code}" here.`);
-      } else if (!hasFunds(resolvedCharacter.wallet, item.currency, item.price)) {
+      } else if (!canAfford(resolvedCharacter.wallet, item)) {
         events.push(`You cannot afford ${item.name}: ${item.price} ${item.currency} required.`);
       } else {
         spendFunds(resolvedCharacter.wallet, item.currency, item.price);
         const itemDetail = resolveItemDetail(item.code, room, resolvedCharacter);
-        if (itemDetail.category === 'ammo') {
-          addAmmo(resolvedCharacter, item.code, itemDetail.bundleSize ?? 5);
+        const purchase = resolveShopPurchase(item, resolvedCharacter.wallet, itemDetail.category, itemDetail.bundleSize);
+        if (purchase.delivery === 'ammoPouch') {
+          addAmmo(resolvedCharacter, item.code, purchase.quantity);
         } else {
           resolvedCharacter.inventory.push(item.code);
         }
         grantSkillPool(resolvedCharacter, 'trading', 1, events);
         modified = true;
         setActionCooldown(resolvedCharacter, 450);
-        events.push(`You buy ${item.name} for ${item.price} ${item.currency}${itemDetail.category === 'ammo' ? ` (${itemDetail.bundleSize ?? 5} bundled).` : '.'}`);
+        events.push(`You buy ${item.name} for ${item.price} ${item.currency}${purchase.delivery === 'ammoPouch' ? ` (${purchase.quantity} bundled).` : '.'}`);
         events.push(`Wallet: ${formatWallet(resolvedCharacter.wallet)}.`);
       }
     }
