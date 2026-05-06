@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Focused race smoke now rejects a non-DragonRealms `Orc` character creation request.
+- Focused race smoke now creates one character for every canonical DragonRealms race and verifies each starts Circle 1, commoner, unaffiliated, modern-fixed, and with fixed racial stats.
+- Local telemetry now reports non-DragonRealms race rejection and canonical race creation Circle 1 coverage.
 - Added a focused `races` API smoke suite for `/v1/races`.
 - Added `npm --prefix server run smoke:races` for direct canonical race endpoint validation.
 - Local agent telemetry now runs focused race smoke and reports canonical race count plus fixed stat table coverage.
@@ -147,7 +150,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add focused smoke coverage that race creation rejects non-DragonRealms race names and preserves all canonical race choices at Circle 1.
+- Add focused smoke coverage that reroll rejects non-DragonRealms race names and preserves canonical race choices without changing guild/circle.
 
 Core Philosophy
 

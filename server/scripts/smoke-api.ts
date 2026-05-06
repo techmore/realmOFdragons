@@ -408,11 +408,39 @@ async function runRaceEndpointSuite(context: SmokeContext): Promise<void> {
     }
   }
 
+  const invalidRaceError = await requestFailure('/v1/characters', {
+    method: 'POST',
+    headers: authHeaders(context.accessToken),
+    body: JSON.stringify({ name: `BadRace${unique.slice(-5)}`, race: 'Orc' }),
+  });
+  assert(invalidRaceError.includes('Unknown race: Orc'), 'Expected non-DragonRealms race creation rejection.');
+
+  let canonicalCreationsChecked = 0;
+  for (const race of context.races) {
+    const character = await request<CharacterSummary>('/v1/characters', {
+      method: 'POST',
+      headers: authHeaders(context.accessToken),
+      body: JSON.stringify({
+        name: `Rc${canonicalCreationsChecked}${unique.slice(-6)}`.slice(0, 40),
+        race: race.name,
+      }),
+    });
+    assert(character.race === race.id || character.race.toLowerCase() === race.name.toLowerCase(), `Expected created race ${race.name}, got ${character.race}.`);
+    assert(character.circle === 1, `Expected created ${race.name} character to start Circle 1, got Circle ${character.circle}.`);
+    assert(character.guildId === 'commoner', `Expected created ${race.name} character to start commoner.`);
+    assert(character.guildName === 'Unaffiliated', `Expected created ${race.name} character to start unaffiliated.`);
+    assert(character.statGenerationMode === 'modern_fixed', `Expected created ${race.name} character to use modern_fixed stats.`);
+    assert(JSON.stringify(character.stats) === JSON.stringify(race.fixedStartingStats), `Expected created ${race.name} stats to match fixed starting stats.`);
+    canonicalCreationsChecked += 1;
+  }
+
   context.summary.raceEndpointChecked = true;
   context.summary.raceEndpointCanonicalCount = context.races.length;
   context.summary.raceEndpointFixedStatTablesChecked = context.races.length;
   context.summary.raceEndpointPrivateRollDataHidden = true;
   context.summary.raceEndpointOnlyCanonical = true;
+  context.summary.invalidRaceCreationRejected = true;
+  context.summary.raceCreationCanonicalCircleOneChecked = canonicalCreationsChecked;
 }
 
 async function runGuildEndpointSuite(context: SmokeContext): Promise<void> {

@@ -93,6 +93,8 @@ function markdownSummary(results, coverage) {
     lines.push(`| Race selected during creation/reroll | ${coverage.gameplay.drRaceSelectionChecked ? 'yes' : 'no'} |`);
     lines.push(`| Focused race endpoint smoke | ${coverage.gameplay.focusedRaceEndpointSmokeChecked ? 'yes' : 'no'} |`);
     lines.push(`| Race endpoint hides private roll data | ${coverage.gameplay.drRaceEndpointPrivateRollDataHidden ? 'yes' : 'no'} |`);
+    lines.push(`| Non-DR race creation rejected | ${coverage.gameplay.drInvalidRaceCreationRejected ? 'yes' : 'no'} |`);
+    lines.push(`| Canonical race creation Circle 1 | ${coverage.gameplay.drCanonicalRaceCreationCircleOneChecked ? 'yes' : 'no'} |`);
     lines.push(`| New characters start unaffiliated | ${coverage.gameplay.drCreationStartsUnaffiliatedChecked ? 'yes' : 'no'} |`);
     lines.push(`| Guild rejected during character creation | ${coverage.gameplay.drGuildCreationRejected ? 'yes' : 'no'} |`);
     lines.push(`| Guild joined in-world only | ${coverage.gameplay.drGuildJoinedInWorldOnlyChecked ? 'yes' : 'no'} |`);
@@ -125,6 +127,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Races rolled | ${coverage.gameplay.racesRolled} |`);
     lines.push(`| Focused race endpoint canonical count | ${coverage.gameplay.focusedRaceEndpointCanonicalCount} |`);
     lines.push(`| Focused race endpoint fixed stat tables | ${coverage.gameplay.focusedRaceEndpointFixedStatTablesChecked} |`);
+    lines.push(`| Canonical race creations checked | ${coverage.gameplay.raceCreationCanonicalCircleOneChecked} |`);
     lines.push(`| Circle 1 races checked | ${coverage.gameplay.circleOneRacesChecked} |`);
     lines.push(`| Race/guild Circle 1 combinations | ${coverage.gameplay.raceGuildMatrixChecked} |`);
     lines.push(`| DR races in matrix | ${coverage.gameplay.raceGuildMatrixRaceCount} |`);
@@ -224,6 +227,7 @@ function coverageSummary(results) {
       racesRolled: apiPayload.racesRolled ?? 0,
       focusedRaceEndpointCanonicalCount: racePayload.raceEndpointCanonicalCount ?? apiPayload.raceEndpointCanonicalCount ?? 0,
       focusedRaceEndpointFixedStatTablesChecked: racePayload.raceEndpointFixedStatTablesChecked ?? apiPayload.raceEndpointFixedStatTablesChecked ?? 0,
+      raceCreationCanonicalCircleOneChecked: racePayload.raceCreationCanonicalCircleOneChecked ?? apiPayload.raceCreationCanonicalCircleOneChecked ?? 0,
       circleOneRacesChecked: apiPayload.circleOneRacesChecked ?? 0,
       raceGuildMatrixChecked: apiPayload.raceGuildMatrixChecked ?? 0,
       raceGuildMatrixRaceCount: apiPayload.raceGuildMatrixRaceCount ?? 0,
@@ -272,6 +276,8 @@ function coverageSummary(results) {
         (racePayload.raceEndpointFixedStatTablesChecked ?? apiPayload.raceEndpointFixedStatTablesChecked) === 11 &&
         (racePayload.raceEndpointOnlyCanonical ?? apiPayload.raceEndpointOnlyCanonical) === true,
       drRaceEndpointPrivateRollDataHidden: (racePayload.raceEndpointPrivateRollDataHidden ?? apiPayload.raceEndpointPrivateRollDataHidden) === true,
+      drInvalidRaceCreationRejected: (racePayload.invalidRaceCreationRejected ?? apiPayload.invalidRaceCreationRejected) === true,
+      drCanonicalRaceCreationCircleOneChecked: (racePayload.raceCreationCanonicalCircleOneChecked ?? apiPayload.raceCreationCanonicalCircleOneChecked) === 11,
       drCreationStartsUnaffiliatedChecked: apiPayload.creationStartsUnaffiliated === true,
       drGuildCreationRejected: apiPayload.guildCreationRejected === true,
       drGuildJoinedInWorldOnlyChecked: apiPayload.raceGuildMatrixStartsCommoner === true && (apiPayload.guildRoomsWalked ?? 0) === 11,
@@ -406,6 +412,8 @@ function assertCoverageShape(coverage) {
     expect(coverage.gameplay.focusedTargetSmokeChecked === true, 'gameplay.focusedTargetSmokeChecked');
     expect(coverage.gameplay.focusedRaceEndpointSmokeChecked === true, 'gameplay.focusedRaceEndpointSmokeChecked');
     expect(coverage.gameplay.drRaceEndpointPrivateRollDataHidden === true, 'gameplay.drRaceEndpointPrivateRollDataHidden');
+    expect(coverage.gameplay.drInvalidRaceCreationRejected === true, 'gameplay.drInvalidRaceCreationRejected');
+    expect(coverage.gameplay.drCanonicalRaceCreationCircleOneChecked === true, 'gameplay.drCanonicalRaceCreationCircleOneChecked');
     expect(coverage.gameplay.focusedGuildEndpointSmokeChecked === true, 'gameplay.focusedGuildEndpointSmokeChecked');
     expect(coverage.gameplay.focusedDamagedAmmoSmokeChecked === true, 'gameplay.focusedDamagedAmmoSmokeChecked');
     expect(coverage.gameplay.agentPromptCurrentStatusChecked === true, 'gameplay.agentPromptCurrentStatusChecked');
