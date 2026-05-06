@@ -121,6 +121,7 @@ async function main(): Promise<void> {
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
           commandCount: 15,
+          targetDetailsClicked: true,
         },
         null,
         2,

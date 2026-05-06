@@ -115,6 +115,8 @@ function coverageSummary(results) {
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
       combatChecked: apiPayload.combatChecked === true,
       scanChecked: apiPayload.scanChecked === true,
+      structuredTargetsChecked: apiPayload.structuredTargetsChecked === true,
+      targetDetailsChecked: apiPayload.targetDetailsChecked === true,
       finalRoom: apiPayload.finalRoom ?? null,
       finalCombatActive: Boolean(apiPayload.finalCombat),
     },
@@ -124,6 +126,7 @@ function coverageSummary(results) {
       browser: browserPayload.browser ?? null,
       browserAccountCreated: Boolean(browserPayload.account),
       browserCommandCount: browserPayload.commandCount ?? 0,
+      browserTargetDetailsClicked: browserPayload.targetDetailsClicked === true,
     },
     unitSuites: unitPayloads.map((payload) => payload.suite),
   };

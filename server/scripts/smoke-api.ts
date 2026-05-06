@@ -422,6 +422,8 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   context.summary.finalRoom = rested.character.roomId;
   context.summary.combatChecked = true;
   context.summary.scanChecked = true;
+  context.summary.structuredTargetsChecked = true;
+  context.summary.targetDetailsChecked = true;
 }
 
 async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void> {

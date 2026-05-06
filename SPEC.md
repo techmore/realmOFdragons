@@ -406,6 +406,18 @@ Next priority:
 
 - Add target details telemetry to the local coverage summary so reports distinguish scan visibility, structured target payloads, and target-detail command/UI coverage.
 
+Implementation Notes - 2026-05-05, Target Details Telemetry
+
+Completed in the current Node/React prototype:
+
+- API smoke now reports `structuredTargetsChecked` and `targetDetailsChecked`.
+- Browser smoke now reports `targetDetailsClicked` when the web details affordance is exercised.
+- Coverage summary now exposes structured target, target details, and browser target-details booleans separately from generic scan/combat coverage.
+
+Next priority:
+
+- Add a small target-details section to the generated Markdown telemetry report so human review can see gameplay coverage booleans without opening JSON.
+
 Implementation Notes - 2026-05-05, Target Details Command
 
 Completed in the current Node/React prototype:
