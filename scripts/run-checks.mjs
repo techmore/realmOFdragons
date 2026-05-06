@@ -59,7 +59,9 @@ function markdownSummary(results, coverage) {
     lines.push(`| Structured targets | ${coverage.gameplay.structuredTargetsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Target details command | ${coverage.gameplay.targetDetailsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Focused target smoke | ${coverage.gameplay.focusedTargetSmokeChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Verb discovery command | ${coverage.gameplay.verbDiscoveryChecked ? 'yes' : 'no'} |`);
     lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
+    lines.push(`| Browser verb discovery action | ${coverage.frontend.browserVerbDiscoveryClicked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
     lines.push('');
     lines.push('## Gameplay Counts');
@@ -145,6 +147,7 @@ function coverageSummary(results) {
       structuredTargetsChecked: apiPayload.structuredTargetsChecked === true,
       targetDetailsChecked: apiPayload.targetDetailsChecked === true,
       focusedTargetSmokeChecked: targetPayload.targetDetailsChecked === true,
+      verbDiscoveryChecked: targetPayload.verbDiscoveryChecked === true,
       finalRoom: apiPayload.finalRoom ?? null,
       finalCombatActive: Boolean(apiPayload.finalCombat),
     },
@@ -155,6 +158,7 @@ function coverageSummary(results) {
       browserAccountCreated: Boolean(browserPayload.account),
       browserCommandCount: browserPayload.commandCount ?? 0,
       browserTargetDetailsClicked: browserPayload.targetDetailsClicked === true,
+      browserVerbDiscoveryClicked: browserPayload.verbDiscoveryClicked === true,
     },
     unitSuites: unitPayloads.map((payload) => payload.suite),
   };

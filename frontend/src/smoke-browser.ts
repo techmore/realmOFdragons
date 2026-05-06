@@ -126,6 +126,7 @@ async function main(): Promise<void> {
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
           commandCount: 16,
           targetDetailsClicked: true,
+          verbDiscoveryClicked: true,
         },
         null,
         2,

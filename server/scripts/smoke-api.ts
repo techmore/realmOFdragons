@@ -460,6 +460,7 @@ async function runTargetSuite(context: SmokeContext): Promise<void> {
   context.summary.scanChecked = true;
   context.summary.structuredTargetsChecked = true;
   context.summary.targetDetailsChecked = true;
+  context.summary.verbDiscoveryChecked = true;
 }
 
 async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void> {

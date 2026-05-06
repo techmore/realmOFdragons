@@ -507,6 +507,19 @@ Next priority:
 
 - Add telemetry fields for verb discovery coverage from focused target smoke and browser smoke, then surface them in coverage summary and Markdown telemetry.
 
+Implementation Notes - 2026-05-05, Verb Discovery Telemetry
+
+Completed in the current Node/React prototype:
+
+- Focused target smoke now reports `verbDiscoveryChecked`.
+- Browser smoke now reports `verbDiscoveryClicked`.
+- Coverage summary exposes verb discovery command and browser action coverage.
+- Markdown telemetry includes Verb discovery command and Browser verb discovery action rows.
+
+Next priority:
+
+- Add a small command-discovery section to the web UI near controls that explains `verb`, `help scan`, and `target <name>` without requiring a first command click.
+
 Implementation Notes - 2026-05-05, Target Details Command
 
 Completed in the current Node/React prototype:
