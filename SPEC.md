@@ -10,6 +10,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Public race descriptions now use DragonRealms-clean fixed-stat summaries instead of prototype archetype language.
+- Unit and API smoke coverage now reject prototype wording in public race descriptions.
 - Character creation API now rejects `guild`/`guildId` payloads; guilds must be joined in-world at a registrar.
 - Smoke coverage now asserts new characters start `commoner`/`Unaffiliated` and only gain guild identity after travel plus `join guild`.
 - Web character creation now explicitly says guilds are joined in-world after travelling to a registrar.
@@ -118,7 +120,7 @@ Completed current slice:
 
 Current next priority:
 
-- Replace internal prototype race descriptions with DragonRealms-clean summaries and add smoke coverage that public race descriptions do not expose prototype archetype wording.
+- Replace internal prototype race role labels with private classic-random labels that are clearly marked non-default/test-only.
 
 Core Philosophy
 

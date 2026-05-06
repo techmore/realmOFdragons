@@ -75,7 +75,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 16,
     maxStat: 40,
-    description: 'Balanced baseline with no major starting constraints.',
+    description: 'Humans are broadly adaptable people with even starting attributes and no racial extremes.',
   },
   {
     id: 'elf',
@@ -93,7 +93,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 17,
     maxStat: 41,
-    description: 'Fast and reactive, tends toward dexterous archetypes.',
+    description: 'Elves begin with strong agility, reflex, and charisma, balanced by lighter strength and stamina.',
   },
   {
     id: "dwarf",
@@ -111,7 +111,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 18,
     maxStat: 42,
-    description: 'Resilient and stubborn with stronger endurance.',
+    description: 'Dwarves begin with strong stamina and discipline, balanced by lower reflex and agility.',
   },
   {
     id: 'elothean',
@@ -129,7 +129,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 16,
     maxStat: 40,
-    description: 'Mind-forward profiles with broad arcane learning potential.',
+    description: 'Elotheans begin with strong intelligence and wisdom, balanced by lighter strength and stamina.',
   },
   {
     id: "gortog",
@@ -147,7 +147,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 20,
     maxStat: 46,
-    description: 'High impact power profile, with limited subtle control.',
+    description: "Gor'togs begin with exceptional strength and stamina, balanced by lower reflex and agility.",
   },
   {
     id: 'halfling',
@@ -165,7 +165,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 16,
     maxStat: 40,
-    description: 'Fast and tricky with high reflex and mobility.',
+    description: 'Halflings begin with strong agility, reflex, and stamina, balanced by lower strength and discipline.',
   },
   {
     id: "skra_mur",
@@ -184,7 +184,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 16,
     maxStat: 40,
-    description: 'Wisdom-weighted, patient, tactically balanced.',
+    description: "S'Kra Mur begin with strong strength and reflex, with even physical development and lower mental/social starts.",
   },
   {
     id: 'rakash',
@@ -202,7 +202,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 16,
     maxStat: 40,
-    description: 'Reactive and fast, with lighter defensive posture.',
+    description: 'Rakash begin with strong stamina, discipline, and reflex, balanced by lower agility and mental starts.',
   },
   {
     id: 'prydaen',
@@ -220,7 +220,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 16,
     maxStat: 40,
-    description: 'Perceptive lineages with magical learning preference.',
+    description: 'Prydaen begin with strong reflex and charisma, balanced by lower discipline and wisdom.',
   },
   {
     id: 'gnome',
@@ -238,7 +238,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 16,
     maxStat: 40,
-    description: 'Nimble and curious, with precision bonuses.',
+    description: 'Gnomes begin with strong reflex, agility, and intelligence, balanced by lower strength and stamina.',
   },
   {
     id: 'kaldar',
@@ -256,7 +256,7 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
     ],
     minStat: 18,
     maxStat: 44,
-    description: 'Powerful and forceful with strong stamina edges.',
+    description: 'Kaldar begin with strong strength and charisma, with balanced physical starts and lower wisdom/intelligence.',
   },
 ];
 

@@ -23,6 +23,7 @@ interface AuthTokens {
 interface RaceSummary {
   id: string;
   name: string;
+  description?: string;
   fixedStartingStats: Record<string, number>;
   roles?: unknown;
   statModifiers?: unknown;
@@ -249,10 +250,14 @@ async function createContext(): Promise<SmokeContext> {
 
   const races = await request<{ races: RaceSummary[] }>('/v1/races');
   assert(races.races.length >= 1, 'Expected at least one race.');
+  const forbiddenRaceDescriptionWords = ['archetype', 'baseline', 'profile', 'brawler', 'skirmisher', 'broker', 'tinker', 'berserker'];
   for (const race of races.races) {
     assert(Object.keys(race.fixedStartingStats ?? {}).length === 8, `Expected fixed starting stats for ${race.name}.`);
     assert(!race.roles, `Expected public race API to omit prototype role data for ${race.name}.`);
     assert(!race.statModifiers, `Expected public race API to omit prototype stat modifiers for ${race.name}.`);
+    for (const forbidden of forbiddenRaceDescriptionWords) {
+      assert(!race.description?.toLowerCase().includes(forbidden), `Expected ${race.name} public description to omit ${forbidden}.`);
+    }
   }
 
   await request<JsonObject>('/v1/auth/register', {
@@ -318,6 +323,7 @@ async function runIdentitySuite(context: SmokeContext): Promise<void> {
   context.summary.fixedRaceStatsChecked = context.races.length;
   context.summary.guildCreationRejected = true;
   context.summary.creationStartsUnaffiliated = true;
+  context.summary.cleanRaceDescriptionsChecked = context.races.length;
 }
 
 async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {

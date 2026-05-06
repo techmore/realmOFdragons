@@ -16,11 +16,15 @@ const expectedFixedStats: Record<string, StatBlock> = {
 };
 
 const races = getAllRaces();
+const forbiddenPublicDescriptionWords = ['archetype', 'baseline', 'profile', 'brawler', 'skirmisher', 'broker', 'tinker', 'berserker'];
 assert.equal(races.length, 11);
 assert.deepEqual(races.map((race) => race.name).sort(), Object.keys(expectedFixedStats).sort());
 
 for (const race of races) {
   const expected = expectedFixedStats[race.name];
+  for (const forbidden of forbiddenPublicDescriptionWords) {
+    assert.equal(race.description.toLowerCase().includes(forbidden), false, `${race.name} public description leaked ${forbidden}`);
+  }
   assert.deepEqual(race.fixedStartingStats, expected, `${race.name} API race fixed stats`);
   assert.deepEqual(fixedStartingStatsForRace(race.name), expected, `${race.name} fixedStartingStatsForRace`);
 
