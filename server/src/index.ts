@@ -12,7 +12,7 @@ import {
   guilds,
   worldRooms,
 } from './world.js';
-import { FileStorage, LoginSession, AccountRecord, CharacterRecord, ScriptRecord, type EquipmentSlot, type EquipmentSlots } from './storage.js';
+import { FileStorage, LoginSession, AccountRecord, CharacterRecord, ScriptRecord, type EquipmentSlots } from './storage.js';
 import {
   getAllRaces,
   isValidRace,
@@ -49,12 +49,11 @@ import {
 } from './economy.js';
 import {
   buildItemDetails,
-  canWearItem,
   displayNameFromCode,
-  findInventoryIndex,
-  findWornIndex,
-  resolveAvailableHandSlot,
-  resolveHandSlot,
+  holdInventoryItem,
+  removeWornInventoryItem,
+  stowHeldItem,
+  wearCarriedItem,
   resolveItemDetail,
   type ItemDetail,
 } from './items.js';
@@ -1146,99 +1145,6 @@ function buildItemDetailEvents(character: CharacterRecord, room: Room, requested
   ];
 }
 
-function holdItem(character: CharacterRecord, room: Room, requestedItem: string, requestedSlot: string, events: string[]) {
-  const inventoryIndex = findInventoryIndex(character, requestedItem);
-  if (inventoryIndex < 0) {
-    events.push(`You are not carrying "${requestedItem}" in your inventory.`);
-    return false;
-  }
-  const slot = resolveAvailableHandSlot(character, requestedSlot);
-  if (!slot) {
-    events.push('Both hands are full. Stow something first.');
-    return false;
-  }
-  if (character.hands[slot]) {
-    events.push(`Your ${slot} hand is already holding ${character.hands[slot]}.`);
-    return false;
-  }
-  const [itemCode] = character.inventory.splice(inventoryIndex, 1);
-  character.hands[slot] = itemCode;
-  const detail = resolveItemDetail(itemCode, room, character);
-  events.push(`You hold ${detail.name} in your ${slot} hand.`);
-  return true;
-}
-
-function stowItem(character: CharacterRecord, room: Room, requestedItem: string, events: string[]) {
-  const slot = resolveHandSlot(character, requestedItem);
-  if (!slot || !character.hands[slot]) {
-    events.push(`You are not holding "${requestedItem}".`);
-    return false;
-  }
-  const itemCode = character.hands[slot]!;
-  character.hands[slot] = null;
-  character.inventory.push(itemCode);
-  const detail = resolveItemDetail(itemCode, room, character);
-  events.push(`You stow ${detail.name} from your ${slot} hand.`);
-  return true;
-}
-
-function wearItem(character: CharacterRecord, room: Room, requestedItem: string, events: string[]) {
-  const inventoryIndex = findInventoryIndex(character, requestedItem);
-  const handSlot = resolveHandSlot(character, requestedItem);
-  const itemCode = inventoryIndex >= 0 ? character.inventory[inventoryIndex] : handSlot ? character.hands[handSlot] : undefined;
-  if (!itemCode) {
-    events.push(`You are not carrying "${requestedItem}".`);
-    return false;
-  }
-  const detail = resolveItemDetail(itemCode, room, character);
-  if (!canWearItem(detail)) {
-    events.push(`${detail.name} is not something you can wear yet.`);
-    return false;
-  }
-  const equipmentSlot = detail.slot;
-  if (!equipmentSlot) {
-    events.push(`${detail.name} is not something you can wear yet.`);
-    return false;
-  }
-  character.equipment = character.equipment ?? {};
-  if (character.equipment[equipmentSlot]) {
-    const current = resolveItemDetail(character.equipment[equipmentSlot]!, room, character);
-    events.push(`Your ${equipmentSlot} slot is already occupied by ${current.name}.`);
-    return false;
-  }
-  if (inventoryIndex >= 0) {
-    character.inventory.splice(inventoryIndex, 1);
-  } else if (handSlot) {
-    character.hands[handSlot] = null;
-  }
-  character.worn = character.worn ?? [];
-  if (!character.worn.includes(itemCode)) {
-    character.worn.push(itemCode);
-  }
-  character.equipment[equipmentSlot] = itemCode;
-  events.push(`You wear ${detail.name} on your ${equipmentSlot} slot.`);
-  return true;
-}
-
-function removeWornItem(character: CharacterRecord, room: Room, requestedItem: string, events: string[]) {
-  const wornIndex = findWornIndex(character, requestedItem);
-  if (wornIndex < 0) {
-    events.push(`You are not wearing "${requestedItem}".`);
-    return false;
-  }
-  const [itemCode] = character.worn!.splice(wornIndex, 1);
-  character.equipment = character.equipment ?? {};
-  for (const [slot, equippedCode] of Object.entries(character.equipment)) {
-    if (equippedCode === itemCode) {
-      delete character.equipment[slot as EquipmentSlot];
-    }
-  }
-  character.inventory.push(itemCode);
-  const detail = resolveItemDetail(itemCode, room, character);
-  events.push(`You remove ${detail.name} and place it in your inventory.`);
-  return true;
-}
-
 function buildVerbEvents(): string[] {
   return [
     'Verb groups:',
@@ -2158,7 +2064,9 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         return buildCommandResult(resolvedCharacter, room, events);
       }
     }
-    if (holdItem(resolvedCharacter, room, requestedItem, hasExplicitSlot ? requestedSlot : '', events)) {
+    const result = holdInventoryItem(resolvedCharacter, room, requestedItem, hasExplicitSlot ? requestedSlot : '');
+    events.push(...result.events);
+    if (result.success) {
       modified = true;
       setActionCooldown(resolvedCharacter, 300);
       await persist();
@@ -2167,7 +2075,9 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command.startsWith('stow ')) {
-    if (stowItem(resolvedCharacter, room, command.slice(5).trim(), events)) {
+    const result = stowHeldItem(resolvedCharacter, room, command.slice(5).trim());
+    events.push(...result.events);
+    if (result.success) {
       modified = true;
       setActionCooldown(resolvedCharacter, 300);
       await persist();
@@ -2176,7 +2086,9 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command.startsWith('wear ')) {
-    if (wearItem(resolvedCharacter, room, command.slice(5).trim(), events)) {
+    const result = wearCarriedItem(resolvedCharacter, room, command.slice(5).trim());
+    events.push(...result.events);
+    if (result.success) {
       modified = true;
       setActionCooldown(resolvedCharacter, 350);
       await persist();
@@ -2185,7 +2097,9 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command.startsWith('remove ')) {
-    if (removeWornItem(resolvedCharacter, room, command.slice(7).trim(), events)) {
+    const result = removeWornInventoryItem(resolvedCharacter, room, command.slice(7).trim());
+    events.push(...result.events);
+    if (result.success) {
       modified = true;
       setActionCooldown(resolvedCharacter, 350);
       await persist();

@@ -61,10 +61,12 @@ Completed current slice:
 - Expanded economy unit coverage for buy-by-name lookup, no damaged-item buy matching, affordability, ammo-bundle delivery, and inventory delivery.
 - Extracted pure inventory/equipment request helpers into `server/src/items.ts`.
 - Expanded item unit coverage for inventory lookup, worn lookup, hand-slot resolution, available hand selection, and wearable classification.
+- Extracted inventory/equipment mutation helpers for hold, stow, wear, and remove into `server/src/items.ts`.
+- Expanded item unit coverage for successful and failed hand/equipment state transitions.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting inventory/equipment command mutation results for hold, stow, wear, and remove.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting hold/wield command parsing and item request validation.
 
 Core Philosophy
 

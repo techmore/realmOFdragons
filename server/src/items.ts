@@ -138,6 +138,95 @@ export function canWearItem(detail: ItemDetail): boolean {
   return Boolean(detail.slot) && ['armor', 'container', 'utility'].includes(detail.category);
 }
 
+export type ItemMutationResult = {
+  success: boolean;
+  events: string[];
+};
+
+function itemMutation(success: boolean, events: string[]): ItemMutationResult {
+  return { success, events };
+}
+
+export function holdInventoryItem(character: CharacterRecord, room: Room, requestedItem: string, requestedSlot = ''): ItemMutationResult {
+  const inventoryIndex = findInventoryIndex(character, requestedItem);
+  if (inventoryIndex < 0) {
+    return itemMutation(false, [`You are not carrying "${requestedItem}" in your inventory.`]);
+  }
+  const slot = resolveAvailableHandSlot(character, requestedSlot);
+  if (!slot) {
+    return itemMutation(false, ['Both hands are full. Stow something first.']);
+  }
+  if (character.hands[slot]) {
+    return itemMutation(false, [`Your ${slot} hand is already holding ${character.hands[slot]}.`]);
+  }
+  const [itemCode] = character.inventory.splice(inventoryIndex, 1);
+  character.hands[slot] = itemCode;
+  const detail = resolveItemDetail(itemCode, room, character);
+  return itemMutation(true, [`You hold ${detail.name} in your ${slot} hand.`]);
+}
+
+export function stowHeldItem(character: CharacterRecord, room: Room, requestedItem: string): ItemMutationResult {
+  const slot = resolveHandSlot(character, requestedItem);
+  if (!slot || !character.hands[slot]) {
+    return itemMutation(false, [`You are not holding "${requestedItem}".`]);
+  }
+  const itemCode = character.hands[slot]!;
+  character.hands[slot] = null;
+  character.inventory.push(itemCode);
+  const detail = resolveItemDetail(itemCode, room, character);
+  return itemMutation(true, [`You stow ${detail.name} from your ${slot} hand.`]);
+}
+
+export function wearCarriedItem(character: CharacterRecord, room: Room, requestedItem: string): ItemMutationResult {
+  const inventoryIndex = findInventoryIndex(character, requestedItem);
+  const handSlot = resolveHandSlot(character, requestedItem);
+  const itemCode = inventoryIndex >= 0 ? character.inventory[inventoryIndex] : handSlot ? character.hands[handSlot] : undefined;
+  if (!itemCode) {
+    return itemMutation(false, [`You are not carrying "${requestedItem}".`]);
+  }
+  const detail = resolveItemDetail(itemCode, room, character);
+  if (!canWearItem(detail)) {
+    return itemMutation(false, [`${detail.name} is not something you can wear yet.`]);
+  }
+  const equipmentSlot = detail.slot;
+  if (!equipmentSlot) {
+    return itemMutation(false, [`${detail.name} is not something you can wear yet.`]);
+  }
+  character.equipment = character.equipment ?? {};
+  if (character.equipment[equipmentSlot]) {
+    const current = resolveItemDetail(character.equipment[equipmentSlot]!, room, character);
+    return itemMutation(false, [`Your ${equipmentSlot} slot is already occupied by ${current.name}.`]);
+  }
+  if (inventoryIndex >= 0) {
+    character.inventory.splice(inventoryIndex, 1);
+  } else if (handSlot) {
+    character.hands[handSlot] = null;
+  }
+  character.worn = character.worn ?? [];
+  if (!character.worn.includes(itemCode)) {
+    character.worn.push(itemCode);
+  }
+  character.equipment[equipmentSlot] = itemCode;
+  return itemMutation(true, [`You wear ${detail.name} on your ${equipmentSlot} slot.`]);
+}
+
+export function removeWornInventoryItem(character: CharacterRecord, room: Room, requestedItem: string): ItemMutationResult {
+  const wornIndex = findWornIndex(character, requestedItem);
+  if (wornIndex < 0) {
+    return itemMutation(false, [`You are not wearing "${requestedItem}".`]);
+  }
+  const [itemCode] = character.worn!.splice(wornIndex, 1);
+  character.equipment = character.equipment ?? {};
+  for (const [slot, equippedCode] of Object.entries(character.equipment)) {
+    if (equippedCode === itemCode) {
+      delete character.equipment[slot as EquipmentSlot];
+    }
+  }
+  character.inventory.push(itemCode);
+  const detail = resolveItemDetail(itemCode, room, character);
+  return itemMutation(true, [`You remove ${detail.name} and place it in your inventory.`]);
+}
+
 function findShopItem(code: string, rooms: Record<string, Room> = worldRooms): RoomShopItem | undefined {
   const lowered = code.toLowerCase();
   for (const room of Object.values(rooms)) {

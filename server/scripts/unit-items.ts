@@ -6,9 +6,13 @@ import {
   displayNameFromCode,
   findInventoryIndex,
   findWornIndex,
+  holdInventoryItem,
+  removeWornInventoryItem,
   resolveAvailableHandSlot,
   resolveHandSlot,
   resolveItemDetail,
+  stowHeldItem,
+  wearCarriedItem,
 } from '../src/items.js';
 import { worldRooms } from '../src/world.js';
 
@@ -121,5 +125,62 @@ const details = buildItemDetails(unit, marksmanRoom);
 assert.equal(details.some((entry) => entry.code === 'training sword'), true);
 assert.equal(details.some((entry) => entry.code === 'itm-sting-arrow'), true);
 assert.equal(details.some((entry) => entry.code === 'itm-practice-bow'), true);
+
+const holdUnit = character();
+const held = holdInventoryItem(holdUnit, marksmanRoom, 'training sword');
+assert.equal(held.success, true);
+assert.deepEqual(held.events, ['You hold training sword in your right hand.']);
+assert.equal(holdUnit.inventory.includes('training sword'), false);
+assert.equal(holdUnit.hands.right, 'training sword');
+
+const holdLeftUnit = character();
+const heldLeft = holdInventoryItem(holdLeftUnit, marksmanRoom, 'training sword', 'left');
+assert.equal(heldLeft.success, true);
+assert.equal(holdLeftUnit.hands.left, 'training sword');
+
+const fullHands = holdInventoryItem(character({ hands: { left: 'repair cloth', right: 'itm-practice-bow' } }), marksmanRoom, 'training sword');
+assert.equal(fullHands.success, false);
+assert.deepEqual(fullHands.events, ['Both hands are full. Stow something first.']);
+
+const stowUnit = character({ inventory: [], hands: { left: null, right: 'training sword' } });
+const stowed = stowHeldItem(stowUnit, marksmanRoom, 'training sword');
+assert.equal(stowed.success, true);
+assert.deepEqual(stowed.events, ['You stow training sword from your right hand.']);
+assert.equal(stowUnit.hands.right, null);
+assert.equal(stowUnit.inventory.includes('training sword'), true);
+
+const wearUnit = character({ inventory: ['leather backpack'], equipment: {}, worn: [] });
+const worn = wearCarriedItem(wearUnit, marksmanRoom, 'leather backpack');
+assert.equal(worn.success, true);
+assert.deepEqual(worn.events, ['You wear leather backpack on your back slot.']);
+assert.equal(wearUnit.inventory.includes('leather backpack'), false);
+assert.equal(wearUnit.worn?.includes('leather backpack'), true);
+assert.equal(wearUnit.equipment?.back, 'leather backpack');
+
+const handWearUnit = character({ inventory: [], hands: { left: 'repair cloth', right: null }, equipment: {}, worn: [] });
+const handWorn = wearCarriedItem(handWearUnit, marksmanRoom, 'repair cloth');
+assert.equal(handWorn.success, true);
+assert.equal(handWearUnit.hands.left, null);
+assert.equal(handWearUnit.equipment?.belt, 'repair cloth');
+
+const invalidWear = wearCarriedItem(character(), marksmanRoom, 'training sword');
+assert.equal(invalidWear.success, false);
+assert.deepEqual(invalidWear.events, ['training sword is not something you can wear yet.']);
+
+const occupiedWear = wearCarriedItem(character({ inventory: ['leather backpack'], equipment: { back: 'leather backpack' }, worn: ['leather backpack'] }), marksmanRoom, 'leather backpack');
+assert.equal(occupiedWear.success, false);
+assert.deepEqual(occupiedWear.events, ['Your back slot is already occupied by leather backpack.']);
+
+const removeUnit = character({ inventory: [], worn: ['leather backpack'], equipment: { back: 'leather backpack' } });
+const removed = removeWornInventoryItem(removeUnit, marksmanRoom, 'leather backpack');
+assert.equal(removed.success, true);
+assert.deepEqual(removed.events, ['You remove leather backpack and place it in your inventory.']);
+assert.equal(removeUnit.worn?.includes('leather backpack'), false);
+assert.equal(removeUnit.inventory.includes('leather backpack'), true);
+assert.equal(removeUnit.equipment?.back, undefined);
+
+const missingRemove = removeWornInventoryItem(character(), marksmanRoom, 'leather backpack');
+assert.equal(missingRemove.success, false);
+assert.deepEqual(missingRemove.events, ['You are not wearing "leather backpack".']);
 
 console.log(JSON.stringify({ ok: true, suite: 'unit:items' }, null, 2));
