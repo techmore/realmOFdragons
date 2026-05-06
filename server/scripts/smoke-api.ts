@@ -1,6 +1,6 @@
 type JsonObject = Record<string, unknown>;
 
-type SmokeSuite = 'all' | 'identity' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
+type SmokeSuite = 'all' | 'identity' | 'guilds' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
 
 const canonicalGuildIds = [
   'barbarian',
@@ -130,7 +130,7 @@ interface SmokeContext {
   summary: Record<string, unknown>;
 }
 
-const suites: SmokeSuite[] = ['all', 'identity', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'combat'];
+const suites: SmokeSuite[] = ['all', 'identity', 'guilds', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'combat'];
 const requestedSuite = (process.argv[2] ?? 'all') as SmokeSuite;
 const baseUrl = (process.env.DR_API_BASE_URL ?? 'http://localhost:4000').replace(/\/+$/, '');
 const password = 'smoke-password-01';
@@ -359,6 +359,26 @@ async function runIdentitySuite(context: SmokeContext): Promise<void> {
   });
   context.character = current;
   context.summary.storedRaceMetadataApiMigrationChecked = true;
+}
+
+async function runGuildEndpointSuite(context: SmokeContext): Promise<void> {
+  const guilds = await request<{ guilds: GuildSummary[] }>('/v1/world/guilds');
+  const ids = guilds.guilds.map((guild) => guild.id).sort();
+  const canonicalIds = [...canonicalGuildIds].sort();
+
+  assert(guilds.guilds.length === canonicalGuildIds.length, `Expected exactly ${canonicalGuildIds.length} canonical DragonRealms guilds, got ${guilds.guilds.length}.`);
+  assert(JSON.stringify(ids) === JSON.stringify(canonicalIds), `Expected only canonical DragonRealms guild ids, got ${ids.join(', ')}.`);
+
+  for (const guild of guilds.guilds) {
+    assert(canonicalGuildIds.includes(guild.id as typeof canonicalGuildIds[number]), `Expected ${guild.id} to be canonical.`);
+    assert(typeof guild.name === 'string' && guild.name.trim().length > 0, `Expected guild ${guild.id} to have a name.`);
+    assert(typeof guild.roomId === 'string' && guild.roomId.startsWith('crossing-'), `Expected guild ${guild.id} to expose a Crossing registrar room id.`);
+  }
+
+  context.summary.guildEndpointChecked = true;
+  context.summary.guildEndpointCanonicalCount = guilds.guilds.length;
+  context.summary.guildEndpointRegistrarRoomsChecked = guilds.guilds.length;
+  context.summary.guildEndpointOnlyCanonical = true;
 }
 
 async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
@@ -898,6 +918,7 @@ async function runDamagedAmmoSuite(context: SmokeContext): Promise<void> {
 
 async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void> {
   if (suite === 'identity') await runIdentitySuite(context);
+  if (suite === 'guilds') await runGuildEndpointSuite(context);
   if (suite === 'race-guild-matrix') await runRaceGuildMatrixSuite(context);
   if (suite === 'scripts') await runScriptSuite(context);
   if (suite === 'progression') await runProgressionSuite(context);
@@ -907,6 +928,7 @@ async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void>
   if (suite === 'combat') await runCombatSuite(context);
   if (suite === 'all') {
     await runIdentitySuite(context);
+    await runGuildEndpointSuite(context);
     await runRaceGuildMatrixSuite(context);
     await runScriptSuite(context);
     await runProgressionSuite(context);

@@ -10,6 +10,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added a focused `guilds` API smoke suite for `/v1/world/guilds`.
+- Added `npm --prefix server run smoke:guilds` for direct canonical guild endpoint validation.
+- Local agent telemetry now runs focused guild smoke and reports endpoint canonical count coverage.
+- Focused guild smoke asserts exactly the canonical DragonRealms guild IDs are exposed and every guild has a Crossing registrar room id.
 - Agent telemetry now has explicit canonical DragonRealms guild identity rows for exactly 11 covered guilds, zero prototype guilds exposed, and successful registrar joins.
 - Coverage summary JSON now promotes canonical guild and prototype-guild counts so reports show guild identity drift directly.
 - Agent check coverage shape now fails if canonical guild count, no-prototype-guild exposure, or registrar-join coverage disappears.
@@ -139,7 +143,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add focused smoke coverage for `/v1/world/guilds` to assert the exposed guild endpoint contains only canonical DragonRealms guild IDs and all have registrar rooms.
+- Add focused smoke coverage for `/v1/races` to assert the exposed race endpoint contains exactly the canonical DragonRealms races and fixed stat tables only.
 
 Core Philosophy
 

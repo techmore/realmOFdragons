@@ -22,6 +22,7 @@ const ciSteps = [
 const localSteps = [
   ...baseSteps,
   { name: 'browser-smoke', command: 'node', args: ['scripts/with-test-app.mjs', 'npm', 'run', 'smoke:browser'] },
+  { name: 'guild-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:guilds'] },
   { name: 'target-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:targets'] },
   { name: 'damaged-ammo-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:damaged-ammo'] },
   { name: 'script-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:scripts'] },
@@ -96,6 +97,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Exactly 11 canonical DR guilds covered | ${coverage.gameplay.drCanonicalGuildCountChecked ? 'yes' : 'no'} |`);
     lines.push(`| No prototype guilds exposed | ${coverage.gameplay.drNoPrototypeGuildsExposed ? 'yes' : 'no'} |`);
     lines.push(`| Canonical registrar joins covered | ${coverage.gameplay.drCanonicalRegistrarJoinsChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Focused guild endpoint smoke | ${coverage.gameplay.focusedGuildEndpointSmokeChecked ? 'yes' : 'no'} |`);
     lines.push(`| Script create/run/delete lifecycle | ${coverage.gameplay.scriptLifecycleChecked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
     lines.push(`| Ammo stack resale | ${coverage.gameplay.ammoSellChecked ? 'yes' : 'no'} |`);
@@ -124,6 +126,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| DR guilds in matrix | ${coverage.gameplay.raceGuildMatrixGuildCount} |`);
     lines.push(`| Canonical guilds checked | ${coverage.gameplay.canonicalGuildsCheckedCount} |`);
     lines.push(`| Prototype guilds exposed | ${coverage.gameplay.extraPrototypeGuildsCount} |`);
+    lines.push(`| Focused guild endpoint canonical count | ${coverage.gameplay.focusedGuildEndpointCanonicalCount} |`);
     lines.push(`| Guild rooms walked | ${coverage.gameplay.guildRoomsWalked} |`);
     lines.push(`| Shop rooms walked | ${coverage.gameplay.shopRoomsWalked} |`);
     lines.push(`| Circle reached | ${coverage.gameplay.circleReached} |`);
@@ -189,6 +192,7 @@ function parseLastJsonObject(text) {
 function coverageSummary(results) {
   const byName = new Map(results.map((result) => [result.name, result]));
   const apiPayload = parseLastJsonObject(byName.get('api-smoke')?.stdoutTail ?? '') ?? {};
+  const guildPayload = parseLastJsonObject(byName.get('guild-smoke')?.stdoutTail ?? '') ?? {};
   const targetPayload = parseLastJsonObject(byName.get('target-smoke')?.stdoutTail ?? '') ?? {};
   const damagedAmmoPayload = parseLastJsonObject(byName.get('damaged-ammo-smoke')?.stdoutTail ?? '') ?? {};
   const scriptPayload = parseLastJsonObject(byName.get('script-smoke')?.stdoutTail ?? '') ?? {};
@@ -218,6 +222,7 @@ function coverageSummary(results) {
       raceGuildMatrixGuildCount: apiPayload.raceGuildMatrixGuildCount ?? 0,
       canonicalGuildsCheckedCount: Array.isArray(apiPayload.canonicalGuildsChecked) ? apiPayload.canonicalGuildsChecked.length : 0,
       extraPrototypeGuildsCount: Array.isArray(apiPayload.extraPrototypeGuilds) ? apiPayload.extraPrototypeGuilds.length : 0,
+      focusedGuildEndpointCanonicalCount: guildPayload.guildEndpointCanonicalCount ?? apiPayload.guildEndpointCanonicalCount ?? 0,
       guildRoomsWalked: apiPayload.guildRoomsWalked ?? 0,
       shopRoomsWalked: apiPayload.shopRoomsWalked ?? 0,
       circleReached: apiPayload.circleReached ?? 0,
@@ -270,6 +275,11 @@ function coverageSummary(results) {
         Array.isArray(apiPayload.canonicalGuildsChecked) &&
         apiPayload.canonicalGuildsChecked.length === 11 &&
         apiPayload.guildRoomsWalked === 11,
+      focusedGuildEndpointSmokeChecked:
+        (guildPayload.guildEndpointChecked ?? apiPayload.guildEndpointChecked) === true &&
+        (guildPayload.guildEndpointCanonicalCount ?? apiPayload.guildEndpointCanonicalCount) === 11 &&
+        (guildPayload.guildEndpointRegistrarRoomsChecked ?? apiPayload.guildEndpointRegistrarRoomsChecked) === 11 &&
+        (guildPayload.guildEndpointOnlyCanonical ?? apiPayload.guildEndpointOnlyCanonical) === true,
       finalRoom: apiPayload.finalRoom ?? null,
       finalCombatActive: Boolean(apiPayload.finalCombat),
     },
@@ -380,6 +390,7 @@ function assertCoverageShape(coverage) {
 
   if (mode === 'local') {
     expect(coverage.gameplay.focusedTargetSmokeChecked === true, 'gameplay.focusedTargetSmokeChecked');
+    expect(coverage.gameplay.focusedGuildEndpointSmokeChecked === true, 'gameplay.focusedGuildEndpointSmokeChecked');
     expect(coverage.gameplay.focusedDamagedAmmoSmokeChecked === true, 'gameplay.focusedDamagedAmmoSmokeChecked');
     expect(coverage.gameplay.agentPromptCurrentStatusChecked === true, 'gameplay.agentPromptCurrentStatusChecked');
   }
