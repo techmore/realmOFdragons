@@ -496,6 +496,7 @@ function GameStatusPanels({
         },
       ]
     : [];
+  const sellingUnavailable = Boolean(character) && (!room || room.shop === undefined);
 
   return (
     <>
@@ -656,6 +657,9 @@ function GameStatusPanels({
           ))}
         </ul>
         <h3>Inventory</h3>
+        {sellingUnavailable ? (
+          <p className="subtle">Selling requires a local shop. Travel to a shop room before selling carried items.</p>
+        ) : null}
         <h3>Ammo</h3>
         <p>{Object.entries(character?.ammoPouch ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none'}</p>
         <p>Loaded: {Object.entries(character?.loadedAmmo ?? {}).map(([weapon, ammo]) => `${weapon}: ${ammo}`).join(', ') || 'none'}</p>
@@ -670,7 +674,8 @@ function GameStatusPanels({
               <button
                 type="button"
                 onClick={() => onCommand(`shop sell ${item}`)}
-                disabled={!!room && room.shop === undefined}
+                disabled={loading || !character || !room?.shop}
+                title={room?.shop ? `Sell ${item} to ${room.shop.name}` : 'Selling requires a local shop.'}
               >
                 sell
               </button>

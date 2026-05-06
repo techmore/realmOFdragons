@@ -92,6 +92,12 @@ async function main(): Promise<void> {
     await damagedAmmoDetail.getByText('damaged practice arrow', { exact: true }).waitFor();
     await damagedAmmoDetail.getByText('damaged-itm-sting-arrow | salvage | 1 trias').waitFor();
     await damagedAmmoDetail.getByText('broken ranged ammunition').waitFor();
+    await page.getByText('Selling requires a local shop. Travel to a shop room before selling carried items.').waitFor();
+    await page
+      .locator('.equip li')
+      .filter({ hasText: 'damaged practice arrow' })
+      .getByRole('button', { name: 'sell' })
+      .waitFor({ state: 'visible' });
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('east');
     await page.keyboard.press('Enter');
@@ -147,9 +153,9 @@ async function main(): Promise<void> {
     await page.locator('.equip').getByRole('paragraph').filter({ hasText: /^leather backpack$/ }).waitFor();
     await page.locator('.equip').getByText('back: leather backpack').waitFor();
 
-    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 350');
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 1200');
     await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You wait for 350ms/).last().waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You wait for 1200ms/).last().waitFor();
 
     await page.getByRole('button', { name: 'range', exact: true }).click();
     await page.getByText('You are not engaged with a target.').waitFor();
@@ -160,7 +166,7 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').focus();
     await page.keyboard.press('Numpad6');
-    await page.locator('.terminal-pane .log').getByText(/You go east/).last().waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You go east to Marksman Way/).last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -168,7 +174,7 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').focus();
     await page.keyboard.press('Numpad4');
-    await page.locator('.terminal-pane .log').getByText(/You go west/).last().waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You go west to Crossing Town Green/).last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -176,7 +182,7 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('south');
     await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You go south/).last().waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You go south to South Gate Road/).last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -184,11 +190,11 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('south');
     await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You go south/).last().waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You go south to South Gate Trailhead/).last().waitFor();
 
-    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 1200');
     await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You wait for 1200ms/).last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('east');
     await page.keyboard.press('Enter');
@@ -245,6 +251,7 @@ async function main(): Promise<void> {
           itemDetailsVisible: true,
           damagedAmmoItemDetailsVisible: true,
           damagedAmmoSoldFromInventory: true,
+          disabledSellHintVisible: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,

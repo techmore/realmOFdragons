@@ -38,10 +38,12 @@ Completed current slice:
 - Frontend telemetry now tracks browser damaged-ammo item detail visibility.
 - Browser smoke now sells damaged ammunition through the inventory panel from the ammo shop.
 - Frontend telemetry now tracks browser damaged-ammo inventory-sale coverage.
+- Inventory now explains that selling requires a local shop when carried-item sell controls are disabled outside shops.
+- Static and browser smoke now verify the disabled sell hint before damaged ammunition is sold at the ammo shop.
 
 Current next priority:
 
-- Add a dedicated damaged-ammo inventory affordance in the UI, such as clearer disabled sell hints outside shops.
+- Add richer shop-aware inventory affordances, such as direct item sale eligibility hints for locally stocked goods and damaged salvage.
 
 Core Philosophy
 

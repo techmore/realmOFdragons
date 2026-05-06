@@ -131,6 +131,17 @@ const markup = renderToStaticMarkup(
   />,
 );
 
+const noShopMarkup = renderToStaticMarkup(
+  <GameStatusPanels
+    character={character}
+    room={{ ...room, shop: undefined }}
+    selectedCharacter={character}
+    skillEntries={Object.entries(character.skills)}
+    localTargets={[]}
+    itemDetails={[]}
+  />,
+);
+
 for (const expected of [
   'Room',
   'Room Affordances',
@@ -204,6 +215,13 @@ for (const expected of [
   'Advantage: 1',
 ]) {
   assertIncludes(markup, expected);
+}
+
+for (const expected of [
+  'Selling requires a local shop. Travel to a shop room before selling carried items.',
+  'title="Selling requires a local shop."',
+]) {
+  assertIncludes(noShopMarkup, expected);
 }
 
 console.log(JSON.stringify({ ok: true, suite: 'frontend:smoke-ui' }, null, 2));
