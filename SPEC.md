@@ -73,10 +73,12 @@ Completed current slice:
 - Expanded item unit coverage for held weapon detection, loaded ammo lifecycle, ammo pouch consumption priority, inventory fallback consumption, and ammo status strings.
 - Extracted recoverable ammunition addition, deterministic ranged recovery outcome/event formatting, and recoverable ammunition collection into `server/src/items.ts`.
 - Expanded item unit coverage for intact, damaged, and lost ranged recovery outcomes plus recover-arrows pouch/inventory mutation.
+- Extracted reload command decisions, loaded-ammo mutation, ammo consumption, and reload event formatting into `server/src/items.ts`.
+- Expanded item unit coverage for successful reloads, already-loaded failures, missing-ranged-weapon failures, and empty-quiver failures.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting reload command decisions and event formatting.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting ammo status command event formatting and ranged fire readiness decisions.
 
 Core Philosophy
 

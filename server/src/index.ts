@@ -68,9 +68,9 @@ import {
   holdInventoryItem,
   parseHeldItemRequest,
   recoverAmmunition,
+  reloadRangedWeapon,
   removeWornInventoryItem,
   resolveRangedAmmoRecovery,
-  setLoadedAmmo,
   stowHeldItem,
   wearCarriedItem,
   resolveItemDetail,
@@ -1529,30 +1529,12 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'reload') {
-    const weapon = findHeldWeapon(resolvedCharacter, room);
-    if (weapon?.weaponRange !== 'ranged') {
-      events.push('You need a ranged weapon in hand to reload.');
-      await persist();
-      return buildCommandResult(resolvedCharacter, room, events);
+    const result = reloadRangedWeapon(resolvedCharacter, room);
+    events.push(...result.events);
+    if (result.success) {
+      setActionCooldown(resolvedCharacter, 350);
+      modified = true;
     }
-    const ammoCode = weapon.ammoCode ?? 'itm-sting-arrow';
-    const ammoName = weapon.ammoName ?? 'practice arrow';
-    const loaded = getLoadedAmmo(resolvedCharacter, weapon);
-    if (loaded) {
-      events.push(`${weapon.name} is already loaded with ${loaded}.`);
-      await persist();
-      return buildCommandResult(resolvedCharacter, room, events);
-    }
-    if (countAmmo(resolvedCharacter, ammoCode) <= 0) {
-      events.push(`Your quiver is empty: you need ${ammoName} (${ammoCode}) to use ${weapon.name}.`);
-      await persist();
-      return buildCommandResult(resolvedCharacter, room, events);
-    }
-    consumeAmmo(resolvedCharacter, ammoCode);
-    setLoadedAmmo(resolvedCharacter, weapon, ammoCode);
-    setActionCooldown(resolvedCharacter, 350);
-    modified = true;
-    events.push(`You load ${ammoName} into ${weapon.name}. ${countAmmo(resolvedCharacter, ammoCode)} remain in your quiver.`);
     await persist();
     return buildCommandResult(resolvedCharacter, room, events);
   }

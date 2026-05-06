@@ -352,6 +352,25 @@ export function recoverAmmunition(character: CharacterRecord): ItemMutationResul
   return itemMutation(true, events);
 }
 
+export function reloadRangedWeapon(character: CharacterRecord, room: Room): ItemMutationResult {
+  const weapon = findHeldWeapon(character, room);
+  if (weapon?.weaponRange !== 'ranged') {
+    return itemMutation(false, ['You need a ranged weapon in hand to reload.']);
+  }
+  const ammoCode = weapon.ammoCode ?? 'itm-sting-arrow';
+  const ammoName = weapon.ammoName ?? 'practice arrow';
+  const loaded = getLoadedAmmo(character, weapon);
+  if (loaded) {
+    return itemMutation(false, [`${weapon.name} is already loaded with ${loaded}.`]);
+  }
+  if (countAmmo(character, ammoCode) <= 0) {
+    return itemMutation(false, [`Your quiver is empty: you need ${ammoName} (${ammoCode}) to use ${weapon.name}.`]);
+  }
+  consumeAmmo(character, ammoCode);
+  setLoadedAmmo(character, weapon, ammoCode);
+  return itemMutation(true, [`You load ${ammoName} into ${weapon.name}. ${countAmmo(character, ammoCode)} remain in your quiver.`]);
+}
+
 export function buildEquipmentSummary(character: CharacterRecord, room?: Room, rooms: Record<string, Room> = worldRooms): EquipmentSummary {
   const slots = character.equipment ?? {};
   const summary: EquipmentSummary = {

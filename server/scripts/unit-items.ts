@@ -26,12 +26,12 @@ import {
   holdInventoryItem,
   parseHeldItemRequest,
   recoverAmmunition,
+  reloadRangedWeapon,
   removeWornInventoryItem,
   resolveAvailableHandSlot,
   resolveHandSlot,
   resolveItemDetail,
   resolveRangedAmmoRecovery,
-  setLoadedAmmo,
   stowHeldItem,
   wearCarriedItem,
 } from '../src/items.js';
@@ -179,14 +179,25 @@ assert.equal(ammoUnit.ammoPouch['itm-sting-arrow'], 5);
 const loadedUnit = character({ hands: { left: null, right: 'itm-practice-bow' }, loadedAmmo: {}, recoverableAmmo: { 'itm-sting-arrow': 2 } });
 const heldWeapon = findHeldWeapon(loadedUnit, marksmanRoom);
 assert.equal(heldWeapon?.code, 'itm-practice-bow');
-setLoadedAmmo(loadedUnit, heldWeapon!, 'itm-sting-arrow');
+const loadedReload = reloadRangedWeapon(loadedUnit, marksmanRoom);
+assert.equal(loadedReload.success, true);
+assert.deepEqual(loadedReload.events, ['You load practice arrow into practice bow. 3 remain in your quiver.']);
 assert.equal(getLoadedAmmo(loadedUnit, heldWeapon!), 'itm-sting-arrow');
 assert.equal(formatLoadedAmmo(loadedUnit), 'itm-practice-bow: itm-sting-arrow');
 assert.equal(formatRecoverableAmmo(loadedUnit), 'itm-sting-arrow x2');
+const alreadyLoaded = reloadRangedWeapon(loadedUnit, marksmanRoom);
+assert.equal(alreadyLoaded.success, false);
+assert.deepEqual(alreadyLoaded.events, ['practice bow is already loaded with itm-sting-arrow.']);
 clearLoadedAmmo(loadedUnit, heldWeapon!);
 assert.equal(getLoadedAmmo(loadedUnit, heldWeapon!), undefined);
 assert.equal(formatLoadedAmmo(loadedUnit), 'none');
 assert.equal(findHeldWeapon(character({ hands: { left: 'repair cloth', right: null } }), marksmanRoom), undefined);
+const noWeaponReload = reloadRangedWeapon(character({ hands: { left: null, right: 'training sword' } }), marksmanRoom);
+assert.equal(noWeaponReload.success, false);
+assert.deepEqual(noWeaponReload.events, ['You need a ranged weapon in hand to reload.']);
+const emptyReload = reloadRangedWeapon(character({ hands: { left: null, right: 'itm-practice-bow' }, ammoPouch: {}, inventory: [] }), marksmanRoom);
+assert.equal(emptyReload.success, false);
+assert.deepEqual(emptyReload.events, ['Your quiver is empty: you need practice arrow (itm-sting-arrow) to use practice bow.']);
 
 const recoverableUnit = character({ ammoPouch: {}, inventory: [], recoverableAmmo: {} });
 addRecoverableAmmo(recoverableUnit, 'itm-sting-arrow', 2);
