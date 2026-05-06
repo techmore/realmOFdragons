@@ -121,7 +121,7 @@ async function main(): Promise<void> {
     await page
       .locator('.ammo-pouch-list li')
       .filter({ hasText: 'itm-sting-arrow x5' })
-      .getByText('Marksman Supply Stand buys practice arrow from your ammo pouch.')
+      .getByText('Marksman Supply Stand buys practice arrow from your ammo pouch for about 1 trias each.')
       .waitFor();
     await page
       .locator('.ammo-pouch-list li')
@@ -138,7 +138,7 @@ async function main(): Promise<void> {
     await page
       .locator('.ammo-pouch-list li')
       .filter({ hasText: 'itm-sting-arrow x4' })
-      .getByText('Marksman Supply Stand buys practice arrow from your ammo pouch.')
+      .getByText('Marksman Supply Stand buys practice arrow from your ammo pouch for about 1 trias each.')
       .waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
@@ -148,7 +148,7 @@ async function main(): Promise<void> {
     await page
       .locator('.equip li')
       .filter({ hasText: 'damaged practice arrow' })
-      .getByText('Marksman Supply Stand buys matching salvage for trias.')
+      .getByText('Marksman Supply Stand buys matching salvage for about 1 trias.')
       .waitFor();
     await page.locator('.equip li').filter({ hasText: 'damaged practice arrow' }).getByRole('button', { name: 'sell' }).click();
     await page.locator('.terminal-pane .log').getByText('You sell damaged practice arrow').waitFor();
@@ -300,6 +300,7 @@ async function main(): Promise<void> {
           ammoPouchRemainingVisible: true,
           ammoPouchDisabledHintVisible: true,
           ammoPouchMetadataVisible: true,
+          sharedEconomyHintVisible: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,

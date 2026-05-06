@@ -48,10 +48,12 @@ Completed current slice:
 - Static and browser smoke now verify ammo pouch sale controls explain and disable sales outside shop rooms.
 - Ammo pouch rows now display ammunition catalog names, bundle sizes, and estimated single-shot resale value when item details are available.
 - Static and browser smoke now verify ammo pouch metadata presentation.
+- Frontend shop/economy presentation now uses shared helper logic for carried items and ammo-pouch stacks.
+- Inventory and ammo pouch sell hints now show consistent estimated resale text from one pricing model.
 
 Current next priority:
 
-- Add reusable frontend helpers for shop/economy presentation so carried-item and ammo-pouch sell hints share one pricing model.
+- Add unit-style frontend smoke coverage for shop/economy helper edge cases such as unknown ammo, damaged salvage, stocked carried goods, and no-shop rooms.
 
 Core Philosophy
 

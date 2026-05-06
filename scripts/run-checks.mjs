@@ -80,6 +80,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Browser ammo pouch remaining count | ${coverage.frontend.browserAmmoPouchRemainingVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser ammo pouch disabled hint | ${coverage.frontend.browserAmmoPouchDisabledHintVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser ammo pouch metadata | ${coverage.frontend.browserAmmoPouchMetadataVisible ? 'yes' : 'no'} |`);
+    lines.push(`| Browser shared economy hints | ${coverage.frontend.browserSharedEconomyHintVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser verb discovery action | ${coverage.frontend.browserVerbDiscoveryClicked ? 'yes' : 'no'} |`);
     lines.push(`| Agent prompt current status | ${coverage.gameplay.agentPromptCurrentStatusChecked ? 'yes' : 'no'} |`);
@@ -259,6 +260,7 @@ function coverageSummary(results) {
       browserAmmoPouchRemainingVisible: browserPayload.ammoPouchRemainingVisible === true,
       browserAmmoPouchDisabledHintVisible: browserPayload.ammoPouchDisabledHintVisible === true,
       browserAmmoPouchMetadataVisible: browserPayload.ammoPouchMetadataVisible === true,
+      browserSharedEconomyHintVisible: browserPayload.sharedEconomyHintVisible === true,
       browserTargetDetailsClicked: browserPayload.targetDetailsClicked === true,
       browserVerbDiscoveryClicked: browserPayload.verbDiscoveryClicked === true,
       browserCommandDiscoveryVisible: browserPayload.commandDiscoveryVisible === true,
@@ -292,6 +294,7 @@ function assertCoverageShape(coverage) {
   expect(coverage.frontend.browserAmmoPouchRemainingVisible === true, 'frontend.browserAmmoPouchRemainingVisible');
   expect(coverage.frontend.browserAmmoPouchDisabledHintVisible === true, 'frontend.browserAmmoPouchDisabledHintVisible');
   expect(coverage.frontend.browserAmmoPouchMetadataVisible === true, 'frontend.browserAmmoPouchMetadataVisible');
+  expect(coverage.frontend.browserSharedEconomyHintVisible === true, 'frontend.browserSharedEconomyHintVisible');
   expect(coverage.scripts.focusedSmoke === true, 'scripts.focusedSmoke');
   expect(coverage.scripts.lifecycle === true, 'scripts.lifecycle');
   expect(coverage.scripts.created === true, 'scripts.created');

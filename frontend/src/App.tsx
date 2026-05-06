@@ -455,9 +455,77 @@ function findPathBetweenRooms(worldRooms: Record<string, Room>, start: string, d
   return [];
 }
 
+const SHOP_SELL_RATE = 0.75;
+const DAMAGED_AMMO_SELL_RATE = 0.25;
+const DEFAULT_AMMO_BUNDLE_SIZE = 5;
+
+type ShopSalePresentation = {
+  displayName: string;
+  bundleSize?: number;
+  resaleEstimate?: number;
+  sellHint: string;
+  sellMatch?: RoomShopItem;
+};
+
 function localShopSellMatch(itemCode: string, room: Room | null): RoomShopItem | undefined {
   const catalogCode = itemCode.startsWith('damaged-') ? itemCode.replace(/^damaged-/, '') : itemCode;
   return room?.shop?.items.find((entry) => entry.code === catalogCode);
+}
+
+function estimateShopResale(code: string, match: RoomShopItem | undefined, bundleSize?: number, mode: 'carried' | 'ammoPouch' = 'carried'): number | undefined {
+  if (!match) return undefined;
+  if (mode === 'ammoPouch') {
+    return Math.max(1, Math.floor((match.price / (bundleSize ?? DEFAULT_AMMO_BUNDLE_SIZE)) * SHOP_SELL_RATE));
+  }
+  if (code.startsWith('damaged-')) {
+    return Math.max(1, Math.floor((match.price / (bundleSize ?? DEFAULT_AMMO_BUNDLE_SIZE)) * DAMAGED_AMMO_SELL_RATE));
+  }
+  return Math.max(1, Math.floor(match.price * SHOP_SELL_RATE));
+}
+
+function shopSalePresentation(code: string, room: Room | null, detail?: ItemDetail, mode: 'carried' | 'ammoPouch' = 'carried'): ShopSalePresentation {
+  const sellMatch = localShopSellMatch(code, room);
+  const bundleSize = detail?.bundleSize ?? (mode === 'ammoPouch' || code.startsWith('damaged-') ? DEFAULT_AMMO_BUNDLE_SIZE : undefined);
+  const resaleEstimate = estimateShopResale(code, sellMatch, bundleSize, mode);
+  const displayName = detail?.name ?? sellMatch?.name ?? code;
+  const priceText = resaleEstimate && sellMatch ? `${resaleEstimate} ${sellMatch.currency}` : undefined;
+  if (sellMatch && mode === 'ammoPouch') {
+    return {
+      displayName,
+      bundleSize,
+      resaleEstimate,
+      sellMatch,
+      sellHint: `${room?.shop?.name} buys ${sellMatch.name} from your ammo pouch${priceText ? ` for about ${priceText} each` : ''}.`,
+    };
+  }
+  if (sellMatch && code.startsWith('damaged-')) {
+    return {
+      displayName,
+      bundleSize,
+      resaleEstimate,
+      sellMatch,
+      sellHint: `${room?.shop?.name} buys matching salvage${priceText ? ` for about ${priceText}` : ''}.`,
+    };
+  }
+  if (sellMatch) {
+    return {
+      displayName,
+      bundleSize,
+      resaleEstimate,
+      sellMatch,
+      sellHint: `${room?.shop?.name} stocks this item and can buy it${priceText ? ` for about ${priceText}` : ''}.`,
+    };
+  }
+  return {
+    displayName,
+    bundleSize,
+    resaleEstimate,
+    sellHint: room?.shop
+      ? `${room.shop.name} does not stock ${mode === 'ammoPouch' ? code : 'this item'}.`
+      : mode === 'ammoPouch'
+        ? 'Selling ammo requires a local shop.'
+        : 'Selling requires a local shop.',
+  };
 }
 
 function GameStatusPanels({
@@ -670,31 +738,20 @@ function GameStatusPanels({
           <ul className="ammo-pouch-list">
             {Object.entries(character?.ammoPouch ?? {}).map(([code, count]) => {
               const detail = itemDetails.find((entry) => entry.code === code);
-              const sellMatch = localShopSellMatch(code, room);
-              const displayName = detail?.name ?? sellMatch?.name ?? code;
-              const bundleSize = detail?.bundleSize ?? (sellMatch ? 5 : undefined);
-              const resaleEstimate =
-                sellMatch && bundleSize
-                  ? Math.max(1, Math.floor((sellMatch.price / bundleSize) * 0.75))
-                  : undefined;
-              const sellHint = sellMatch
-                ? `${room?.shop?.name} buys ${sellMatch.name} from your ammo pouch.`
-                : room?.shop
-                  ? `${room.shop.name} does not stock ${code}.`
-                  : 'Selling ammo requires a local shop.';
+              const sale = shopSalePresentation(code, room, detail, 'ammoPouch');
               return (
                 <li key={code}>
-                  <strong>{displayName}</strong>
+                  <strong>{sale.displayName}</strong>
                   <span>{code} x{count}</span>
                   <small>
-                    bundle {bundleSize ?? 'unknown'} | resale estimate {resaleEstimate ? `${resaleEstimate} ${sellMatch?.currency} each` : 'unavailable'}
+                    bundle {sale.bundleSize ?? 'unknown'} | resale estimate {sale.resaleEstimate && sale.sellMatch ? `${sale.resaleEstimate} ${sale.sellMatch.currency} each` : 'unavailable'}
                   </small>
-                  <small>{sellHint}</small>
+                  <small>{sale.sellHint}</small>
                   <button
                     type="button"
                     onClick={() => onCommand(`shop sell ${code}`)}
-                    disabled={loading || !character || !sellMatch}
-                    title={sellHint}
+                    disabled={loading || !character || !sale.sellMatch}
+                    title={sale.sellHint}
                   >
                     sell one
                   </button>
@@ -710,18 +767,11 @@ function GameStatusPanels({
         <ul>
           {(character?.inventory ?? []).map((item, index) => {
             const detail = itemDetails.find((entry) => entry.code === item);
-            const sellMatch = localShopSellMatch(item, room);
-            const sellHint = sellMatch
-              ? item.startsWith('damaged-')
-                ? `${room?.shop?.name} buys matching salvage for ${sellMatch.currency}.`
-                : `${room?.shop?.name} stocks this item and can buy it.`
-              : room?.shop
-                ? `${room.shop.name} does not stock this item.`
-                : 'Selling requires a local shop.';
+            const sale = shopSalePresentation(item, room, detail, 'carried');
             return (
               <li key={`${item}-${index}`}>
-                <span>{detail?.name ?? item}</span>
-                <small>{sellHint}</small>
+                <span>{sale.displayName}</span>
+                <small>{sale.sellHint}</small>
                 <button type="button" onClick={() => onCommand(`appraise ${item}`)} disabled={loading || !character}>
                   appraise
                 </button>
@@ -729,7 +779,7 @@ function GameStatusPanels({
                   type="button"
                   onClick={() => onCommand(`shop sell ${item}`)}
                   disabled={loading || !character || !room?.shop}
-                  title={sellHint}
+                  title={sale.sellHint}
                 >
                   sell
                 </button>
