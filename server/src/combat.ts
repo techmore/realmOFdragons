@@ -174,6 +174,17 @@ export function buildCombatRangeEvents(combat: CombatStatusCharacter['combat']):
   return [`You are at ${formatRange(normalizeRange(combat.range))} from ${combat.targetName}.`];
 }
 
+export function buildCombatCircleRangeFailureEvents(): string[] {
+  return ['You are too far away to circle your target.'];
+}
+
+export function buildCombatCircleSuccessEvents(advantage: unknown, balance: unknown): string[] {
+  return [
+    `You circle for a better angle. Position: ${formatAdvantage(normalizeAdvantage(advantage))}.`,
+    `Balance: ${formatBalance(balance)}.`,
+  ];
+}
+
 export function buildRoomTargetsFromTemplates(targets: CombatTargetTemplate[]): RoomTarget[] {
   return targets.map((target) => ({
     id: target.id,

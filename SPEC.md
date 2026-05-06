@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted combat `circle` command formatting into pure combat helpers with unit coverage for missile-range rejection and normalized position/balance success output.
+- The Express combat `circle` branch now delegates circle-specific event text to combat-owned formatting while retaining route-local mutation, skill gain, cooldown, and enemy pressure.
 - Extracted combat `range` command formatting into pure combat helpers with unit coverage for unengaged characters, engaged melee targets, and malformed stored range fallback.
 - The Express `range` command now delegates distance text to combat-owned formatting.
 - Extracted combat status command formatting into pure combat helpers with unit coverage for idle equipment/stance summaries, normalized fallback values, and engaged target status output.
@@ -203,7 +205,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract combat circle command formatting into combat helpers with unit coverage.
+- Extract combat jab/bash maneuver formatting into combat helpers with unit coverage.
 
 Core Philosophy
 

@@ -56,6 +56,8 @@ import {
   normalizeRange,
   normalizeStance,
   buildPostAttackStatusEvents,
+  buildCombatCircleRangeFailureEvents,
+  buildCombatCircleSuccessEvents,
   buildCombatRangeEvents,
   buildCombatStatusEvents,
   buildRoomTargetsFromTemplates,
@@ -1187,7 +1189,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   if (command === 'circle') {
     if (resolvedCharacter.combat) {
       if (normalizeRange(resolvedCharacter.combat.range) === 'missile') {
-        events.push('You are too far away to circle your target.');
+        events.push(...buildCombatCircleRangeFailureEvents());
         return buildCommandResult(resolvedCharacter, room, events);
       }
       shiftAdvantage(resolvedCharacter, 1);
@@ -1195,8 +1197,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       events.push(...applySkillPoolGain(resolvedCharacter, 'tactics', 2).events);
       setActionCooldown(resolvedCharacter, 500);
       modified = true;
-      events.push(`You circle for a better angle. Position: ${formatAdvantage(resolvedCharacter.combat.advantage)}.`);
-      events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
+      events.push(...buildCombatCircleSuccessEvents(resolvedCharacter.combat.advantage, resolvedCharacter.balance));
       const template = findCombatTemplate(resolvedCharacter);
       if (template) {
         applyEnemyPressure(resolvedCharacter, template, Date.now(), events);

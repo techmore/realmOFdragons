@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {
   STANCE_PROFILES,
   applyBalanceChange,
+  buildCombatCircleRangeFailureEvents,
+  buildCombatCircleSuccessEvents,
   buildCombatRangeEvents,
   buildCombatStatusEvents,
   buildPostAttackStatusEvents,
@@ -163,6 +165,15 @@ assert.deepEqual(buildCombatRangeEvents({
   range: 'bad-range',
   advantage: 0,
 }), ['You are at missile range from test rat.']);
+assert.deepEqual(buildCombatCircleRangeFailureEvents(), ['You are too far away to circle your target.']);
+assert.deepEqual(buildCombatCircleSuccessEvents(1, 3), [
+  'You circle for a better angle. Position: you have the edge.',
+  'Balance: very balanced.',
+]);
+assert.deepEqual(buildCombatCircleSuccessEvents(99, 99), [
+  'You circle for a better angle. Position: you have overwhelming advantage.',
+  'Balance: incredibly balanced.',
+]);
 
 const targetTemplates = [
   { id: 'test-rat', name: 'test rat', maxHp: 8, aggression: 30 },
@@ -210,4 +221,4 @@ assert.equal(buildTargetDetailEvents(targetTemplates[0], 'test rat', {
   range: 'melee',
 })[4], 'Suggested next verb: attack test rat.');
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true, combatStatusChecked: true, combatRangeChecked: true }, null, 2));
+console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true, combatStatusChecked: true, combatRangeChecked: true, combatCircleChecked: true }, null, 2));
