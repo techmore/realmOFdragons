@@ -68,10 +68,10 @@ export const worldRooms: Record<RoomId, Room> = {
       { direction: "north", destination: "crossing-IN02-001", details: "Toward the inns and guesthouses." },
       { direction: "east", destination: "crossing-MA01-001", details: "Toward the training lanes and practice targets." },
       { direction: "south", destination: "crossing-RV01-001", details: "Toward the gate road and outskirts." },
-      { direction: "northeast", destination: "crossing-GU01-001", details: "Toward the Fighter Guild hall." },
-      { direction: "northwest", destination: "crossing-GU02-001", details: "Toward the Mage Guild hall." },
-      { direction: "southeast", destination: "crossing-GU03-001", details: "Toward the Scout Guild hall." },
-      { direction: "southwest", destination: "crossing-GU04-001", details: "Toward the Rogue Guild hall." },
+      { direction: "northeast", destination: "crossing-GU01-001", details: "Toward the martial practice hall." },
+      { direction: "northwest", destination: "crossing-GU02-001", details: "Toward the arcane study hall." },
+      { direction: "southeast", destination: "crossing-GU03-001", details: "Toward the trail scout lodge." },
+      { direction: "southwest", destination: "crossing-GU04-001", details: "Toward the shadowed utility hall." },
       { direction: "up", destination: "crossing-GU05-001", details: "Toward the Cleric Guild hall." },
     ],
   },
@@ -256,15 +256,14 @@ export const worldRooms: Record<RoomId, Room> = {
   "crossing-GU01-001": {
     id: "crossing-GU01-001",
     code: { town: "crossing", square: "GU01", zone: "crossing-town" },
-    title: "Crossing Fighter Guild Hall",
+    title: "Crossing Martial Practice Hall",
     description:
       "A long stone hall with sparring markers and heavy training dummies. Newcomers report here first for practical combat basics.",
     prompts: ["The guild steward points to a rack of practice weapons."],
     exits: [{ direction: "southwest", destination: "crossing-TG01-001", details: "Return to the town green." }],
-    guild: "fighter",
     shop: {
-      code: "crossing-fighter-armory",
-      name: "Fighter Armory",
+      code: "crossing-martial-armory",
+      name: "Martial Practice Armory",
       items: [
         { code: "itm-training-mace", name: "training mace", price: 8, currency: "plat" },
         { code: "itm-chain-gloves", name: "chain gloves", price: 7, currency: "plat" },
@@ -274,7 +273,7 @@ export const worldRooms: Record<RoomId, Room> = {
   "crossing-GU02-001": {
     id: "crossing-GU02-001",
     code: { town: "crossing", square: "GU02", zone: "crossing-town" },
-    title: "Crossing Mage Circle Hall",
+    title: "Crossing Arcane Study Hall",
     description:
       "A quiet hall of sigils and chalk circles where apprentices discuss theory and control.",
     prompts: ["Runes in the dust glow faintly and fade again."],
@@ -283,10 +282,9 @@ export const worldRooms: Record<RoomId, Room> = {
       { direction: "north", destination: "crossing-GU12-001", details: "Toward the Moon Mage Guild observatory." },
       { direction: "down", destination: "crossing-GU13-001", details: "Toward a sealed lower study." },
     ],
-    guild: "mage",
     shop: {
-      code: "crossing-mage-circle",
-      name: "Mage Circle Supply",
+      code: "crossing-arcane-study",
+      name: "Arcane Study Supply",
       items: [
         { code: "itm-focusing-slate", name: "focusing slate", price: 16, currency: "plat" },
         { code: "itm-lingering-ink", name: "lingering ink", price: 4, currency: "trias" },
@@ -296,7 +294,7 @@ export const worldRooms: Record<RoomId, Room> = {
   "crossing-GU03-001": {
     id: "crossing-GU03-001",
     code: { town: "crossing", square: "GU03", zone: "crossing-town" },
-    title: "Crossing Scout Lodge",
+    title: "Crossing Trail Scout Lodge",
     description:
       "A quiet building with maps, routes, and low walls for tactical exercises.",
     prompts: ["A cartographer traces routes between hunting waypoints."],
@@ -304,10 +302,9 @@ export const worldRooms: Record<RoomId, Room> = {
       { direction: "northwest", destination: "crossing-TG01-001", details: "Return to the town green." },
       { direction: "east", destination: "crossing-GU14-001", details: "Toward the Ranger Guild field room." },
     ],
-    guild: "scout",
     shop: {
       code: "crossing-scout-supply",
-      name: "Scout Route Stand",
+      name: "Trail Scout Route Stand",
       items: [
         { code: "itm-compass", name: "travel compass", price: 10, currency: "plat" },
         { code: "itm-climbing-clasps", name: "climbing clasps", price: 5, currency: "trias" },
@@ -317,7 +314,7 @@ export const worldRooms: Record<RoomId, Room> = {
   "crossing-GU04-001": {
     id: "crossing-GU04-001",
     code: { town: "crossing", square: "GU04", zone: "crossing-town" },
-    title: "Crossing Rogue Guild Hall",
+    title: "Crossing Shadowed Utility Hall",
     description:
       "Narrow lanes, padded walls, and soft-voiced instructors keep practice runs discreet and efficient.",
     prompts: ["A pair of hands move through lockwork and pressure catches silently."],
@@ -325,10 +322,9 @@ export const worldRooms: Record<RoomId, Room> = {
       { direction: "northeast", destination: "crossing-TG01-001", details: "Return to the town green." },
       { direction: "west", destination: "crossing-GU15-001", details: "Toward the Thief Guild practice room." },
     ],
-    guild: "rogue",
     shop: {
       code: "crossing-rogue-gear",
-      name: "Rogue Utility Hall",
+      name: "Shadowed Utility Hall",
       items: [
         { code: "itm-lockpick-set", name: "lockpick set", price: 18, currency: "plat" },
         { code: "itm-dark-hood", name: "dark hood", price: 7, currency: "trias" },
@@ -461,7 +457,7 @@ export const worldRooms: Record<RoomId, Room> = {
     title: "Crossing Moon Mage Observatory",
     description: "Star charts, calculation boards, and quiet telescope bays fill a domed study.",
     prompts: ["A student revises a prediction table in chalk."],
-    exits: [{ direction: "south", destination: "crossing-GU02-001", details: "Return to the Mage Circle Hall." }],
+    exits: [{ direction: "south", destination: "crossing-GU02-001", details: "Return to the Arcane Study Hall." }],
     guild: "moon_mage",
     shop: {
       code: "crossing-moon-mage-observatory",
@@ -478,7 +474,7 @@ export const worldRooms: Record<RoomId, Room> = {
     title: "Crossing Lower Study",
     description: "A sealed lower room contains heavily supervised theory drills and restricted shelves.",
     prompts: ["The lower study is quiet enough to hear page edges scrape."],
-    exits: [{ direction: "up", destination: "crossing-GU02-001", details: "Return to the Mage Circle Hall." }],
+    exits: [{ direction: "up", destination: "crossing-GU02-001", details: "Return to the Arcane Study Hall." }],
     guild: "necromancer",
     shop: {
       code: "crossing-lower-study",
@@ -495,7 +491,7 @@ export const worldRooms: Record<RoomId, Room> = {
     title: "Crossing Ranger Field Room",
     description: "Trail signs, weathered maps, and controlled fieldcraft exercises occupy a lean annex.",
     prompts: ["A pathfinder sorts tracks by depth and direction."],
-    exits: [{ direction: "west", destination: "crossing-GU03-001", details: "Return to the Scout Lodge." }],
+    exits: [{ direction: "west", destination: "crossing-GU03-001", details: "Return to the Trail Scout Lodge." }],
     guild: "ranger",
     shop: {
       code: "crossing-ranger-field-room",
@@ -512,7 +508,7 @@ export const worldRooms: Record<RoomId, Room> = {
     title: "Crossing Thief Practice Room",
     description: "Practice locks, blind corners, and quiet obstacle stations shape a compact training room.",
     prompts: ["A trainer marks the sound of every careless step."],
-    exits: [{ direction: "east", destination: "crossing-GU04-001", details: "Return to the Rogue Guild Hall." }],
+    exits: [{ direction: "east", destination: "crossing-GU04-001", details: "Return to the Shadowed Utility Hall." }],
     guild: "thief",
     shop: {
       code: "crossing-thief-practice",
@@ -528,14 +524,10 @@ export const worldRooms: Record<RoomId, Room> = {
 export const guilds: Guild[] = [
   { id: "barbarian", name: "Barbarian Guild", roomId: "crossing-GU10-001" },
   { id: "bard", name: "Bard Guild", roomId: "crossing-GU06-001" },
-  { id: "fighter", name: "Fighter Guild", roomId: "crossing-GU01-001" },
-  { id: "mage", name: "Mage Guild", roomId: "crossing-GU02-001" },
   { id: "moon_mage", name: "Moon Mage Guild", roomId: "crossing-GU12-001" },
   { id: "necromancer", name: "Necromancer Guild", roomId: "crossing-GU13-001" },
   { id: "paladin", name: "Paladin Guild", roomId: "crossing-GU09-001" },
   { id: "ranger", name: "Ranger Guild", roomId: "crossing-GU14-001" },
-  { id: "scout", name: "Scout Guild", roomId: "crossing-GU03-001" },
-  { id: "rogue", name: "Rogue Guild", roomId: "crossing-GU04-001" },
   { id: "thief", name: "Thief Guild", roomId: "crossing-GU15-001" },
   { id: "trader", name: "Trader Guild", roomId: "crossing-GU07-001" },
   { id: "warrior_mage", name: "Warrior Mage Guild", roomId: "crossing-GU11-001" },

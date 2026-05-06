@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Normalized prototype-only Fighter, Mage, Scout, and Rogue halls into non-guild tutorial/support halls while preserving routes and shops.
+- `/v1/world/guilds` now exposes only the canonical DragonRealms-style 11 guild identities.
+- The web quick guild route buttons now list only canonical guilds; tutorial/support halls remain reachable through movement and tour routing.
 - Added smoke telemetry that verifies all implemented race rerolls remain Circle 1 during character creation coverage.
 - Progression smoke now distinguishes canonical DragonRealms-style guild coverage from extra prototype guild halls.
 - Canonical guild smoke coverage now requires Barbarian, Bard, Cleric, Empath, Moon Mage, Necromancer, Paladin, Ranger, Thief, Trader, and Warrior Mage to be present and joinable at Circle 1 before training.
@@ -93,7 +96,7 @@ Completed current slice:
 
 Current next priority:
 
-- Normalize prototype-only guild halls (`fighter`, `mage`, `scout`, `rogue`) into either non-guild tutorial halls or canonical guild aliases, then update the Crossing routes and UI labels.
+- Add a focused race/guild matrix smoke suite that creates or rerolls every race and verifies Circle 1 canonical guild joining coverage without relying on a single character's final guild state.
 
 Core Philosophy
 
