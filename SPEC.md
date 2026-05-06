@@ -10,13 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Added a web command discovery note near controls for `verb`, `help scan`, and `target <name>`.
-- Added telemetry fields for static/browser command discovery guidance.
-- Added in-game and web `verb` discovery coverage, target-detail coverage, and focused target smoke telemetry.
+- Added an authoritative `Current Status` block to `SPEC.md`.
+- Updated agent prompt generation to prefer the `Current Status` priority over historical `Next priority` entries.
+- Added local prompt smoke coverage for current-status priority generation.
 
 Current next priority:
 
-- Add a short `npm run agent:prompt` smoke assertion to the local check path so prompt generation regressions are caught before autonomous follow-up work starts.
+- Add command-line documentation for the new `smoke:agent-prompt` script and the `agent-prompt-smoke` telemetry row.
 
 Core Philosophy
 
@@ -419,6 +419,20 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add a short `npm run agent:prompt` smoke assertion to the local check path so prompt generation regressions are caught before autonomous follow-up work starts.
+
+Implementation Notes - 2026-05-06, Agent Prompt Smoke
+
+Completed in the current Node/React prototype:
+
+- Added `scripts/smoke-agent-prompt.mjs`.
+- Added `npm run smoke:agent-prompt`.
+- `npm run agent:check` now runs `agent-prompt-smoke` before git status.
+- Prompt smoke asserts that generated autonomous prompts use the `Current Status` priority and include the stale-priority warning.
+- Coverage telemetry now reports `agentPromptCurrentStatusChecked`.
+
+Next priority:
+
+- Add command-line documentation for the new `smoke:agent-prompt` script and the `agent-prompt-smoke` telemetry row.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

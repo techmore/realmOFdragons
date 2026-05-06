@@ -23,6 +23,7 @@ const localSteps = [
   { name: 'browser-smoke', command: 'node', args: ['scripts/with-test-app.mjs', 'npm', 'run', 'smoke:browser'] },
   { name: 'target-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:targets'] },
   { name: 'api-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', 'run', 'smoke:api'] },
+  { name: 'agent-prompt-smoke', command: 'npm', args: ['run', 'smoke:agent-prompt'] },
   { name: 'git-status', command: 'node', args: ['scripts/agent-check.mjs'] },
 ];
 
@@ -64,6 +65,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Browser command discovery note | ${coverage.frontend.browserCommandDiscoveryVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser verb discovery action | ${coverage.frontend.browserVerbDiscoveryClicked ? 'yes' : 'no'} |`);
+    lines.push(`| Agent prompt current status | ${coverage.gameplay.agentPromptCurrentStatusChecked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
     lines.push('');
     lines.push('## Gameplay Counts');
@@ -122,6 +124,7 @@ function coverageSummary(results) {
   const apiPayload = parseLastJsonObject(byName.get('api-smoke')?.stdoutTail ?? '') ?? {};
   const targetPayload = parseLastJsonObject(byName.get('target-smoke')?.stdoutTail ?? '') ?? {};
   const browserPayload = parseLastJsonObject(byName.get('browser-smoke')?.stdoutTail ?? '') ?? {};
+  const agentPromptPayload = parseLastJsonObject(byName.get('agent-prompt-smoke')?.stdoutTail ?? '') ?? {};
   const unitPayloads = (byName.get('unit-tests')?.stdoutTail.match(/\{[\s\S]*?\n\}/g) ?? [])
     .map((candidate) => {
       try {
@@ -150,6 +153,7 @@ function coverageSummary(results) {
       targetDetailsChecked: apiPayload.targetDetailsChecked === true,
       focusedTargetSmokeChecked: targetPayload.targetDetailsChecked === true,
       verbDiscoveryChecked: targetPayload.verbDiscoveryChecked === true,
+      agentPromptCurrentStatusChecked: agentPromptPayload.currentStatusPriorityChecked === true,
       finalRoom: apiPayload.finalRoom ?? null,
       finalCombatActive: Boolean(apiPayload.finalCombat),
     },
