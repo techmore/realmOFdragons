@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted room survey formatting into pure world helpers with unit coverage for sparse rooms and rooms with forage, shops, registrar text, and targets.
+- The Express `survey`/`search` commands now pass registrar display text and target names into the world-owned survey formatter.
 - Extracted pathfinding into pure world helpers with unit coverage for same-room routes, reachable exits, reverse traversal, unreachable rooms, and unknown destinations.
 - The `/v1/world/path` route now uses world-owned pathfinding instead of an Express-local BFS helper.
 - Extracted movement command direction normalization and movement decision/output into pure world helpers with unit coverage for aliases, `go` prefixes, successful movement, broken exits, and unknown commands.
@@ -191,7 +193,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract room survey formatting into pure world helpers with unit coverage.
+- Extract room look formatting into pure world helpers with unit coverage.
 
 Core Philosophy
 

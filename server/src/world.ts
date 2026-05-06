@@ -57,6 +57,11 @@ export type MovementDecision =
   | { moved: true; direction: string; nextRoom: Room; events: string[] }
   | { moved: false; reason: 'broken_exit' | 'unknown_command'; direction: string; events: string[] };
 
+export interface RoomSurveyContext {
+  guildRegistrarEvent?: string;
+  targetNames?: string[];
+}
+
 export const worldRooms: Record<RoomId, Room> = {
   "crossing-TG01-001": {
     id: "crossing-TG01-001",
@@ -636,4 +641,32 @@ export function findPathToRoom(
   }
 
   return [];
+}
+
+export function buildRoomSurveyEvents(room: Room, context: RoomSurveyContext = {}): string[] {
+  const events = [`Surveying ${room.title}:`];
+  events.push(`Exits: ${room.exits.map((exit) => exit.direction).join(', ') || 'none'}.`);
+
+  if (room.forage?.items.length) {
+    events.push(`Forage: difficulty ${room.forage.difficulty}; possible finds ${room.forage.items.map((item) => item.name).join(', ')}.`);
+  } else {
+    events.push('Forage: nothing obvious.');
+  }
+
+  if (room.shop) {
+    events.push(`Shop: ${room.shop.name} (${room.shop.items.length} catalog item(s)).`);
+  } else {
+    events.push('Shop: none visible.');
+  }
+
+  events.push(context.guildRegistrarEvent ?? 'Guild registrar: none visible.');
+
+  const targetNames = context.targetNames ?? [];
+  if (targetNames.length) {
+    events.push(`Targets: ${targetNames.join(', ')}.`);
+  } else {
+    events.push('Targets: none immediate.');
+  }
+
+  return events;
 }

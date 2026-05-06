@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { findPathToRoom, normalizeDirection, resolveMovementDecision, type Room } from '../src/world.js';
+import { buildRoomSurveyEvents, findPathToRoom, normalizeDirection, resolveMovementDecision, type Room } from '../src/world.js';
 
 const start: Room = {
   id: 'test-start',
@@ -20,6 +20,24 @@ const north: Room = {
   description: 'A northern room.',
   prompts: [],
   exits: [{ direction: 'south', destination: 'test-start', details: 'Back.' }],
+};
+
+const fullRoom: Room = {
+  id: 'test-full',
+  code: { town: 'test', square: 'FU01', zone: 'test-zone' },
+  title: 'Full Room',
+  description: 'A fully featured room.',
+  prompts: [],
+  exits: [{ direction: 'west', destination: 'test-start', details: 'Back.' }],
+  forage: {
+    difficulty: 2,
+    items: [{ code: 'forage-test', name: 'test herb' }],
+  },
+  shop: {
+    code: 'test-shop',
+    name: 'Test Shop',
+    items: [{ code: 'test-item', name: 'test item', price: 1, currency: 'trias' }],
+  },
 };
 
 const east: Room = {
@@ -66,4 +84,25 @@ assert.deepEqual(findPathToRoom('test-north', 'test-start', rooms), ['south']);
 assert.deepEqual(findPathToRoom('test-start', 'test-east', rooms), []);
 assert.deepEqual(findPathToRoom('test-start', 'test-missing', rooms), []);
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:world', movementDecisionChecked: true, pathfindingChecked: true }, null, 2));
+assert.deepEqual(buildRoomSurveyEvents(start), [
+  'Surveying Test Start:',
+  'Exits: north, east.',
+  'Forage: nothing obvious.',
+  'Shop: none visible.',
+  'Guild registrar: none visible.',
+  'Targets: none immediate.',
+]);
+
+assert.deepEqual(buildRoomSurveyEvents(fullRoom, {
+  guildRegistrarEvent: 'Guild registrar: Test Guild.',
+  targetNames: ['test rat', 'test goblin'],
+}), [
+  'Surveying Full Room:',
+  'Exits: west.',
+  'Forage: difficulty 2; possible finds test herb.',
+  'Shop: Test Shop (1 catalog item(s)).',
+  'Guild registrar: Test Guild.',
+  'Targets: test rat, test goblin.',
+]);
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:world', movementDecisionChecked: true, pathfindingChecked: true, roomSurveyChecked: true }, null, 2));

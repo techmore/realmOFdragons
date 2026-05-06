@@ -7,6 +7,7 @@ import { createServer } from 'node:http';
 import {
   Room,
   RoomId,
+  buildRoomSurveyEvents,
   findPathToRoom,
   guilds,
   resolveMovementDecision,
@@ -952,34 +953,6 @@ function buildVerbEvents(): string[] {
   ];
 }
 
-function buildSurveyEvents(room: Room): string[] {
-  const events = [`Surveying ${room.title}:`];
-  events.push(`Exits: ${room.exits.map((exit) => exit.direction).join(', ') || 'none'}.`);
-
-  if (room.forage?.items.length) {
-    events.push(`Forage: difficulty ${room.forage.difficulty}; possible finds ${room.forage.items.map((item) => item.name).join(', ')}.`);
-  } else {
-    events.push('Forage: nothing obvious.');
-  }
-
-  if (room.shop) {
-    events.push(`Shop: ${room.shop.name} (${room.shop.items.length} catalog item(s)).`);
-  } else {
-    events.push('Shop: none visible.');
-  }
-
-  events.push(buildGuildRegistrarDisplay(room).event);
-
-  const enemies = getRoomEnemies(room.id);
-  if (enemies.length) {
-    events.push(`Targets: ${enemies.map((enemy) => enemy.name).join(', ')}.`);
-  } else {
-    events.push('Targets: none immediate.');
-  }
-
-  return events;
-}
-
 function buildCharacterCombat(character: CharacterRecord, requestedTarget?: string): CharacterCombatSnapshot | null {
   const enemies = getRoomEnemies(character.roomId);
   if (!enemies.length) return null;
@@ -1241,7 +1214,10 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'survey' || command === 'search') {
-    events.push(...buildSurveyEvents(room));
+    events.push(...buildRoomSurveyEvents(room, {
+      guildRegistrarEvent: buildGuildRegistrarDisplay(room).event,
+      targetNames: getRoomEnemies(room.id).map((enemy) => enemy.name),
+    }));
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
