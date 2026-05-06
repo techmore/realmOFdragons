@@ -41,6 +41,8 @@ export type EquipmentSummary = {
   totalAttackModifier: number;
 };
 
+export type AmmoRecoveryOutcome = 'lost' | 'damaged' | 'intact';
+
 export const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | 'shopAvailable'>> = {
   'leather backpack': {
     code: 'leather backpack',
@@ -94,6 +96,16 @@ export function addAmmo(character: CharacterRecord, code: string, count: number)
   character.ammoPouch[code] = Math.max(0, Math.floor(character.ammoPouch[code] ?? 0)) + Math.max(0, Math.floor(count));
 }
 
+export function addRecoverableAmmo(character: CharacterRecord, code: string, count: number): void {
+  character.recoverableAmmo = character.recoverableAmmo ?? {};
+  character.recoverableAmmo[code] =
+    Math.max(0, Math.floor(character.recoverableAmmo[code] ?? 0)) + Math.max(0, Math.floor(count));
+}
+
+export function damagedAmmoCode(code: string): string {
+  return `damaged-${code}`;
+}
+
 export function consumeAmmo(character: CharacterRecord, code: string): boolean {
   if ((character.ammoPouch?.[code] ?? 0) > 0) {
     character.ammoPouch![code] -= 1;
@@ -132,6 +144,24 @@ export function formatLoadedAmmo(character: CharacterRecord): string {
 
 export function formatRecoverableAmmo(character: CharacterRecord): string {
   return Object.entries(character.recoverableAmmo ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none';
+}
+
+export function resolveRangedAmmoRecovery(
+  character: CharacterRecord,
+  ammoCode: string,
+  ammoName: string,
+  recoveryRoll: number,
+): { outcome: AmmoRecoveryOutcome; events: string[] } {
+  const normalizedRoll = Math.max(0, Math.floor(recoveryRoll)) % 100;
+  if (normalizedRoll < 20) {
+    return { outcome: 'lost', events: [`${ammoName} splinters beyond recovery.`] };
+  }
+  if (normalizedRoll < 55) {
+    addRecoverableAmmo(character, damagedAmmoCode(ammoCode), 1);
+    return { outcome: 'damaged', events: [`${ammoName} is damaged and may be recovered only as broken ammunition after the fight.`] };
+  }
+  addRecoverableAmmo(character, ammoCode, 1);
+  return { outcome: 'intact', events: [`${ammoName} may be recovered after the fight.`] };
 }
 
 function inferItemCategory(code: string, name: string): string {
@@ -298,6 +328,28 @@ export function removeWornInventoryItem(character: CharacterRecord, room: Room, 
   character.inventory.push(itemCode);
   const detail = resolveItemDetail(itemCode, room, character);
   return itemMutation(true, [`You remove ${detail.name} and place it in your inventory.`]);
+}
+
+export function recoverAmmunition(character: CharacterRecord): ItemMutationResult {
+  const recoverableEntries = Object.entries(character.recoverableAmmo ?? {}).filter(([, count]) => count > 0);
+  if (!recoverableEntries.length) {
+    return itemMutation(false, ['You find no recoverable ammunition.']);
+  }
+  const events: string[] = [];
+  for (const [ammoCode, count] of recoverableEntries) {
+    const normalizedCount = Math.max(0, Math.floor(count));
+    if (isDamagedAmmoCode(ammoCode)) {
+      for (let index = 0; index < normalizedCount; index += 1) {
+        character.inventory.push(ammoCode);
+      }
+      events.push(`You recover ${normalizedCount} ${displayNameFromCode(ammoCode)} as broken ammunition.`);
+    } else {
+      addAmmo(character, ammoCode, normalizedCount);
+      events.push(`You recover ${normalizedCount} ${displayNameFromCode(ammoCode)} into your ammo pouch.`);
+    }
+    delete character.recoverableAmmo![ammoCode];
+  }
+  return itemMutation(true, events);
 }
 
 export function buildEquipmentSummary(character: CharacterRecord, room?: Room, rooms: Record<string, Room> = worldRooms): EquipmentSummary {

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
   addAmmo,
+  addRecoverableAmmo,
   buildEquipmentSummary,
   buildInventoryEquipmentEvents,
   buildItemDetailEvents,
@@ -24,10 +25,12 @@ import {
   getLoadedAmmo,
   holdInventoryItem,
   parseHeldItemRequest,
+  recoverAmmunition,
   removeWornInventoryItem,
   resolveAvailableHandSlot,
   resolveHandSlot,
   resolveItemDetail,
+  resolveRangedAmmoRecovery,
   setLoadedAmmo,
   stowHeldItem,
   wearCarriedItem,
@@ -184,6 +187,35 @@ clearLoadedAmmo(loadedUnit, heldWeapon!);
 assert.equal(getLoadedAmmo(loadedUnit, heldWeapon!), undefined);
 assert.equal(formatLoadedAmmo(loadedUnit), 'none');
 assert.equal(findHeldWeapon(character({ hands: { left: 'repair cloth', right: null } }), marksmanRoom), undefined);
+
+const recoverableUnit = character({ ammoPouch: {}, inventory: [], recoverableAmmo: {} });
+addRecoverableAmmo(recoverableUnit, 'itm-sting-arrow', 2);
+addRecoverableAmmo(recoverableUnit, 'damaged-itm-sting-arrow', 1);
+assert.equal(formatRecoverableAmmo(recoverableUnit), 'itm-sting-arrow x2, damaged-itm-sting-arrow x1');
+const recoveredAmmo = recoverAmmunition(recoverableUnit);
+assert.equal(recoveredAmmo.success, true);
+assert.deepEqual(recoveredAmmo.events, [
+  'You recover 2 sting arrow into your ammo pouch.',
+  'You recover 1 damaged itm sting arrow as broken ammunition.',
+]);
+assert.equal(recoverableUnit.ammoPouch['itm-sting-arrow'], 2);
+assert.deepEqual(recoverableUnit.inventory, ['damaged-itm-sting-arrow']);
+assert.deepEqual(recoverableUnit.recoverableAmmo, {});
+assert.deepEqual(recoverAmmunition(character({ recoverableAmmo: {} })).events, ['You find no recoverable ammunition.']);
+
+const lostRecovery = resolveRangedAmmoRecovery(character({ recoverableAmmo: {} }), 'itm-sting-arrow', 'practice arrow', 19);
+assert.equal(lostRecovery.outcome, 'lost');
+assert.deepEqual(lostRecovery.events, ['practice arrow splinters beyond recovery.']);
+const damagedRecoveryUnit = character({ recoverableAmmo: {} });
+const damagedRecovery = resolveRangedAmmoRecovery(damagedRecoveryUnit, 'itm-sting-arrow', 'practice arrow', 20);
+assert.equal(damagedRecovery.outcome, 'damaged');
+assert.deepEqual(damagedRecovery.events, ['practice arrow is damaged and may be recovered only as broken ammunition after the fight.']);
+assert.equal(damagedRecoveryUnit.recoverableAmmo?.['damaged-itm-sting-arrow'], 1);
+const intactRecoveryUnit = character({ recoverableAmmo: {} });
+const intactRecovery = resolveRangedAmmoRecovery(intactRecoveryUnit, 'itm-sting-arrow', 'practice arrow', 55);
+assert.equal(intactRecovery.outcome, 'intact');
+assert.deepEqual(intactRecovery.events, ['practice arrow may be recovered after the fight.']);
+assert.equal(intactRecoveryUnit.recoverableAmmo?.['itm-sting-arrow'], 1);
 
 assert.deepEqual(parseHeldItemRequest('training sword left'), {
   requestedItem: 'training sword',

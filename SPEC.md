@@ -71,10 +71,12 @@ Completed current slice:
 - Expanded item unit coverage for appraise matching by code/name, hyphenated names, damaged ammunition descriptions, and missing item failures.
 - Extracted held weapon resolution, ammo counting/consumption, loaded-ammo state helpers, ammo status formatting, and ammo addition into `server/src/items.ts`.
 - Expanded item unit coverage for held weapon detection, loaded ammo lifecycle, ammo pouch consumption priority, inventory fallback consumption, and ammo status strings.
+- Extracted recoverable ammunition addition, deterministic ranged recovery outcome/event formatting, and recoverable ammunition collection into `server/src/items.ts`.
+- Expanded item unit coverage for intact, damaged, and lost ranged recovery outcomes plus recover-arrows pouch/inventory mutation.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting recoverable ammunition mutation helpers and ranged recovery event formatting.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting reload command decisions and event formatting.
 
 Core Philosophy
 

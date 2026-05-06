@@ -67,7 +67,9 @@ import {
   getLoadedAmmo,
   holdInventoryItem,
   parseHeldItemRequest,
+  recoverAmmunition,
   removeWornInventoryItem,
+  resolveRangedAmmoRecovery,
   setLoadedAmmo,
   stowHeldItem,
   wearCarriedItem,
@@ -446,32 +448,6 @@ function normalizeRecoverableAmmo(character: CharacterRecord): boolean {
     }
   }
   return changed;
-}
-
-function addRecoverableAmmo(character: CharacterRecord, code: string, count: number) {
-  character.recoverableAmmo = character.recoverableAmmo ?? {};
-  character.recoverableAmmo[code] =
-    Math.max(0, Math.floor(character.recoverableAmmo[code] ?? 0)) + Math.max(0, Math.floor(count));
-}
-
-function damagedAmmoCode(code: string) {
-  return `damaged-${code}`;
-}
-
-function resolveRangedAmmoRecovery(character: CharacterRecord, ammoCode: string, ammoName: string, recoveryRoll: number, events: string[]) {
-  const normalizedRoll = Math.max(0, Math.floor(recoveryRoll)) % 100;
-  if (normalizedRoll < 20) {
-    events.push(`${ammoName} splinters beyond recovery.`);
-    return 'lost';
-  }
-  if (normalizedRoll < 55) {
-    addRecoverableAmmo(character, damagedAmmoCode(ammoCode), 1);
-    events.push(`${ammoName} is damaged and may be recovered only as broken ammunition after the fight.`);
-    return 'damaged';
-  }
-  addRecoverableAmmo(character, ammoCode, 1);
-  events.push(`${ammoName} may be recovered after the fight.`);
-  return 'intact';
 }
 
 function applyRollToCharacter(character: CharacterRecord, characterRoll: RaceRollResult) {
@@ -1542,24 +1518,9 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       events.push('You are too engaged to recover ammunition safely.');
       return buildCommandResult(resolvedCharacter, room, events);
     }
-    const recoverableEntries = Object.entries(resolvedCharacter.recoverableAmmo ?? {}).filter(([, count]) => count > 0);
-    if (!recoverableEntries.length) {
-      events.push('You find no recoverable ammunition.');
-      return buildCommandResult(resolvedCharacter, room, events);
-    }
-    for (const [ammoCode, count] of recoverableEntries) {
-      if (ammoCode.startsWith('damaged-')) {
-        const recoveredCode = ammoCode;
-        for (let index = 0; index < count; index += 1) {
-          resolvedCharacter.inventory.push(recoveredCode);
-        }
-        events.push(`You recover ${count} ${displayNameFromCode(ammoCode)} as broken ammunition.`);
-      } else {
-        addAmmo(resolvedCharacter, ammoCode, count);
-        events.push(`You recover ${count} ${displayNameFromCode(ammoCode)} into your ammo pouch.`);
-      }
-      delete resolvedCharacter.recoverableAmmo![ammoCode];
-    }
+    const result = recoverAmmunition(resolvedCharacter);
+    events.push(...result.events);
+    if (!result.success) return buildCommandResult(resolvedCharacter, room, events);
     grantSkillPool(resolvedCharacter, 'survival', 1, events);
     setActionCooldown(resolvedCharacter, 400);
     modified = true;
@@ -1833,13 +1794,13 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       (requestedTarget ? -2 : 0) + stanceProfile.attack + balanceBonus + advantageBonus + equipment.totalAttackModifier * 3,
     );
     if (weapon?.weaponRange === 'ranged' && consumedAmmo) {
-      resolveRangedAmmoRecovery(
+      const recovery = resolveRangedAmmoRecovery(
         resolvedCharacter,
         consumedAmmo,
         weapon.ammoName ?? consumedAmmo,
         playerAttack.roll + playerAttack.threshold + resolvedCharacter.balance,
-        events,
       );
+      events.push(...recovery.events);
       modified = true;
     }
 
