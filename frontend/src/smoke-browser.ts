@@ -37,6 +37,9 @@ async function main(): Promise<void> {
     await page.getByLabel('Password').fill(password);
     await page.getByRole('button', { name: 'Login' }).click();
     await page.getByRole('heading', { name: 'DragonRealms Next Gen' }).waitFor();
+    await page.getByText('Use verb for grouped commands').waitFor();
+    await page.getByText('help scan').waitFor();
+    await page.getByText('target <name>').waitFor();
 
     await page.getByRole('textbox', { name: 'Name', exact: true }).fill(characterName);
     await page.getByRole('button', { name: 'Create Character' }).click();

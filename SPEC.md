@@ -393,6 +393,19 @@ Next priority:
 
 - Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
 
+Implementation Notes - 2026-05-06, Web Command Discovery Note
+
+Completed in the current Node/React prototype:
+
+- Added an always-visible command discovery note near the web controls.
+- The note introduces `verb`, `help scan`, and `target <name>` before the player clicks any command.
+- Static UI smoke verifies the discovery text.
+- Browser smoke verifies the discovery text after login.
+
+Next priority:
+
+- Add command discovery telemetry fields for the static discovery note so reports distinguish always-visible command guidance from clicked `verb` discovery coverage.
+
 Implementation Notes - 2026-05-05, Web Target Details Action
 
 Completed in the current Node/React prototype:
