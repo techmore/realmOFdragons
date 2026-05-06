@@ -7,6 +7,7 @@ import { createServer } from 'node:http';
 import {
   Room,
   RoomId,
+  buildRoomLookEvents,
   buildRoomSurveyEvents,
   findPathToRoom,
   guilds,
@@ -1640,15 +1641,10 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'look' || command === 'l') {
-    events.push(room.description);
-    events.push(...room.prompts);
-    if (room.forage?.items.length) {
-      events.push(`Forageable: difficulty ${room.forage.difficulty}; try forage to search for ${room.forage.items.map((item) => item.name).join(', ')}.`);
-    }
     const enemies = getRoomEnemies(room.id);
-    if (enemies.length) {
-      events.push(...buildEnemyScanEvents(room.id));
-    }
+    events.push(...buildRoomLookEvents(room, {
+      targetEvents: enemies.length ? buildEnemyScanEvents(room.id) : [],
+    }));
     return buildCommandResult(resolvedCharacter, room, events);
   }
 

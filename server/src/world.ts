@@ -62,6 +62,10 @@ export interface RoomSurveyContext {
   targetNames?: string[];
 }
 
+export interface RoomLookContext {
+  targetEvents?: string[];
+}
+
 export const worldRooms: Record<RoomId, Room> = {
   "crossing-TG01-001": {
     id: "crossing-TG01-001",
@@ -668,5 +672,14 @@ export function buildRoomSurveyEvents(room: Room, context: RoomSurveyContext = {
     events.push('Targets: none immediate.');
   }
 
+  return events;
+}
+
+export function buildRoomLookEvents(room: Room, context: RoomLookContext = {}): string[] {
+  const events = [room.description, ...room.prompts];
+  if (room.forage?.items.length) {
+    events.push(`Forageable: difficulty ${room.forage.difficulty}; try forage to search for ${room.forage.items.map((item) => item.name).join(', ')}.`);
+  }
+  events.push(...(context.targetEvents ?? []));
   return events;
 }

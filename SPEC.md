@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted room look formatting into pure world helpers with unit coverage for sparse rooms and forage/target-enhanced rooms.
+- The Express `look` command now passes enemy scan output into the world-owned look formatter instead of constructing room text inline.
 - Extracted room survey formatting into pure world helpers with unit coverage for sparse rooms and rooms with forage, shops, registrar text, and targets.
 - The Express `survey`/`search` commands now pass registrar display text and target names into the world-owned survey formatter.
 - Extracted pathfinding into pure world helpers with unit coverage for same-room routes, reachable exits, reverse traversal, unreachable rooms, and unknown destinations.
@@ -193,7 +195,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract room look formatting into pure world helpers with unit coverage.
+- Extract room target listing into combat/world helpers with unit coverage.
 
 Core Philosophy
 

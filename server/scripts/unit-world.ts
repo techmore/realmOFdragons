@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { buildRoomSurveyEvents, findPathToRoom, normalizeDirection, resolveMovementDecision, type Room } from '../src/world.js';
+import { buildRoomLookEvents, buildRoomSurveyEvents, findPathToRoom, normalizeDirection, resolveMovementDecision, type Room } from '../src/world.js';
 
 const start: Room = {
   id: 'test-start',
@@ -105,4 +105,14 @@ assert.deepEqual(buildRoomSurveyEvents(fullRoom, {
   'Targets: test rat, test goblin.',
 ]);
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:world', movementDecisionChecked: true, pathfindingChecked: true, roomSurveyChecked: true }, null, 2));
+assert.deepEqual(buildRoomLookEvents(start), ['A test room.']);
+assert.deepEqual(buildRoomLookEvents(fullRoom, {
+  targetEvents: ['Target: test rat', 'Range: not yet engaged.'],
+}), [
+  'A fully featured room.',
+  'Forageable: difficulty 2; try forage to search for test herb.',
+  'Target: test rat',
+  'Range: not yet engaged.',
+]);
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:world', movementDecisionChecked: true, pathfindingChecked: true, roomSurveyChecked: true, roomLookChecked: true }, null, 2));
