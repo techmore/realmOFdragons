@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
   buildItemDetails,
+  canWieldItem,
   canWearItem,
   displayNameFromCode,
   findInventoryIndex,
   findWornIndex,
   holdInventoryItem,
+  parseHeldItemRequest,
   removeWornInventoryItem,
   resolveAvailableHandSlot,
   resolveHandSlot,
@@ -83,10 +85,12 @@ assert.equal(starterSword.category, 'weapon');
 assert.equal(starterSword.weaponRange, 'melee');
 assert.equal(starterSword.carried, true);
 assert.equal(canWearItem(starterSword), false);
+assert.equal(canWieldItem(starterSword), true);
 
 const backpack = resolveItemDetail('leather backpack', marksmanRoom, character({ inventory: ['leather backpack'] }));
 assert.equal(backpack.slot, 'back');
 assert.equal(canWearItem(backpack), true);
+assert.equal(canWieldItem(backpack), false);
 
 const bow = resolveItemDetail('itm-practice-bow', marksmanRoom, unit);
 assert.equal(bow.name, 'practice bow');
@@ -94,6 +98,7 @@ assert.equal(bow.source, 'shop');
 assert.equal(bow.category, 'ranged');
 assert.deepEqual(bow.validAttackRanges, ['missile', 'pole']);
 assert.equal(bow.ammoCode, 'itm-sting-arrow');
+assert.equal(canWieldItem(bow), true);
 
 const ammo = resolveItemDetail('itm-sting-arrow', marksmanRoom, unit);
 assert.equal(ammo.name, 'practice arrow');
@@ -125,6 +130,22 @@ const details = buildItemDetails(unit, marksmanRoom);
 assert.equal(details.some((entry) => entry.code === 'training sword'), true);
 assert.equal(details.some((entry) => entry.code === 'itm-sting-arrow'), true);
 assert.equal(details.some((entry) => entry.code === 'itm-practice-bow'), true);
+
+assert.deepEqual(parseHeldItemRequest('training sword left'), {
+  requestedItem: 'training sword',
+  requestedSlot: 'left',
+  hasExplicitSlot: true,
+});
+assert.deepEqual(parseHeldItemRequest('  practice bow   right  '), {
+  requestedItem: 'practice bow',
+  requestedSlot: 'right',
+  hasExplicitSlot: true,
+});
+assert.deepEqual(parseHeldItemRequest('training sword'), {
+  requestedItem: 'training sword',
+  requestedSlot: '',
+  hasExplicitSlot: false,
+});
 
 const holdUnit = character();
 const held = holdInventoryItem(holdUnit, marksmanRoom, 'training sword');

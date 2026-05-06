@@ -49,8 +49,10 @@ import {
 } from './economy.js';
 import {
   buildItemDetails,
+  canWieldItem,
   displayNameFromCode,
   holdInventoryItem,
+  parseHeldItemRequest,
   removeWornInventoryItem,
   stowHeldItem,
   wearCarriedItem,
@@ -2053,18 +2055,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command.startsWith('hold ') || command.startsWith('wield ')) {
     const wielding = command.startsWith('wield ');
-    const parts = command.slice(wielding ? 6 : 5).trim().split(/\s+/);
-    const requestedSlot = parts.at(-1);
-    const hasExplicitSlot = requestedSlot === 'left' || requestedSlot === 'right';
-    const requestedItem = hasExplicitSlot ? parts.slice(0, -1).join(' ') : parts.join(' ');
+    const heldRequest = parseHeldItemRequest(command.slice(wielding ? 6 : 5));
     if (wielding) {
-      const item = findItemDetailForRequest(resolvedCharacter, room, requestedItem);
-      if (!item || !['weapon', 'ranged'].includes(item.category)) {
-        events.push(`You cannot wield "${requestedItem}" as a weapon.`);
+      const item = findItemDetailForRequest(resolvedCharacter, room, heldRequest.requestedItem);
+      if (!item || !canWieldItem(item)) {
+        events.push(`You cannot wield "${heldRequest.requestedItem}" as a weapon.`);
         return buildCommandResult(resolvedCharacter, room, events);
       }
     }
-    const result = holdInventoryItem(resolvedCharacter, room, requestedItem, hasExplicitSlot ? requestedSlot : '');
+    const result = holdInventoryItem(resolvedCharacter, room, heldRequest.requestedItem, heldRequest.requestedSlot);
     events.push(...result.events);
     if (result.success) {
       modified = true;

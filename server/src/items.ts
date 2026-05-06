@@ -28,6 +28,12 @@ export type ItemDetail = {
 
 export type HandSlotName = 'left' | 'right';
 
+export type HeldItemRequest = {
+  requestedItem: string;
+  requestedSlot: HandSlotName | '';
+  hasExplicitSlot: boolean;
+};
+
 export const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | 'shopAvailable'>> = {
   'leather backpack': {
     code: 'leather backpack',
@@ -136,6 +142,21 @@ export function resolveAvailableHandSlot(character: CharacterRecord, requestedSl
 
 export function canWearItem(detail: ItemDetail): boolean {
   return Boolean(detail.slot) && ['armor', 'container', 'utility'].includes(detail.category);
+}
+
+export function canWieldItem(detail: ItemDetail): boolean {
+  return ['weapon', 'ranged'].includes(detail.category);
+}
+
+export function parseHeldItemRequest(raw: string): HeldItemRequest {
+  const parts = raw.trim().split(/\s+/).filter(Boolean);
+  const requestedSlot = parts.at(-1);
+  const hasExplicitSlot = requestedSlot === 'left' || requestedSlot === 'right';
+  return {
+    requestedItem: hasExplicitSlot ? parts.slice(0, -1).join(' ') : parts.join(' '),
+    requestedSlot: hasExplicitSlot ? requestedSlot : '',
+    hasExplicitSlot,
+  };
 }
 
 export type ItemMutationResult = {

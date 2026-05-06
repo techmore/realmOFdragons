@@ -63,10 +63,12 @@ Completed current slice:
 - Expanded item unit coverage for inventory lookup, worn lookup, hand-slot resolution, available hand selection, and wearable classification.
 - Extracted inventory/equipment mutation helpers for hold, stow, wear, and remove into `server/src/items.ts`.
 - Expanded item unit coverage for successful and failed hand/equipment state transitions.
+- Extracted hold/wield item request parsing and wieldable item validation into `server/src/items.ts`.
+- Expanded item unit coverage for optional hand-slot parsing and weapon/ranged wieldability classification.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting hold/wield command parsing and item request validation.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting inventory/equipment presentation summaries and command-result event formatting.
 
 Core Philosophy
 
