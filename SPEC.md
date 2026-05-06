@@ -365,6 +365,20 @@ Next priority:
 
 - Add server-provided structured room target data to command responses so the UI no longer has to parse scan text.
 
+Implementation Notes - 2026-05-05, Structured Room Targets
+
+Completed in the current Node/React prototype:
+
+- Command responses now include a structured `targets` array.
+- Character state, script run, and fixture state responses include structured room targets.
+- Target records include id, name, baseline vitality, and aggression.
+- Frontend target actions now use server-provided targets instead of parsing scan text.
+- API smoke verifies structured targets for wolf-cub, beetle, and hare hunting rooms.
+
+Next priority:
+
+- Render target vitality/aggression metadata in the web UI target affordance, and add browser/static smoke assertions for that richer target display.
+
 Implementation Notes - 2026-05-05, Enemy Visibility Commands
 
 Completed in the current Node/React prototype:

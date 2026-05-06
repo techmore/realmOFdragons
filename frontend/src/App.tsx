@@ -104,6 +104,14 @@ type CommandResult = {
   character: Character;
   room: Room;
   events: string[];
+  targets: RoomTarget[];
+};
+
+type RoomTarget = {
+  id: string;
+  name: string;
+  vitality: number;
+  aggression: number;
 };
 
 type Guild = {
@@ -155,6 +163,7 @@ type ScriptRunResponse = {
   steps: ScriptRunStep[];
   character: Character;
   room: Room;
+  targets?: RoomTarget[];
 };
 
 type ScriptPreset = {
@@ -367,13 +376,6 @@ function formatWallet(wallet?: Wallet) {
     return 'wallet unavailable';
   }
   return `${wallet.plat} plat · ${wallet.trias} trias · ${wallet.lucan} lucan · ${wallet.silk} silk`;
-}
-
-function extractScannedTargets(events: string[]): string[] {
-  const targets = events
-    .map((event) => event.match(/^\s*-\s+(.+?)\s+\(\d+\s+vitality,\s+aggression\s+\d+\)$/)?.[1])
-    .filter((target): target is string => Boolean(target));
-  return [...new Set(targets)];
 }
 
 function findPathBetweenRooms(worldRooms: Record<string, Room>, start: string, destination: string): string[] {
@@ -682,13 +684,13 @@ function App() {
   };
 
   const hydrateCharacterState = async (characterId: string) => {
-    const data = await request<{ character: Character; room: Room }>(`/characters/${characterId}/state`, {
+    const data = await request<{ character: Character; room: Room; targets: RoomTarget[] }>(`/characters/${characterId}/state`, {
       token: accessToken,
     });
     setSelectedCharacterId(characterId);
     setCharacter(data.character);
     setRoom(data.room);
-    setLocalTargets([]);
+    setLocalTargets(data.targets.map((target) => target.name));
     appendHistory(`Loaded ${data.character.name} in ${data.room.title}.`);
   };
 
@@ -787,16 +789,10 @@ function App() {
   };
 
   const applyCommandResult = (result: CommandResult) => {
-    const previousRoomId = character?.roomId;
     setCharacter(result.character);
     setRoom(result.room);
     setCharacters((current) => current.map((entry) => (entry.id === result.character.id ? result.character : entry)));
-    const scannedTargets = extractScannedTargets(result.events);
-    if (scannedTargets.length) {
-      setLocalTargets(scannedTargets);
-    } else if (previousRoomId && previousRoomId !== result.character.roomId) {
-      setLocalTargets([]);
-    }
+    setLocalTargets(result.targets.map((target) => target.name));
     for (const event of result.events) {
       appendHistory(event);
     }
@@ -959,6 +955,7 @@ function App() {
       }
       setCharacter(result.character);
       setRoom(result.room);
+      setLocalTargets((result.targets ?? []).map((target) => target.name));
       setCharacters((current) =>
         current.map((entry) => (entry.id === result.character.id ? result.character : entry)),
       );

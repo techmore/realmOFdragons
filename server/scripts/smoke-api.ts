@@ -31,6 +31,14 @@ interface CharacterSummary {
 interface CommandResult {
   events: string[];
   character: CharacterSummary;
+  targets: RoomTarget[];
+}
+
+interface RoomTarget {
+  id: string;
+  name: string;
+  vitality: number;
+  aggression: number;
 }
 
 interface GuildSummary {
@@ -309,17 +317,21 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
 
   let result = await command(context.accessToken, current.id, 'scan');
   assert(result.events.some((event) => event.includes('forage wolf-cub')), 'Expected scan to list forage wolf-cub.');
+  assert(result.targets.some((target) => target.name === 'forage wolf-cub'), 'Expected structured target forage wolf-cub.');
 
   result = await command(context.accessToken, current.id, 'look');
   assert(result.events.some((event) => event.includes('forage wolf-cub')), 'Expected hunting room look to list forage wolf-cub.');
+  assert(result.targets.some((target) => target.name === 'forage wolf-cub'), 'Expected look response target forage wolf-cub.');
 
   current = await walkTo(context.accessToken, result.character, 'crossing-RV02-004');
   result = await command(context.accessToken, current.id, 'scan');
   assert(result.events.some((event) => event.includes('muddy shell beetle')), 'Expected scan to list muddy shell beetle.');
+  assert(result.targets.some((target) => target.name === 'muddy shell beetle'), 'Expected structured target muddy shell beetle.');
 
   current = await walkTo(context.accessToken, result.character, 'crossing-RV02-005');
   result = await command(context.accessToken, current.id, 'scan');
   assert(result.events.some((event) => event.includes('ridge hare')), 'Expected scan to list ridge hare.');
+  assert(result.targets.some((target) => target.name === 'ridge hare'), 'Expected structured target ridge hare.');
 
   current = await walkTo(context.accessToken, result.character, 'crossing-RV02-002');
   current = (await command(context.accessToken, current.id, 'wait 900')).character;

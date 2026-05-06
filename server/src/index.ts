@@ -77,7 +77,15 @@ interface CommandResult {
   };
   room: Room;
   events: string[];
+  targets: RoomTarget[];
 }
+
+type RoomTarget = {
+  id: string;
+  name: string;
+  vitality: number;
+  aggression: number;
+};
 
 type SocketState = {
   characterId?: string;
@@ -784,6 +792,24 @@ function getRoomEnemies(roomId: RoomId): EnemyTemplate[] {
   return ENEMY_TEMPLATES.filter((entry) => entry.roomId === roomId);
 }
 
+function buildRoomTargets(roomId: RoomId): RoomTarget[] {
+  return getRoomEnemies(roomId).map((enemy) => ({
+    id: enemy.id,
+    name: enemy.name,
+    vitality: enemy.maxHp,
+    aggression: enemy.aggression,
+  }));
+}
+
+function buildCommandResult(character: CharacterRecord, room: Room, events: string[]): CommandResult {
+  return {
+    character: sanitizeCharacter(character),
+    room,
+    events,
+    targets: buildRoomTargets(character.roomId),
+  };
+}
+
 function buildEnemyScanEvents(roomId: RoomId): string[] {
   const enemies = getRoomEnemies(roomId);
   if (!enemies.length) {
@@ -1030,7 +1056,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     command.startsWith('stance ');
   if (resolvedCharacter.health.current <= 0 && command !== 'rest') {
     events.push('You are incapacitated. Use rest to recover, or wait.');
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   const sleepMs = await parseSleepCommand(command);
@@ -1057,17 +1083,17 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       }
     }
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (!commandReady && command !== 'combat' && !passiveCommand) {
     events.push(`You are still recovering from the last action (${Math.max(0, resolvedCharacter.roundtimeMs)}ms).`);
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (!command) {
     events.push('You need to enter a command.');
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'help') {
@@ -1075,20 +1101,20 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       'Commands: look, scan, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'join guild') {
     if (!room.guild) {
       events.push('There is no guild registrar here.');
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     resolvedCharacter.guildId = room.guild;
     resolvedCharacter.guildName = GUILD_NAMES[room.guild] ?? room.guild;
     modified = true;
     events.push(`You are now registered with ${resolvedCharacter.guildName}.`);
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'skills') {
@@ -1097,14 +1123,14 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         ([id, skill]) => `${id}: ${skill.name} rank ${skill.rank}, pool ${skill.pool}`,
       ),
     );
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'circle') {
     if (resolvedCharacter.combat) {
       if (normalizeRange(resolvedCharacter.combat.range) === 'missile') {
         events.push('You are too far away to circle your target.');
-        return { character: sanitizeCharacter(resolvedCharacter), room, events };
+        return buildCommandResult(resolvedCharacter, room, events);
       }
       shiftAdvantage(resolvedCharacter, 1);
       recoverBalance(resolvedCharacter, 1);
@@ -1118,7 +1144,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         applyEnemyPressure(resolvedCharacter, template, Date.now(), events);
       }
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     events.push(...buildCircleStatus(resolvedCharacter));
     if (canCircle(resolvedCharacter)) {
@@ -1128,13 +1154,13 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       events.push(`You advance to Circle ${resolvedCharacter.circle}.`);
       await persist();
     }
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'jab' || command === 'bash') {
     if (!resolvedCharacter.combat) {
       events.push('You are not currently in combat.');
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     const template = findCombatTemplate(resolvedCharacter);
     if (!template) {
@@ -1142,7 +1168,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       modified = true;
       events.push('Your target vanished from the world.');
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     resolvePlayerManeuver(resolvedCharacter, template, command, Date.now(), events);
     if (resolvedCharacter.health.current <= 0) {
@@ -1154,7 +1180,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     }
     modified = true;
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'stance' || command.startsWith('stance ')) {
@@ -1162,12 +1188,12 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     if (!requestedStance) {
       events.push(`Current stance: ${STANCE_PROFILES[resolvedCharacter.stance].label}.`);
       events.push('Available stances: balanced, offensive, defensive, evasive.');
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     if (!(requestedStance in STANCE_PROFILES)) {
       events.push(`Unknown stance: ${requestedStance}.`);
       events.push('Available stances: balanced, offensive, defensive, evasive.');
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     resolvedCharacter.stance = requestedStance as StanceName;
     recoverBalance(resolvedCharacter, requestedStance === 'balanced' ? 1 : 0);
@@ -1175,12 +1201,12 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     events.push(`You settle into ${STANCE_PROFILES[resolvedCharacter.stance].label}.`);
     events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'balance') {
     events.push(`You are ${formatBalance(resolvedCharacter.balance)} in ${STANCE_PROFILES[resolvedCharacter.stance].label}.`);
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'range') {
@@ -1189,7 +1215,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     } else {
       events.push(`You are at ${formatRange(normalizeRange(resolvedCharacter.combat.range))} from ${resolvedCharacter.combat.targetName}.`);
     }
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'train' || command.startsWith('train ')) {
@@ -1199,19 +1225,19 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       modified = true;
       await persist();
     }
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'combat') {
     events.push(...buildCombatEvents(resolvedCharacter));
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'defend') {
     if (!resolvedCharacter.combat) {
       events.push('You are not currently in combat.');
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     resolvedCharacter.combat.defendUntil = Date.now() + 1200;
     recoverBalance(resolvedCharacter, resolvedCharacter.stance === 'defensive' || resolvedCharacter.stance === 'evasive' ? 2 : 1);
@@ -1219,7 +1245,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     modified = true;
     events.push(`You guard and recover your footing. Balance: ${formatBalance(resolvedCharacter.balance)}.`);
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'advance' || command.startsWith('advance ')) {
@@ -1229,7 +1255,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       if (!combat) {
         events.push('There are no immediate targets in this location.');
         await persist();
-        return { character: sanitizeCharacter(resolvedCharacter), room, events };
+        return buildCommandResult(resolvedCharacter, room, events);
       }
       resolvedCharacter.combat = combat;
       events.push(`You begin advancing on ${combat.targetName}.`);
@@ -1261,14 +1287,14 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     }
     modified = true;
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'retreat') {
     if (!resolvedCharacter.combat) {
       events.push('You are not currently in combat.');
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     const currentRange = normalizeRange(resolvedCharacter.combat.range);
     const nextRange = shiftCombatRange(currentRange, 'retreat');
@@ -1295,21 +1321,21 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     }
     modified = true;
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'flee') {
     if (!resolvedCharacter.combat) {
       events.push('You are not currently in combat.');
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     clearCombat(resolvedCharacter);
     setActionCooldown(resolvedCharacter, 800);
     modified = true;
     events.push('You break line and flee from combat.');
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command.startsWith('attack')) {
@@ -1319,7 +1345,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       if (!combat) {
         events.push('There are no immediate targets in this location.');
         await persist();
-        return { character: sanitizeCharacter(resolvedCharacter), room, events };
+        return buildCommandResult(resolvedCharacter, room, events);
       }
       resolvedCharacter.combat = combat;
       modified = true;
@@ -1328,7 +1354,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
     if (!resolvedCharacter.combat) {
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
 
     const attackRange = normalizeRange(resolvedCharacter.combat.range);
@@ -1336,7 +1362,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       events.push(`You are too far away to strike. Current range: ${formatRange(attackRange)}.`);
       events.push('Advance to melee range first.');
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
 
     const now = Date.now();
@@ -1345,7 +1371,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       setActionCooldown(resolvedCharacter, remaining);
       events.push(`Your target is still in the attack cycle (${remaining}ms).`);
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
 
     const template = ENEMY_TEMPLATES.find((entry) => entry.id === resolvedCharacter.combat?.targetId);
@@ -1354,7 +1380,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       modified = true;
       events.push('Your target vanished from the world.');
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
 
     const target = resolvedCharacter.combat;
@@ -1385,7 +1411,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         clearCombat(resolvedCharacter);
         setActionCooldown(resolvedCharacter, 700);
         await persist();
-        return { character: sanitizeCharacter(resolvedCharacter), room, events };
+        return buildCommandResult(resolvedCharacter, room, events);
       }
     } else {
       events.push(`You miss ${target.targetName}.`);
@@ -1402,12 +1428,12 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       modified = true;
       events.push('You have fallen unconscious and can no longer act.');
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     modified = true;
     setActionCooldown(resolvedCharacter, template.aggression >= 60 ? 900 : 650);
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'look' || command === 'l') {
@@ -1417,19 +1443,19 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     if (enemies.length) {
       events.push(...buildEnemyScanEvents(room.id));
     }
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'scan') {
     events.push(...buildEnemyScanEvents(room.id));
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'rest') {
     if (resolvedCharacter.health.current >= resolvedCharacter.health.max) {
       events.push(`You are fully rested at ${resolvedCharacter.health.current}/${resolvedCharacter.health.max}.`);
       await persist();
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     const regained = Math.max(1, Math.ceil(resolvedCharacter.health.max / 6));
     const previousHealth = resolvedCharacter.health.current;
@@ -1440,18 +1466,18 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     const actualGain = resolvedCharacter.health.current - previousHealth;
     events.push(`You settle and recover ${actualGain} health (${resolvedCharacter.health.current}/${resolvedCharacter.health.max}).`);
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'exits') {
     events.push(room.exits.map((exit) => `${exit.direction}: ${exit.destination}`).join(' | ') || 'No exits listed.');
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'inventory' || command === 'inv') {
     events.push(`You are carrying ${resolvedCharacter.inventory.length} item(s).`);
     events.push(...resolvedCharacter.inventory.map((item) => ` - ${item}`));
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'score') {
@@ -1466,27 +1492,27 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     events.push(
       `Strength ${resolvedCharacter.stats.strength}, Reflex ${resolvedCharacter.stats.reflex}, Agility ${resolvedCharacter.stats.agility}, Discipline ${resolvedCharacter.stats.discipline}, Stamina ${resolvedCharacter.stats.stamina}, Wisdom ${resolvedCharacter.stats.wisdom}, Intelligence ${resolvedCharacter.stats.intelligence}, Charisma ${resolvedCharacter.stats.charisma}`,
     );
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command.startsWith('roll')) {
     events.push(`Current roll profile v${resolvedCharacter.rollProfileVersion}, ${resolvedCharacter.rollTrace[0] || 'No trace'}.`);
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command === 'shop') {
     events.push(...listShopItems(room.shop));
     events.push(`Wallet: ${formatWallet(resolvedCharacter.wallet)}.`);
     await persist();
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command.startsWith('shop buy ')) {
     const code = command.slice(9).trim();
     if (!code) {
       events.push('Specify an item code or name: shop buy <code>.');
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
     if (!room.shop) {
       events.push('No shop is present here.');
@@ -1512,19 +1538,19 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     if (modified) {
       await persist();
     }
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   if (command.startsWith('shop sell ')) {
     if (!room.shop) {
       events.push('No shop is present here.');
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
 
     const code = command.slice(10).trim();
     if (!code) {
       events.push('Specify a carried item code: shop sell <code>.');
-      return { character: sanitizeCharacter(resolvedCharacter), room, events };
+      return buildCommandResult(resolvedCharacter, room, events);
     }
 
     const lowered = code.toLowerCase();
@@ -1558,7 +1584,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     if (modified) {
       await persist();
     }
-    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+    return buildCommandResult(resolvedCharacter, room, events);
   }
 
   const direction = normalizeDirection(command);
@@ -1576,17 +1602,13 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       if (modified) {
         await storage.saveCharacter(resolvedCharacter);
       }
-      return {
-        character: sanitizeCharacter(resolvedCharacter),
-        room: nextRoom,
-        events,
-      };
+      return buildCommandResult(resolvedCharacter, nextRoom, events);
     }
   } else {
     events.push(`Unknown command: ${command}`);
   }
 
-  return { character: sanitizeCharacter(resolvedCharacter), room, events };
+  return buildCommandResult(resolvedCharacter, room, events);
 }
 
 app.get('/health', (_req: Request, res: Response) => {
@@ -1962,6 +1984,7 @@ app.post('/v1/scripts/:scriptId/run', authRequired, async (req: AuthenticatedReq
     steps,
     character: sanitizeCharacter(finalCharacter),
     room: finalRoom,
+    targets: buildRoomTargets(finalCharacter.roomId),
   });
 });
 
@@ -1979,6 +2002,7 @@ app.get('/v1/characters/:characterId/state', authRequired, async (req: Authentic
   return res.json({
     character: sanitizeCharacter(resolved.character),
     room,
+    targets: buildRoomTargets(resolved.character.roomId),
   });
 });
 
@@ -2018,6 +2042,7 @@ app.post('/v1/test/characters/:characterId/state', authRequired, async (req: Aut
   return res.json({
     character: sanitizeCharacter(resolved),
     room,
+    targets: buildRoomTargets(resolved.roomId),
   });
 });
 
