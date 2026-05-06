@@ -784,6 +784,18 @@ function getRoomEnemies(roomId: RoomId): EnemyTemplate[] {
   return ENEMY_TEMPLATES.filter((entry) => entry.roomId === roomId);
 }
 
+function buildEnemyScanEvents(roomId: RoomId): string[] {
+  const enemies = getRoomEnemies(roomId);
+  if (!enemies.length) {
+    return ['You scan the area and find no immediate targets.'];
+  }
+
+  return [
+    'You scan the area and notice:',
+    ...enemies.map((enemy) => ` - ${enemy.name} (${enemy.maxHp} vitality, aggression ${enemy.aggression})`),
+  ];
+}
+
 function buildCharacterCombat(character: CharacterRecord, requestedTarget?: string): CharacterCombatSnapshot | null {
   const enemies = getRoomEnemies(character.roomId);
   if (!enemies.length) return null;
@@ -1002,6 +1014,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     command === 'help' ||
     command === 'look' ||
     command === 'l' ||
+    command === 'scan' ||
     command === 'exits' ||
     command === 'inventory' ||
     command === 'inv' ||
@@ -1059,7 +1072,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'help') {
     events.push(
-      'Commands: look, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, scan, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
     return { character: sanitizeCharacter(resolvedCharacter), room, events };
@@ -1400,6 +1413,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   if (command === 'look' || command === 'l') {
     events.push(room.description);
     events.push(...room.prompts);
+    const enemies = getRoomEnemies(room.id);
+    if (enemies.length) {
+      events.push(...buildEnemyScanEvents(room.id));
+    }
+    return { character: sanitizeCharacter(resolvedCharacter), room, events };
+  }
+
+  if (command === 'scan') {
+    events.push(...buildEnemyScanEvents(room.id));
     return { character: sanitizeCharacter(resolvedCharacter), room, events };
   }
 

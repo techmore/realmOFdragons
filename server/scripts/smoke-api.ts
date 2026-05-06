@@ -307,7 +307,24 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   let current = await walkTo(context.accessToken, context.character, 'crossing-RV02-002');
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
 
-  let result = await command(context.accessToken, current.id, 'advance');
+  let result = await command(context.accessToken, current.id, 'scan');
+  assert(result.events.some((event) => event.includes('forage wolf-cub')), 'Expected scan to list forage wolf-cub.');
+
+  result = await command(context.accessToken, current.id, 'look');
+  assert(result.events.some((event) => event.includes('forage wolf-cub')), 'Expected hunting room look to list forage wolf-cub.');
+
+  current = await walkTo(context.accessToken, result.character, 'crossing-RV02-004');
+  result = await command(context.accessToken, current.id, 'scan');
+  assert(result.events.some((event) => event.includes('muddy shell beetle')), 'Expected scan to list muddy shell beetle.');
+
+  current = await walkTo(context.accessToken, result.character, 'crossing-RV02-005');
+  result = await command(context.accessToken, current.id, 'scan');
+  assert(result.events.some((event) => event.includes('ridge hare')), 'Expected scan to list ridge hare.');
+
+  current = await walkTo(context.accessToken, result.character, 'crossing-RV02-002');
+  current = (await command(context.accessToken, current.id, 'wait 900')).character;
+
+  result = await command(context.accessToken, current.id, 'advance');
   assert(result.character.combat?.range, 'Expected combat to start after advance.');
   current = result.character;
 
@@ -379,6 +396,7 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   context.summary.finalCombat = rested.character.combat ?? null;
   context.summary.finalRoom = rested.character.roomId;
   context.summary.combatChecked = true;
+  context.summary.scanChecked = true;
 }
 
 async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void> {

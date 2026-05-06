@@ -114,6 +114,7 @@ function coverageSummary(results) {
       scriptSteps: apiPayload.scriptSteps ?? 0,
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
       combatChecked: apiPayload.combatChecked === true,
+      scanChecked: apiPayload.scanChecked === true,
       finalRoom: apiPayload.finalRoom ?? null,
       finalCombatActive: Boolean(apiPayload.finalCombat),
     },

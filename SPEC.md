@@ -336,6 +336,20 @@ Next priority:
 
 - Add command visibility for available local enemies, starting with a `scan` or enhanced `look` output that lists beginner-safe targets in hunting rooms.
 
+Implementation Notes - 2026-05-05, Enemy Visibility Commands
+
+Completed in the current Node/React prototype:
+
+- Added passive `scan` command.
+- `scan` lists local beginner targets with baseline vitality and aggression.
+- Hunting-room `look` output now includes available local targets.
+- API smoke now verifies target visibility in Willow Tract, Muddy Beetle Bend, and Low Ridge Rabbit Run.
+- Coverage telemetry now tracks `scanChecked`.
+
+Next priority:
+
+- Add scan/target visibility to the web UI controls and browser smoke so players can discover enemies from both command input and quick actions.
+
 Implementation Notes - 2026-05-05, Telemetry Coverage Summary
 
 Completed in the current Node/React prototype:
