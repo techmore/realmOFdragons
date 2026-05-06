@@ -67,10 +67,12 @@ Completed current slice:
 - Expanded item unit coverage for optional hand-slot parsing and weapon/ranged wieldability classification.
 - Extracted equipment summary calculation, equipment modifier formatting, and inventory event formatting into `server/src/items.ts`.
 - Expanded item unit coverage for equipment totals, slot formatting, and inventory/equipment command event presentation.
+- Extracted item detail request matching and appraisal event formatting into `server/src/items.ts`.
+- Expanded item unit coverage for appraise matching by code/name, hyphenated names, damaged ammunition descriptions, and missing item failures.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting item detail request matching and appraisal event formatting.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting held weapon resolution and ammo readiness helpers.
 
 Core Philosophy
 

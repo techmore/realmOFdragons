@@ -50,9 +50,11 @@ import {
 import {
   buildEquipmentSummary,
   buildInventoryEquipmentEvents,
+  buildItemDetailEvents,
   buildItemDetails,
   canWieldItem,
   displayNameFromCode,
+  findItemDetailForRequest,
   formatEquipmentModifiers,
   holdInventoryItem,
   parseHeldItemRequest,
@@ -1087,35 +1089,6 @@ function buildTargetDetailEvents(character: CharacterRecord, requestedTarget: st
     `Aggression: ${template.aggression}.`,
     `Range: ${range}.`,
     `Suggested next verb: ${suggestedVerb}.`,
-  ];
-}
-
-function findItemDetailForRequest(character: CharacterRecord, room: Room, requestedItem: string): ItemDetail | undefined {
-  const normalized = requestedItem.toLowerCase().trim();
-  if (!normalized) return undefined;
-  return buildItemDetails(character, room).find((item) => {
-    const code = item.code.toLowerCase();
-    const name = item.name.toLowerCase();
-    return code === normalized || name === normalized || code.replace(/\s+/g, '-') === normalized || name.replace(/\s+/g, '-') === normalized;
-  });
-}
-
-function buildItemDetailEvents(character: CharacterRecord, room: Room, requestedItem: string): string[] {
-  const item = findItemDetailForRequest(character, room, requestedItem);
-  if (!item) {
-    return [`You cannot find an item matching "${requestedItem}". Use inventory or shop to list known items.`];
-  }
-  return [
-    `Item: ${item.name}`,
-    `Code: ${item.code}.`,
-    `Category: ${item.category}. Source: ${item.source}.`,
-    `Slot: ${item.slot ?? 'held/carried only'}. Armor ${item.armor}. Evasion penalty ${item.evasionPenalty}. Attack modifier ${item.attackModifier}.`,
-    `Weapon range: ${item.weaponRange ?? 'none'}. Valid attack ranges: ${item.validAttackRanges?.join(', ') ?? 'none'}. Training skill: ${item.trainingSkill ?? 'none'}.`,
-    `Ammo: ${item.ammoCode ? `${item.ammoName} (${item.ammoCode})` : 'none'}.`,
-    `Quantity: ${item.quantity ?? 1}. Bundle size: ${item.bundleSize ?? 1}.`,
-    `Value: ${item.value} ${item.currency}.`,
-    `Carried: ${item.carried ? 'yes' : 'no'}. Shop available here: ${item.shopAvailable ? 'yes' : 'no'}.`,
-    item.description,
   ];
 }
 

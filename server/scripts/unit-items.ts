@@ -3,10 +3,12 @@ import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
   buildEquipmentSummary,
   buildInventoryEquipmentEvents,
+  buildItemDetailEvents,
   buildItemDetails,
   canWieldItem,
   canWearItem,
   displayNameFromCode,
+  findItemDetailForRequest,
   findInventoryIndex,
   findWornIndex,
   formatEquipmentModifiers,
@@ -134,6 +136,18 @@ const details = buildItemDetails(unit, marksmanRoom);
 assert.equal(details.some((entry) => entry.code === 'training sword'), true);
 assert.equal(details.some((entry) => entry.code === 'itm-sting-arrow'), true);
 assert.equal(details.some((entry) => entry.code === 'itm-practice-bow'), true);
+
+assert.equal(findItemDetailForRequest(unit, marksmanRoom, 'training sword')?.code, 'training sword');
+assert.equal(findItemDetailForRequest(unit, marksmanRoom, 'practice-bow')?.code, 'itm-practice-bow');
+assert.equal(findItemDetailForRequest(unit, marksmanRoom, '')?.code, undefined);
+assert.deepEqual(buildItemDetailEvents(unit, marksmanRoom, 'practice bow').slice(0, 4), [
+  'Item: practice bow',
+  'Code: itm-practice-bow.',
+  'Category: ranged. Source: shop.',
+  'Slot: held/carried only. Armor 0. Evasion penalty 0. Attack modifier 2.',
+]);
+assert.equal(buildItemDetailEvents(unit, marksmanRoom, 'damaged-itm-sting-arrow').some((entry) => entry.includes('broken ranged ammunition')), true);
+assert.deepEqual(buildItemDetailEvents(unit, marksmanRoom, 'missing bauble'), ['You cannot find an item matching "missing bauble". Use inventory or shop to list known items.']);
 
 assert.deepEqual(parseHeldItemRequest('training sword left'), {
   requestedItem: 'training sword',
