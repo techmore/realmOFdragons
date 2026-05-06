@@ -556,12 +556,6 @@ function ensureProgressionShape(character: CharacterRecord): boolean {
   return changed;
 }
 
-function grantSkillPool(character: CharacterRecord, skillId: string, amount: number, events: string[]) {
-  const gain = applySkillPoolGain(character, skillId, amount);
-  events.push(...gain.events);
-  return gain.applied;
-}
-
 function trainCharacter(character: CharacterRecord, room: Room, requestedSkill: string, events: string[]) {
   const training = resolveTrainingDecision(character, room, requestedSkill);
   if (!training.allowed) {
@@ -570,7 +564,7 @@ function trainCharacter(character: CharacterRecord, room: Room, requestedSkill: 
   }
 
   for (const gain of training.gains) {
-    grantSkillPool(character, gain.skillId, gain.amount, events);
+    events.push(...applySkillPoolGain(character, gain.skillId, gain.amount).events);
   }
   events.push(...training.events);
   return true;
@@ -589,7 +583,7 @@ function forageRoom(character: CharacterRecord, room: Room, events: string[]) {
 
   const item = forage.items[randomInt(0, forage.items.length)];
   character.inventory.push(item.code);
-  grantSkillPool(character, 'survival', Math.max(1, forage.difficulty), events);
+  events.push(...applySkillPoolGain(character, 'survival', Math.max(1, forage.difficulty)).events);
   events.push(`You forage carefully and find ${item.name}.`);
   events.push(`You place ${item.code} in your pack.`);
   return true;
@@ -611,7 +605,7 @@ function applyMeleeRetaliation(character: CharacterRecord, template: EnemyTempla
     const damage = Math.max(0, rawDamage - (defended ? 2 : 0) - stanceMitigation - equipment.totalArmor);
     events.push(`${character.combat.targetName} attacks for ${damage}.`);
     character.health.current = Math.max(0, character.health.current - damage);
-    grantSkillPool(character, 'evasion', defended ? 2 : 1, events);
+    events.push(...applySkillPoolGain(character, 'evasion', defended ? 2 : 1).events);
     events.push(`You now have ${character.health.current}/${character.health.max} health.`);
     if (damage >= 6) {
       events.push('You take a hard hit.');
@@ -682,7 +676,7 @@ function resolvePlayerManeuver(
     character.combat.targetHp = Math.max(0, character.combat.targetHp - damage);
     events.push(`You ${maneuver} ${character.combat.targetName} for ${damage} (${playerAttack.roll}/${playerAttack.threshold}).`);
     shiftAdvantage(character, maneuver === 'bash' ? 1 : 0);
-    grantSkillPool(character, 'melee', maneuver === 'bash' ? 3 : 2, events);
+    events.push(...applySkillPoolGain(character, 'melee', maneuver === 'bash' ? 3 : 2).events);
   } else {
     events.push(`You fail to land your ${maneuver}.`);
     shiftAdvantage(character, -1);
@@ -695,7 +689,7 @@ function resolvePlayerManeuver(
   if (character.combat.targetHp <= 0) {
     events.push(`${character.combat.targetName} collapses.`);
     character.inventory.push(`${character.combat.targetName} fang`);
-    grantSkillPool(character, 'survival', 2, events);
+    events.push(...applySkillPoolGain(character, 'survival', 2).events);
     clearCombat(character);
     setActionCooldown(character, 700);
     return true;
@@ -1398,7 +1392,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       }
       shiftAdvantage(resolvedCharacter, 1);
       recoverBalance(resolvedCharacter, 1);
-      grantSkillPool(resolvedCharacter, 'tactics', 2, events);
+      events.push(...applySkillPoolGain(resolvedCharacter, 'tactics', 2).events);
       setActionCooldown(resolvedCharacter, 500);
       modified = true;
       events.push(`You circle for a better angle. Position: ${formatAdvantage(resolvedCharacter.combat.advantage)}.`);
@@ -1501,7 +1495,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     const result = recoverAmmunition(resolvedCharacter);
     events.push(...result.events);
     if (!result.success) return buildCommandResult(resolvedCharacter, room, events);
-    grantSkillPool(resolvedCharacter, 'survival', 1, events);
+    events.push(...applySkillPoolGain(resolvedCharacter, 'survival', 1).events);
     setActionCooldown(resolvedCharacter, 400);
     modified = true;
     await persist();
@@ -1589,7 +1583,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     } else {
       combat.range = nextRange;
       reduceBalance(resolvedCharacter, 1);
-      grantSkillPool(resolvedCharacter, 'tactics', 1, events);
+      events.push(...applySkillPoolGain(resolvedCharacter, 'tactics', 1).events);
       events.push(`You advance to ${formatRange(nextRange)}.`);
       events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
     }
@@ -1623,7 +1617,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     } else {
       resolvedCharacter.combat.range = nextRange;
       recoverBalance(resolvedCharacter, 1);
-      grantSkillPool(resolvedCharacter, 'evasion', 1, events);
+      events.push(...applySkillPoolGain(resolvedCharacter, 'evasion', 1).events);
       events.push(`You retreat to ${formatRange(nextRange)}.`);
       events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
     }
@@ -1765,8 +1759,8 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     events.push(...attackOutcome.events);
     if (attackOutcome.collapsed) {
         resolvedCharacter.inventory.push(`${target.targetName} fang`);
-        grantSkillPool(resolvedCharacter, weapon?.trainingSkill ?? 'melee', 4, events);
-        grantSkillPool(resolvedCharacter, 'survival', 2, events);
+        events.push(...applySkillPoolGain(resolvedCharacter, weapon?.trainingSkill ?? 'melee', 4).events);
+        events.push(...applySkillPoolGain(resolvedCharacter, 'survival', 2).events);
         clearCombat(resolvedCharacter);
         setActionCooldown(resolvedCharacter, 700);
         await persist();
@@ -1826,7 +1820,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     const regained = Math.max(1, Math.ceil(resolvedCharacter.health.max / 6));
     const previousHealth = resolvedCharacter.health.current;
     resolvedCharacter.health.current = Math.min(resolvedCharacter.health.max, resolvedCharacter.health.current + regained);
-    grantSkillPool(resolvedCharacter, 'first_aid', 1, events);
+    events.push(...applySkillPoolGain(resolvedCharacter, 'first_aid', 1).events);
     setActionCooldown(resolvedCharacter, 1500);
     modified = true;
     const actualGain = resolvedCharacter.health.current - previousHealth;
@@ -1957,7 +1951,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         } else {
           resolvedCharacter.inventory.push(item.code);
         }
-        grantSkillPool(resolvedCharacter, 'trading', 1, events);
+        events.push(...applySkillPoolGain(resolvedCharacter, 'trading', 1).events);
         modified = true;
         setActionCooldown(resolvedCharacter, 450);
         events.push(`You buy ${item.name} for ${item.price} ${item.currency}${purchase.delivery === 'ammoPouch' ? ` (${purchase.quantity} bundled).` : '.'}`);
@@ -1996,7 +1990,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         const sellPrice = estimateAmmoPouchSalePrice(catalogItem, bundleSize);
         consumeAmmo(resolvedCharacter, catalogItem.code);
         earnFunds(resolvedCharacter.wallet, catalogItem.currency, sellPrice);
-        grantSkillPool(resolvedCharacter, 'trading', 1, events);
+        events.push(...applySkillPoolGain(resolvedCharacter, 'trading', 1).events);
         modified = true;
         setActionCooldown(resolvedCharacter, 450);
         events.push(`You sell one ${catalogItem.name} from your ammo pouch for ${sellPrice} ${catalogItem.currency}. ${countAmmo(resolvedCharacter, catalogItem.code)} remain.`);
@@ -2023,7 +2017,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
           resolvedCharacter.hands.right = null;
         }
         earnFunds(resolvedCharacter.wallet, catalogItem.currency, sellPrice);
-        grantSkillPool(resolvedCharacter, 'trading', 1, events);
+        events.push(...applySkillPoolGain(resolvedCharacter, 'trading', 1).events);
         modified = true;
         setActionCooldown(resolvedCharacter, 450);
         events.push(`You sell ${itemDetail.name} for ${sellPrice} ${catalogItem.currency}.`);
@@ -2044,7 +2038,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       events.push('That path is broken in the world data.');
     } else {
       resolvedCharacter.roomId = nextRoom.id;
-      grantSkillPool(resolvedCharacter, 'athletics', 1, events);
+      events.push(...applySkillPoolGain(resolvedCharacter, 'athletics', 1).events);
       setActionCooldown(resolvedCharacter, 350);
       modified = true;
       events.push(`You go ${direction} to ${nextRoom.title}.`);
