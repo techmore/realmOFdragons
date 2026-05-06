@@ -42,10 +42,12 @@ Completed current slice:
 - Static and browser smoke now verify the disabled sell hint before damaged ammunition is sold at the ammo shop.
 - Inventory rows now show shop-aware sell eligibility hints for stocked goods, unstored carried items, and damaged ammunition salvage.
 - Browser telemetry now verifies the shop-aware damaged salvage hint before selling recovered broken ammunition.
+- Ammo pouch rows now expose shop-aware `sell one` buttons for stacked ammunition when the local shop stocks the ammo.
+- Browser smoke buys a practice-arrow bundle and sells one shot from the ammo pouch through the UI.
 
 Current next priority:
 
-- Add ammo-pouch sale affordances in the UI so stacked ammunition can be sold directly without typing `shop sell <ammo-code>`.
+- Add richer ammo-pouch state feedback after UI sales, such as visible remaining-count assertions and disabled sale hints when no matching shop is present.
 
 Core Philosophy
 

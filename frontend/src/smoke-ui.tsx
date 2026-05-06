@@ -224,6 +224,8 @@ for (const expected of [
   'Test Gear Stand buys matching salvage for trias.',
   'Ammo',
   'itm-sting-arrow x4',
+  'Test Gear Stand buys practice arrow from your ammo pouch.',
+  'sell one',
   'Loaded: itm-practice-bow: itm-sting-arrow',
   'Recoverable: itm-sting-arrow x1',
   'Item Details',

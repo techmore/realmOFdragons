@@ -115,6 +115,26 @@ async function main(): Promise<void> {
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
 
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('shop buy itm-sting-arrow');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You buy practice arrow/).waitFor();
+    await page
+      .locator('.ammo-pouch-list li')
+      .filter({ hasText: 'itm-sting-arrow x5' })
+      .getByText('Marksman Supply Stand buys practice arrow from your ammo pouch.')
+      .waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
+    await page.locator('.ammo-pouch-list li').filter({ hasText: 'itm-sting-arrow x5' }).getByRole('button', { name: 'sell one' }).click();
+    await page.locator('.terminal-pane .log').getByText(/You sell one practice arrow from your ammo pouch/).waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
     await page
       .locator('.equip li')
       .filter({ hasText: 'damaged practice arrow' })
@@ -180,6 +200,14 @@ async function main(): Promise<void> {
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').focus();
     await page.keyboard.press('Numpad4');
     await page.locator('.terminal-pane .log').getByText(/You go west to Crossing Town Green/).last().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('look');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText('A broad square with the fountain').last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -258,6 +286,7 @@ async function main(): Promise<void> {
           damagedAmmoSoldFromInventory: true,
           disabledSellHintVisible: true,
           shopAwareSellHintVisible: true,
+          ammoPouchSellClicked: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,

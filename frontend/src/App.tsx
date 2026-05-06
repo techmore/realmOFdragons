@@ -666,7 +666,34 @@ function GameStatusPanels({
           <p className="subtle">Selling requires a local shop. Travel to a shop room before selling carried items.</p>
         ) : null}
         <h3>Ammo</h3>
-        <p>{Object.entries(character?.ammoPouch ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none'}</p>
+        {Object.entries(character?.ammoPouch ?? {}).length ? (
+          <ul className="ammo-pouch-list">
+            {Object.entries(character?.ammoPouch ?? {}).map(([code, count]) => {
+              const sellMatch = localShopSellMatch(code, room);
+              const sellHint = sellMatch
+                ? `${room?.shop?.name} buys ${sellMatch.name} from your ammo pouch.`
+                : room?.shop
+                  ? `${room.shop.name} does not stock ${code}.`
+                  : 'Selling ammo requires a local shop.';
+              return (
+                <li key={code}>
+                  <span>{code} x{count}</span>
+                  <small>{sellHint}</small>
+                  <button
+                    type="button"
+                    onClick={() => onCommand(`shop sell ${code}`)}
+                    disabled={loading || !character || !sellMatch}
+                    title={sellHint}
+                  >
+                    sell one
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p>none</p>
+        )}
         <p>Loaded: {Object.entries(character?.loadedAmmo ?? {}).map(([weapon, ammo]) => `${weapon}: ${ammo}`).join(', ') || 'none'}</p>
         <p>Recoverable: {Object.entries(character?.recoverableAmmo ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none'}</p>
         <ul>
