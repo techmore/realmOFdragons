@@ -10,13 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Added a gameplay `forage` command for Crossing outskirts and hunting rooms.
-- `forage` adds a found item to inventory and grants Survival learning.
-- Web quick controls, static UI smoke, API smoke, telemetry, and README now include forage coverage.
+- Forage results now live in room metadata in `server/src/world.ts`.
+- Outdoor Crossing rooms define forage difficulty and found item tables.
+- The `forage` command now reads room forage metadata instead of hardcoded room IDs.
 
 Current next priority:
 
-- Add a small foraging result table or room-specific forage metadata to the world model so finds are data-driven instead of hardcoded in command logic.
+- Expose forage availability in `look` or room payloads so players can discover forageable rooms without trial-and-error.
 
 Core Philosophy
 
@@ -558,6 +558,19 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add a small foraging result table or room-specific forage metadata to the world model so finds are data-driven instead of hardcoded in command logic.
+
+Implementation Notes - 2026-05-06, Data Driven Forage Rooms
+
+Completed in the current Node/React prototype:
+
+- Added `RoomForage` and `RoomForageItem` metadata to the world model.
+- Crossing outskirts and beginner hunting rooms now define forage difficulty and found item tables.
+- The `forage` command now reads `room.forage` metadata instead of hardcoded room IDs.
+- Survival learning gain is based on forage difficulty.
+
+Next priority:
+
+- Expose forage availability in `look` or room payloads so players can discover forageable rooms without trial-and-error.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

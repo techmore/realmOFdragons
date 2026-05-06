@@ -23,6 +23,16 @@ export interface RoomShop {
   items: RoomShopItem[];
 }
 
+export interface RoomForageItem {
+  code: string;
+  name: string;
+}
+
+export interface RoomForage {
+  difficulty: number;
+  items: RoomForageItem[];
+}
+
 export interface Room {
   id: RoomId;
   code: RoomCode;
@@ -32,6 +42,7 @@ export interface Room {
   exits: RoomExit[];
   guild?: string;
   shop?: RoomShop;
+  forage?: RoomForage;
 }
 
 export interface Guild {
@@ -109,6 +120,10 @@ export const worldRooms: Record<RoomId, Room> = {
       { direction: "west", destination: "crossing-GU11-001", details: "Toward the Warrior Mage Guild range." },
       { direction: "south", destination: "crossing-RV02-001", details: "Continue toward the gate trail." },
     ],
+    forage: {
+      difficulty: 1,
+      items: [{ code: "foraged-fieldherb", name: "field herb bundle" }],
+    },
   },
   "crossing-RV02-001": {
     id: "crossing-RV02-001",
@@ -121,6 +136,10 @@ export const worldRooms: Record<RoomId, Room> = {
       { direction: "north", destination: "crossing-RV01-001", details: "Return to the gate road." },
       { direction: "east", destination: "crossing-RV02-002", details: "A foraging path." },
     ],
+    forage: {
+      difficulty: 1,
+      items: [{ code: "foraged-fieldherb", name: "field herb bundle" }],
+    },
   },
   "crossing-RV02-002": {
     id: "crossing-RV02-002",
@@ -134,6 +153,10 @@ export const worldRooms: Record<RoomId, Room> = {
       { direction: "south", destination: "crossing-RV02-003", details: "A narrow game path." },
       { direction: "east", destination: "crossing-RV02-004", details: "A muddy bend near beetle stones." },
     ],
+    forage: {
+      difficulty: 1,
+      items: [{ code: "foraged-fieldherb", name: "field herb bundle" }],
+    },
   },
   "crossing-RV02-003": {
     id: "crossing-RV02-003",
@@ -146,6 +169,10 @@ export const worldRooms: Record<RoomId, Room> = {
       { direction: "north", destination: "crossing-RV02-002", details: "Backtrack the path." },
       { direction: "south", destination: "crossing-RV02-005", details: "Toward a quiet low ridge." },
     ],
+    forage: {
+      difficulty: 2,
+      items: [{ code: "foraged-willowbark", name: "willow bark strip" }],
+    },
     shop: {
       code: "crossing-outskirts-general",
       name: "Crossing Forage Supply Stand",
@@ -165,6 +192,10 @@ export const worldRooms: Record<RoomId, Room> = {
     exits: [
       { direction: "west", destination: "crossing-RV02-002", details: "Return to the brushline fork." },
     ],
+    forage: {
+      difficulty: 2,
+      items: [{ code: "foraged-mudroot", name: "mudroot sprig" }],
+    },
     shop: {
       code: "crossing-beetle-forager",
       name: "Muddy Bend Forager Cache",
@@ -184,6 +215,10 @@ export const worldRooms: Record<RoomId, Room> = {
     exits: [
       { direction: "north", destination: "crossing-RV02-003", details: "Back toward the willow tract." },
     ],
+    forage: {
+      difficulty: 2,
+      items: [{ code: "foraged-ridgegrass", name: "ridge grass bundle" }],
+    },
     shop: {
       code: "crossing-ridge-snare-kit",
       name: "Ridge Snare Kit",

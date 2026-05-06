@@ -496,30 +496,20 @@ function trainCharacter(character: CharacterRecord, room: Room, requestedSkill: 
   return true;
 }
 
-function isForageRoom(room: Room) {
-  return room.code.zone === 'crossing-outskirts' || room.code.zone === 'crossing-hunting';
-}
-
-function forageRoomItem(room: Room) {
-  if (room.id === 'crossing-RV02-004') return { code: 'foraged-mudroot', name: 'mudroot sprig' };
-  if (room.id === 'crossing-RV02-005') return { code: 'foraged-ridgegrass', name: 'ridge grass bundle' };
-  if (room.id === 'crossing-RV02-003') return { code: 'foraged-willowbark', name: 'willow bark strip' };
-  return { code: 'foraged-fieldherb', name: 'field herb bundle' };
-}
-
 function forageRoom(character: CharacterRecord, room: Room, events: string[]) {
   if (character.combat) {
     events.push('You are too engaged to forage safely.');
     return false;
   }
-  if (!isForageRoom(room)) {
+  const forage = room.forage;
+  if (!forage?.items.length) {
     events.push('You find nothing useful to forage here.');
     return false;
   }
 
-  const item = forageRoomItem(room);
+  const item = forage.items[randomInt(0, forage.items.length)];
   character.inventory.push(item.code);
-  grantSkillPool(character, 'survival', 2, events);
+  grantSkillPool(character, 'survival', Math.max(1, forage.difficulty), events);
   events.push(`You forage carefully and find ${item.name}.`);
   events.push(`You place ${item.code} in your pack.`);
   return true;
