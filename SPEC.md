@@ -316,7 +316,7 @@ Completed in the current Node/React prototype:
 
 Next priority:
 
-- Make browser smoke CI-compatible by using Playwright-managed Chromium on Linux or conditionally detecting installed browsers.
+- Add first gameplay content expansion beyond Crossing smoke coverage: additional beginner hunting rooms, enemy templates, and shop inventory variety while keeping all tests deterministic.
 
 Implementation Notes - 2026-05-05, Telemetry Coverage Summary
 
@@ -356,4 +356,4 @@ Completed in the current Node/React prototype:
 
 Next priority:
 
-- Make browser smoke CI-compatible by using Playwright-managed Chromium on Linux or conditionally detecting installed browsers.
+- Add first gameplay content expansion beyond Crossing smoke coverage: additional beginner hunting rooms, enemy templates, and shop inventory variety while keeping all tests deterministic.
