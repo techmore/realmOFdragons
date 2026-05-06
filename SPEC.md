@@ -15,10 +15,15 @@ Completed current slice:
 - Ammo item metadata exposes quantity and bundle size.
 - Inventory and web UI now show ammo counts separately from regular inventory.
 - Ranged attacks consume from the ammo pouch first and report remaining ammo.
+- Added persistent loaded-ammo state for ranged weapons.
+- Added passive `ammo`/`quiver` status and active `reload`.
+- Ranged `fire`/`shoot` now require a loaded shot and report empty-quiver/unloaded states.
+- Web controls and character panels now expose ammo readiness.
+- Smoke telemetry now tracks ranged reload readiness.
 
 Current next priority:
 
-- Add reload/quiver verbs and UI actions for ranged readiness, including `ammo`, `reload`, and empty-quiver messaging.
+- Add ammunition recovery and selling rules so spent/recovered arrows and ammo stacks participate in the economy consistently.
 
 Core Philosophy
 

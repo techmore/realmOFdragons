@@ -70,6 +70,7 @@ export interface CharacterRecord {
   createdAt: string;
   inventory: string[];
   ammoPouch?: Record<string, number>;
+  loadedAmmo?: Record<string, string>;
   worn?: string[];
   equipment?: EquipmentSlots;
   hands: {

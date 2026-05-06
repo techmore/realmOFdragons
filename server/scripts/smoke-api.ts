@@ -19,6 +19,7 @@ interface CharacterSummary {
   circle: number;
   inventory: string[];
   ammoPouch?: Record<string, number>;
+  loadedAmmo?: Record<string, string>;
   worn?: string[];
   equipment?: Record<string, string>;
   hands: {
@@ -422,6 +423,17 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   assert(result.events.some((event) => event.includes('You hold practice bow in your right hand')), 'Expected to wield practice bow.');
   current = (await command(context.accessToken, result.character.id, 'wait 300')).character;
 
+  result = await command(context.accessToken, current.id, 'ammo');
+  assert(result.events.some((event) => event.includes('Ammo pouch: itm-sting-arrow x5')), 'Expected ammo command to show quiver count.');
+  assert(result.events.some((event) => event.includes('practice bow is not loaded')), 'Expected ammo command to show unloaded bow state.');
+
+  result = await command(context.accessToken, current.id, 'reload');
+  assert(result.events.some((event) => event.includes('You load practice arrow into practice bow')), 'Expected reload output.');
+  assert(result.events.some((event) => event.includes('4 remain in your quiver')), 'Expected reload to report remaining quiver count.');
+  assert(result.character.ammoPouch?.['itm-sting-arrow'] === 4, 'Expected reload to move one arrow out of the pouch.');
+  assert(result.character.loadedAmmo?.['itm-practice-bow'] === 'itm-sting-arrow', 'Expected practice bow loaded ammo state.');
+  current = (await command(context.accessToken, result.character.id, 'wait 350')).character;
+
   current = await walkTo(context.accessToken, current, 'crossing-RV02-002');
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
 
@@ -474,13 +486,15 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   const arrowsBefore = current.ammoPouch?.['itm-sting-arrow'] ?? 0;
   result = await command(context.accessToken, current.id, 'fire');
   assert(result.events.some((event) => event.includes('You attack with practice bow (ranged weapon')), 'Expected ranged weapon attack output.');
-  assert(result.events.some((event) => event.includes('You loose practice arrow')), 'Expected ranged attack to consume practice arrow.');
+  assert(result.events.some((event) => event.includes('You loose loaded practice arrow')), 'Expected ranged attack to fire loaded practice arrow.');
   assert(result.events.some((event) => event.includes('4 remain')), 'Expected ranged attack to report remaining ammo.');
-  assert((result.character.ammoPouch?.['itm-sting-arrow'] ?? 0) === arrowsBefore - 1, 'Expected practice arrow pouch count to decrease.');
+  assert((result.character.ammoPouch?.['itm-sting-arrow'] ?? 0) === arrowsBefore, 'Expected loaded ranged attack not to double-consume pouch ammo.');
+  assert(!result.character.loadedAmmo?.['itm-practice-bow'], 'Expected ranged attack to clear loaded ammo state.');
   assert(!result.events.some((event) => event.includes('too far away')), 'Expected ranged weapon to attack from pole or missile range.');
   context.summary.rangedWeaponRangeChecked = true;
   context.summary.rangedAliasAmmoChecked = true;
   context.summary.ammoBundleChecked = true;
+  context.summary.rangedReloadChecked = true;
   current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
 
   if (current.combat?.range === 'melee') {
