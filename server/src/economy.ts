@@ -22,6 +22,33 @@ export type ShopBuyDecision =
   | { allowed: false; reason: 'missing_code' | 'no_shop' | 'not_found' | 'unaffordable'; events: string[] }
   | { allowed: true; item: RoomShopItem; purchase: ShopPurchaseResolution; events: string[] };
 
+export type ShopSellItemDetail = {
+  name: string;
+  category: string;
+  bundleSize?: number;
+};
+
+export type ShopSellDecision =
+  | { allowed: false; reason: 'no_shop' | 'missing_code' | 'not_carried' | 'shop_does_not_buy'; events: string[] }
+  | {
+      allowed: true;
+      source: 'inventory';
+      inventoryIndex: number;
+      itemCode: string;
+      catalogItem: RoomShopItem;
+      sellPrice: number;
+      events: string[];
+    }
+  | {
+      allowed: true;
+      source: 'ammoPouch';
+      itemCode: string;
+      catalogItem: RoomShopItem;
+      sellPrice: number;
+      remainingAmmo: number;
+      events: string[];
+    };
+
 export function isDamagedAmmoCode(code: string): boolean {
   const normalized = code.toLowerCase();
   return normalized.startsWith('damaged-itm-') || normalized.startsWith('damaged itm-');
@@ -100,6 +127,71 @@ export function resolveShopBuyDecision(
     item,
     purchase,
     events: [`You buy ${item.name} for ${item.price} ${item.currency}${purchase.delivery === 'ammoPouch' ? ` (${purchase.quantity} bundled).` : '.'}`],
+  };
+}
+
+export function resolveShopSellDecision(
+  shop: RoomShop | undefined,
+  code: string,
+  inventory: string[],
+  itemDetailForCode: (code: string) => ShopSellItemDetail,
+  ammoCountForCode: (code: string) => number = () => 0,
+): ShopSellDecision {
+  if (!shop) {
+    return { allowed: false, reason: 'no_shop', events: ['No shop is present here.'] };
+  }
+
+  const requestedCode = code.trim();
+  if (!requestedCode) {
+    return { allowed: false, reason: 'missing_code', events: ['Specify a carried item code: shop sell <code>.'] };
+  }
+
+  const lowered = requestedCode.toLowerCase();
+  const inventoryIndex = inventory.findIndex(
+    (entry) => entry.toLowerCase() === lowered || entry.toLowerCase().replace(/\s+/g, '-') === lowered,
+  );
+  if (inventoryIndex < 0) {
+    const catalogItem = findLocalShopSaleItem(shop.items, lowered);
+    const itemDetail = catalogItem ? itemDetailForCode(catalogItem.code) : undefined;
+    if (!catalogItem || itemDetail?.category !== 'ammo' || ammoCountForCode(catalogItem.code) <= 0) {
+      return { allowed: false, reason: 'not_carried', events: [`You are not carrying "${requestedCode}".`] };
+    }
+
+    const bundleSize = itemDetail.bundleSize ?? 1;
+    const sellPrice = estimateAmmoPouchSalePrice(catalogItem, bundleSize);
+    const remainingAmmo = Math.max(0, ammoCountForCode(catalogItem.code) - 1);
+    return {
+      allowed: true,
+      source: 'ammoPouch',
+      itemCode: catalogItem.code,
+      catalogItem,
+      sellPrice,
+      remainingAmmo,
+      events: [`You sell one ${catalogItem.name} from your ammo pouch for ${sellPrice} ${catalogItem.currency}. ${remainingAmmo} remain.`],
+    };
+  }
+
+  const itemCode = inventory[inventoryIndex];
+  const catalogItem = findLocalShopSaleItem(shop.items, itemCode);
+  if (!catalogItem) {
+    return { allowed: false, reason: 'shop_does_not_buy', events: [`This shop does not buy ${itemCode}.`] };
+  }
+
+  const itemDetail = itemDetailForCode(itemCode);
+  const damagedAmmo = isDamagedAmmoCode(itemCode);
+  const sellPrice = estimateInventorySalePrice(
+    itemCode,
+    catalogItem,
+    damagedAmmo ? itemDetailForCode(catalogItem.code).bundleSize : undefined,
+  );
+  return {
+    allowed: true,
+    source: 'inventory',
+    inventoryIndex,
+    itemCode,
+    catalogItem,
+    sellPrice,
+    events: [`You sell ${itemDetail.name} for ${sellPrice} ${catalogItem.currency}.`],
   };
 }
 

@@ -12,6 +12,7 @@ import {
   originalAmmoCodeFromDamaged,
   resolveShopBuyDecision,
   resolveShopPurchase,
+  resolveShopSellDecision,
 } from '../src/economy.js';
 
 const practiceArrow: RoomShopItem = {
@@ -118,4 +119,57 @@ assert.deepEqual(resolveShopBuyDecision(testShop, 'practice arrow', wallet, () =
   events: ['You buy practice arrow for 1 trias (7 bundled).'],
 });
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:economy', shopListFormattingChecked: true, shopBuyDecisionChecked: true }, null, 2));
+const detailForCode = (code: string) => ({
+  name: code === 'damaged-itm-sting-arrow' ? 'damaged practice arrow' : code === 'itm-sting-arrow' ? 'practice arrow' : 'test blade',
+  category: code.includes('arrow') ? 'ammo' : 'weapon',
+  bundleSize: code.includes('arrow') ? 5 : undefined,
+});
+assert.deepEqual(resolveShopSellDecision(undefined, 'itm-test-blade', ['itm-test-blade'], detailForCode), {
+  allowed: false,
+  reason: 'no_shop',
+  events: ['No shop is present here.'],
+});
+assert.deepEqual(resolveShopSellDecision(testShop, '', ['itm-test-blade'], detailForCode), {
+  allowed: false,
+  reason: 'missing_code',
+  events: ['Specify a carried item code: shop sell <code>.'],
+});
+assert.deepEqual(resolveShopSellDecision(testShop, 'itm-missing', ['itm-test-blade'], detailForCode), {
+  allowed: false,
+  reason: 'not_carried',
+  events: ['You are not carrying "itm-missing".'],
+});
+assert.deepEqual(resolveShopSellDecision(testShop, 'itm-unknown', ['itm-unknown'], detailForCode), {
+  allowed: false,
+  reason: 'shop_does_not_buy',
+  events: ['This shop does not buy itm-unknown.'],
+});
+assert.deepEqual(resolveShopSellDecision(testShop, 'itm-test-blade', ['itm-test-blade'], detailForCode), {
+  allowed: true,
+  source: 'inventory',
+  inventoryIndex: 0,
+  itemCode: 'itm-test-blade',
+  catalogItem: testBlade,
+  sellPrice: 2,
+  events: ['You sell test blade for 2 trias.'],
+});
+assert.deepEqual(resolveShopSellDecision(testShop, 'damaged-itm-sting-arrow', ['damaged-itm-sting-arrow'], detailForCode), {
+  allowed: true,
+  source: 'inventory',
+  inventoryIndex: 0,
+  itemCode: 'damaged-itm-sting-arrow',
+  catalogItem: practiceArrow,
+  sellPrice: 1,
+  events: ['You sell damaged practice arrow for 1 trias.'],
+});
+assert.deepEqual(resolveShopSellDecision(testShop, 'practice arrow', [], detailForCode, () => 3), {
+  allowed: true,
+  source: 'ammoPouch',
+  itemCode: 'itm-sting-arrow',
+  catalogItem: practiceArrow,
+  sellPrice: 1,
+  remainingAmmo: 2,
+  events: ['You sell one practice arrow from your ammo pouch for 1 trias. 2 remain.'],
+});
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:economy', shopListFormattingChecked: true, shopBuyDecisionChecked: true, shopSellDecisionChecked: true }, null, 2));

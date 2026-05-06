@@ -68,6 +68,7 @@ import {
   listShopItems,
   originalAmmoCodeFromDamaged,
   resolveShopBuyDecision,
+  resolveShopSellDecision,
 } from './economy.js';
 import {
   addAmmo,
@@ -1876,64 +1877,38 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command.startsWith('shop sell ')) {
-    if (!room.shop) {
-      events.push('No shop is present here.');
-      return buildCommandResult(resolvedCharacter, room, events);
-    }
-
     const code = command.slice(10).trim();
-    if (!code) {
-      events.push('Specify a carried item code: shop sell <code>.');
-      return buildCommandResult(resolvedCharacter, room, events);
-    }
-
-    const lowered = code.toLowerCase();
-    const inventoryIndex = resolvedCharacter.inventory.findIndex(
-      (entry) => entry.toLowerCase() === lowered || entry.toLowerCase().replace(/\s+/g, '-') === lowered,
+    const decision = resolveShopSellDecision(
+      room.shop,
+      code,
+      resolvedCharacter.inventory,
+      (itemCode) => resolveItemDetail(itemCode, room, resolvedCharacter),
+      (itemCode) => countAmmo(resolvedCharacter, itemCode),
     );
-    if (inventoryIndex < 0) {
-      const catalogItem = findLocalShopSaleItem(room.shop.items, lowered);
-      const itemDetail = catalogItem ? resolveItemDetail(catalogItem.code, room, resolvedCharacter) : undefined;
-      if (!catalogItem || itemDetail?.category !== 'ammo' || countAmmo(resolvedCharacter, catalogItem.code) <= 0) {
-        events.push(`You are not carrying "${code}".`);
-      } else {
-        const bundleSize = itemDetail.bundleSize ?? 1;
-        const sellPrice = estimateAmmoPouchSalePrice(catalogItem, bundleSize);
-        consumeAmmo(resolvedCharacter, catalogItem.code);
-        earnFunds(resolvedCharacter.wallet, catalogItem.currency, sellPrice);
+    if (!decision.allowed) {
+      events.push(...decision.events);
+    } else if (decision.source === 'ammoPouch') {
+        consumeAmmo(resolvedCharacter, decision.itemCode);
+        earnFunds(resolvedCharacter.wallet, decision.catalogItem.currency, decision.sellPrice);
         events.push(...applySkillPoolGain(resolvedCharacter, 'trading', 1).events);
         modified = true;
         setActionCooldown(resolvedCharacter, 450);
-        events.push(`You sell one ${catalogItem.name} from your ammo pouch for ${sellPrice} ${catalogItem.currency}. ${countAmmo(resolvedCharacter, catalogItem.code)} remain.`);
+        events.push(...decision.events);
         events.push(`Wallet: ${formatWallet(resolvedCharacter.wallet)}.`);
-      }
     } else {
-      const itemCode = resolvedCharacter.inventory[inventoryIndex];
-      const damagedAmmo = isDamagedAmmoCode(itemCode);
-      const catalogItem = findLocalShopSaleItem(room.shop.items, itemCode);
-      if (!catalogItem) {
-        events.push(`This shop does not buy ${itemCode}.`);
-      } else {
-        const itemDetail = resolveItemDetail(itemCode, room, resolvedCharacter);
-        const sellPrice = estimateInventorySalePrice(
-          itemCode,
-          catalogItem,
-          damagedAmmo ? resolveItemDetail(catalogItem.code, room, resolvedCharacter).bundleSize : undefined,
-        );
-        resolvedCharacter.inventory.splice(inventoryIndex, 1);
-        if (resolvedCharacter.hands.left === itemCode) {
+        resolvedCharacter.inventory.splice(decision.inventoryIndex, 1);
+        if (resolvedCharacter.hands.left === decision.itemCode) {
           resolvedCharacter.hands.left = null;
         }
-        if (resolvedCharacter.hands.right === itemCode) {
+        if (resolvedCharacter.hands.right === decision.itemCode) {
           resolvedCharacter.hands.right = null;
         }
-        earnFunds(resolvedCharacter.wallet, catalogItem.currency, sellPrice);
+        earnFunds(resolvedCharacter.wallet, decision.catalogItem.currency, decision.sellPrice);
         events.push(...applySkillPoolGain(resolvedCharacter, 'trading', 1).events);
         modified = true;
         setActionCooldown(resolvedCharacter, 450);
-        events.push(`You sell ${itemDetail.name} for ${sellPrice} ${catalogItem.currency}.`);
+        events.push(...decision.events);
         events.push(`Wallet: ${formatWallet(resolvedCharacter.wallet)}.`);
-      }
     }
     if (modified) {
       await persist();
