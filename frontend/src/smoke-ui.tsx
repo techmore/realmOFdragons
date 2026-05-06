@@ -47,6 +47,7 @@ const character: Character = {
   health: { current: 31, max: 38 },
   hands: { right: 'itm-test-blade', left: null },
   inventory: ['itm-test-blade', 'forage wolf-cub fang'],
+  worn: ['leather backpack'],
   wallet: { plat: 40, trias: 77, lucan: 0, silk: 0 },
   combat: {
     targetId: 'rv-wolf-cub',
@@ -151,6 +152,8 @@ for (const expected of [
   'Fighter Guild | Circle 4',
   'Right: itm-test-blade',
   'Left: empty',
+  'Worn',
+  'leather backpack',
   'Inventory',
   'Item Details',
   'test blade',

@@ -113,6 +113,7 @@ type Character = {
     right: string | null;
   };
   inventory: string[];
+  worn?: string[];
   wallet: Wallet;
   combat?: CombatState;
   stance: 'balanced' | 'offensive' | 'defensive' | 'evasive';
@@ -621,6 +622,8 @@ function GameStatusPanels({
         <h3>Hands</h3>
         <p>Right: {character?.hands.right ?? 'empty'}</p>
         <p>Left: {character?.hands.left ?? 'empty'}</p>
+        <h3>Worn</h3>
+        <p>{character?.worn?.length ? character.worn.join(', ') : 'nothing'}</p>
         <h3>Skills</h3>
         <ul>
           {skillEntries.map(([id, skill]) => (

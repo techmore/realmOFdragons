@@ -10,14 +10,14 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Command, character-state, script-run, and fixture-state responses now include structured `itemDetails`.
-- `appraise <item>` resolves starter, shop, forage, and simple loot metadata before falling back to target appraisal.
-- Web UI now renders item detail cards and inventory appraisal actions.
-- API, static UI, and browser smoke cover structured item details and item appraisal.
+- Added starter equipment verbs: `hold <item> [left|right]`, `stow <item|left|right>`, `wear <item>`, and `remove <item>`.
+- Character state now persists a lightweight `worn` item list alongside hands and inventory.
+- Inventory output and web UI show worn items.
+- API and browser smoke cover wearing/removing starter gear and holding/stowing starter inventory.
 
 Current next priority:
 
-- Add simple hands/equipment verbs (`hold`, `stow`, `wear/remove` starter scope) so item details become actionable beyond shop buy/sell.
+- Add structured equipment slots and beginner armor/weapon constraints so worn gear has explicit location and combat/evasion tradeoffs.
 
 Core Philosophy
 

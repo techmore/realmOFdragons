@@ -66,6 +66,7 @@ interface CommandResult {
   | 'health'
   | 'hands'
   | 'inventory'
+  | 'worn'
   | 'roundtimeMs'
   | 'combat'
   | 'stance'
@@ -342,6 +343,7 @@ function sanitizeCharacter(character: CharacterRecord): CommandResult['character
     health: character.health,
     hands: character.hands,
     inventory: character.inventory,
+    worn: character.worn ?? [],
     wallet: character.wallet,
     stats: character.stats,
     rollProfileVersion: character.rollProfileVersion,
@@ -668,6 +670,10 @@ function resolvePlayerManeuver(
 
 function ensureCharacterShape(character: CharacterRecord): { character: CharacterRecord; changed: boolean } {
   let changed = false;
+  if (!Array.isArray(character.worn)) {
+    character.worn = [];
+    changed = true;
+  }
   if (
     character.health &&
     typeof character.health.current === 'number' &&
@@ -751,6 +757,7 @@ async function createRolledCharacter(accountId: string, name: string, raceInput:
     rollProfileVersion: roll.rollProfileVersion,
     createdAt: new Date().toISOString(),
     inventory: ['leather backpack', 'repair cloth'],
+    worn: [],
     hands: { left: null, right: 'training sword' },
     actionCooldownUntil: undefined,
     combat: undefined,
@@ -942,14 +949,14 @@ function resolveItemDetail(code: string, room: Room, character: CharacterRecord)
     value,
     currency,
     source,
-    carried: character.inventory.includes(code) || character.hands.left === code || character.hands.right === code,
+    carried: character.inventory.includes(code) || (character.worn ?? []).includes(code) || character.hands.left === code || character.hands.right === code,
     shopAvailable: Boolean(room.shop?.items.some((entry) => entry.code === code)),
   };
 }
 
 function buildItemDetails(character: CharacterRecord, room: Room): ItemDetail[] {
   const details = new Map<string, ItemDetail>();
-  for (const itemCode of [...character.inventory, character.hands.left, character.hands.right].filter(Boolean) as string[]) {
+  for (const itemCode of [...character.inventory, ...(character.worn ?? []), character.hands.left, character.hands.right].filter(Boolean) as string[]) {
     details.set(itemCode, resolveItemDetail(itemCode, room, character));
   }
   for (const item of room.shop?.items ?? []) {
@@ -1026,6 +1033,116 @@ function buildItemDetailEvents(character: CharacterRecord, room: Room, requested
   ];
 }
 
+function normalizeItemRequest(raw: string): string {
+  return raw.toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+function findInventoryIndex(character: CharacterRecord, requestedItem: string): number {
+  const normalized = normalizeItemRequest(requestedItem);
+  return character.inventory.findIndex((item) => {
+    const code = normalizeItemRequest(item);
+    return code === normalized || code.replace(/\s+/g, '-') === normalized;
+  });
+}
+
+function findWornIndex(character: CharacterRecord, requestedItem: string): number {
+  const normalized = normalizeItemRequest(requestedItem);
+  return (character.worn ?? []).findIndex((item) => {
+    const code = normalizeItemRequest(item);
+    return code === normalized || code.replace(/\s+/g, '-') === normalized;
+  });
+}
+
+function resolveHandSlot(character: CharacterRecord, requested: string): 'left' | 'right' | undefined {
+  const normalized = normalizeItemRequest(requested);
+  if (normalized === 'left' || normalized === 'left hand') return 'left';
+  if (normalized === 'right' || normalized === 'right hand') return 'right';
+  if (character.hands.left && normalizeItemRequest(character.hands.left) === normalized) return 'left';
+  if (character.hands.right && normalizeItemRequest(character.hands.right) === normalized) return 'right';
+  return undefined;
+}
+
+function holdItem(character: CharacterRecord, room: Room, requestedItem: string, requestedSlot: string, events: string[]) {
+  const inventoryIndex = findInventoryIndex(character, requestedItem);
+  if (inventoryIndex < 0) {
+    events.push(`You are not carrying "${requestedItem}" in your inventory.`);
+    return false;
+  }
+  const slot = requestedSlot === 'left' || requestedSlot === 'right'
+    ? requestedSlot
+    : character.hands.right === null
+      ? 'right'
+      : character.hands.left === null
+        ? 'left'
+        : undefined;
+  if (!slot) {
+    events.push('Both hands are full. Stow something first.');
+    return false;
+  }
+  if (character.hands[slot]) {
+    events.push(`Your ${slot} hand is already holding ${character.hands[slot]}.`);
+    return false;
+  }
+  const [itemCode] = character.inventory.splice(inventoryIndex, 1);
+  character.hands[slot] = itemCode;
+  const detail = resolveItemDetail(itemCode, room, character);
+  events.push(`You hold ${detail.name} in your ${slot} hand.`);
+  return true;
+}
+
+function stowItem(character: CharacterRecord, room: Room, requestedItem: string, events: string[]) {
+  const slot = resolveHandSlot(character, requestedItem);
+  if (!slot || !character.hands[slot]) {
+    events.push(`You are not holding "${requestedItem}".`);
+    return false;
+  }
+  const itemCode = character.hands[slot]!;
+  character.hands[slot] = null;
+  character.inventory.push(itemCode);
+  const detail = resolveItemDetail(itemCode, room, character);
+  events.push(`You stow ${detail.name} from your ${slot} hand.`);
+  return true;
+}
+
+function wearItem(character: CharacterRecord, room: Room, requestedItem: string, events: string[]) {
+  const inventoryIndex = findInventoryIndex(character, requestedItem);
+  const handSlot = resolveHandSlot(character, requestedItem);
+  const itemCode = inventoryIndex >= 0 ? character.inventory[inventoryIndex] : handSlot ? character.hands[handSlot] : undefined;
+  if (!itemCode) {
+    events.push(`You are not carrying "${requestedItem}".`);
+    return false;
+  }
+  const detail = resolveItemDetail(itemCode, room, character);
+  if (!['armor', 'container', 'utility'].includes(detail.category)) {
+    events.push(`${detail.name} is not something you can wear yet.`);
+    return false;
+  }
+  if (inventoryIndex >= 0) {
+    character.inventory.splice(inventoryIndex, 1);
+  } else if (handSlot) {
+    character.hands[handSlot] = null;
+  }
+  character.worn = character.worn ?? [];
+  if (!character.worn.includes(itemCode)) {
+    character.worn.push(itemCode);
+  }
+  events.push(`You wear ${detail.name}.`);
+  return true;
+}
+
+function removeWornItem(character: CharacterRecord, room: Room, requestedItem: string, events: string[]) {
+  const wornIndex = findWornIndex(character, requestedItem);
+  if (wornIndex < 0) {
+    events.push(`You are not wearing "${requestedItem}".`);
+    return false;
+  }
+  const [itemCode] = character.worn!.splice(wornIndex, 1);
+  character.inventory.push(itemCode);
+  const detail = resolveItemDetail(itemCode, room, character);
+  events.push(`You remove ${detail.name} and place it in your inventory.`);
+  return true;
+}
+
 function buildVerbEvents(): string[] {
   return [
     'Verb groups:',
@@ -1033,6 +1150,7 @@ function buildVerbEvents(): string[] {
     'Movement: north, south, east, west, n, s, e, w, go <direction>, enter, exit, up, down, ne, nw, se, sw.',
     'Targets: scan, target, target <name>, appraise <target>.',
     'Items: inventory, appraise <item>, shop, shop buy <code>, shop sell <code>.',
+    'Equipment: hold <item> [left|right], stow <item|left|right>, wear <item>, remove <item>.',
     'Survival: forage, inventory, train survival.',
     'Combat: stance, stance balanced, stance offensive, stance defensive, stance evasive, advance <target>, retreat, attack <target>, circle, jab, bash, defend, flee, wait <ms>, rest.',
     'Progression: train, train <skill>, circle, join guild.',
@@ -1365,7 +1483,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'help') {
     events.push(
-      'Commands: look, survey, search, scan, forage, help scan, verb, rest, inventory, appraise <item|target>, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, survey, search, scan, forage, help scan, verb, rest, inventory, appraise <item|target>, hold <item>, stow <item>, wear <item>, remove <item>, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
     return buildCommandResult(resolvedCharacter, room, events);
@@ -1785,6 +1903,47 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   if (command === 'inventory' || command === 'inv') {
     events.push(`You are carrying ${resolvedCharacter.inventory.length} item(s).`);
     events.push(...resolvedCharacter.inventory.map((item) => ` - ${item}`));
+    events.push(`Worn: ${(resolvedCharacter.worn ?? []).join(', ') || 'nothing'}.`);
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
+  if (command.startsWith('hold ')) {
+    const parts = command.slice(5).trim().split(/\s+/);
+    const requestedSlot = parts.at(-1);
+    const hasExplicitSlot = requestedSlot === 'left' || requestedSlot === 'right';
+    const requestedItem = hasExplicitSlot ? parts.slice(0, -1).join(' ') : parts.join(' ');
+    if (holdItem(resolvedCharacter, room, requestedItem, hasExplicitSlot ? requestedSlot : '', events)) {
+      modified = true;
+      setActionCooldown(resolvedCharacter, 300);
+      await persist();
+    }
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
+  if (command.startsWith('stow ')) {
+    if (stowItem(resolvedCharacter, room, command.slice(5).trim(), events)) {
+      modified = true;
+      setActionCooldown(resolvedCharacter, 300);
+      await persist();
+    }
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
+  if (command.startsWith('wear ')) {
+    if (wearItem(resolvedCharacter, room, command.slice(5).trim(), events)) {
+      modified = true;
+      setActionCooldown(resolvedCharacter, 350);
+      await persist();
+    }
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
+  if (command.startsWith('remove ')) {
+    if (removeWornItem(resolvedCharacter, room, command.slice(7).trim(), events)) {
+      modified = true;
+      setActionCooldown(resolvedCharacter, 350);
+      await persist();
+    }
     return buildCommandResult(resolvedCharacter, room, events);
   }
 

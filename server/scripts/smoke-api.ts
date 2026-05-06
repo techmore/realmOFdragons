@@ -18,6 +18,11 @@ interface CharacterSummary {
   roomId: string;
   circle: number;
   inventory: string[];
+  worn?: string[];
+  hands: {
+    left: string | null;
+    right: string | null;
+  };
   health: {
     current: number;
     max: number;
@@ -312,6 +317,26 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
   assert(shops.shops.length >= 1, 'Expected at least one shop room.');
 
   let current = context.character;
+  let equipment = await command(context.accessToken, current.id, 'wear leather backpack');
+  assert(equipment.events.some((event) => event.includes('You wear leather backpack')), 'Expected wear leather backpack output.');
+  assert(equipment.character.worn?.includes('leather backpack'), 'Expected worn leather backpack.');
+  current = (await command(context.accessToken, equipment.character.id, 'wait 350')).character;
+
+  equipment = await command(context.accessToken, current.id, 'remove leather backpack');
+  assert(equipment.events.some((event) => event.includes('You remove leather backpack')), 'Expected remove leather backpack output.');
+  assert(equipment.character.inventory.includes('leather backpack'), 'Expected leather backpack returned to inventory.');
+  current = (await command(context.accessToken, equipment.character.id, 'wait 350')).character;
+
+  equipment = await command(context.accessToken, current.id, 'hold repair cloth left');
+  assert(equipment.events.some((event) => event.includes('You hold repair cloth in your left hand.')), 'Expected hold repair cloth output.');
+  assert(equipment.character.hands.left === 'repair cloth', 'Expected repair cloth in left hand.');
+  current = (await command(context.accessToken, equipment.character.id, 'wait 300')).character;
+
+  equipment = await command(context.accessToken, current.id, 'stow left');
+  assert(equipment.events.some((event) => event.includes('You stow repair cloth from your left hand.')), 'Expected stow repair cloth output.');
+  assert(equipment.character.inventory.includes('repair cloth'), 'Expected repair cloth returned to inventory.');
+  current = (await command(context.accessToken, equipment.character.id, 'wait 300')).character;
+
   let testedShopEconomy = false;
 
   for (const shopRoom of shops.shops) {
@@ -350,6 +375,7 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
   context.summary.shopRoomsWalked = shops.shops.length;
   context.summary.shopEconomyChecked = true;
   context.summary.itemDetailsChecked = true;
+  context.summary.equipmentChecked = true;
 }
 
 async function runCombatSuite(context: SmokeContext): Promise<void> {

@@ -66,6 +66,7 @@ export interface CharacterRecord {
   rollProfileVersion: number;
   createdAt: string;
   inventory: string[];
+  worn?: string[];
   hands: {
     left: string | null;
     right: string | null;

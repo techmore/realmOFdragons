@@ -64,6 +64,15 @@ async function main(): Promise<void> {
     await page.locator('.terminal-pane .log').getByText('Item: training sword').waitFor();
     await page.locator('.terminal-pane .log').getByText('Category: weapon. Source: starter.').waitFor();
 
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wear leather backpack');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText('You wear leather backpack.').waitFor();
+    await page.locator('.equip').getByRole('paragraph').filter({ hasText: /^leather backpack$/ }).waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 350');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 350ms/).last().waitFor();
+
     await page.getByRole('button', { name: 'range', exact: true }).click();
     await page.getByText('You are not engaged with a target.').waitFor();
 
@@ -150,7 +159,7 @@ async function main(): Promise<void> {
           suite: 'frontend:smoke-browser',
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
-          commandCount: 18,
+          commandCount: 20,
           targetDetailsClicked: true,
           verbDiscoveryClicked: true,
           surveyClicked: true,
