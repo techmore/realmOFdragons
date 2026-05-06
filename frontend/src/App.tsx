@@ -488,6 +488,7 @@ function GameStatusPanels({
         {localTargets.length ? (
           <>
             <h3>Visible Targets</h3>
+            <p className="subtle">Vitality estimates staying power; aggression estimates how quickly a target presses or attacks.</p>
             <div className="action-grid">
               {localTargets.map((target) => (
                 <span key={target.id} className="target-actions">

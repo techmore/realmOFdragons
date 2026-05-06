@@ -317,6 +317,7 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
 
   let result = await command(context.accessToken, current.id, 'scan');
   assert(result.events.some((event) => event.includes('forage wolf-cub')), 'Expected scan to list forage wolf-cub.');
+  assert(result.events.some((event) => event.includes('Vitality estimates')), 'Expected scan stat explanation.');
   assert(result.targets.some((target) => target.name === 'forage wolf-cub'), 'Expected structured target forage wolf-cub.');
 
   result = await command(context.accessToken, current.id, 'look');

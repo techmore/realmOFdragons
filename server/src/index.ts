@@ -818,6 +818,7 @@ function buildEnemyScanEvents(roomId: RoomId): string[] {
 
   return [
     'You scan the area and notice:',
+    'Vitality estimates how long a target can stay in the fight; aggression estimates how quickly it presses or attacks.',
     ...enemies.map((enemy) => ` - ${enemy.name} (${enemy.maxHp} vitality, aggression ${enemy.aggression})`),
   ];
 }

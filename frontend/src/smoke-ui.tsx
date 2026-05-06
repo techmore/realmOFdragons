@@ -94,6 +94,7 @@ for (const expected of [
   'bash',
   'Directional movement controls',
   'Visible Targets',
+  'Vitality estimates staying power',
   'Vitality 12 · Aggression 55',
   'advance',
   'attack',

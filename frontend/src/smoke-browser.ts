@@ -91,7 +91,9 @@ async function main(): Promise<void> {
 
     await page.getByRole('button', { name: 'scan', exact: true }).click();
     await page.locator('.terminal-pane .log').getByText('forage wolf-cub').waitFor();
+    await page.locator('.terminal-pane .log').getByText('Vitality estimates how long a target can stay in the fight').waitFor();
     await page.getByText('Visible Targets').waitFor();
+    await page.getByText('Vitality estimates staying power').waitFor();
     await page.getByText('Vitality 10 · Aggression 55').waitFor();
     await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByRole('button', { name: 'advance' }).click();
     await page.locator('.terminal-pane .log').getByText(/You begin advancing on forage wolf-cub/).waitFor();

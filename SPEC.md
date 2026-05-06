@@ -393,6 +393,20 @@ Next priority:
 
 - Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
 
+Implementation Notes - 2026-05-05, Target Metadata Guidance
+
+Completed in the current Node/React prototype:
+
+- `scan` output now explains vitality and aggression in beginner-facing language.
+- The web `Visible Targets` panel now includes the same lightweight guidance.
+- API smoke verifies the scan guidance text.
+- Static UI smoke verifies the target guidance panel text.
+- Browser smoke verifies both terminal scan guidance and web target guidance.
+
+Next priority:
+
+- Add target metadata guidance to help text and documentation, including `help scan` or a short command-specific help branch.
+
 Implementation Notes - 2026-05-05, Enemy Visibility Commands
 
 Completed in the current Node/React prototype:
