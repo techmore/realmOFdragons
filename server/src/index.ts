@@ -34,7 +34,9 @@ import {
   normalizeBalance,
   normalizeRange,
   normalizeStance,
+  buildTargetVanishedEvents,
   resolveAttackOutcome,
+  resolveAttackCycleStatus,
   shiftAdvantageValue,
   shiftCombatRange,
 } from './combat.js';
@@ -1714,10 +1716,10 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     }
 
     const now = Date.now();
-    if (resolvedCharacter.combat.nextAttackAt > now) {
-      const remaining = resolvedCharacter.combat.nextAttackAt - now;
-      setActionCooldown(resolvedCharacter, remaining);
-      events.push(`Your target is still in the attack cycle (${remaining}ms).`);
+    const attackCycle = resolveAttackCycleStatus(resolvedCharacter.combat.nextAttackAt, now);
+    if (!attackCycle.ready) {
+      setActionCooldown(resolvedCharacter, attackCycle.remainingMs);
+      events.push(...attackCycle.events);
       await persist();
       return buildCommandResult(resolvedCharacter, room, events);
     }
@@ -1738,7 +1740,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     if (!template) {
       clearCombat(resolvedCharacter);
       modified = true;
-      events.push('Your target vanished from the world.');
+      events.push(...buildTargetVanishedEvents());
       await persist();
       return buildCommandResult(resolvedCharacter, room, events);
     }

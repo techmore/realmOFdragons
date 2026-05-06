@@ -83,10 +83,12 @@ Completed current slice:
 - Expanded item unit coverage for ranged weapon, melee weapon, and unarmed attack opening text.
 - Extracted attack hit, miss, target HP, advantage shift, and collapse event formatting into `server/src/combat.ts`.
 - Expanded combat unit coverage for nonlethal hits, lethal hits, and misses.
+- Extracted attack cycle wait status/event formatting and target-vanished event formatting into `server/src/combat.ts`.
+- Expanded combat unit coverage for ready/not-ready attack cycles and target-vanished messaging.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting attack cycle/cooldown event formatting and target-vanished handling.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting post-attack position/balance event formatting and action cooldown selection.
 
 Core Philosophy
 

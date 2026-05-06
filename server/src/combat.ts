@@ -86,6 +86,28 @@ export type AttackOutcomeResult = {
   events: string[];
 };
 
+export type AttackCycleStatus = {
+  ready: boolean;
+  remainingMs: number;
+  events: string[];
+};
+
+export function resolveAttackCycleStatus(nextAttackAt: number, now: number): AttackCycleStatus {
+  const remainingMs = Math.max(0, Math.floor(nextAttackAt) - Math.floor(now));
+  if (remainingMs <= 0) {
+    return { ready: true, remainingMs: 0, events: [] };
+  }
+  return {
+    ready: false,
+    remainingMs,
+    events: [`Your target is still in the attack cycle (${remainingMs}ms).`],
+  };
+}
+
+export function buildTargetVanishedEvents(): string[] {
+  return ['Your target vanished from the world.'];
+}
+
 export function resolveAttackOutcome(targetName: string, currentHp: number, damage: number, attack: AttackRollResult): AttackOutcomeResult {
   if (!attack.hit) {
     return {

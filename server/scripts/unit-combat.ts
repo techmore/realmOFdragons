@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {
   STANCE_PROFILES,
   applyBalanceChange,
+  buildTargetVanishedEvents,
   formatAdvantage,
   formatBalance,
   formatRange,
@@ -10,6 +11,7 @@ import {
   normalizeRange,
   normalizeStance,
   resolveAttackOutcome,
+  resolveAttackCycleStatus,
   shiftAdvantageValue,
   shiftCombatRange,
 } from '../src/combat.js';
@@ -77,5 +79,16 @@ assert.deepEqual(resolveAttackOutcome('forage wolf-cub', 12, 0, { hit: false, ro
   advantageShift: -1,
   events: ['You miss forage wolf-cub.'],
 });
+assert.deepEqual(resolveAttackCycleStatus(1_500, 1_000), {
+  ready: false,
+  remainingMs: 500,
+  events: ['Your target is still in the attack cycle (500ms).'],
+});
+assert.deepEqual(resolveAttackCycleStatus(1_000, 1_500), {
+  ready: true,
+  remainingMs: 0,
+  events: [],
+});
+assert.deepEqual(buildTargetVanishedEvents(), ['Your target vanished from the world.']);
 
 console.log(JSON.stringify({ ok: true, suite: 'unit:combat' }, null, 2));
