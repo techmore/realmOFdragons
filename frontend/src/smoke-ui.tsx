@@ -75,6 +75,7 @@ const markup = renderToStaticMarkup(
     room={room}
     selectedCharacter={character}
     skillEntries={Object.entries(character.skills)}
+    localTargets={['forage wolf-cub']}
   />,
 );
 
@@ -92,6 +93,9 @@ for (const expected of [
   'jab',
   'bash',
   'Directional movement controls',
+  'Visible Targets',
+  'advance',
+  'attack',
   'Character',
   'UiScout | Human | Baseline',
   'Fighter Guild | Circle 4',

@@ -350,6 +350,21 @@ Next priority:
 
 - Add a first target-selection affordance in the UI: when scan output identifies local enemies, expose an easy `advance <target>` / `attack <target>` action without requiring manual typing.
 
+Implementation Notes - 2026-05-05, UI Target Action Affordance
+
+Completed in the current Node/React prototype:
+
+- Frontend now parses standardized scan target lines from command output.
+- Last-seen local targets are shown in a `Visible Targets` section.
+- Each visible target gets quick `advance <target>` and `attack <target>` actions.
+- Target actions clear when the character changes rooms.
+- Static UI smoke verifies the visible-target action controls.
+- Browser smoke now scans the beginner hunting fork, sees `forage wolf-cub`, clicks the target-specific `advance` action, and verifies combat engagement output.
+
+Next priority:
+
+- Add server-provided structured room target data to command responses so the UI no longer has to parse scan text.
+
 Implementation Notes - 2026-05-05, Enemy Visibility Commands
 
 Completed in the current Node/React prototype:

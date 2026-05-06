@@ -198,6 +198,7 @@ type GameStatusPanelsProps = {
   room: Room | null;
   selectedCharacter: Character | null;
   skillEntries: Array<[string, CharacterSkill]>;
+  localTargets?: string[];
   loading?: boolean;
   onCommand?: (command: string) => void;
 };
@@ -368,6 +369,13 @@ function formatWallet(wallet?: Wallet) {
   return `${wallet.plat} plat · ${wallet.trias} trias · ${wallet.lucan} lucan · ${wallet.silk} silk`;
 }
 
+function extractScannedTargets(events: string[]): string[] {
+  const targets = events
+    .map((event) => event.match(/^\s*-\s+(.+?)\s+\(\d+\s+vitality,\s+aggression\s+\d+\)$/)?.[1])
+    .filter((target): target is string => Boolean(target));
+  return [...new Set(targets)];
+}
+
 function findPathBetweenRooms(worldRooms: Record<string, Room>, start: string, destination: string): string[] {
   if (!start || !destination || start === destination) return [];
   const startRoom = worldRooms[start];
@@ -409,6 +417,7 @@ function GameStatusPanels({
   room,
   selectedCharacter,
   skillEntries,
+  localTargets = [],
   loading = false,
   onCommand = () => undefined,
 }: GameStatusPanelsProps) {
@@ -474,6 +483,24 @@ function GameStatusPanels({
             </button>
           ))}
         </div>
+        {localTargets.length ? (
+          <>
+            <h3>Visible Targets</h3>
+            <div className="action-grid">
+              {localTargets.map((target) => (
+                <span key={target} className="target-actions">
+                  <strong>{target}</strong>
+                  <button type="button" onClick={() => onCommand(`advance ${target}`)} disabled={loading || !character}>
+                    advance
+                  </button>
+                  <button type="button" onClick={() => onCommand(`attack ${target}`)} disabled={loading || !character}>
+                    attack
+                  </button>
+                </span>
+              ))}
+            </div>
+          </>
+        ) : null}
       </section>
 
       <section className="panel equip">
@@ -566,6 +593,7 @@ function App() {
     'Welcome to Clean-Room DR test client.',
     'Register/login, create/select a character, then use numpad or command input.',
   ]);
+  const [localTargets, setLocalTargets] = useState<string[]>([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const logRef = useRef<HTMLDivElement | null>(null);
@@ -660,6 +688,7 @@ function App() {
     setSelectedCharacterId(characterId);
     setCharacter(data.character);
     setRoom(data.room);
+    setLocalTargets([]);
     appendHistory(`Loaded ${data.character.name} in ${data.room.title}.`);
   };
 
@@ -758,9 +787,16 @@ function App() {
   };
 
   const applyCommandResult = (result: CommandResult) => {
+    const previousRoomId = character?.roomId;
     setCharacter(result.character);
     setRoom(result.room);
     setCharacters((current) => current.map((entry) => (entry.id === result.character.id ? result.character : entry)));
+    const scannedTargets = extractScannedTargets(result.events);
+    if (scannedTargets.length) {
+      setLocalTargets(scannedTargets);
+    } else if (previousRoomId && previousRoomId !== result.character.roomId) {
+      setLocalTargets([]);
+    }
     for (const event of result.events) {
       appendHistory(event);
     }
@@ -1170,6 +1206,7 @@ function App() {
               room={room}
               selectedCharacter={selectedCharacter}
               skillEntries={skillEntries}
+              localTargets={localTargets}
               loading={loading}
               onCommand={(entry) => void runCommand(entry)}
             />

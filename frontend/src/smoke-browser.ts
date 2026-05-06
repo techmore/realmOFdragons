@@ -85,8 +85,15 @@ async function main(): Promise<void> {
     await page.keyboard.press('Enter');
     await page.getByText(/You go east to Brushline Forage Fork/).waitFor();
 
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
     await page.getByRole('button', { name: 'scan', exact: true }).click();
     await page.locator('.terminal-pane .log').getByText('forage wolf-cub').waitFor();
+    await page.getByText('Visible Targets').waitFor();
+    await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByRole('button', { name: 'advance' }).click();
+    await page.locator('.terminal-pane .log').getByText(/You begin advancing on forage wolf-cub/).waitFor();
 
     const content = await page.content();
     for (const expected of [
@@ -108,7 +115,7 @@ async function main(): Promise<void> {
           suite: 'frontend:smoke-browser',
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
-          commandCount: 12,
+          commandCount: 14,
         },
         null,
         2,
