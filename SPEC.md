@@ -46,10 +46,12 @@ Completed current slice:
 - Browser smoke buys a practice-arrow bundle and sells one shot from the ammo pouch through the UI.
 - Browser smoke now verifies the visible ammo pouch count decreases after a UI sale.
 - Static and browser smoke now verify ammo pouch sale controls explain and disable sales outside shop rooms.
+- Ammo pouch rows now display ammunition catalog names, bundle sizes, and estimated single-shot resale value when item details are available.
+- Static and browser smoke now verify ammo pouch metadata presentation.
 
 Current next priority:
 
-- Add richer ammunition item presentation in the ammo pouch, such as displaying catalog names, bundle size, and estimated single-shot resale value.
+- Add reusable frontend helpers for shop/economy presentation so carried-item and ammo-pouch sell hints share one pricing model.
 
 Core Philosophy
 

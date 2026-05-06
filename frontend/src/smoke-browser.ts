@@ -123,6 +123,11 @@ async function main(): Promise<void> {
       .filter({ hasText: 'itm-sting-arrow x5' })
       .getByText('Marksman Supply Stand buys practice arrow from your ammo pouch.')
       .waitFor();
+    await page
+      .locator('.ammo-pouch-list li')
+      .filter({ hasText: 'itm-sting-arrow x5' })
+      .getByText('bundle 5 | resale estimate 1 trias each')
+      .waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -294,6 +299,7 @@ async function main(): Promise<void> {
           ammoPouchSellClicked: true,
           ammoPouchRemainingVisible: true,
           ammoPouchDisabledHintVisible: true,
+          ammoPouchMetadataVisible: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,

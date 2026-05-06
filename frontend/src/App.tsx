@@ -669,7 +669,14 @@ function GameStatusPanels({
         {Object.entries(character?.ammoPouch ?? {}).length ? (
           <ul className="ammo-pouch-list">
             {Object.entries(character?.ammoPouch ?? {}).map(([code, count]) => {
+              const detail = itemDetails.find((entry) => entry.code === code);
               const sellMatch = localShopSellMatch(code, room);
+              const displayName = detail?.name ?? sellMatch?.name ?? code;
+              const bundleSize = detail?.bundleSize ?? (sellMatch ? 5 : undefined);
+              const resaleEstimate =
+                sellMatch && bundleSize
+                  ? Math.max(1, Math.floor((sellMatch.price / bundleSize) * 0.75))
+                  : undefined;
               const sellHint = sellMatch
                 ? `${room?.shop?.name} buys ${sellMatch.name} from your ammo pouch.`
                 : room?.shop
@@ -677,7 +684,11 @@ function GameStatusPanels({
                   : 'Selling ammo requires a local shop.';
               return (
                 <li key={code}>
+                  <strong>{displayName}</strong>
                   <span>{code} x{count}</span>
+                  <small>
+                    bundle {bundleSize ?? 'unknown'} | resale estimate {resaleEstimate ? `${resaleEstimate} ${sellMatch?.currency} each` : 'unavailable'}
+                  </small>
                   <small>{sellHint}</small>
                   <button
                     type="button"

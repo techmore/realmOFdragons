@@ -79,6 +79,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Browser ammo pouch sale action | ${coverage.frontend.browserAmmoPouchSellClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser ammo pouch remaining count | ${coverage.frontend.browserAmmoPouchRemainingVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser ammo pouch disabled hint | ${coverage.frontend.browserAmmoPouchDisabledHintVisible ? 'yes' : 'no'} |`);
+    lines.push(`| Browser ammo pouch metadata | ${coverage.frontend.browserAmmoPouchMetadataVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser verb discovery action | ${coverage.frontend.browserVerbDiscoveryClicked ? 'yes' : 'no'} |`);
     lines.push(`| Agent prompt current status | ${coverage.gameplay.agentPromptCurrentStatusChecked ? 'yes' : 'no'} |`);
@@ -257,6 +258,7 @@ function coverageSummary(results) {
       browserAmmoPouchSellClicked: browserPayload.ammoPouchSellClicked === true,
       browserAmmoPouchRemainingVisible: browserPayload.ammoPouchRemainingVisible === true,
       browserAmmoPouchDisabledHintVisible: browserPayload.ammoPouchDisabledHintVisible === true,
+      browserAmmoPouchMetadataVisible: browserPayload.ammoPouchMetadataVisible === true,
       browserTargetDetailsClicked: browserPayload.targetDetailsClicked === true,
       browserVerbDiscoveryClicked: browserPayload.verbDiscoveryClicked === true,
       browserCommandDiscoveryVisible: browserPayload.commandDiscoveryVisible === true,
@@ -289,6 +291,7 @@ function assertCoverageShape(coverage) {
   expect(coverage.frontend.browserAmmoPouchSellClicked === true, 'frontend.browserAmmoPouchSellClicked');
   expect(coverage.frontend.browserAmmoPouchRemainingVisible === true, 'frontend.browserAmmoPouchRemainingVisible');
   expect(coverage.frontend.browserAmmoPouchDisabledHintVisible === true, 'frontend.browserAmmoPouchDisabledHintVisible');
+  expect(coverage.frontend.browserAmmoPouchMetadataVisible === true, 'frontend.browserAmmoPouchMetadataVisible');
   expect(coverage.scripts.focusedSmoke === true, 'scripts.focusedSmoke');
   expect(coverage.scripts.lifecycle === true, 'scripts.lifecycle');
   expect(coverage.scripts.created === true, 'scripts.created');
