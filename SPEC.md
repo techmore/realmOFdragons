@@ -455,6 +455,20 @@ Next priority:
 
 - Add command documentation for focused smoke scripts and telemetry artifacts in `README.md` or a development section so future agents/users know how to run target-only checks.
 
+Implementation Notes - 2026-05-05, Developer Smoke Documentation
+
+Completed in the current Node/React prototype:
+
+- Added a root `README.md`.
+- Documented local app startup commands for the server and web UI.
+- Documented standard `agent:check` and `ci:check` flows.
+- Documented focused API smoke suites, including the fast `smoke:targets` regression path.
+- Documented telemetry artifacts and the target-specific coverage fields.
+
+Next priority:
+
+- Add a lightweight command reference to `README.md` for the current in-game verbs, especially target discovery, movement, inventory, shops, progression, and beginner combat.
+
 Implementation Notes - 2026-05-05, Target Details Command
 
 Completed in the current Node/React prototype:
