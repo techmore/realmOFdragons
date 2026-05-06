@@ -22,10 +22,14 @@ Completed current slice:
 - Smoke telemetry now tracks ranged reload readiness.
 - Shop resale now supports selling one shot from an ammo pouch stack when the local shop stocks that ammo.
 - Economy smoke telemetry now verifies ammo stack resale and remaining pouch counts.
+- Fired ranged ammunition now becomes recoverable after combat.
+- Added `recover arrows`/`recover ammo` scavenging to move recoverable arrows back into ammo pouch stacks.
+- Web ammo readiness now shows recoverable ammunition.
+- Smoke telemetry now tracks ammo recovery scavenging.
 
 Current next priority:
 
-- Add ammunition recovery from missed shots or post-combat scavenging so ranged combat can return recoverable arrows into ammo stacks.
+- Add ranged ammo loss chance and damaged-arrow outcomes so recovery is not always perfect.
 
 Core Philosophy
 

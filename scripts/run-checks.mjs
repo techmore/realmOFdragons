@@ -85,6 +85,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Ranged alias ammo handling | ${coverage.gameplay.rangedAliasAmmoChecked ? 'yes' : 'no'} |`);
     lines.push(`| Ammo bundle pouch handling | ${coverage.gameplay.ammoBundleChecked ? 'yes' : 'no'} |`);
     lines.push(`| Ranged reload readiness | ${coverage.gameplay.rangedReloadChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Ammo recovery scavenging | ${coverage.gameplay.ammoRecoveryChecked ? 'yes' : 'no'} |`);
     lines.push(`| Browser item detail panel | ${coverage.frontend.browserItemDetailsVisible ? 'yes' : 'no'} |`);
     lines.push('');
     lines.push('## Gameplay Counts');
@@ -199,6 +200,7 @@ function coverageSummary(results) {
       rangedAliasAmmoChecked: apiPayload.rangedAliasAmmoChecked === true,
       ammoBundleChecked: apiPayload.ammoBundleChecked === true,
       rangedReloadChecked: apiPayload.rangedReloadChecked === true,
+      ammoRecoveryChecked: apiPayload.ammoRecoveryChecked === true,
       combatChecked: apiPayload.combatChecked === true,
       surveyChecked: apiPayload.surveyChecked === true,
       forageChecked: apiPayload.forageChecked === true,
@@ -275,6 +277,7 @@ function assertCoverageShape(coverage) {
   expect(coverage.gameplay.rangedAliasAmmoChecked === true, 'gameplay.rangedAliasAmmoChecked');
   expect(coverage.gameplay.ammoBundleChecked === true, 'gameplay.ammoBundleChecked');
   expect(coverage.gameplay.rangedReloadChecked === true, 'gameplay.rangedReloadChecked');
+  expect(coverage.gameplay.ammoRecoveryChecked === true, 'gameplay.ammoRecoveryChecked');
   expect(coverage.gameplay.scriptLifecycleChecked === true, 'gameplay.scriptLifecycleChecked');
 
   if (mode === 'local') {

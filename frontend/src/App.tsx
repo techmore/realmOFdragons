@@ -126,6 +126,7 @@ type Character = {
   inventory: string[];
   ammoPouch?: Record<string, number>;
   loadedAmmo?: Record<string, string>;
+  recoverableAmmo?: Record<string, number>;
   worn?: string[];
   equipment?: Record<string, string>;
   wallet: Wallet;
@@ -569,7 +570,7 @@ function GameStatusPanels({
           <p><strong>New here?</strong> Use <code>verb</code> for grouped commands, <code>help scan</code> for target discovery, and <code>target &lt;name&gt;</code> before you advance.</p>
         </div>
         <div className="action-grid">
-          {['look', 'survey', 'verb', 'scan', 'forage', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'ammo', 'reload', 'wield training sword', 'shop', 'join guild', 'combat', 'attack', 'fire', 'shoot', 'defend', 'flee', 'rest'].map((entry) => (
+          {['look', 'survey', 'verb', 'scan', 'forage', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'ammo', 'reload', 'recover arrows', 'wield training sword', 'shop', 'join guild', 'combat', 'attack', 'fire', 'shoot', 'defend', 'flee', 'rest'].map((entry) => (
             <button type="button" key={entry} onClick={() => onCommand(entry)} disabled={loading || !character}>
               {entry}
             </button>
@@ -658,6 +659,7 @@ function GameStatusPanels({
         <h3>Ammo</h3>
         <p>{Object.entries(character?.ammoPouch ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none'}</p>
         <p>Loaded: {Object.entries(character?.loadedAmmo ?? {}).map(([weapon, ammo]) => `${weapon}: ${ammo}`).join(', ') || 'none'}</p>
+        <p>Recoverable: {Object.entries(character?.recoverableAmmo ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none'}</p>
         <ul>
           {(character?.inventory ?? []).map((item, index) => (
             <li key={`${item}-${index}`}>

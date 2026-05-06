@@ -68,6 +68,7 @@ interface CommandResult {
   | 'inventory'
   | 'ammoPouch'
   | 'loadedAmmo'
+  | 'recoverableAmmo'
   | 'worn'
   | 'equipment'
   | 'roundtimeMs'
@@ -381,6 +382,7 @@ function sanitizeCharacter(character: CharacterRecord): CommandResult['character
     inventory: character.inventory,
     ammoPouch: character.ammoPouch ?? {},
     loadedAmmo: character.loadedAmmo ?? {},
+    recoverableAmmo: character.recoverableAmmo ?? {},
     worn: character.worn ?? [],
     equipment: character.equipment ?? {},
     wallet: character.wallet,
@@ -469,9 +471,34 @@ function normalizeLoadedAmmo(character: CharacterRecord): boolean {
   return changed;
 }
 
+function normalizeRecoverableAmmo(character: CharacterRecord): boolean {
+  let changed = false;
+  if (!character.recoverableAmmo || typeof character.recoverableAmmo !== 'object') {
+    character.recoverableAmmo = {};
+    changed = true;
+  }
+  for (const [code, rawCount] of Object.entries(character.recoverableAmmo)) {
+    const count = Math.max(0, Math.floor(Number(rawCount) || 0));
+    if (count <= 0) {
+      delete character.recoverableAmmo[code];
+      changed = true;
+    } else if (count !== rawCount) {
+      character.recoverableAmmo[code] = count;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 function addAmmo(character: CharacterRecord, code: string, count: number) {
   character.ammoPouch = character.ammoPouch ?? {};
   character.ammoPouch[code] = Math.max(0, Math.floor(character.ammoPouch[code] ?? 0)) + Math.max(0, Math.floor(count));
+}
+
+function addRecoverableAmmo(character: CharacterRecord, code: string, count: number) {
+  character.recoverableAmmo = character.recoverableAmmo ?? {};
+  character.recoverableAmmo[code] =
+    Math.max(0, Math.floor(character.recoverableAmmo[code] ?? 0)) + Math.max(0, Math.floor(count));
 }
 
 function countAmmo(character: CharacterRecord, code: string) {
@@ -583,6 +610,10 @@ function formatAmmoPouch(character: CharacterRecord) {
 
 function formatLoadedAmmo(character: CharacterRecord) {
   return Object.entries(character.loadedAmmo ?? {}).map(([weaponCode, ammoCode]) => `${weaponCode}: ${ammoCode}`).join(', ') || 'none';
+}
+
+function formatRecoverableAmmo(character: CharacterRecord) {
+  return Object.entries(character.recoverableAmmo ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none';
 }
 
 function applyRollToCharacter(character: CharacterRecord, characterRoll: RaceRollResult) {
@@ -875,6 +906,9 @@ function ensureCharacterShape(character: CharacterRecord): { character: Characte
   if (normalizeLoadedAmmo(character)) {
     changed = true;
   }
+  if (normalizeRecoverableAmmo(character)) {
+    changed = true;
+  }
   for (const itemCode of character.worn) {
     if (Object.values(character.equipment).includes(itemCode)) continue;
     const room = worldRooms[character.roomId] ?? worldRooms['crossing-TG01-001'];
@@ -969,6 +1003,7 @@ async function createRolledCharacter(accountId: string, name: string, raceInput:
     inventory: ['leather backpack', 'repair cloth'],
     ammoPouch: {},
     loadedAmmo: {},
+    recoverableAmmo: {},
     worn: [],
     equipment: {},
     hands: { left: null, right: 'training sword' },
@@ -1388,9 +1423,9 @@ function buildVerbEvents(): string[] {
     'Movement: north, south, east, west, n, s, e, w, go <direction>, enter, exit, up, down, ne, nw, se, sw.',
     'Targets: scan, target, target <name>, appraise <target>.',
     'Items: inventory, appraise <item>, shop, shop buy <code>, shop sell <code>.',
-    'Equipment: ammo, reload, hold <item> [left|right], wield <item> [left|right], stow <item|left|right>, wear <item>, remove <item>.',
+    'Equipment: ammo, reload, recover arrows, hold <item> [left|right], wield <item> [left|right], stow <item|left|right>, wear <item>, remove <item>.',
     'Survival: forage, inventory, train survival.',
-    'Combat: stance, stance balanced, stance offensive, stance defensive, stance evasive, advance <target>, retreat, attack <target>, reload, fire, shoot, circle, jab, bash, defend, flee, wait <ms>, rest.',
+    'Combat: stance, stance balanced, stance offensive, stance defensive, stance evasive, advance <target>, retreat, attack <target>, reload, fire, shoot, recover arrows, circle, jab, bash, defend, flee, wait <ms>, rest.',
     'Progression: train, train <skill>, circle, join guild.',
     'Shops: shop, shop buy <code>, shop sell <code>.',
   ];
@@ -1729,7 +1764,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'help') {
     events.push(
-      'Commands: look, survey, search, scan, forage, help scan, verb, rest, inventory, ammo, reload, appraise <item|target>, hold <item>, wield <item>, stow <item>, wear <item>, remove <item>, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], fire, shoot, defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, survey, search, scan, forage, help scan, verb, rest, inventory, ammo, reload, recover arrows, appraise <item|target>, hold <item>, wield <item>, stow <item>, wear <item>, remove <item>, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], fire, shoot, defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
     return buildCommandResult(resolvedCharacter, room, events);
@@ -1863,6 +1898,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     const weapon = findHeldWeapon(resolvedCharacter, room);
     events.push(`Ammo pouch: ${formatAmmoPouch(resolvedCharacter)}.`);
     events.push(`Loaded: ${formatLoadedAmmo(resolvedCharacter)}.`);
+    events.push(`Recoverable: ${formatRecoverableAmmo(resolvedCharacter)}.`);
     if (weapon?.weaponRange === 'ranged') {
       const ammoCode = weapon.ammoCode ?? 'itm-sting-arrow';
       const loaded = getLoadedAmmo(resolvedCharacter, weapon);
@@ -1871,6 +1907,28 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     } else {
       events.push('No ranged weapon is currently in hand.');
     }
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
+  if (command === 'recover arrows' || command === 'recover ammo' || command === 'collect arrows') {
+    if (resolvedCharacter.combat) {
+      events.push('You are too engaged to recover ammunition safely.');
+      return buildCommandResult(resolvedCharacter, room, events);
+    }
+    const recoverableEntries = Object.entries(resolvedCharacter.recoverableAmmo ?? {}).filter(([, count]) => count > 0);
+    if (!recoverableEntries.length) {
+      events.push('You find no recoverable ammunition.');
+      return buildCommandResult(resolvedCharacter, room, events);
+    }
+    for (const [ammoCode, count] of recoverableEntries) {
+      addAmmo(resolvedCharacter, ammoCode, count);
+      delete resolvedCharacter.recoverableAmmo![ammoCode];
+      events.push(`You recover ${count} ${displayNameFromCode(ammoCode)} into your ammo pouch.`);
+    }
+    grantSkillPool(resolvedCharacter, 'survival', 1, events);
+    setActionCooldown(resolvedCharacter, 400);
+    modified = true;
+    await persist();
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
@@ -2118,8 +2176,10 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       }
       clearLoadedAmmo(resolvedCharacter, weapon);
       consumedAmmo = ammoCode;
+      addRecoverableAmmo(resolvedCharacter, ammoCode, 1);
       modified = true;
       events.push(`You loose loaded ${weapon.ammoName ?? consumedAmmo}. ${countAmmo(resolvedCharacter, ammoCode)} remain in your quiver.`);
+      events.push(`${weapon.ammoName ?? consumedAmmo} may be recoverable after the fight.`);
     }
 
     const template = ENEMY_TEMPLATES.find((entry) => entry.id === resolvedCharacter.combat?.targetId);
@@ -2240,6 +2300,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     events.push(...resolvedCharacter.inventory.map((item) => ` - ${item}`));
     events.push(`Ammo: ${formatAmmoPouch(resolvedCharacter)}.`);
     events.push(`Loaded: ${formatLoadedAmmo(resolvedCharacter)}.`);
+    events.push(`Recoverable: ${formatRecoverableAmmo(resolvedCharacter)}.`);
     events.push(`Equipment slots: ${Object.entries(equipment.slots).map(([slot, item]) => `${slot}: ${item}`).join(', ') || 'none'}.`);
     events.push(`Equipment modifiers: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`);
     return buildCommandResult(resolvedCharacter, room, events);
