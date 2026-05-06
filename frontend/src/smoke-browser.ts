@@ -93,6 +93,45 @@ async function main(): Promise<void> {
     await damagedAmmoDetail.getByText('damaged-itm-sting-arrow | salvage | 1 trias').waitFor();
     await damagedAmmoDetail.getByText('broken ranged ammunition').waitFor();
 
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('east');
+    await page.keyboard.press('Enter');
+    await page.getByText(/You go east to Marksman Way/).waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('north');
+    await page.keyboard.press('Enter');
+    await page.getByText(/You go north to Marksman Sheds/).waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
+    await page.locator('.equip li').filter({ hasText: 'damaged practice arrow' }).getByRole('button', { name: 'sell' }).click();
+    await page.locator('.terminal-pane .log').getByText('You sell damaged practice arrow').waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('south');
+    await page.keyboard.press('Enter');
+    await page.getByText(/You go south to Marksman Way/).waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('west');
+    await page.keyboard.press('Enter');
+    await page.getByText(/You go west to Crossing Town Green/).waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('look');
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText('A broad square with the fountain').waitFor();
@@ -121,7 +160,7 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').focus();
     await page.keyboard.press('Numpad6');
-    await page.getByText(/You go east/).waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You go east/).last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -129,7 +168,7 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').focus();
     await page.keyboard.press('Numpad4');
-    await page.getByText(/You go west/).waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You go west/).last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -137,7 +176,7 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('south');
     await page.keyboard.press('Enter');
-    await page.getByText(/You go south/).waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You go south/).last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -145,7 +184,7 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('south');
     await page.keyboard.press('Enter');
-    await page.getByText(/You go south/).last().waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You go south/).last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -153,7 +192,7 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('east');
     await page.keyboard.press('Enter');
-    await page.getByText(/You go east to Brushline Forage Fork/).waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You go east to Brushline Forage Fork/).last().waitFor();
     await page.getByText('Forage available').waitFor();
     await page.getByText(/difficulty 1: field herb bundle/).waitFor();
     await page.locator('.affordance-row').filter({ hasText: 'Targets visible' }).getByText('forage wolf-cub').waitFor();
@@ -198,13 +237,14 @@ async function main(): Promise<void> {
           suite: 'frontend:smoke-browser',
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
-          commandCount: 20,
+          commandCount: 29,
           targetDetailsClicked: true,
           verbDiscoveryClicked: true,
           surveyClicked: true,
           roomAffordancePanelVisible: true,
           itemDetailsVisible: true,
           damagedAmmoItemDetailsVisible: true,
+          damagedAmmoSoldFromInventory: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,

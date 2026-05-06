@@ -36,10 +36,12 @@ Completed current slice:
 - Local agent telemetry now runs the focused damaged-ammo smoke before the full API smoke.
 - Browser smoke now seeds damaged recovered ammunition through fixtures and verifies the item details panel renders salvage metadata.
 - Frontend telemetry now tracks browser damaged-ammo item detail visibility.
+- Browser smoke now sells damaged ammunition through the inventory panel from the ammo shop.
+- Frontend telemetry now tracks browser damaged-ammo inventory-sale coverage.
 
 Current next priority:
 
-- Add browser UI coverage for selling damaged ammunition from the inventory panel.
+- Add a dedicated damaged-ammo inventory affordance in the UI, such as clearer disabled sell hints outside shops.
 
 Core Philosophy
 
