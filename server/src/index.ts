@@ -464,6 +464,16 @@ function buildEquipmentSummary(character: CharacterRecord, room?: Room): Equipme
   return summary;
 }
 
+function findHeldWeapon(character: CharacterRecord, room?: Room): ItemDetail | undefined {
+  const detailRoom = room ?? worldRooms[character.roomId] ?? worldRooms['crossing-TG01-001'];
+  for (const itemCode of [character.hands.right, character.hands.left]) {
+    if (!itemCode) continue;
+    const detail = resolveItemDetail(itemCode, detailRoom, character);
+    if (detail.category === 'weapon' || detail.category === 'ranged') return detail;
+  }
+  return undefined;
+}
+
 function applyRollToCharacter(character: CharacterRecord, characterRoll: RaceRollResult) {
   character.race = characterRoll.race.toLowerCase();
   character.raceDisplayName = characterRoll.race;
@@ -1249,7 +1259,7 @@ function buildVerbEvents(): string[] {
     'Movement: north, south, east, west, n, s, e, w, go <direction>, enter, exit, up, down, ne, nw, se, sw.',
     'Targets: scan, target, target <name>, appraise <target>.',
     'Items: inventory, appraise <item>, shop, shop buy <code>, shop sell <code>.',
-    'Equipment: hold <item> [left|right], stow <item|left|right>, wear <item>, remove <item>.',
+    'Equipment: hold <item> [left|right], wield <item> [left|right], stow <item|left|right>, wear <item>, remove <item>.',
     'Survival: forage, inventory, train survival.',
     'Combat: stance, stance balanced, stance offensive, stance defensive, stance evasive, advance <target>, retreat, attack <target>, circle, jab, bash, defend, flee, wait <ms>, rest.',
     'Progression: train, train <skill>, circle, join guild.',
@@ -1354,6 +1364,7 @@ function buildCombatEvents(character: CharacterRecord): string[] {
       'You are not in combat.',
       `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
       `Equipment: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`,
+      `Weapon: ${findHeldWeapon(character)?.name ?? 'unarmed'}.`,
     ];
   }
   const equipment = buildEquipmentSummary(character);
@@ -1364,6 +1375,7 @@ function buildCombatEvents(character: CharacterRecord): string[] {
     `Position: ${formatAdvantage(character.combat.advantage)}`,
     `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
     `Equipment: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`,
+    `Weapon: ${findHeldWeapon(character)?.name ?? 'unarmed'}.`,
     `Ready in: ${Math.max(0, character.roundtimeMs)}ms`,
   ];
 }
@@ -1586,7 +1598,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'help') {
     events.push(
-      'Commands: look, survey, search, scan, forage, help scan, verb, rest, inventory, appraise <item|target>, hold <item>, stow <item>, wear <item>, remove <item>, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, survey, search, scan, forage, help scan, verb, rest, inventory, appraise <item|target>, hold <item>, wield <item>, stow <item>, wear <item>, remove <item>, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
     return buildCommandResult(resolvedCharacter, room, events);
@@ -1874,6 +1886,14 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       return buildCommandResult(resolvedCharacter, room, events);
     }
 
+    const equipment = buildEquipmentSummary(resolvedCharacter, room);
+    const weapon = findHeldWeapon(resolvedCharacter, room);
+    if (weapon) {
+      events.push(`You attack with ${weapon.name} (attack modifier ${weapon.attackModifier}).`);
+    } else {
+      events.push('You attack unarmed; wield a weapon for better accuracy and damage.');
+    }
+
     const attackRange = normalizeRange(resolvedCharacter.combat.range);
     if (attackRange !== 'melee') {
       events.push(`You are too far away to strike. Current range: ${formatRange(attackRange)}.`);
@@ -1906,13 +1926,13 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     const advantageBonus = normalizeAdvantage(resolvedCharacter.combat.advantage) * 7;
     const playerAttack = evaluateToHit(
       resolvedCharacter.stats.strength + resolvedCharacter.stats.agility + resolvedCharacter.stats.reflex,
-      (requestedTarget ? -2 : 0) + stanceProfile.attack + balanceBonus + advantageBonus,
+      (requestedTarget ? -2 : 0) + stanceProfile.attack + balanceBonus + advantageBonus + equipment.totalAttackModifier * 3,
     );
 
     if (playerAttack.hit) {
       const damage = resolveAttackDamage(
         resolvedCharacter.stats.strength,
-        resolvedCharacter.stats.discipline + stanceProfile.damage,
+        resolvedCharacter.stats.discipline + stanceProfile.damage + equipment.totalAttackModifier,
         template.damageMin,
         template.damageMax,
       );
@@ -2012,11 +2032,19 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
-  if (command.startsWith('hold ')) {
-    const parts = command.slice(5).trim().split(/\s+/);
+  if (command.startsWith('hold ') || command.startsWith('wield ')) {
+    const wielding = command.startsWith('wield ');
+    const parts = command.slice(wielding ? 6 : 5).trim().split(/\s+/);
     const requestedSlot = parts.at(-1);
     const hasExplicitSlot = requestedSlot === 'left' || requestedSlot === 'right';
     const requestedItem = hasExplicitSlot ? parts.slice(0, -1).join(' ') : parts.join(' ');
+    if (wielding) {
+      const item = findItemDetailForRequest(resolvedCharacter, room, requestedItem);
+      if (!item || !['weapon', 'ranged'].includes(item.category)) {
+        events.push(`You cannot wield "${requestedItem}" as a weapon.`);
+        return buildCommandResult(resolvedCharacter, room, events);
+      }
+    }
     if (holdItem(resolvedCharacter, room, requestedItem, hasExplicitSlot ? requestedSlot : '', events)) {
       modified = true;
       setActionCooldown(resolvedCharacter, 300);

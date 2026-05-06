@@ -10,15 +10,15 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Character state now exposes structured equipment slots in addition to legacy worn-item lists.
-- Item metadata includes slot, armor, evasion penalty, and attack modifier fields.
-- `wear` now enforces slot/category constraints and blocks occupied slots.
-- Combat/status output summarizes equipment armor, evasion penalty, and attack modifier.
-- API, static UI, and browser smoke cover equipment slots and item combat modifiers.
+- Added `wield <item> [left|right]` as a weapon-constrained hold alias.
+- Combat status now reports the active held weapon.
+- Basic `attack` output identifies the held weapon or warns when attacking unarmed.
+- Basic `attack` now applies held/equipment attack modifiers to accuracy and damage calculations.
+- API smoke covers weapon-aware attack output; static UI smoke covers the `wield training sword` action.
 
 Current next priority:
 
-- Add beginner weapon handling constraints and attack verb integration so held weapons affect accuracy/damage more explicitly.
+- Add beginner weapon type/range distinctions so ranged gear, melee gear, and unarmed attacks have different valid ranges and training outputs.
 
 Core Philosophy
 

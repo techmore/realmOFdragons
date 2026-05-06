@@ -453,11 +453,16 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
 
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
 
-  if (current.combat?.range !== 'melee') {
+  for (let attempts = 0; current.combat?.range !== 'melee' && attempts < 4; attempts += 1) {
     result = await command(context.accessToken, current.id, 'advance');
-    current = result.character;
-    await command(context.accessToken, current.id, 'wait 900');
+    current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
   }
+
+  result = await command(context.accessToken, current.id, 'attack');
+  assert(result.events.some((event) => event.includes('You attack with training sword')), 'Expected weapon-aware attack output.');
+  context.summary.weaponAttackChecked = true;
+
+  current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
 
   result = await command(context.accessToken, current.id, 'circle');
   assert(result.events.some((event) => event.includes('circle')), 'Expected circle maneuver output.');
@@ -494,6 +499,11 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   }
 
   current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
+
+  if (!current.combat) {
+    result = await command(context.accessToken, current.id, 'advance');
+    current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
+  }
 
   result = await command(context.accessToken, current.id, 'bash');
   assert(result.events.some((event) => event.includes('bash') || event.includes('too far away')), 'Expected bash maneuver output.');

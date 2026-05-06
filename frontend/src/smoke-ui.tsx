@@ -145,6 +145,7 @@ for (const expected of [
   'verb',
   'scan',
   'forage',
+  'wield training sword',
   'range',
   'advance',
   'jab',
