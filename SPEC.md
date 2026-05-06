@@ -10,13 +10,14 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Added `npm run smoke:agent-prompt` documentation to `README.md`.
-- Documented that `agent:check` includes agent prompt smoke.
-- Documented prompt-generation telemetry fields.
+- Added an always-visible scripts/macros discovery note to the web Scripts panel.
+- Browser smoke verifies the scripts/macros note and a preset load button.
+- README now documents saved scripts/macros, presets, save/run flow, pace, and continue-on-error behavior.
+- Coverage summary and Markdown telemetry now report browser script discovery visibility.
 
 Current next priority:
 
-- Add a small UI affordance or README note for saved scripts/macros so players can discover the existing scripting system without digging through implementation details.
+- Add a focused browser or API smoke action that loads a script preset, saves it, and verifies the saved script appears in the UI/API.
 
 Core Philosophy
 
@@ -446,6 +447,20 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add a small UI affordance or README note for saved scripts/macros so players can discover the existing scripting system without digging through implementation details.
+
+Implementation Notes - 2026-05-06, Script Discovery UI Docs And Telemetry
+
+Completed in the current Node/React prototype:
+
+- Added a Scripts panel note explaining scripts as reusable command macros.
+- Browser smoke verifies the scripts/macros note and a preset load button.
+- Browser smoke now reports `scriptDiscoveryVisible`.
+- Coverage summary and Markdown telemetry now report browser script discovery visibility.
+- README now documents saved scripts/macros, preset loading, command editing, save/run flow, pace, and continue-on-error behavior.
+
+Next priority:
+
+- Add a focused browser or API smoke action that loads a script preset, saves it, and verifies the saved script appears in the UI/API.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

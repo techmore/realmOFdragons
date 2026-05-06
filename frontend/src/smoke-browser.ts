@@ -40,6 +40,8 @@ async function main(): Promise<void> {
     await page.getByText('Use verb for grouped commands').waitFor();
     await page.getByText('help scan').waitFor();
     await page.getByText('target <name>').waitFor();
+    await page.getByText('Scripts are reusable command macros').waitFor();
+    await page.getByRole('button', { name: /load Crossing Guild Tour/ }).waitFor();
 
     await page.getByRole('textbox', { name: 'Name', exact: true }).fill(characterName);
     await page.getByRole('button', { name: 'Create Character' }).click();
@@ -131,6 +133,7 @@ async function main(): Promise<void> {
           targetDetailsClicked: true,
           verbDiscoveryClicked: true,
           commandDiscoveryVisible: true,
+          scriptDiscoveryVisible: true,
         },
         null,
         2,

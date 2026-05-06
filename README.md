@@ -100,10 +100,23 @@ Coverage fields currently distinguish broad combat coverage from target-specific
 - `gameplay.agentPromptCurrentStatusChecked`
 - `frontend.staticCommandDiscoveryChecked`
 - `frontend.browserCommandDiscoveryVisible`
+- `frontend.browserScriptDiscoveryVisible`
 - `frontend.browserTargetDetailsClicked`
 - `frontend.browserVerbDiscoveryClicked`
 
 Use these fields when reviewing whether a report proves target discovery, target metadata, typed target details, command discovery, prompt generation, and web target-detail affordances all ran.
+
+## Saved scripts and macros
+
+The web UI includes a Scripts panel for reusable command macros.
+
+- Use `load <preset name>` buttons to copy a preset route or shop sweep into the editor.
+- Edit the command list directly; one command runs per line.
+- Use `Save Script` to store the macro on the logged-in account.
+- Use `run` on a saved script to execute it for the selected character.
+- `Pace ms` controls delay between commands, and `Continue on command errors` lets longer routes keep going after recoverable failures.
+
+Scripts are useful for repeatable town routes, shop checks, guild tours, target discovery drills, and smoke-test-style setup flows.
 
 ## Current command reference
 

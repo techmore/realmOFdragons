@@ -1267,6 +1267,7 @@ function App() {
 
           <article className="panel">
             <h2>Scripts</h2>
+            <p className="subtle">Scripts are reusable command macros. Load a preset, edit the command list, save it, then run it on the selected character.</p>
             <div className="action-grid">
               {availableScriptPresets.map((preset) => (
                 <button
