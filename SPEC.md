@@ -431,4 +431,4 @@ Completed in the current Node/React prototype:
 
 Next priority:
 
-- Add server-provided structured room target data to command responses so the UI no longer has to parse scan text.
+- Render target vitality/aggression metadata in the web UI target affordance, and add browser/static smoke assertions for that richer target display.
