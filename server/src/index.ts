@@ -1442,6 +1442,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       await persist();
       return buildCommandResult(resolvedCharacter, room, events);
     }
+    if (resolvedCharacter.guildId === 'commoner') {
+      events.push('You need to join a guild before you can advance circles.');
+      return buildCommandResult(resolvedCharacter, room, events);
+    }
+    const registrar = guilds.find((guild) => guild.id === resolvedCharacter.guildId);
+    if (!registrar || resolvedCharacter.roomId !== registrar.roomId) {
+      events.push(`Travel to your ${resolvedCharacter.guildName} registrar before requesting circle advancement.`);
+      return buildCommandResult(resolvedCharacter, room, events);
+    }
     events.push(...buildCircleStatus(resolvedCharacter));
     if (canCircle(resolvedCharacter)) {
       resolvedCharacter.circle += 1;

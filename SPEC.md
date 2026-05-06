@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Circle advancement now requires the character to belong to a guild and stand at that guild's registrar room.
+- Progression smoke now verifies a Barbarian cannot advance circles from Crossing Town Green and must return to the Barbarian registrar.
+- Local telemetry now reports guild-registrar-gated circle advancement coverage.
 - Focused race smoke now rejects non-DragonRealms race rerolls.
 - Focused race smoke now joins a character to the Barbarian Guild, rerolls through every canonical DragonRealms race, and verifies each reroll preserves guild identity and Circle 1.
 - Local telemetry now reports non-DragonRealms reroll rejection and canonical race reroll guild/circle preservation.

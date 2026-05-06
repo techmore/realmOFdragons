@@ -100,6 +100,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| New characters start unaffiliated | ${coverage.gameplay.drCreationStartsUnaffiliatedChecked ? 'yes' : 'no'} |`);
     lines.push(`| Guild rejected during character creation | ${coverage.gameplay.drGuildCreationRejected ? 'yes' : 'no'} |`);
     lines.push(`| Guild joined in-world only | ${coverage.gameplay.drGuildJoinedInWorldOnlyChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Circle advancement requires guild registrar | ${coverage.gameplay.circleRequiresGuildRegistrar ? 'yes' : 'no'} |`);
     lines.push(`| All DR race/guild Circle 1 combinations | ${coverage.gameplay.drRaceGuildCircleOneMatrixChecked ? 'yes' : 'no'} |`);
     lines.push(`| Exactly 11 canonical DR guilds covered | ${coverage.gameplay.drCanonicalGuildCountChecked ? 'yes' : 'no'} |`);
     lines.push(`| No prototype guilds exposed | ${coverage.gameplay.drNoPrototypeGuildsExposed ? 'yes' : 'no'} |`);
@@ -250,6 +251,7 @@ function coverageSummary(results) {
         (scriptPayload.scriptCreatedChecked ?? apiPayload.scriptCreatedChecked) === true &&
         (scriptPayload.scriptRunChecked ?? apiPayload.scriptRunChecked) === true &&
         (scriptPayload.scriptDeletedChecked ?? apiPayload.scriptDeletedChecked) === true,
+      circleRequiresGuildRegistrar: apiPayload.circleRequiresGuildRegistrar === true,
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
       ammoSellChecked: apiPayload.ammoSellChecked === true,
       damagedAmmoEconomyChecked: apiPayload.damagedAmmoEconomyChecked === true,
@@ -405,6 +407,7 @@ function assertCoverageShape(coverage) {
   expect(coverage.gameplay.ammoRecoveryChecked === true, 'gameplay.ammoRecoveryChecked');
   expect(coverage.gameplay.ammoDamageLossChecked === true, 'gameplay.ammoDamageLossChecked');
   expect(coverage.gameplay.scriptLifecycleChecked === true, 'gameplay.scriptLifecycleChecked');
+  expect(coverage.gameplay.circleRequiresGuildRegistrar === true, 'gameplay.circleRequiresGuildRegistrar');
   expect(coverage.gameplay.drRaceSelectionChecked === true, 'gameplay.drRaceSelectionChecked');
   expect(coverage.gameplay.drCreationStartsUnaffiliatedChecked === true, 'gameplay.drCreationStartsUnaffiliatedChecked');
   expect(coverage.gameplay.drGuildCreationRejected === true, 'gameplay.drGuildCreationRejected');

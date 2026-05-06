@@ -616,6 +616,14 @@ async function runProgressionSuite(context: SmokeContext): Promise<void> {
 
   current = await walkTo(context.accessToken, current, canonicalGuilds[0].roomId);
   current = (await command(context.accessToken, current.id, 'join guild')).character;
+  current = await walkTo(context.accessToken, current, 'crossing-TG01-001');
+  const awayCircle = await command(context.accessToken, current.id, 'circle');
+  assert(awayCircle.character.circle === 1, 'Expected circle request away from guild registrar to keep Circle 1.');
+  assert(
+    awayCircle.events.some((event) => event.includes('Travel to your Barbarian Guild registrar')),
+    'Expected circle request away from guild registrar to require registrar travel.',
+  );
+  current = await walkTo(context.accessToken, awayCircle.character, canonicalGuilds[0].roomId);
   current = await advanceToCircle(context.accessToken, current, 10);
 
   context.character = current;
@@ -624,6 +632,7 @@ async function runProgressionSuite(context: SmokeContext): Promise<void> {
   context.summary.extraPrototypeGuilds = extraGuilds.map((guild) => guild.id);
   context.summary.guildRoomsWalked = canonicalGuilds.length;
   context.summary.circleReached = current.circle;
+  context.summary.circleRequiresGuildRegistrar = true;
 }
 
 async function runEconomySuite(context: SmokeContext): Promise<void> {
