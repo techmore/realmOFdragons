@@ -85,8 +85,53 @@ export const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | '
   },
 };
 
-function countItemAmmo(character: CharacterRecord, code: string): number {
+export function countAmmo(character: CharacterRecord, code: string): number {
   return Math.max(0, Math.floor(character.ammoPouch?.[code] ?? 0)) + character.inventory.filter((item) => item === code).length;
+}
+
+export function addAmmo(character: CharacterRecord, code: string, count: number): void {
+  character.ammoPouch = character.ammoPouch ?? {};
+  character.ammoPouch[code] = Math.max(0, Math.floor(character.ammoPouch[code] ?? 0)) + Math.max(0, Math.floor(count));
+}
+
+export function consumeAmmo(character: CharacterRecord, code: string): boolean {
+  if ((character.ammoPouch?.[code] ?? 0) > 0) {
+    character.ammoPouch![code] -= 1;
+    if (character.ammoPouch![code] <= 0) delete character.ammoPouch![code];
+    return true;
+  }
+  const inventoryIndex = character.inventory.findIndex((item) => item === code);
+  if (inventoryIndex >= 0) {
+    character.inventory.splice(inventoryIndex, 1);
+    return true;
+  }
+  return false;
+}
+
+export function getLoadedAmmo(character: CharacterRecord, weapon: ItemDetail): string | undefined {
+  return character.loadedAmmo?.[weapon.code];
+}
+
+export function setLoadedAmmo(character: CharacterRecord, weapon: ItemDetail, ammoCode: string): void {
+  character.loadedAmmo = character.loadedAmmo ?? {};
+  character.loadedAmmo[weapon.code] = ammoCode;
+}
+
+export function clearLoadedAmmo(character: CharacterRecord, weapon: ItemDetail): void {
+  if (!character.loadedAmmo) return;
+  delete character.loadedAmmo[weapon.code];
+}
+
+export function formatAmmoPouch(character: CharacterRecord): string {
+  return Object.entries(character.ammoPouch ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none';
+}
+
+export function formatLoadedAmmo(character: CharacterRecord): string {
+  return Object.entries(character.loadedAmmo ?? {}).map(([weaponCode, ammoCode]) => `${weaponCode}: ${ammoCode}`).join(', ') || 'none';
+}
+
+export function formatRecoverableAmmo(character: CharacterRecord): string {
+  return Object.entries(character.recoverableAmmo ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none';
 }
 
 function inferItemCategory(code: string, name: string): string {
@@ -334,6 +379,16 @@ export function buildItemDetailEvents(character: CharacterRecord, room: Room, re
   ];
 }
 
+export function findHeldWeapon(character: CharacterRecord, room?: Room, rooms: Record<string, Room> = worldRooms): ItemDetail | undefined {
+  const detailRoom = room ?? rooms[character.roomId] ?? rooms['crossing-TG01-001'];
+  for (const itemCode of [character.hands.right, character.hands.left]) {
+    if (!itemCode) continue;
+    const detail = resolveItemDetail(itemCode, detailRoom, character, rooms);
+    if (canWieldItem(detail)) return detail;
+  }
+  return undefined;
+}
+
 function findShopItem(code: string, rooms: Record<string, Room> = worldRooms): RoomShopItem | undefined {
   const lowered = code.toLowerCase();
   for (const room of Object.values(rooms)) {
@@ -424,8 +479,8 @@ export function resolveItemDetail(code: string, room: Room, character: Character
     ...inferEquipmentStats(code, name, category),
     ...inferWeaponProfile(code, name, category),
     bundleSize: category === 'ammo' ? 5 : undefined,
-    quantity: category === 'ammo' ? countItemAmmo(character, code) : undefined,
-    carried: character.inventory.includes(code) || (character.worn ?? []).includes(code) || character.hands.left === code || character.hands.right === code || countItemAmmo(character, code) > 0,
+    quantity: category === 'ammo' ? countAmmo(character, code) : undefined,
+    carried: character.inventory.includes(code) || (character.worn ?? []).includes(code) || character.hands.left === code || character.hands.right === code || countAmmo(character, code) > 0,
     shopAvailable: Boolean(room.shop?.items.some((entry) => entry.code === code)),
   };
 }

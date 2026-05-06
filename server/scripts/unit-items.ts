@@ -1,24 +1,34 @@
 import assert from 'node:assert/strict';
 import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
+  addAmmo,
   buildEquipmentSummary,
   buildInventoryEquipmentEvents,
   buildItemDetailEvents,
   buildItemDetails,
   canWieldItem,
   canWearItem,
+  clearLoadedAmmo,
+  consumeAmmo,
+  countAmmo,
   displayNameFromCode,
+  findHeldWeapon,
   findItemDetailForRequest,
   findInventoryIndex,
   findWornIndex,
+  formatAmmoPouch,
   formatEquipmentModifiers,
   formatEquipmentSlots,
+  formatLoadedAmmo,
+  formatRecoverableAmmo,
+  getLoadedAmmo,
   holdInventoryItem,
   parseHeldItemRequest,
   removeWornInventoryItem,
   resolveAvailableHandSlot,
   resolveHandSlot,
   resolveItemDetail,
+  setLoadedAmmo,
   stowHeldItem,
   wearCarriedItem,
 } from '../src/items.js';
@@ -113,6 +123,8 @@ assert.equal(ammo.bundleSize, 5);
 assert.equal(ammo.quantity, 4);
 assert.equal(ammo.carried, true);
 assert.equal(ammo.shopAvailable, true);
+assert.equal(countAmmo(unit, 'itm-sting-arrow'), 4);
+assert.equal(formatAmmoPouch(unit), 'itm-sting-arrow x4');
 
 const damaged = resolveItemDetail('damaged-itm-sting-arrow', marksmanRoom, unit);
 assert.equal(damaged.name, 'damaged practice arrow');
@@ -148,6 +160,30 @@ assert.deepEqual(buildItemDetailEvents(unit, marksmanRoom, 'practice bow').slice
 ]);
 assert.equal(buildItemDetailEvents(unit, marksmanRoom, 'damaged-itm-sting-arrow').some((entry) => entry.includes('broken ranged ammunition')), true);
 assert.deepEqual(buildItemDetailEvents(unit, marksmanRoom, 'missing bauble'), ['You cannot find an item matching "missing bauble". Use inventory or shop to list known items.']);
+
+const ammoUnit = character({ inventory: ['itm-sting-arrow'], ammoPouch: { 'itm-sting-arrow': 2 } });
+assert.equal(countAmmo(ammoUnit, 'itm-sting-arrow'), 3);
+assert.equal(consumeAmmo(ammoUnit, 'itm-sting-arrow'), true);
+assert.equal(ammoUnit.ammoPouch['itm-sting-arrow'], 1);
+assert.equal(consumeAmmo(ammoUnit, 'itm-sting-arrow'), true);
+assert.equal(ammoUnit.ammoPouch['itm-sting-arrow'], undefined);
+assert.equal(consumeAmmo(ammoUnit, 'itm-sting-arrow'), true);
+assert.equal(ammoUnit.inventory.includes('itm-sting-arrow'), false);
+assert.equal(consumeAmmo(ammoUnit, 'itm-sting-arrow'), false);
+addAmmo(ammoUnit, 'itm-sting-arrow', 5);
+assert.equal(ammoUnit.ammoPouch['itm-sting-arrow'], 5);
+
+const loadedUnit = character({ hands: { left: null, right: 'itm-practice-bow' }, loadedAmmo: {}, recoverableAmmo: { 'itm-sting-arrow': 2 } });
+const heldWeapon = findHeldWeapon(loadedUnit, marksmanRoom);
+assert.equal(heldWeapon?.code, 'itm-practice-bow');
+setLoadedAmmo(loadedUnit, heldWeapon!, 'itm-sting-arrow');
+assert.equal(getLoadedAmmo(loadedUnit, heldWeapon!), 'itm-sting-arrow');
+assert.equal(formatLoadedAmmo(loadedUnit), 'itm-practice-bow: itm-sting-arrow');
+assert.equal(formatRecoverableAmmo(loadedUnit), 'itm-sting-arrow x2');
+clearLoadedAmmo(loadedUnit, heldWeapon!);
+assert.equal(getLoadedAmmo(loadedUnit, heldWeapon!), undefined);
+assert.equal(formatLoadedAmmo(loadedUnit), 'none');
+assert.equal(findHeldWeapon(character({ hands: { left: 'repair cloth', right: null } }), marksmanRoom), undefined);
 
 assert.deepEqual(parseHeldItemRequest('training sword left'), {
   requestedItem: 'training sword',

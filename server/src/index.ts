@@ -48,17 +48,27 @@ import {
   resolveShopPurchase,
 } from './economy.js';
 import {
+  addAmmo,
   buildEquipmentSummary,
   buildInventoryEquipmentEvents,
   buildItemDetailEvents,
   buildItemDetails,
   canWieldItem,
+  clearLoadedAmmo,
+  consumeAmmo,
+  countAmmo,
   displayNameFromCode,
   findItemDetailForRequest,
+  findHeldWeapon,
+  formatAmmoPouch,
   formatEquipmentModifiers,
+  formatLoadedAmmo,
+  formatRecoverableAmmo,
+  getLoadedAmmo,
   holdInventoryItem,
   parseHeldItemRequest,
   removeWornInventoryItem,
+  setLoadedAmmo,
   stowHeldItem,
   wearCarriedItem,
   resolveItemDetail,
@@ -438,11 +448,6 @@ function normalizeRecoverableAmmo(character: CharacterRecord): boolean {
   return changed;
 }
 
-function addAmmo(character: CharacterRecord, code: string, count: number) {
-  character.ammoPouch = character.ammoPouch ?? {};
-  character.ammoPouch[code] = Math.max(0, Math.floor(character.ammoPouch[code] ?? 0)) + Math.max(0, Math.floor(count));
-}
-
 function addRecoverableAmmo(character: CharacterRecord, code: string, count: number) {
   character.recoverableAmmo = character.recoverableAmmo ?? {};
   character.recoverableAmmo[code] =
@@ -467,60 +472,6 @@ function resolveRangedAmmoRecovery(character: CharacterRecord, ammoCode: string,
   addRecoverableAmmo(character, ammoCode, 1);
   events.push(`${ammoName} may be recovered after the fight.`);
   return 'intact';
-}
-
-function countAmmo(character: CharacterRecord, code: string) {
-  return Math.max(0, Math.floor(character.ammoPouch?.[code] ?? 0)) + character.inventory.filter((item) => item === code).length;
-}
-
-function consumeAmmo(character: CharacterRecord, code: string): boolean {
-  if ((character.ammoPouch?.[code] ?? 0) > 0) {
-    character.ammoPouch![code] -= 1;
-    if (character.ammoPouch![code] <= 0) delete character.ammoPouch![code];
-    return true;
-  }
-  const inventoryIndex = character.inventory.findIndex((item) => item === code);
-  if (inventoryIndex >= 0) {
-    character.inventory.splice(inventoryIndex, 1);
-    return true;
-  }
-  return false;
-}
-
-function findHeldWeapon(character: CharacterRecord, room?: Room): ItemDetail | undefined {
-  const detailRoom = room ?? worldRooms[character.roomId] ?? worldRooms['crossing-TG01-001'];
-  for (const itemCode of [character.hands.right, character.hands.left]) {
-    if (!itemCode) continue;
-    const detail = resolveItemDetail(itemCode, detailRoom, character);
-    if (detail.category === 'weapon' || detail.category === 'ranged') return detail;
-  }
-  return undefined;
-}
-
-function getLoadedAmmo(character: CharacterRecord, weapon: ItemDetail): string | undefined {
-  return character.loadedAmmo?.[weapon.code];
-}
-
-function setLoadedAmmo(character: CharacterRecord, weapon: ItemDetail, ammoCode: string) {
-  character.loadedAmmo = character.loadedAmmo ?? {};
-  character.loadedAmmo[weapon.code] = ammoCode;
-}
-
-function clearLoadedAmmo(character: CharacterRecord, weapon: ItemDetail) {
-  if (!character.loadedAmmo) return;
-  delete character.loadedAmmo[weapon.code];
-}
-
-function formatAmmoPouch(character: CharacterRecord) {
-  return Object.entries(character.ammoPouch ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none';
-}
-
-function formatLoadedAmmo(character: CharacterRecord) {
-  return Object.entries(character.loadedAmmo ?? {}).map(([weaponCode, ammoCode]) => `${weaponCode}: ${ammoCode}`).join(', ') || 'none';
-}
-
-function formatRecoverableAmmo(character: CharacterRecord) {
-  return Object.entries(character.recoverableAmmo ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none';
 }
 
 function applyRollToCharacter(character: CharacterRecord, characterRoll: RaceRollResult) {
