@@ -37,6 +37,13 @@ import {
   shiftAdvantageValue,
   shiftCombatRange,
 } from './combat.js';
+import {
+  estimateAmmoPouchSalePrice,
+  estimateInventorySalePrice,
+  findLocalShopSaleItem,
+  isDamagedAmmoCode,
+  originalAmmoCodeFromDamaged,
+} from './economy.js';
 import { WebSocketServer, WebSocket } from 'ws';
 
 type TokenClaims = {
@@ -168,7 +175,6 @@ type CharacterCombatSnapshot = {
 const MAX_SCRIPT_INPUT_COMMANDS = 200;
 const MAX_SCRIPT_RUNTIME_STEPS = 800;
 const MAX_REPEAT_COUNT = 100;
-const SHOP_SELL_RATE = 0.75;
 const STARTING_WALLET = Object.freeze({
   plat: 40,
   trias: 80,
@@ -1173,15 +1179,6 @@ function displayNameFromCode(code: string): string {
     .replace(/^foraged-/, '')
     .replace(/-/g, ' ')
     .trim();
-}
-
-function isDamagedAmmoCode(code: string) {
-  const normalized = code.toLowerCase();
-  return normalized.startsWith('damaged-itm-') || normalized.startsWith('damaged itm-');
-}
-
-function originalAmmoCodeFromDamaged(code: string) {
-  return code.toLowerCase().replace(/^damaged[- ]/, '');
 }
 
 function findShopItem(code: string) {
@@ -2489,15 +2486,13 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       (entry) => entry.toLowerCase() === lowered || entry.toLowerCase().replace(/\s+/g, '-') === lowered,
     );
     if (inventoryIndex < 0) {
-      const catalogItem = room.shop.items.find(
-        (entry) => entry.code.toLowerCase() === lowered || entry.name.toLowerCase() === lowered,
-      );
+      const catalogItem = findLocalShopSaleItem(room.shop.items, lowered);
       const itemDetail = catalogItem ? resolveItemDetail(catalogItem.code, room, resolvedCharacter) : undefined;
       if (!catalogItem || itemDetail?.category !== 'ammo' || countAmmo(resolvedCharacter, catalogItem.code) <= 0) {
         events.push(`You are not carrying "${code}".`);
       } else {
         const bundleSize = itemDetail.bundleSize ?? 1;
-        const sellPrice = Math.max(1, Math.floor((catalogItem.price / bundleSize) * SHOP_SELL_RATE));
+        const sellPrice = estimateAmmoPouchSalePrice(catalogItem, bundleSize);
         consumeAmmo(resolvedCharacter, catalogItem.code);
         earnFunds(resolvedCharacter.wallet, catalogItem.currency, sellPrice);
         grantSkillPool(resolvedCharacter, 'trading', 1, events);
@@ -2509,14 +2504,16 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     } else {
       const itemCode = resolvedCharacter.inventory[inventoryIndex];
       const damagedAmmo = isDamagedAmmoCode(itemCode);
-      const catalogItem = room.shop.items.find((entry) => entry.code === (damagedAmmo ? originalAmmoCodeFromDamaged(itemCode) : itemCode));
+      const catalogItem = findLocalShopSaleItem(room.shop.items, itemCode);
       if (!catalogItem) {
         events.push(`This shop does not buy ${itemCode}.`);
       } else {
         const itemDetail = resolveItemDetail(itemCode, room, resolvedCharacter);
-        const sellPrice = damagedAmmo
-          ? Math.max(1, Math.floor((catalogItem.price / (resolveItemDetail(catalogItem.code, room, resolvedCharacter).bundleSize ?? 5)) * 0.25))
-          : Math.max(1, Math.floor(catalogItem.price * SHOP_SELL_RATE));
+        const sellPrice = estimateInventorySalePrice(
+          itemCode,
+          catalogItem,
+          damagedAmmo ? resolveItemDetail(catalogItem.code, room, resolvedCharacter).bundleSize : undefined,
+        );
         resolvedCharacter.inventory.splice(inventoryIndex, 1);
         if (resolvedCharacter.hands.left === itemCode) {
           resolvedCharacter.hands.left = null;
