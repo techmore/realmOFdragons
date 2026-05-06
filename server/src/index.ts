@@ -880,7 +880,7 @@ function buildTargetDetailEvents(character: CharacterRecord, requestedTarget: st
 function buildVerbEvents(): string[] {
   return [
     'Verb groups:',
-    'Info: help, help scan, verb, look, exits, score, skills, inventory, balance, range, combat.',
+    'Info: help, help scan, verb, look, survey, search, exits, score, skills, inventory, balance, range, combat.',
     'Movement: north, south, east, west, n, s, e, w, go <direction>, enter, exit, up, down, ne, nw, se, sw.',
     'Targets: scan, target, target <name>, appraise <target>.',
     'Survival: forage, inventory, train survival.',
@@ -888,6 +888,38 @@ function buildVerbEvents(): string[] {
     'Progression: train, train <skill>, circle, join guild.',
     'Shops: shop, shop buy <code>, shop sell <code>.',
   ];
+}
+
+function buildSurveyEvents(room: Room): string[] {
+  const events = [`Surveying ${room.title}:`];
+  events.push(`Exits: ${room.exits.map((exit) => exit.direction).join(', ') || 'none'}.`);
+
+  if (room.forage?.items.length) {
+    events.push(`Forage: difficulty ${room.forage.difficulty}; possible finds ${room.forage.items.map((item) => item.name).join(', ')}.`);
+  } else {
+    events.push('Forage: nothing obvious.');
+  }
+
+  if (room.shop) {
+    events.push(`Shop: ${room.shop.name} (${room.shop.items.length} catalog item(s)).`);
+  } else {
+    events.push('Shop: none visible.');
+  }
+
+  if (room.guild) {
+    events.push(`Guild registrar: ${GUILD_NAMES[room.guild] ?? room.guild}.`);
+  } else {
+    events.push('Guild registrar: none visible.');
+  }
+
+  const enemies = getRoomEnemies(room.id);
+  if (enemies.length) {
+    events.push(`Targets: ${enemies.map((enemy) => enemy.name).join(', ')}.`);
+  } else {
+    events.push('Targets: none immediate.');
+  }
+
+  return events;
 }
 
 function buildCharacterCombat(character: CharacterRecord, requestedTarget?: string): CharacterCombatSnapshot | null {
@@ -1110,6 +1142,8 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     command === 'verbs' ||
     command === 'look' ||
     command === 'l' ||
+    command === 'survey' ||
+    command === 'search' ||
     command === 'scan' ||
     command === 'target' ||
     command.startsWith('target ') ||
@@ -1181,7 +1215,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'help') {
     events.push(
-      'Commands: look, scan, forage, help scan, verb, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, survey, search, scan, forage, help scan, verb, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
     return buildCommandResult(resolvedCharacter, room, events);
@@ -1189,6 +1223,11 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'verb' || command === 'verbs') {
     events.push(...buildVerbEvents());
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
+  if (command === 'survey' || command === 'search') {
+    events.push(...buildSurveyEvents(room));
     return buildCommandResult(resolvedCharacter, room, events);
   }
 

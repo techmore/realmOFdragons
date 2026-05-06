@@ -10,14 +10,14 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- `look` now reports forage availability, difficulty, and possible finds for forageable rooms.
-- Room payloads expose forage metadata to the web UI.
-- The web Room panel now shows a Forage section with difficulty and possible finds.
-- Static UI and API smoke verify forage discovery.
+- Added passive `survey` and `search` room discovery commands.
+- Survey output summarizes exits, forage, shop, guild registrar, and immediate targets.
+- Web quick controls now include `survey`.
+- Static UI and API smoke verify survey discovery.
 
 Current next priority:
 
-- Add a dedicated `survey` or `search` discovery command that summarizes room affordances: exits, forage, shop, targets, and guild registrar.
+- Add `survey` command coverage to README command reference and browser smoke telemetry.
 
 Core Philosophy
 
@@ -586,6 +586,20 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add a dedicated `survey` or `search` discovery command that summarizes room affordances: exits, forage, shop, targets, and guild registrar.
+
+Implementation Notes - 2026-05-06, Room Survey Command
+
+Completed in the current Node/React prototype:
+
+- Added passive `survey` and `search` commands.
+- Survey output summarizes room exits, forage availability, shop, guild registrar, and immediate targets.
+- `help`, `verb`, and web quick controls now expose `survey`.
+- API smoke verifies survey header, exits, forage summary, and target summary in the beginner hunting fork.
+- Coverage telemetry now reports `surveyChecked`.
+
+Next priority:
+
+- Add `survey` command coverage to README command reference and browser smoke telemetry.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

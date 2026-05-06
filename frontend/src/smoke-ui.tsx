@@ -97,6 +97,7 @@ for (const expected of [
   'New here?',
   'help scan',
   'target &lt;name&gt;',
+  'survey',
   'verb',
   'scan',
   'forage',

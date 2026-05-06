@@ -58,6 +58,7 @@ function markdownSummary(results, coverage) {
     lines.push('| Area | Covered |');
     lines.push('| --- | --- |');
     lines.push(`| Combat smoke | ${coverage.gameplay.combatChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Survey discovery command | ${coverage.gameplay.surveyChecked ? 'yes' : 'no'} |`);
     lines.push(`| Forage survival command | ${coverage.gameplay.forageChecked ? 'yes' : 'no'} |`);
     lines.push(`| Scan visibility | ${coverage.gameplay.scanChecked ? 'yes' : 'no'} |`);
     lines.push(`| Structured targets | ${coverage.gameplay.structuredTargetsChecked ? 'yes' : 'no'} |`);
@@ -178,6 +179,7 @@ function coverageSummary(results) {
         (scriptPayload.scriptDeletedChecked ?? apiPayload.scriptDeletedChecked) === true,
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
       combatChecked: apiPayload.combatChecked === true,
+      surveyChecked: apiPayload.surveyChecked === true,
       forageChecked: apiPayload.forageChecked === true,
       scanChecked: apiPayload.scanChecked === true,
       structuredTargetsChecked: apiPayload.structuredTargetsChecked === true,
