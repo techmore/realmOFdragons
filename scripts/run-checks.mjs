@@ -72,6 +72,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Browser survey action | ${coverage.frontend.browserSurveyClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser script discovery note | ${coverage.frontend.browserScriptDiscoveryVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser script preset save | ${coverage.frontend.browserScriptPresetSaved ? 'yes' : 'no'} |`);
+    lines.push(`| Browser damaged ammo item details | ${coverage.frontend.browserDamagedAmmoItemDetailsVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser verb discovery action | ${coverage.frontend.browserVerbDiscoveryClicked ? 'yes' : 'no'} |`);
     lines.push(`| Agent prompt current status | ${coverage.gameplay.agentPromptCurrentStatusChecked ? 'yes' : 'no'} |`);
@@ -243,6 +244,7 @@ function coverageSummary(results) {
       browserSurveyClicked: browserPayload.surveyClicked === true,
       browserRoomAffordancePanelVisible: browserPayload.roomAffordancePanelVisible === true,
       browserItemDetailsVisible: browserPayload.itemDetailsVisible === true,
+      browserDamagedAmmoItemDetailsVisible: browserPayload.damagedAmmoItemDetailsVisible === true,
       browserTargetDetailsClicked: browserPayload.targetDetailsClicked === true,
       browserVerbDiscoveryClicked: browserPayload.verbDiscoveryClicked === true,
       browserCommandDiscoveryVisible: browserPayload.commandDiscoveryVisible === true,
@@ -268,6 +270,7 @@ function assertCoverageShape(coverage) {
   expect(coverage.frontend.staticUiSmoke === true, 'frontend.staticUiSmoke');
   expect(coverage.frontend.browserSmoke === true, 'frontend.browserSmoke');
   expect(coverage.frontend.browserScriptPresetSaved === true, 'frontend.browserScriptPresetSaved');
+  expect(coverage.frontend.browserDamagedAmmoItemDetailsVisible === true, 'frontend.browserDamagedAmmoItemDetailsVisible');
   expect(coverage.scripts.focusedSmoke === true, 'scripts.focusedSmoke');
   expect(coverage.scripts.lifecycle === true, 'scripts.lifecycle');
   expect(coverage.scripts.created === true, 'scripts.created');

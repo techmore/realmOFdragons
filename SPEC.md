@@ -34,10 +34,12 @@ Completed current slice:
 - Economy smoke telemetry now tracks damaged ammo appraisal and resale coverage.
 - Added focused `smoke:damaged-ammo` coverage for damaged ammo item details and resale.
 - Local agent telemetry now runs the focused damaged-ammo smoke before the full API smoke.
+- Browser smoke now seeds damaged recovered ammunition through fixtures and verifies the item details panel renders salvage metadata.
+- Frontend telemetry now tracks browser damaged-ammo item detail visibility.
 
 Current next priority:
 
-- Add browser UI coverage for damaged recovered ammunition in the item details panel.
+- Add browser UI coverage for selling damaged ammunition from the inventory panel.
 
 Core Philosophy
 

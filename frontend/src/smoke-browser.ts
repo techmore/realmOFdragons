@@ -2,6 +2,7 @@ import { chromium } from 'playwright-core';
 import { existsSync } from 'node:fs';
 
 const appUrl = process.env.DR_WEB_BASE_URL ?? 'http://localhost:4200';
+const apiBaseUrl = (process.env.DR_API_BASE_URL ?? 'http://localhost:4100').replace(/\/+$/, '');
 const defaultChromePath =
   process.platform === 'darwin' && existsSync('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
     ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
@@ -14,6 +15,21 @@ const characterName = `Browser${unique.slice(-5)}`;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
+}
+
+async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    ...options,
+    headers: {
+      'content-type': 'application/json',
+      ...(options.headers ?? {}),
+    },
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(`Browser smoke API request failed ${response.status} ${path}: ${JSON.stringify(body)}`);
+  }
+  return body as T;
 }
 
 async function main(): Promise<void> {
@@ -54,6 +70,28 @@ async function main(): Promise<void> {
     await page.getByText('Structured survey summary from room state').waitFor();
     await page.getByText('Item Details').waitFor();
     await page.getByText('training sword | weapon | 2 trias').waitFor();
+
+    const login = await apiRequest<{ accessToken: string }>('/v1/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    const characterList = await apiRequest<{ characters: Array<{ id: string; name: string }> }>('/v1/characters', {
+      headers: { authorization: `Bearer ${login.accessToken}` },
+    });
+    const createdCharacter = characterList.characters.find((entry) => entry.name === characterName);
+    assert(createdCharacter, 'Expected browser-created character in API character list.');
+    await apiRequest(`/v1/test/characters/${createdCharacter.id}/state`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${login.accessToken}` },
+      body: JSON.stringify({ inventoryAppend: ['damaged-itm-sting-arrow'] }),
+    });
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('inventory');
+    await page.keyboard.press('Enter');
+    const damagedAmmoDetail = page.locator('.item-detail').filter({ hasText: 'damaged-itm-sting-arrow | salvage | 1 trias' });
+    await damagedAmmoDetail.getByText('damaged practice arrow', { exact: true }).waitFor();
+    await damagedAmmoDetail.getByText('damaged-itm-sting-arrow | salvage | 1 trias').waitFor();
+    await damagedAmmoDetail.getByText('broken ranged ammunition').waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('look');
     await page.keyboard.press('Enter');
@@ -130,7 +168,7 @@ async function main(): Promise<void> {
     await page.locator('.terminal-pane .log').getByText('Targets: forage wolf-cub.').waitFor();
 
     await page.locator('.panel').filter({ hasText: 'Controls' }).getByRole('button', { name: 'scan', exact: true }).click();
-    await page.locator('.terminal-pane .log').getByText('forage wolf-cub').waitFor();
+    await page.locator('.terminal-pane .log').getByText(/ - forage wolf-cub \(/).waitFor();
     await page.locator('.terminal-pane .log').getByText('Vitality estimates how long a target can stay in the fight').waitFor();
     await page.getByText('Visible Targets').waitFor();
     await page.getByText('Vitality estimates staying power').waitFor();
@@ -166,6 +204,7 @@ async function main(): Promise<void> {
           surveyClicked: true,
           roomAffordancePanelVisible: true,
           itemDetailsVisible: true,
+          damagedAmmoItemDetailsVisible: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,
