@@ -21,6 +21,7 @@ const ciSteps = [
 const localSteps = [
   ...baseSteps,
   { name: 'browser-smoke', command: 'node', args: ['scripts/with-test-app.mjs', 'npm', 'run', 'smoke:browser'] },
+  { name: 'target-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:targets'] },
   { name: 'api-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', 'run', 'smoke:api'] },
   { name: 'git-status', command: 'node', args: ['scripts/agent-check.mjs'] },
 ];
@@ -57,6 +58,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Scan visibility | ${coverage.gameplay.scanChecked ? 'yes' : 'no'} |`);
     lines.push(`| Structured targets | ${coverage.gameplay.structuredTargetsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Target details command | ${coverage.gameplay.targetDetailsChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Focused target smoke | ${coverage.gameplay.focusedTargetSmokeChecked ? 'yes' : 'no'} |`);
     lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
     lines.push('');
@@ -114,6 +116,7 @@ function parseLastJsonObject(text) {
 function coverageSummary(results) {
   const byName = new Map(results.map((result) => [result.name, result]));
   const apiPayload = parseLastJsonObject(byName.get('api-smoke')?.stdoutTail ?? '') ?? {};
+  const targetPayload = parseLastJsonObject(byName.get('target-smoke')?.stdoutTail ?? '') ?? {};
   const browserPayload = parseLastJsonObject(byName.get('browser-smoke')?.stdoutTail ?? '') ?? {};
   const unitPayloads = (byName.get('unit-tests')?.stdoutTail.match(/\{[\s\S]*?\n\}/g) ?? [])
     .map((candidate) => {
@@ -141,6 +144,7 @@ function coverageSummary(results) {
       scanChecked: apiPayload.scanChecked === true,
       structuredTargetsChecked: apiPayload.structuredTargetsChecked === true,
       targetDetailsChecked: apiPayload.targetDetailsChecked === true,
+      focusedTargetSmokeChecked: targetPayload.targetDetailsChecked === true,
       finalRoom: apiPayload.finalRoom ?? null,
       finalCombatActive: Boolean(apiPayload.finalCombat),
     },

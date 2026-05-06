@@ -443,6 +443,18 @@ Next priority:
 
 - Add the focused `targets` smoke suite to telemetry as a separate optional/local step or targeted npm script documentation, so target regressions can be checked without running the full all-suite path.
 
+Implementation Notes - 2026-05-05, Focused Target Telemetry Step
+
+Completed in the current Node/React prototype:
+
+- `npm run agent:check` now runs `target-smoke` as a separate local telemetry step before the full API smoke.
+- Coverage summary now reports `focusedTargetSmokeChecked`.
+- Markdown telemetry now includes Focused target smoke in the Gameplay Coverage table.
+
+Next priority:
+
+- Add command documentation for focused smoke scripts and telemetry artifacts in `README.md` or a development section so future agents/users know how to run target-only checks.
+
 Implementation Notes - 2026-05-05, Target Details Command
 
 Completed in the current Node/React prototype:
