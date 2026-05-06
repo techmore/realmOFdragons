@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Agent telemetry now has explicit canonical DragonRealms guild identity rows for exactly 11 covered guilds, zero prototype guilds exposed, and successful registrar joins.
+- Coverage summary JSON now promotes canonical guild and prototype-guild counts so reports show guild identity drift directly.
+- Agent check coverage shape now fails if canonical guild count, no-prototype-guild exposure, or registrar-join coverage disappears.
 - Agent telemetry now has explicit rows for DragonRealms race selection, unaffiliated character creation, guild-at-creation rejection, in-world guild joining, and all 121 race/guild Circle 1 combinations.
 - Coverage summary JSON now promotes race/guild matrix counts so reports show 11 races, 11 guilds, and 121 Circle 1 combinations directly.
 - Agent check coverage shape now fails if the DragonRealms race/guild creation rules disappear from smoke telemetry.
@@ -136,7 +139,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add focused telemetry rows for canonical DragonRealms guild identity coverage: exactly 11 exposed guilds, no prototype guilds, and successful registrar joins.
+- Add focused smoke coverage for `/v1/world/guilds` to assert the exposed guild endpoint contains only canonical DragonRealms guild IDs and all have registrar rooms.
 
 Core Philosophy
 

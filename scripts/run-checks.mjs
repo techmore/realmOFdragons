@@ -93,6 +93,9 @@ function markdownSummary(results, coverage) {
     lines.push(`| Guild rejected during character creation | ${coverage.gameplay.drGuildCreationRejected ? 'yes' : 'no'} |`);
     lines.push(`| Guild joined in-world only | ${coverage.gameplay.drGuildJoinedInWorldOnlyChecked ? 'yes' : 'no'} |`);
     lines.push(`| All DR race/guild Circle 1 combinations | ${coverage.gameplay.drRaceGuildCircleOneMatrixChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Exactly 11 canonical DR guilds covered | ${coverage.gameplay.drCanonicalGuildCountChecked ? 'yes' : 'no'} |`);
+    lines.push(`| No prototype guilds exposed | ${coverage.gameplay.drNoPrototypeGuildsExposed ? 'yes' : 'no'} |`);
+    lines.push(`| Canonical registrar joins covered | ${coverage.gameplay.drCanonicalRegistrarJoinsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Script create/run/delete lifecycle | ${coverage.gameplay.scriptLifecycleChecked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
     lines.push(`| Ammo stack resale | ${coverage.gameplay.ammoSellChecked ? 'yes' : 'no'} |`);
@@ -119,6 +122,8 @@ function markdownSummary(results, coverage) {
     lines.push(`| Race/guild Circle 1 combinations | ${coverage.gameplay.raceGuildMatrixChecked} |`);
     lines.push(`| DR races in matrix | ${coverage.gameplay.raceGuildMatrixRaceCount} |`);
     lines.push(`| DR guilds in matrix | ${coverage.gameplay.raceGuildMatrixGuildCount} |`);
+    lines.push(`| Canonical guilds checked | ${coverage.gameplay.canonicalGuildsCheckedCount} |`);
+    lines.push(`| Prototype guilds exposed | ${coverage.gameplay.extraPrototypeGuildsCount} |`);
     lines.push(`| Guild rooms walked | ${coverage.gameplay.guildRoomsWalked} |`);
     lines.push(`| Shop rooms walked | ${coverage.gameplay.shopRoomsWalked} |`);
     lines.push(`| Circle reached | ${coverage.gameplay.circleReached} |`);
@@ -211,6 +216,8 @@ function coverageSummary(results) {
       raceGuildMatrixChecked: apiPayload.raceGuildMatrixChecked ?? 0,
       raceGuildMatrixRaceCount: apiPayload.raceGuildMatrixRaceCount ?? 0,
       raceGuildMatrixGuildCount: apiPayload.raceGuildMatrixGuildCount ?? 0,
+      canonicalGuildsCheckedCount: Array.isArray(apiPayload.canonicalGuildsChecked) ? apiPayload.canonicalGuildsChecked.length : 0,
+      extraPrototypeGuildsCount: Array.isArray(apiPayload.extraPrototypeGuilds) ? apiPayload.extraPrototypeGuilds.length : 0,
       guildRoomsWalked: apiPayload.guildRoomsWalked ?? 0,
       shopRoomsWalked: apiPayload.shopRoomsWalked ?? 0,
       circleReached: apiPayload.circleReached ?? 0,
@@ -254,6 +261,15 @@ function coverageSummary(results) {
         apiPayload.raceGuildMatrixRaceCount === 11 &&
         apiPayload.raceGuildMatrixGuildCount === 11 &&
         apiPayload.raceGuildMatrixCircle === 1,
+      drCanonicalGuildCountChecked:
+        Array.isArray(apiPayload.canonicalGuildsChecked) &&
+        apiPayload.canonicalGuildsChecked.length === 11 &&
+        apiPayload.canonicalGuildRoomsWalked === 11,
+      drNoPrototypeGuildsExposed: Array.isArray(apiPayload.extraPrototypeGuilds) && apiPayload.extraPrototypeGuilds.length === 0,
+      drCanonicalRegistrarJoinsChecked:
+        Array.isArray(apiPayload.canonicalGuildsChecked) &&
+        apiPayload.canonicalGuildsChecked.length === 11 &&
+        apiPayload.guildRoomsWalked === 11,
       finalRoom: apiPayload.finalRoom ?? null,
       finalCombatActive: Boolean(apiPayload.finalCombat),
     },
@@ -358,6 +374,9 @@ function assertCoverageShape(coverage) {
   expect(coverage.gameplay.drGuildCreationRejected === true, 'gameplay.drGuildCreationRejected');
   expect(coverage.gameplay.drGuildJoinedInWorldOnlyChecked === true, 'gameplay.drGuildJoinedInWorldOnlyChecked');
   expect(coverage.gameplay.drRaceGuildCircleOneMatrixChecked === true, 'gameplay.drRaceGuildCircleOneMatrixChecked');
+  expect(coverage.gameplay.drCanonicalGuildCountChecked === true, 'gameplay.drCanonicalGuildCountChecked');
+  expect(coverage.gameplay.drNoPrototypeGuildsExposed === true, 'gameplay.drNoPrototypeGuildsExposed');
+  expect(coverage.gameplay.drCanonicalRegistrarJoinsChecked === true, 'gameplay.drCanonicalRegistrarJoinsChecked');
 
   if (mode === 'local') {
     expect(coverage.gameplay.focusedTargetSmokeChecked === true, 'gameplay.focusedTargetSmokeChecked');
