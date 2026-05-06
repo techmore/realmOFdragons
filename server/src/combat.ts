@@ -92,6 +92,41 @@ export type AttackCycleStatus = {
   events: string[];
 };
 
+export type CombatTargetTemplate = {
+  id: string;
+  name: string;
+  maxHp: number;
+  aggression: number;
+};
+
+export type RoomTarget = {
+  id: string;
+  name: string;
+  vitality: number;
+  aggression: number;
+};
+
+export function buildRoomTargetsFromTemplates(targets: CombatTargetTemplate[]): RoomTarget[] {
+  return targets.map((target) => ({
+    id: target.id,
+    name: target.name,
+    vitality: target.maxHp,
+    aggression: target.aggression,
+  }));
+}
+
+export function buildTargetScanEvents(targets: CombatTargetTemplate[]): string[] {
+  if (!targets.length) {
+    return ['You scan the area and find no immediate targets.'];
+  }
+
+  return [
+    'You scan the area and notice:',
+    'Vitality estimates how long a target can stay in the fight; aggression estimates how quickly it presses or attacks.',
+    ...targets.map((target) => ` - ${target.name} (${target.maxHp} vitality, aggression ${target.aggression})`),
+  ];
+}
+
 export function resolveAttackCycleStatus(nextAttackAt: number, now: number): AttackCycleStatus {
   const remainingMs = Math.max(0, Math.floor(nextAttackAt) - Math.floor(now));
   if (remainingMs <= 0) {

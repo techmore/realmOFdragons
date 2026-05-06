@@ -3,6 +3,8 @@ import {
   STANCE_PROFILES,
   applyBalanceChange,
   buildPostAttackStatusEvents,
+  buildRoomTargetsFromTemplates,
+  buildTargetScanEvents,
   buildTargetVanishedEvents,
   formatAdvantage,
   formatBalance,
@@ -96,4 +98,20 @@ assert.deepEqual(buildPostAttackStatusEvents(1, 3), ['Position: you have the edg
 assert.equal(resolveAttackCooldownMs(59), 650);
 assert.equal(resolveAttackCooldownMs(60), 900);
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:combat' }, null, 2));
+const targetTemplates = [
+  { id: 'test-rat', name: 'test rat', maxHp: 8, aggression: 30 },
+  { id: 'test-goblin', name: 'test goblin', maxHp: 12, aggression: 55 },
+];
+assert.deepEqual(buildRoomTargetsFromTemplates(targetTemplates), [
+  { id: 'test-rat', name: 'test rat', vitality: 8, aggression: 30 },
+  { id: 'test-goblin', name: 'test goblin', vitality: 12, aggression: 55 },
+]);
+assert.deepEqual(buildTargetScanEvents([]), ['You scan the area and find no immediate targets.']);
+assert.deepEqual(buildTargetScanEvents(targetTemplates), [
+  'You scan the area and notice:',
+  'Vitality estimates how long a target can stay in the fight; aggression estimates how quickly it presses or attacks.',
+  ' - test rat (8 vitality, aggression 30)',
+  ' - test goblin (12 vitality, aggression 55)',
+]);
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true }, null, 2));

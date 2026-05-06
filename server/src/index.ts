@@ -56,12 +56,15 @@ import {
   normalizeRange,
   normalizeStance,
   buildPostAttackStatusEvents,
+  buildRoomTargetsFromTemplates,
+  buildTargetScanEvents,
   buildTargetVanishedEvents,
   resolveAttackCooldownMs,
   resolveAttackOutcome,
   resolveAttackCycleStatus,
   shiftAdvantageValue,
   shiftCombatRange,
+  type RoomTarget,
 } from './combat.js';
 import {
   estimateAmmoPouchSalePrice,
@@ -153,13 +156,6 @@ interface CommandResult {
   targets: RoomTarget[];
   itemDetails: ItemDetail[];
 }
-
-type RoomTarget = {
-  id: string;
-  name: string;
-  vitality: number;
-  aggression: number;
-};
 
 type SocketState = {
   characterId?: string;
@@ -864,12 +860,7 @@ function getRoomEnemies(roomId: RoomId): EnemyTemplate[] {
 }
 
 function buildRoomTargets(roomId: RoomId): RoomTarget[] {
-  return getRoomEnemies(roomId).map((enemy) => ({
-    id: enemy.id,
-    name: enemy.name,
-    vitality: enemy.maxHp,
-    aggression: enemy.aggression,
-  }));
+  return buildRoomTargetsFromTemplates(getRoomEnemies(roomId));
 }
 
 function findRoomEnemyByName(roomId: RoomId, requestedTarget: string): EnemyTemplate | undefined {
@@ -897,16 +888,7 @@ function findShopItem(code: string) {
 }
 
 function buildEnemyScanEvents(roomId: RoomId): string[] {
-  const enemies = getRoomEnemies(roomId);
-  if (!enemies.length) {
-    return ['You scan the area and find no immediate targets.'];
-  }
-
-  return [
-    'You scan the area and notice:',
-    'Vitality estimates how long a target can stay in the fight; aggression estimates how quickly it presses or attacks.',
-    ...enemies.map((enemy) => ` - ${enemy.name} (${enemy.maxHp} vitality, aggression ${enemy.aggression})`),
-  ];
+  return buildTargetScanEvents(getRoomEnemies(roomId));
 }
 
 function buildTargetDetailEvents(character: CharacterRecord, requestedTarget: string): string[] {
