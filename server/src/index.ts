@@ -24,7 +24,19 @@ import {
   type StatGenerationMode,
   type StatBlock,
 } from './races.js';
-import { applySkillPoolGain, buildCircleStatus, nextCircleRequirement, primarySkillForGuild, resolveCircleAdvancement, resolveCircleAdvancementRequest, resolveTrainingDecision, totalSkillRanks } from './progression.js';
+import {
+  GUILD_NAMES,
+  applySkillPoolGain,
+  buildCircleStatus,
+  buildStarterSkills,
+  ensureProgressionShape,
+  nextCircleRequirement,
+  primarySkillForGuild,
+  resolveCircleAdvancement,
+  resolveCircleAdvancementRequest,
+  resolveTrainingDecision,
+  totalSkillRanks,
+} from './progression.js';
 import {
   STANCE_PROFILES,
   type CombatRangeName,
@@ -194,41 +206,6 @@ const STARTING_WALLET = Object.freeze({
   lucan: 0,
   silk: 0,
 });
-
-const STARTER_SKILLS = [
-  ['melee', 'Melee'],
-  ['missile', 'Missile'],
-  ['evasion', 'Evasion'],
-  ['athletics', 'Athletics'],
-  ['survival', 'Survival'],
-  ['stealth', 'Stealth'],
-  ['magic', 'Magic'],
-  ['tactics', 'Tactics'],
-  ['scholarship', 'Scholarship'],
-  ['performance', 'Performance'],
-  ['empathy', 'Empathy'],
-  ['trading', 'Trading'],
-  ['first_aid', 'First Aid'],
-] as const;
-
-const GUILD_NAMES: Record<string, string> = {
-  commoner: 'Unaffiliated',
-  barbarian: 'Barbarian Guild',
-  bard: 'Bard Guild',
-  fighter: 'Fighter Guild',
-  mage: 'Mage Guild',
-  moon_mage: 'Moon Mage Guild',
-  necromancer: 'Necromancer Guild',
-  paladin: 'Paladin Guild',
-  ranger: 'Ranger Guild',
-  scout: 'Scout Guild',
-  rogue: 'Rogue Guild',
-  thief: 'Thief Guild',
-  trader: 'Trader Guild',
-  warrior_mage: 'Warrior Mage Guild',
-  cleric: 'Cleric Guild',
-  empath: 'Empath Guild',
-};
 
 const SCRIPT_PRESETS: ScriptPreset[] = [
   {
@@ -512,48 +489,6 @@ function ensureCombatShape(character: CharacterRecord): boolean {
 function shiftAdvantage(character: CharacterRecord, amount: number) {
   if (!character.combat) return;
   character.combat.advantage = shiftAdvantageValue(character.combat.advantage, amount);
-}
-
-function buildStarterSkills(): CharacterRecord['skills'] {
-  return Object.fromEntries(
-    STARTER_SKILLS.map(([id, name]) => [id, { name, rank: 0, pool: 0 }]),
-  );
-}
-
-function ensureProgressionShape(character: CharacterRecord): boolean {
-  let changed = false;
-  if (!character.guildId) {
-    character.guildId = 'commoner';
-    changed = true;
-  }
-  const expectedGuildName = GUILD_NAMES[character.guildId] ?? character.guildName ?? 'Unaffiliated';
-  if (character.guildName !== expectedGuildName) {
-    character.guildName = expectedGuildName;
-    changed = true;
-  }
-  if (!Number.isFinite(character.circle) || character.circle < 1) {
-    character.circle = 1;
-    changed = true;
-  }
-  if (!character.skills) {
-    character.skills = buildStarterSkills();
-    changed = true;
-  }
-  for (const [id, name] of STARTER_SKILLS) {
-    const skill = character.skills[id];
-    if (!skill) {
-      character.skills[id] = { name, rank: 0, pool: 0 };
-      changed = true;
-    } else {
-      const normalizedRank = Math.max(0, Math.floor(Number(skill.rank) || 0));
-      const normalizedPool = Math.max(0, Math.floor(Number(skill.pool) || 0));
-      if (skill.name !== name || skill.rank !== normalizedRank || skill.pool !== normalizedPool) {
-        character.skills[id] = { name, rank: normalizedRank, pool: normalizedPool };
-        changed = true;
-      }
-    }
-  }
-  return changed;
 }
 
 function trainCharacter(character: CharacterRecord, room: Room, requestedSkill: string, events: string[]) {

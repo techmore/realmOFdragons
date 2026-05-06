@@ -1,5 +1,40 @@
 import type { CharacterRecord } from './storage.js';
 
+export const STARTER_SKILLS = [
+  ['melee', 'Melee'],
+  ['missile', 'Missile'],
+  ['evasion', 'Evasion'],
+  ['athletics', 'Athletics'],
+  ['survival', 'Survival'],
+  ['stealth', 'Stealth'],
+  ['magic', 'Magic'],
+  ['tactics', 'Tactics'],
+  ['scholarship', 'Scholarship'],
+  ['performance', 'Performance'],
+  ['empathy', 'Empathy'],
+  ['trading', 'Trading'],
+  ['first_aid', 'First Aid'],
+] as const;
+
+export const GUILD_NAMES: Record<string, string> = {
+  commoner: 'Unaffiliated',
+  barbarian: 'Barbarian Guild',
+  bard: 'Bard Guild',
+  fighter: 'Fighter Guild',
+  mage: 'Mage Guild',
+  moon_mage: 'Moon Mage Guild',
+  necromancer: 'Necromancer Guild',
+  paladin: 'Paladin Guild',
+  ranger: 'Ranger Guild',
+  scout: 'Scout Guild',
+  rogue: 'Rogue Guild',
+  thief: 'Thief Guild',
+  trader: 'Trader Guild',
+  warrior_mage: 'Warrior Mage Guild',
+  cleric: 'Cleric Guild',
+  empath: 'Empath Guild',
+};
+
 export interface GuildRegistrarSummary {
   id: string;
   roomId: string;
@@ -41,6 +76,48 @@ export interface SkillPoolGainResult {
 
 export function totalSkillRanks(character: Pick<CharacterRecord, 'skills'>): number {
   return Object.values(character.skills).reduce((sum, skill) => sum + skill.rank, 0);
+}
+
+export function buildStarterSkills(): CharacterRecord['skills'] {
+  return Object.fromEntries(
+    STARTER_SKILLS.map(([id, name]) => [id, { name, rank: 0, pool: 0 }]),
+  );
+}
+
+export function ensureProgressionShape(character: CharacterRecord): boolean {
+  let changed = false;
+  if (!character.guildId) {
+    character.guildId = 'commoner';
+    changed = true;
+  }
+  const expectedGuildName = GUILD_NAMES[character.guildId] ?? character.guildName ?? 'Unaffiliated';
+  if (character.guildName !== expectedGuildName) {
+    character.guildName = expectedGuildName;
+    changed = true;
+  }
+  if (!Number.isFinite(character.circle) || character.circle < 1) {
+    character.circle = 1;
+    changed = true;
+  }
+  if (!character.skills) {
+    character.skills = buildStarterSkills();
+    changed = true;
+  }
+  for (const [id, name] of STARTER_SKILLS) {
+    const skill = character.skills[id];
+    if (!skill) {
+      character.skills[id] = { name, rank: 0, pool: 0 };
+      changed = true;
+    } else {
+      const normalizedRank = Math.max(0, Math.floor(Number(skill.rank) || 0));
+      const normalizedPool = Math.max(0, Math.floor(Number(skill.pool) || 0));
+      if (skill.name !== name || skill.rank !== normalizedRank || skill.pool !== normalizedPool) {
+        character.skills[id] = { name, rank: normalizedRank, pool: normalizedPool };
+        changed = true;
+      }
+    }
+  }
+  return changed;
 }
 
 export function nextCircleRequirement(character: Pick<CharacterRecord, 'circle'>): {

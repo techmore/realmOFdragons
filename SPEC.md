@@ -7,6 +7,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted starter skill construction, guild display-name normalization, circle floor normalization, and skill shape repair into pure progression helpers.
+- Progression unit coverage now verifies starter skill construction, malformed guild/circle/skill repair, idempotent normalization, and guild display-name correction.
+- Character creation and shape repair now import progression-owned starter skills and normalization instead of keeping progression shape rules in the Express route module.
 - Removed the remaining route-local `grantSkillPool` adapter.
 - Server command handling now calls the progression `applySkillPoolGain` helper directly for training, forage, combat, movement, rest, and trading skill awards.
 - Extracted skill pool gain and rank-up mutation into a pure progression helper.
@@ -170,7 +173,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract progression shape normalization into pure progression helpers with unit coverage.
+- Extract guild join decision/output into pure progression helpers with unit coverage.
 
 Core Philosophy
 

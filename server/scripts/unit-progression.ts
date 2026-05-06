@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict';
 import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
+  GUILD_NAMES,
+  STARTER_SKILLS,
   applySkillPoolGain,
   buildCircleStatus,
+  buildStarterSkills,
   canCircle,
+  ensureProgressionShape,
   isTrainingRoom,
   nextCircleRequirement,
   primarySkillForGuild,
@@ -65,6 +69,38 @@ assert.equal(primarySkillForGuild('barbarian'), 'melee');
 assert.equal(primarySkillForGuild('moon_mage'), 'scholarship');
 assert.equal(primarySkillForGuild('warrior_mage'), 'magic');
 assert.equal(primarySkillForGuild('unknown'), 'athletics');
+assert.equal(GUILD_NAMES.commoner, 'Unaffiliated');
+assert.equal(STARTER_SKILLS.length, 13);
+
+const starterSkills = buildStarterSkills();
+assert.equal(starterSkills.melee.name, 'Melee');
+assert.equal(starterSkills.first_aid.name, 'First Aid');
+assert.equal(starterSkills.trading.rank, 0);
+
+const malformed = character({
+  guildId: '',
+  guildName: 'Bad Guild',
+  circle: -4,
+  skills: {
+    melee: skill('Bad Melee', -2, -7),
+  },
+});
+assert.equal(ensureProgressionShape(malformed), true);
+assert.equal(malformed.guildId, 'commoner');
+assert.equal(malformed.guildName, 'Unaffiliated');
+assert.equal(malformed.circle, 1);
+assert.equal(malformed.skills.melee.name, 'Melee');
+assert.equal(malformed.skills.melee.rank, 0);
+assert.equal(malformed.skills.melee.pool, 0);
+assert.equal(malformed.skills.first_aid.name, 'First Aid');
+assert.equal(ensureProgressionShape(malformed), false);
+
+const guildNameFix = character({
+  guildId: 'barbarian',
+  guildName: 'Wrong',
+});
+assert.equal(ensureProgressionShape(guildNameFix), true);
+assert.equal(guildNameFix.guildName, 'Barbarian Guild');
 
 assert.deepEqual(nextCircleRequirement(character({ circle: 1 })), {
   nextCircle: 2,
@@ -295,6 +331,7 @@ console.log(
       circleAdvancementChecked: true,
       trainingDecisionChecked: true,
       skillPoolGainChecked: true,
+      progressionShapeChecked: true,
     },
     null,
     2,
