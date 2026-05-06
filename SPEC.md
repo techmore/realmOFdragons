@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted guild join/no-registrar decision and guild identity output into pure progression helpers with unit coverage for empty rooms, canonical DR guilds, legacy tutorial guilds, and unknown fallback labels.
+- `join guild` now applies the guild identity returned by progression instead of resolving registrar state inline in the command handler.
 - Extracted starter skill construction, guild display-name normalization, circle floor normalization, and skill shape repair into pure progression helpers.
 - Progression unit coverage now verifies starter skill construction, malformed guild/circle/skill repair, idempotent normalization, and guild display-name correction.
 - Character creation and shape repair now import progression-owned starter skills and normalization instead of keeping progression shape rules in the Express route module.
@@ -173,7 +175,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract guild join decision/output into pure progression helpers with unit coverage.
+- Extract guild registrar display labels into pure progression helpers with unit coverage.
 
 Core Philosophy
 

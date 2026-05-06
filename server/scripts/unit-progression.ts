@@ -13,6 +13,7 @@ import {
   primarySkillForGuild,
   resolveCircleAdvancement,
   resolveCircleAdvancementRequest,
+  resolveGuildJoinDecision,
   resolveTrainingDecision,
   totalSkillRanks,
 } from '../src/progression.js';
@@ -239,6 +240,33 @@ assert.equal(isTrainingRoom({ id: 'crossing-TG01-001' }), false);
 assert.equal(isTrainingRoom({ id: 'crossing-MA01-001' }), true);
 assert.equal(isTrainingRoom({ id: 'crossing-GU10-001', guild: 'barbarian' }), true);
 
+assert.deepEqual(resolveGuildJoinDecision({}), {
+  joined: false,
+  reason: 'no_registrar',
+  events: ['There is no guild registrar here.'],
+});
+
+assert.deepEqual(resolveGuildJoinDecision({ guild: 'barbarian' }), {
+  joined: true,
+  guildId: 'barbarian',
+  guildName: 'Barbarian Guild',
+  events: ['You are now registered with Barbarian Guild.'],
+});
+
+assert.deepEqual(resolveGuildJoinDecision({ guild: 'fighter' }), {
+  joined: true,
+  guildId: 'fighter',
+  guildName: 'Fighter Guild',
+  events: ['You are now registered with Fighter Guild.'],
+});
+
+assert.deepEqual(resolveGuildJoinDecision({ guild: 'cleanroom_test_guild' }), {
+  joined: true,
+  guildId: 'cleanroom_test_guild',
+  guildName: 'cleanroom_test_guild',
+  events: ['You are now registered with cleanroom_test_guild.'],
+});
+
 assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-TG01-001' }), {
   allowed: false,
   reason: 'wrong_room',
@@ -329,6 +357,7 @@ console.log(
       circleAdvancementRequestChecked: true,
       circleStatusChecked: true,
       circleAdvancementChecked: true,
+      guildJoinDecisionChecked: true,
       trainingDecisionChecked: true,
       skillPoolGainChecked: true,
       progressionShapeChecked: true,

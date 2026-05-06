@@ -34,6 +34,7 @@ import {
   primarySkillForGuild,
   resolveCircleAdvancement,
   resolveCircleAdvancementRequest,
+  resolveGuildJoinDecision,
   resolveTrainingDecision,
   totalSkillRanks,
 } from './progression.js';
@@ -1298,14 +1299,14 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'join guild') {
-    if (!room.guild) {
-      events.push('There is no guild registrar here.');
+    const joinDecision = resolveGuildJoinDecision(room);
+    events.push(...joinDecision.events);
+    if (!joinDecision.joined) {
       return buildCommandResult(resolvedCharacter, room, events);
     }
-    resolvedCharacter.guildId = room.guild;
-    resolvedCharacter.guildName = GUILD_NAMES[room.guild] ?? room.guild;
+    resolvedCharacter.guildId = joinDecision.guildId;
+    resolvedCharacter.guildName = joinDecision.guildName;
     modified = true;
-    events.push(`You are now registered with ${resolvedCharacter.guildName}.`);
     await persist();
     return buildCommandResult(resolvedCharacter, room, events);
   }

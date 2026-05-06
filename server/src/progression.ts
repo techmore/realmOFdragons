@@ -45,9 +45,17 @@ export interface TrainingRoomSummary {
   guild?: string;
 }
 
+export interface GuildJoinRoomSummary {
+  guild?: string;
+}
+
 export type CircleAdvancementDecision =
   | { allowed: true; registrarRoomId: string }
   | { allowed: false; reason: 'commoner' | 'wrong_room'; events: string[] };
+
+export type GuildJoinDecision =
+  | { joined: true; guildId: string; guildName: string; events: string[] }
+  | { joined: false; reason: 'no_registrar'; events: string[] };
 
 export interface CircleAdvancementResult {
   advanced: boolean;
@@ -146,6 +154,25 @@ export function primarySkillForGuild(guildId: string): string {
   if (guildId === 'cleric') return 'first_aid';
   if (guildId === 'empath') return 'empathy';
   return 'athletics';
+}
+
+export function resolveGuildJoinDecision(room: GuildJoinRoomSummary): GuildJoinDecision {
+  if (!room.guild) {
+    return {
+      joined: false,
+      reason: 'no_registrar',
+      events: ['There is no guild registrar here.'],
+    };
+  }
+
+  const guildId = room.guild;
+  const guildName = GUILD_NAMES[guildId] ?? guildId;
+  return {
+    joined: true,
+    guildId,
+    guildName,
+    events: [`You are now registered with ${guildName}.`],
+  };
 }
 
 export function canCircle(character: Pick<CharacterRecord, 'circle' | 'guildId' | 'skills'>): boolean {
