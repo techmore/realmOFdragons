@@ -7,7 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "test:unit": "tsx scripts/unit-progression.ts && tsx scripts/unit-combat.ts && tsx scripts/unit-economy.ts && tsx scripts/unit-items.ts",
+    "test:unit": "tsx scripts/unit-races.ts && tsx scripts/unit-progression.ts && tsx scripts/unit-combat.ts && tsx scripts/unit-economy.ts && tsx scripts/unit-items.ts",
     "smoke:api": "tsx scripts/smoke-api.ts all",
     "smoke:identity": "tsx scripts/smoke-api.ts identity",
     "smoke:race-guild-matrix": "tsx scripts/smoke-api.ts race-guild-matrix",

@@ -45,8 +45,8 @@ const character: Character = {
   raceDisplayName: 'Human',
   role: 'baseline',
   roleTitle: 'Baseline',
-  guildId: 'fighter',
-  guildName: 'Fighter Guild',
+  guildId: 'barbarian',
+  guildName: 'Barbarian Guild',
   circle: 4,
   skills: {
     melee: { name: 'Melee', rank: 7, pool: 2 },
@@ -85,6 +85,7 @@ const character: Character = {
     charisma: 17,
   },
   rollProfileVersion: 1,
+  statGenerationMode: 'modern_fixed',
   roundtimeMs: 0,
 };
 
@@ -245,7 +246,7 @@ for (const expected of [
   'attack',
   'Character',
   'UiScout | Human | Baseline',
-  'Fighter Guild | Circle 4',
+  'Barbarian Guild | Circle 4',
   'Right: itm-test-blade',
   'Left: empty',
   'Worn',

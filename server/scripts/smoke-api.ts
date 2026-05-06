@@ -23,6 +23,7 @@ interface AuthTokens {
 interface RaceSummary {
   id: string;
   name: string;
+  fixedStartingStats: Record<string, number>;
 }
 
 interface CharacterSummary {
@@ -231,6 +232,9 @@ async function createContext(): Promise<SmokeContext> {
 
   const races = await request<{ races: RaceSummary[] }>('/v1/races');
   assert(races.races.length >= 1, 'Expected at least one race.');
+  for (const race of races.races) {
+    assert(Object.keys(race.fixedStartingStats ?? {}).length === 8, `Expected fixed starting stats for ${race.name}.`);
+  }
 
   await request<JsonObject>('/v1/auth/register', {
     method: 'POST',
@@ -276,12 +280,14 @@ async function runIdentitySuite(context: SmokeContext): Promise<void> {
     );
     assert(current.circle === 1, `Expected ${race.name} reroll to remain Circle 1, got Circle ${current.circle}.`);
     assert(current.statGenerationMode === 'modern_fixed', `Expected ${race.name} reroll to use modern_fixed stats.`);
+    assert(JSON.stringify(current.stats) === JSON.stringify(race.fixedStartingStats), `Expected ${race.name} stats to match fixed starting stats.`);
   }
 
   context.character = current;
   context.summary.racesRolled = context.races.length;
   context.summary.circleOneRacesChecked = context.races.length;
   context.summary.modernFixedStatsChecked = true;
+  context.summary.fixedRaceStatsChecked = context.races.length;
 }
 
 async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
@@ -314,6 +320,7 @@ async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
       );
       assert(character.circle === 1, `Expected new ${race.name} character to start Circle 1, got Circle ${character.circle}.`);
       assert(character.statGenerationMode === 'modern_fixed', `Expected matrix ${race.name} character to use modern_fixed stats.`);
+      assert(JSON.stringify(character.stats) === JSON.stringify(race.fixedStartingStats), `Expected matrix ${race.name} stats to match fixed starting stats.`);
 
       const arrived = await walkTo(context.accessToken, character, guild.roomId);
       const joined = await command(context.accessToken, arrived.id, 'join guild');

@@ -10,6 +10,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `unit:races` coverage for the exact fixed starting stat table for all 11 DragonRealms races.
+- Unit coverage now verifies modern fixed rolls return exact fixed base/final stats and classic random remains explicit opt-in.
+- API smoke now verifies `/v1/races`, character creation, reroll, and race/guild matrix stats all match fixed racial starts.
+- Static frontend smoke now uses canonical DragonRealms guild identity in its fixture data.
 - `/v1/races` now exposes modern fixed starting stats for each DragonRealms race.
 - Web character creation now states that it uses DragonRealms modern fixed racial starting stats.
 - The web race panel now shows the selected race's fixed starting stat table.
@@ -107,7 +111,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add backend and UI coverage for exact fixed starting stat values for all 11 DragonRealms races.
+- Replace remaining prototype race flavor descriptions/role labels with DragonRealms-clean descriptions that do not imply non-canonical archetypes.
 
 Core Philosophy
 

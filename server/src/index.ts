@@ -2096,6 +2096,7 @@ app.get('/v1/races', (_req: Request, res: Response) => {
       minStat: race.minStat,
       maxStat: race.maxStat,
       statModifiers: race.statModifiers,
+      fixedStartingStats: race.fixedStartingStats,
       roles: race.roles.map((role) => ({
         id: role.id,
         title: role.title,
