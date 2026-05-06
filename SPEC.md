@@ -10,6 +10,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added stored character race-roll metadata normalization for old file-backed prototype role titles.
+- Modern fixed stored characters are normalized to `modern_fixed` / `Modern fixed racial start` when loaded.
+- Classic-random stored characters keep explicit classic mode but migrate old role trace wording to private test-profile wording.
+- Race unit coverage now verifies legacy modern and legacy classic metadata migration.
 - Private classic-random role labels are now explicitly marked as non-default test profiles.
 - Classic-random roll traces now say `Private classic-random test profile selected` instead of exposing archetype language.
 - Race unit coverage now asserts classic-random labels/traces remain private test-profile language.
@@ -123,7 +127,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add migration/shape cleanup for stored characters with old prototype role titles so old file-backed data is normalized when loaded.
+- Add API smoke coverage for stored-character metadata migration through the existing test fixture state endpoint.
 
 Core Philosophy
 

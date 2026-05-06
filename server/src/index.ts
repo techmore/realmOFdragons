@@ -16,6 +16,7 @@ import { FileStorage, LoginSession, AccountRecord, CharacterRecord, ScriptRecord
 import {
   getAllRaces,
   isValidRace,
+  normalizeStoredRaceRollMetadata,
   normalizeStatGenerationMode,
   resolveRace,
   rollCharacterForRace,
@@ -753,6 +754,9 @@ function ensureCharacterShape(character: CharacterRecord): { character: Characte
     changed = true;
   }
   if (normalizeRecoverableAmmo(character)) {
+    changed = true;
+  }
+  if (normalizeStoredRaceRollMetadata(character)) {
     changed = true;
   }
   for (const itemCode of character.worn) {

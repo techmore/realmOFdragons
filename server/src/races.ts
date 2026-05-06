@@ -316,6 +316,59 @@ export function normalizeStatGenerationMode(input: unknown): StatGenerationMode 
   return input === 'classic_random' ? 'classic_random' : 'modern_fixed';
 }
 
+export function normalizeStoredRaceRollMetadata(character: {
+  role?: string;
+  roleTitle?: string;
+  rollTrace?: string[];
+  statGenerationMode?: StatGenerationMode;
+  rollProfileVersion?: number;
+}): boolean {
+  let changed = false;
+  const mode = normalizeStatGenerationMode(character.statGenerationMode);
+  const oldRoleTitle = String(character.roleTitle ?? '');
+
+  if (character.statGenerationMode !== mode) {
+    character.statGenerationMode = mode;
+    changed = true;
+  }
+
+  if (mode === 'modern_fixed') {
+    if (character.role !== 'modern_fixed') {
+      character.role = 'modern_fixed';
+      changed = true;
+    }
+    if (character.roleTitle !== 'Modern fixed racial start') {
+      character.roleTitle = 'Modern fixed racial start';
+      changed = true;
+    }
+    return changed;
+  }
+
+  if (!oldRoleTitle.startsWith('Private classic-random test profile ')) {
+    const profileSuffix = character.role?.endsWith('b') || oldRoleTitle.match(/\b(B|Frontline|Scholar|Craftmaster|Binder|Wrestler|Broker|Rider|Trancefighter|Healer|Inquisitive|Crusher)\b/)
+      ? 'B'
+      : character.role?.endsWith('c') || oldRoleTitle.match(/\b(C|Versatile|Quickblade|Breach|Mender|Breaker|Lightfoot|Warden|Watchkeeper|Guide|Ambusher)\b/)
+        ? 'C'
+        : 'A';
+    character.roleTitle = `Private classic-random test profile ${profileSuffix}`;
+    changed = true;
+  }
+
+  if (Array.isArray(character.rollTrace)) {
+    const nextTrace = character.rollTrace.map((entry) =>
+      entry.startsWith('Role selected:')
+        ? entry.replace('Role selected:', 'Private classic-random test profile selected:')
+        : entry,
+    );
+    if (nextTrace.some((entry, index) => entry !== character.rollTrace?.[index])) {
+      character.rollTrace = nextTrace;
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
 export function fixedStartingStatsForRace(raceInput: string): StatBlock {
   const race = resolveRace(raceInput);
   const fixed = MODERN_FIXED_STARTING_STATS[normalizeRaceInput(race.id)];

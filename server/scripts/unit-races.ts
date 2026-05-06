@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { fixedStartingStatsForRace, getAllRaces, rollCharacterForRace, type StatBlock } from '../src/races.js';
+import { fixedStartingStatsForRace, getAllRaces, normalizeStoredRaceRollMetadata, rollCharacterForRace, type StatBlock } from '../src/races.js';
 
 const expectedFixedStats: Record<string, StatBlock> = {
   Dwarf: { strength: 10, reflex: 8, agility: 8, discipline: 12, stamina: 12, wisdom: 10, intelligence: 10, charisma: 10 },
@@ -40,4 +40,26 @@ for (const race of races) {
   assert.equal(classicRoll.trace.some((entry) => entry.startsWith('Private classic-random test profile selected:')), true);
 }
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:races', fixedRaceStatsChecked: races.length }, null, 2));
+const legacyModern = {
+  role: 'frontline',
+  roleTitle: 'Frontline',
+  rollTrace: ['Race selected: Human', 'Role selected: Frontline (frontline)'],
+  rollProfileVersion: 1,
+};
+assert.equal(normalizeStoredRaceRollMetadata(legacyModern), true);
+assert.equal(legacyModern.role, 'modern_fixed');
+assert.equal(legacyModern.roleTitle, 'Modern fixed racial start');
+assert.deepEqual(legacyModern.rollTrace, ['Race selected: Human', 'Role selected: Frontline (frontline)']);
+
+const legacyClassic = {
+  role: 'berserker',
+  roleTitle: 'Berserker',
+  statGenerationMode: 'classic_random' as const,
+  rollTrace: ['Race selected: Kaldar', 'Role selected: Berserker (berserker)'],
+  rollProfileVersion: 1,
+};
+assert.equal(normalizeStoredRaceRollMetadata(legacyClassic), true);
+assert.equal(legacyClassic.roleTitle, 'Private classic-random test profile A');
+assert.deepEqual(legacyClassic.rollTrace, ['Race selected: Kaldar', 'Private classic-random test profile selected: Berserker (berserker)']);
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:races', fixedRaceStatsChecked: races.length, storedRaceMetadataMigrationChecked: true }, null, 2));
