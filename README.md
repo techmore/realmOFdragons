@@ -122,6 +122,8 @@ Coverage fields currently distinguish broad combat coverage from target-specific
 
 Use these fields when reviewing whether a report proves target discovery, target metadata, typed target details, command discovery, prompt generation, and web target-detail affordances all ran.
 
+Successful `agent:check` and `ci:check` runs also validate the `coverage-summary.json` shape before writing final telemetry. Missing `gameplay`, `scripts`, `frontend`, duration, unit-suite, or required script lifecycle fields fail the check immediately.
+
 ## Saved scripts and macros
 
 The web UI includes a Scripts panel for reusable command macros.

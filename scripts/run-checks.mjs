@@ -215,6 +215,41 @@ function coverageSummary(results) {
   };
 }
 
+function assertCoverageShape(coverage) {
+  const missing = [];
+  const expect = (condition, label) => {
+    if (!condition) missing.push(label);
+  };
+
+  expect(Boolean(coverage.gameplay), 'gameplay section');
+  expect(Boolean(coverage.scripts), 'scripts section');
+  expect(Boolean(coverage.frontend), 'frontend section');
+  expect(typeof coverage.durationsMs === 'object' && coverage.durationsMs !== null, 'durationsMs section');
+  expect(Array.isArray(coverage.unitSuites), 'unitSuites array');
+
+  expect(coverage.frontend.staticUiSmoke === true, 'frontend.staticUiSmoke');
+  expect(coverage.frontend.browserSmoke === true, 'frontend.browserSmoke');
+  expect(coverage.frontend.browserScriptPresetSaved === true, 'frontend.browserScriptPresetSaved');
+  expect(coverage.scripts.focusedSmoke === true, 'scripts.focusedSmoke');
+  expect(coverage.scripts.lifecycle === true, 'scripts.lifecycle');
+  expect(coverage.scripts.created === true, 'scripts.created');
+  expect(coverage.scripts.ran === true, 'scripts.ran');
+  expect(coverage.scripts.deleted === true, 'scripts.deleted');
+  expect(coverage.scripts.steps > 0, 'scripts.steps');
+  expect(coverage.gameplay.combatChecked === true, 'gameplay.combatChecked');
+  expect(coverage.gameplay.shopEconomyChecked === true, 'gameplay.shopEconomyChecked');
+  expect(coverage.gameplay.scriptLifecycleChecked === true, 'gameplay.scriptLifecycleChecked');
+
+  if (mode === 'local') {
+    expect(coverage.gameplay.focusedTargetSmokeChecked === true, 'gameplay.focusedTargetSmokeChecked');
+    expect(coverage.gameplay.agentPromptCurrentStatusChecked === true, 'gameplay.agentPromptCurrentStatusChecked');
+  }
+
+  if (missing.length) {
+    throw new Error(`Coverage summary missing expected successful-run fields: ${missing.join(', ')}`);
+  }
+}
+
 async function runStep(step) {
   const startedAt = Date.now();
   const commandLine = [step.command, ...step.args].join(' ');
@@ -282,6 +317,7 @@ const summary = {
 
 writeFileSync(join(telemetryDir, 'summary.json'), `${JSON.stringify(summary, null, 2)}\n`);
 const coverage = coverageSummary(results);
+if (summary.ok) assertCoverageShape(coverage);
 writeFileSync(join(telemetryDir, 'summary.md'), markdownSummary(results, coverage));
 writeFileSync(join(telemetryDir, 'coverage-summary.json'), `${JSON.stringify(coverage, null, 2)}\n`);
 

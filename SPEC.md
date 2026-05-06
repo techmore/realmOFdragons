@@ -10,13 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- README now documents that `ci:check` includes focused script smoke.
-- README now documents the CI telemetry artifact name and focused `smoke:scripts` scope.
-- GitHub workflow step and artifact names now reflect build, unit, browser, script, and API smoke coverage.
+- `scripts/run-checks.mjs` now validates `coverage-summary.json` shape on successful runs.
+- Coverage validation requires `gameplay`, `scripts`, `frontend`, durations, unit suites, script lifecycle, browser smoke, and core gameplay fields.
+- README now documents coverage-summary shape validation for CI/local consumers.
 
 Current next priority:
 
-- Add a small CI smoke assertion or documentation note for `coverage-summary.json` consumers so automation can fail fast when expected coverage sections are missing.
+- Add a small unit-style telemetry validation fixture so coverage shape validation can be tested without running the full smoke suite.
 
 Core Philosophy
 
@@ -529,6 +529,19 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add a small CI smoke assertion or documentation note for `coverage-summary.json` consumers so automation can fail fast when expected coverage sections are missing.
+
+Implementation Notes - 2026-05-06, Coverage Summary Shape Assertion
+
+Completed in the current Node/React prototype:
+
+- `scripts/run-checks.mjs` now validates coverage summary shape before writing final telemetry on successful runs.
+- Required sections include `gameplay`, `scripts`, `frontend`, `durationsMs`, and `unitSuites`.
+- Required success fields include script lifecycle coverage, browser script preset save coverage, core combat/economy coverage, and local-only focused target/agent prompt coverage when running `agent:check`.
+- README now documents that successful local/CI checks fail fast if expected coverage sections or critical fields are missing.
+
+Next priority:
+
+- Add a small unit-style telemetry validation fixture so coverage shape validation can be tested without running the full smoke suite.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 
