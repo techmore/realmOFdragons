@@ -50,6 +50,7 @@ API smoke suites run against a live test server. Use `scripts/with-test-server.m
 
 ```sh
 node scripts/with-test-server.mjs npm --prefix server run smoke:targets
+node scripts/with-test-server.mjs npm --prefix server run smoke:scripts
 node scripts/with-test-server.mjs npm --prefix server run smoke:combat
 node scripts/with-test-server.mjs npm --prefix server run smoke:economy
 node scripts/with-test-server.mjs npm --prefix server run smoke:progression
@@ -107,6 +108,7 @@ Coverage fields currently distinguish broad combat coverage from target-specific
 - `scripts.ran`
 - `scripts.deleted`
 - `scripts.lifecycle`
+- `scripts.focusedSmoke`
 - `scripts.browserPresetSaved`
 - `frontend.staticCommandDiscoveryChecked`
 - `frontend.browserCommandDiscoveryVisible`

@@ -10,13 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Markdown telemetry now includes a dedicated Script Coverage section.
-- `coverage-summary.json` now includes a structured `scripts` block.
-- README documents the `scripts` coverage summary fields.
+- CI and local telemetry now run a focused `script-smoke` step.
+- Script coverage summary prefers focused script smoke payloads over full API smoke payloads.
+- Markdown telemetry and README now distinguish focused script smoke from browser preset-save coverage.
 
 Current next priority:
 
-- Add focused script lifecycle coverage to CI telemetry, not just local `agent:check`, or document why local-only browser script coverage remains local.
+- Add focused script smoke telemetry to CI documentation and verify the GitHub workflow artifact description matches the expanded check set.
 
 Core Philosophy
 
@@ -501,6 +501,20 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add focused script lifecycle coverage to CI telemetry, not just local `agent:check`, or document why local-only browser script coverage remains local.
+
+Implementation Notes - 2026-05-06, Focused Script Smoke In CI Telemetry
+
+Completed in the current Node/React prototype:
+
+- `npm run ci:check` now runs focused `script-smoke` before full API smoke.
+- `npm run agent:check` also runs focused `script-smoke` for parity.
+- Script coverage summary now prefers the focused script smoke payload, falling back to full API smoke when needed.
+- Markdown telemetry now reports Focused script smoke.
+- README documents `smoke:scripts` and `scripts.focusedSmoke`.
+
+Next priority:
+
+- Add focused script smoke telemetry to CI documentation and verify the GitHub workflow artifact description matches the expanded check set.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

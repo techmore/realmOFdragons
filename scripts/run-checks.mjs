@@ -15,6 +15,7 @@ const baseSteps = [
 const ciSteps = [
   ...baseSteps,
   { name: 'browser-smoke', command: 'node', args: ['scripts/with-test-app.mjs', 'npm', 'run', 'smoke:browser'] },
+  { name: 'script-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:scripts'] },
   { name: 'api-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', 'run', 'smoke:api'] },
 ];
 
@@ -22,6 +23,7 @@ const localSteps = [
   ...baseSteps,
   { name: 'browser-smoke', command: 'node', args: ['scripts/with-test-app.mjs', 'npm', 'run', 'smoke:browser'] },
   { name: 'target-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:targets'] },
+  { name: 'script-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:scripts'] },
   { name: 'api-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', 'run', 'smoke:api'] },
   { name: 'agent-prompt-smoke', command: 'npm', args: ['run', 'smoke:agent-prompt'] },
   { name: 'git-status', command: 'node', args: ['scripts/agent-check.mjs'] },
@@ -90,6 +92,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| API script run | ${coverage.scripts.ran ? 'yes' : 'no'} |`);
     lines.push(`| API script delete | ${coverage.scripts.deleted ? 'yes' : 'no'} |`);
     lines.push(`| API script lifecycle | ${coverage.scripts.lifecycle ? 'yes' : 'no'} |`);
+    lines.push(`| Focused script smoke | ${coverage.scripts.focusedSmoke ? 'yes' : 'no'} |`);
     lines.push(`| Browser preset save | ${coverage.scripts.browserPresetSaved ? 'yes' : 'no'} |`);
     lines.push('');
     lines.push('| Metric | Value |');
@@ -141,6 +144,7 @@ function coverageSummary(results) {
   const byName = new Map(results.map((result) => [result.name, result]));
   const apiPayload = parseLastJsonObject(byName.get('api-smoke')?.stdoutTail ?? '') ?? {};
   const targetPayload = parseLastJsonObject(byName.get('target-smoke')?.stdoutTail ?? '') ?? {};
+  const scriptPayload = parseLastJsonObject(byName.get('script-smoke')?.stdoutTail ?? '') ?? {};
   const browserPayload = parseLastJsonObject(byName.get('browser-smoke')?.stdoutTail ?? '') ?? {};
   const agentPromptPayload = parseLastJsonObject(byName.get('agent-prompt-smoke')?.stdoutTail ?? '') ?? {};
   const unitPayloads = (byName.get('unit-tests')?.stdoutTail.match(/\{[\s\S]*?\n\}/g) ?? [])
@@ -163,14 +167,14 @@ function coverageSummary(results) {
       guildRoomsWalked: apiPayload.guildRoomsWalked ?? 0,
       shopRoomsWalked: apiPayload.shopRoomsWalked ?? 0,
       circleReached: apiPayload.circleReached ?? 0,
-      scriptSteps: apiPayload.scriptSteps ?? 0,
-      scriptCreatedChecked: apiPayload.scriptCreatedChecked === true,
-      scriptRunChecked: apiPayload.scriptRunChecked === true,
-      scriptDeletedChecked: apiPayload.scriptDeletedChecked === true,
+      scriptSteps: scriptPayload.scriptSteps ?? apiPayload.scriptSteps ?? 0,
+      scriptCreatedChecked: (scriptPayload.scriptCreatedChecked ?? apiPayload.scriptCreatedChecked) === true,
+      scriptRunChecked: (scriptPayload.scriptRunChecked ?? apiPayload.scriptRunChecked) === true,
+      scriptDeletedChecked: (scriptPayload.scriptDeletedChecked ?? apiPayload.scriptDeletedChecked) === true,
       scriptLifecycleChecked:
-        apiPayload.scriptCreatedChecked === true &&
-        apiPayload.scriptRunChecked === true &&
-        apiPayload.scriptDeletedChecked === true,
+        (scriptPayload.scriptCreatedChecked ?? apiPayload.scriptCreatedChecked) === true &&
+        (scriptPayload.scriptRunChecked ?? apiPayload.scriptRunChecked) === true &&
+        (scriptPayload.scriptDeletedChecked ?? apiPayload.scriptDeletedChecked) === true,
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
       combatChecked: apiPayload.combatChecked === true,
       scanChecked: apiPayload.scanChecked === true,
@@ -183,14 +187,15 @@ function coverageSummary(results) {
       finalCombatActive: Boolean(apiPayload.finalCombat),
     },
     scripts: {
-      steps: apiPayload.scriptSteps ?? 0,
-      created: apiPayload.scriptCreatedChecked === true,
-      ran: apiPayload.scriptRunChecked === true,
-      deleted: apiPayload.scriptDeletedChecked === true,
+      steps: scriptPayload.scriptSteps ?? apiPayload.scriptSteps ?? 0,
+      created: (scriptPayload.scriptCreatedChecked ?? apiPayload.scriptCreatedChecked) === true,
+      ran: (scriptPayload.scriptRunChecked ?? apiPayload.scriptRunChecked) === true,
+      deleted: (scriptPayload.scriptDeletedChecked ?? apiPayload.scriptDeletedChecked) === true,
       lifecycle:
-        apiPayload.scriptCreatedChecked === true &&
-        apiPayload.scriptRunChecked === true &&
-        apiPayload.scriptDeletedChecked === true,
+        (scriptPayload.scriptCreatedChecked ?? apiPayload.scriptCreatedChecked) === true &&
+        (scriptPayload.scriptRunChecked ?? apiPayload.scriptRunChecked) === true &&
+        (scriptPayload.scriptDeletedChecked ?? apiPayload.scriptDeletedChecked) === true,
+      focusedSmoke: byName.get('script-smoke')?.exitCode === 0 && scriptPayload.scriptRunChecked === true,
       browserPresetSaved: browserPayload.scriptPresetSaved === true,
     },
     frontend: {
