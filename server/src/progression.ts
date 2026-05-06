@@ -20,14 +20,10 @@ export function nextCircleRequirement(character: Pick<CharacterRecord, 'circle'>
 export function primarySkillForGuild(guildId: string): string {
   if (guildId === 'barbarian') return 'melee';
   if (guildId === 'bard') return 'performance';
-  if (guildId === 'fighter') return 'melee';
-  if (guildId === 'mage') return 'scholarship';
   if (guildId === 'moon_mage') return 'scholarship';
   if (guildId === 'necromancer') return 'magic';
   if (guildId === 'paladin') return 'tactics';
   if (guildId === 'ranger') return 'survival';
-  if (guildId === 'scout') return 'survival';
-  if (guildId === 'rogue') return 'evasion';
   if (guildId === 'thief') return 'stealth';
   if (guildId === 'trader') return 'trading';
   if (guildId === 'warrior_mage') return 'magic';

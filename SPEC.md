@@ -10,6 +10,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Character creation now defaults to DragonRealms-style modern fixed racial starting stats instead of prototype random rolls.
+- Classic random racial rolling remains available only through explicit `statMode: "classic_random"` API input for future nostalgia/testing workflows.
+- Race reroll and race/guild matrix smoke now assert modern fixed stat generation.
+- Removed residual non-DragonRealms guild IDs from progression skill mapping and unit coverage.
 - Added a focused `race-guild-matrix` API smoke suite that creates every DragonRealms race against every canonical DragonRealms guild.
 - Full API smoke now verifies 121 race/guild Circle 1 combinations across 11 races and 11 guilds.
 - Added an `npm --prefix server run smoke:race-guild-matrix` command for targeted race/guild validation.
@@ -99,7 +103,7 @@ Completed current slice:
 
 Current next priority:
 
-- Start tightening character stat generation toward DragonRealms correctness by documenting and supporting explicit classic-random versus modern-fixed racial stat modes.
+- Surface stat generation mode and fixed racial starting stats clearly in the web character creation/reroll UI.
 
 Core Philosophy
 

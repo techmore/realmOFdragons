@@ -16,9 +16,11 @@ import { FileStorage, LoginSession, AccountRecord, CharacterRecord, ScriptRecord
 import {
   getAllRaces,
   isValidRace,
+  normalizeStatGenerationMode,
   resolveRace,
   rollCharacterForRace,
   type RaceRollResult,
+  type StatGenerationMode,
   type StatBlock,
 } from './races.js';
 import { canCircle, nextCircleRequirement, primarySkillForGuild, totalSkillRanks } from './progression.js';
@@ -124,6 +126,7 @@ interface CommandResult {
   | 'stats'
   > & {
     rollProfileVersion: number;
+    statGenerationMode: CharacterRecord['statGenerationMode'];
     wallet: CharacterRecord['wallet'];
   };
   room: Room;
@@ -359,6 +362,7 @@ function sanitizeCharacter(character: CharacterRecord): CommandResult['character
     wallet: character.wallet,
     stats: character.stats,
     rollProfileVersion: character.rollProfileVersion,
+    statGenerationMode: character.statGenerationMode ?? 'modern_fixed',
     roundtimeMs: character.roundtimeMs,
     combat: character.combat,
     stance: character.stance,
@@ -466,6 +470,7 @@ function applyRollToCharacter(character: CharacterRecord, characterRoll: RaceRol
   character.health = calculateHealth(characterRoll.finalStats, character.health?.current);
   character.rollTrace = characterRoll.trace;
   character.rollProfileVersion = characterRoll.rollProfileVersion;
+  character.statGenerationMode = characterRoll.statGenerationMode;
 }
 
 function calculateHealth(stats: StatBlock, current?: number) {
@@ -819,9 +824,9 @@ function ensureCharacterShape(character: CharacterRecord): { character: Characte
   return { character, changed };
 }
 
-async function createRolledCharacter(accountId: string, name: string, raceInput: string): Promise<CharacterRecord> {
+async function createRolledCharacter(accountId: string, name: string, raceInput: string, statMode: StatGenerationMode = 'modern_fixed'): Promise<CharacterRecord> {
   const template = resolveRace(raceInput);
-  const roll = rollCharacterForRace(template.name);
+  const roll = rollCharacterForRace(template.name, statMode);
   return {
     id: `char-${randomUUID()}`,
     accountId,
@@ -840,6 +845,7 @@ async function createRolledCharacter(accountId: string, name: string, raceInput:
     wallet: { ...STARTING_WALLET },
     rollTrace: roll.trace,
     rollProfileVersion: roll.rollProfileVersion,
+    statGenerationMode: roll.statGenerationMode,
     createdAt: new Date().toISOString(),
     inventory: ['leather backpack', 'repair cloth'],
     ammoPouch: {},
@@ -2205,6 +2211,7 @@ app.post('/v1/auth/refresh', async (req: Request, res: Response) => {
 app.post('/v1/characters', authRequired, async (req: AuthenticatedRequest, res: Response) => {
   const name = String(req.body?.name ?? '').trim();
   const raceInput = String(req.body?.race ?? '').trim() || 'Human';
+  const statMode = normalizeStatGenerationMode(req.body?.statMode);
 
   if (!name || name.length > 40) {
     return res.status(400).json({ error: 'A valid character name is required.' });
@@ -2214,7 +2221,7 @@ app.post('/v1/characters', authRequired, async (req: AuthenticatedRequest, res: 
     return res.status(400).json({ error: `Unknown race: ${raceInput}` });
   }
 
-  const character = await createRolledCharacter(req.auth!.sub, name, raceInput);
+  const character = await createRolledCharacter(req.auth!.sub, name, raceInput, statMode);
   await storage.saveCharacter(character);
 
   return res.status(201).json(sanitizeCharacter(character));
@@ -2242,11 +2249,12 @@ app.post('/v1/characters/:characterId/reroll', authRequired, async (req: Authent
   }
 
   const characterRace = String(req.body?.race ?? '').trim() || character.race;
+  const statMode = normalizeStatGenerationMode(req.body?.statMode ?? character.statGenerationMode);
   if (!isValidRace(characterRace)) {
     return res.status(400).json({ error: `Unknown race: ${characterRace}` });
   }
 
-  const reroll = rollCharacterForRace(resolveRace(characterRace).name);
+  const reroll = rollCharacterForRace(resolveRace(characterRace).name, statMode);
   applyRollToCharacter(character, reroll);
   await storage.saveCharacter(character);
   return res.json({

@@ -31,6 +31,8 @@ interface CharacterSummary {
   race: string;
   roomId: string;
   circle: number;
+  stats: Record<string, number>;
+  statGenerationMode?: string;
   inventory: string[];
   ammoPouch?: Record<string, number>;
   loadedAmmo?: Record<string, string>;
@@ -273,11 +275,13 @@ async function runIdentitySuite(context: SmokeContext): Promise<void> {
       `Expected reroll race ${race.name}, got ${current.race}`,
     );
     assert(current.circle === 1, `Expected ${race.name} reroll to remain Circle 1, got Circle ${current.circle}.`);
+    assert(current.statGenerationMode === 'modern_fixed', `Expected ${race.name} reroll to use modern_fixed stats.`);
   }
 
   context.character = current;
   context.summary.racesRolled = context.races.length;
   context.summary.circleOneRacesChecked = context.races.length;
+  context.summary.modernFixedStatsChecked = true;
 }
 
 async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
@@ -309,6 +313,7 @@ async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
         `Expected matrix character race ${race.name}, got ${character.race}.`,
       );
       assert(character.circle === 1, `Expected new ${race.name} character to start Circle 1, got Circle ${character.circle}.`);
+      assert(character.statGenerationMode === 'modern_fixed', `Expected matrix ${race.name} character to use modern_fixed stats.`);
 
       const arrived = await walkTo(context.accessToken, character, guild.roomId);
       const joined = await command(context.accessToken, arrived.id, 'join guild');

@@ -256,7 +256,7 @@ async function main(): Promise<void> {
     await page.locator('.terminal-pane .log').getByText('Targets: forage wolf-cub.').waitFor();
 
     await page.locator('.panel').filter({ hasText: 'Controls' }).getByRole('button', { name: 'scan', exact: true }).click();
-    await page.locator('.terminal-pane .log').getByText(/ - forage wolf-cub \(/).waitFor();
+    await page.locator('.terminal-pane .log').getByText(/ - forage wolf-cub \(/).last().waitFor();
     await page.locator('.terminal-pane .log').getByText('Vitality estimates how long a target can stay in the fight').waitFor();
     await page.getByText('Visible Targets').waitFor();
     await page.getByText('Vitality estimates staying power').waitFor();

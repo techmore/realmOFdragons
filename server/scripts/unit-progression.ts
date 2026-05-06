@@ -15,8 +15,8 @@ function character(overrides: Partial<CharacterRecord> = {}): CharacterRecord {
     raceDisplayName: 'Human',
     role: 'baseline',
     roleTitle: 'Baseline',
-    guildId: 'fighter',
-    guildName: 'Fighter Guild',
+    guildId: 'barbarian',
+    guildName: 'Barbarian Guild',
     circle: 1,
     skills: {
       melee: skill('Melee', 0),
@@ -49,9 +49,7 @@ function character(overrides: Partial<CharacterRecord> = {}): CharacterRecord {
   };
 }
 
-assert.equal(primarySkillForGuild('fighter'), 'melee');
 assert.equal(primarySkillForGuild('barbarian'), 'melee');
-assert.equal(primarySkillForGuild('mage'), 'scholarship');
 assert.equal(primarySkillForGuild('moon_mage'), 'scholarship');
 assert.equal(primarySkillForGuild('warrior_mage'), 'magic');
 assert.equal(primarySkillForGuild('unknown'), 'athletics');

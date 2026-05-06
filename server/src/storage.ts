@@ -3,7 +3,7 @@ import { mkdirSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { RoomId } from './world.js';
-import type { StatBlock } from './races.js';
+import type { StatBlock, StatGenerationMode } from './races.js';
 
 export type CombatRange = 'missile' | 'pole' | 'melee';
 
@@ -67,6 +67,7 @@ export interface CharacterRecord {
   wallet: CurrencyWallet;
   rollTrace: string[];
   rollProfileVersion: number;
+  statGenerationMode?: StatGenerationMode;
   createdAt: string;
   inventory: string[];
   ammoPouch?: Record<string, number>;

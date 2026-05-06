@@ -14,6 +14,8 @@ export type StatBlock = {
   [key in StatName]: number;
 };
 
+export type StatGenerationMode = 'modern_fixed' | 'classic_random';
+
 export interface RaceRole {
   id: string;
   title: string;
@@ -38,6 +40,7 @@ export interface RaceRollResult {
   finalStats: StatBlock;
   trace: string[];
   rollProfileVersion: number;
+  statGenerationMode: StatGenerationMode;
 }
 
 const STAT_NAMES: StatName[] = [
@@ -257,6 +260,20 @@ const RACE_DEFINITIONS: RaceTemplate[] = [
   },
 ];
 
+const MODERN_FIXED_STARTING_STATS: Record<string, StatBlock> = {
+  dwarf: { strength: 10, reflex: 8, agility: 8, discipline: 12, stamina: 12, wisdom: 10, intelligence: 10, charisma: 10 },
+  elf: { strength: 8, reflex: 12, agility: 12, discipline: 8, stamina: 8, wisdom: 10, intelligence: 10, charisma: 12 },
+  elothean: { strength: 8, reflex: 12, agility: 10, discipline: 10, stamina: 6, wisdom: 12, intelligence: 12, charisma: 10 },
+  gnome: { strength: 4, reflex: 14, agility: 12, discipline: 10, stamina: 6, wisdom: 10, intelligence: 14, charisma: 10 },
+  gortog: { strength: 16, reflex: 8, agility: 10, discipline: 10, stamina: 14, wisdom: 6, intelligence: 6, charisma: 10 },
+  halfling: { strength: 6, reflex: 12, agility: 14, discipline: 8, stamina: 12, wisdom: 8, intelligence: 10, charisma: 10 },
+  human: { strength: 10, reflex: 10, agility: 10, discipline: 10, stamina: 10, wisdom: 10, intelligence: 10, charisma: 10 },
+  kaldar: { strength: 12, reflex: 10, agility: 10, discipline: 10, stamina: 10, wisdom: 8, intelligence: 8, charisma: 12 },
+  prydaen: { strength: 10, reflex: 14, agility: 10, discipline: 8, stamina: 10, wisdom: 6, intelligence: 10, charisma: 12 },
+  rakash: { strength: 10, reflex: 12, agility: 8, discipline: 12, stamina: 14, wisdom: 8, intelligence: 6, charisma: 10 },
+  skramur: { strength: 12, reflex: 12, agility: 10, discipline: 10, stamina: 10, wisdom: 8, intelligence: 8, charisma: 10 },
+};
+
 function normalizeRaceInput(input: string): string {
   return input
     .toLowerCase()
@@ -264,7 +281,7 @@ function normalizeRaceInput(input: string): string {
     .replace(/[^a-z0-9]/g, '');
 }
 
-export const ROLL_PROFILE_VERSION = 1;
+export const ROLL_PROFILE_VERSION = 2;
 
 export function getAllRaces(): Array<
   Pick<RaceTemplate, 'id' | 'name' | 'statModifiers' | 'roles' | 'description' | 'minStat' | 'maxStat'>
@@ -292,6 +309,19 @@ export function isValidRace(input: string): boolean {
   }
 }
 
+export function normalizeStatGenerationMode(input: unknown): StatGenerationMode {
+  return input === 'classic_random' ? 'classic_random' : 'modern_fixed';
+}
+
+export function fixedStartingStatsForRace(raceInput: string): StatBlock {
+  const race = resolveRace(raceInput);
+  const fixed = MODERN_FIXED_STARTING_STATS[normalizeRaceInput(race.id)];
+  if (!fixed) {
+    throw new Error(`Missing fixed starting stats for race: ${race.name}`);
+  }
+  return { ...fixed };
+}
+
 function d20(): number {
   return randomInt(1, 21);
 }
@@ -316,8 +346,28 @@ function randomVariance(): number {
   return randomInt(0, 5) - 2;
 }
 
-export function rollCharacterForRace(raceInput: string): RaceRollResult {
+export function rollCharacterForRace(raceInput: string, mode: StatGenerationMode = 'modern_fixed'): RaceRollResult {
   const race = resolveRace(raceInput);
+  const statGenerationMode = normalizeStatGenerationMode(mode);
+  if (statGenerationMode === 'modern_fixed') {
+    const fixedStats = fixedStartingStatsForRace(race.name);
+    return {
+      race: race.name,
+      role: 'modern_fixed',
+      roleTitle: 'Modern fixed racial start',
+      baseStats: { ...fixedStats },
+      finalStats: { ...fixedStats },
+      trace: [
+        `Race selected: ${race.name}`,
+        'Stat generation mode: modern_fixed',
+        'Using DragonRealms fixed racial starting stats.',
+        `Roll profile version ${ROLL_PROFILE_VERSION}`,
+      ],
+      rollProfileVersion: ROLL_PROFILE_VERSION,
+      statGenerationMode,
+    };
+  }
+
   const selectedRole = randomChoice(race.roles);
   const trace: string[] = [];
 
@@ -329,6 +379,7 @@ export function rollCharacterForRace(raceInput: string): RaceRollResult {
   ) as StatBlock;
 
   trace.push(`Race selected: ${race.name}`);
+  trace.push('Stat generation mode: classic_random');
   trace.push(`Role selected: ${selectedRole.title} (${selectedRole.id})`);
 
   for (const statName of STAT_NAMES) {
@@ -352,5 +403,6 @@ export function rollCharacterForRace(raceInput: string): RaceRollResult {
     finalStats,
     trace,
     rollProfileVersion: ROLL_PROFILE_VERSION,
+    statGenerationMode,
   };
 }
