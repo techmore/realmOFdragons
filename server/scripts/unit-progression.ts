@@ -3,10 +3,12 @@ import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
   buildCircleStatus,
   canCircle,
+  isTrainingRoom,
   nextCircleRequirement,
   primarySkillForGuild,
   resolveCircleAdvancement,
   resolveCircleAdvancementRequest,
+  resolveTrainingDecision,
   totalSkillRanks,
 } from '../src/progression.js';
 
@@ -196,6 +198,55 @@ assert.deepEqual(resolveCircleAdvancement(circleReady), {
   events: ['You advance to Circle 2.'],
 });
 
+assert.equal(isTrainingRoom({ id: 'crossing-TG01-001' }), false);
+assert.equal(isTrainingRoom({ id: 'crossing-MA01-001' }), true);
+assert.equal(isTrainingRoom({ id: 'crossing-GU10-001', guild: 'barbarian' }), true);
+
+assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-TG01-001' }), {
+  allowed: false,
+  reason: 'wrong_room',
+  events: ['This is not a useful place to train.'],
+});
+
+assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001', guild: 'barbarian' }), {
+  allowed: true,
+  skillId: 'melee',
+  skillName: 'Melee',
+  primarySkillId: 'melee',
+  gains: [
+    { skillId: 'melee', amount: 5 },
+    { skillId: 'athletics', amount: 1 },
+  ],
+  events: ['You drill Melee.'],
+});
+
+assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001', guild: 'barbarian' }, 'tactics'), {
+  allowed: true,
+  skillId: 'tactics',
+  skillName: 'Tactics',
+  primarySkillId: 'melee',
+  gains: [
+    { skillId: 'tactics', amount: 3 },
+    { skillId: 'athletics', amount: 1 },
+  ],
+  events: ['You drill Tactics.'],
+});
+
+assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001', guild: 'barbarian' }, 'athletics'), {
+  allowed: true,
+  skillId: 'athletics',
+  skillName: 'Athletics',
+  primarySkillId: 'melee',
+  gains: [{ skillId: 'athletics', amount: 3 }],
+  events: ['You drill Athletics.'],
+});
+
+assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001', guild: 'barbarian' }, 'alchemy'), {
+  allowed: false,
+  reason: 'unknown_skill',
+  events: ['You do not know how to train "alchemy".'],
+});
+
 console.log(
   JSON.stringify(
     {
@@ -204,6 +255,7 @@ console.log(
       circleAdvancementRequestChecked: true,
       circleStatusChecked: true,
       circleAdvancementChecked: true,
+      trainingDecisionChecked: true,
     },
     null,
     2,

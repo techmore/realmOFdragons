@@ -7,6 +7,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted training room eligibility, target skill selection, primary-skill detection, and skill gain decisions into pure progression helpers.
+- Progression unit coverage now verifies train rejection outside training rooms, default guild-primary training, off-primary training, athletics-only gain behavior, and unknown-skill rejection.
+- The Express command handler now delegates training decisions to progression and only applies the returned skill gains.
 - Extracted circle status text and circle advancement decision output into pure progression helpers.
 - Progression unit coverage now verifies circle status formatting plus non-advancing and advancing circle decisions.
 - The Express command handler now delegates circle status and circle increment decisions to the progression module while retaining health recalculation after advancement.
@@ -162,7 +165,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract training room/skill gain decisions into pure progression helpers with unit coverage.
+- Extract skill pool application and rank-up mutation into pure progression helpers with unit coverage.
 
 Core Philosophy
 

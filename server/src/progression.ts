@@ -5,6 +5,11 @@ export interface GuildRegistrarSummary {
   roomId: string;
 }
 
+export interface TrainingRoomSummary {
+  id: string;
+  guild?: string;
+}
+
 export type CircleAdvancementDecision =
   | { allowed: true; registrarRoomId: string }
   | { allowed: false; reason: 'commoner' | 'wrong_room'; events: string[] };
@@ -14,6 +19,17 @@ export interface CircleAdvancementResult {
   circle: number;
   events: string[];
 }
+
+export type TrainingDecision =
+  | { allowed: false; reason: 'wrong_room' | 'unknown_skill'; events: string[] }
+  | {
+      allowed: true;
+      skillId: string;
+      skillName: string;
+      primarySkillId: string;
+      gains: Array<{ skillId: string; amount: number }>;
+      events: string[];
+    };
 
 export function totalSkillRanks(character: Pick<CharacterRecord, 'skills'>): number {
   return Object.values(character.skills).reduce((sum, skill) => sum + skill.rank, 0);
@@ -99,4 +115,39 @@ export function resolveCircleAdvancementRequest(
   }
 
   return { allowed: true, registrarRoomId: registrar.roomId };
+}
+
+export function isTrainingRoom(room: TrainingRoomSummary): boolean {
+  return Boolean(room.guild) || room.id === 'crossing-MA01-001' || room.id === 'crossing-MA01-002';
+}
+
+export function resolveTrainingDecision(
+  character: Pick<CharacterRecord, 'guildId' | 'skills'>,
+  room: TrainingRoomSummary,
+  requestedSkill = '',
+): TrainingDecision {
+  if (!isTrainingRoom(room)) {
+    return { allowed: false, reason: 'wrong_room', events: ['This is not a useful place to train.'] };
+  }
+
+  const skillId = requestedSkill || primarySkillForGuild(room.guild ?? character.guildId);
+  const skill = character.skills[skillId];
+  if (!skill) {
+    return { allowed: false, reason: 'unknown_skill', events: [`You do not know how to train "${skillId}".`] };
+  }
+
+  const primarySkillId = primarySkillForGuild(room.guild ?? character.guildId);
+  const gains = [{ skillId, amount: skillId === primarySkillId ? 5 : 3 }];
+  if (skillId !== 'athletics') {
+    gains.push({ skillId: 'athletics', amount: 1 });
+  }
+
+  return {
+    allowed: true,
+    skillId,
+    skillName: skill.name,
+    primarySkillId,
+    gains,
+    events: [`You drill ${skill.name}.`],
+  };
 }

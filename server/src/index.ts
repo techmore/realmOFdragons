@@ -24,7 +24,7 @@ import {
   type StatGenerationMode,
   type StatBlock,
 } from './races.js';
-import { buildCircleStatus, nextCircleRequirement, primarySkillForGuild, resolveCircleAdvancement, resolveCircleAdvancementRequest, totalSkillRanks } from './progression.js';
+import { buildCircleStatus, nextCircleRequirement, primarySkillForGuild, resolveCircleAdvancement, resolveCircleAdvancementRequest, resolveTrainingDecision, totalSkillRanks } from './progression.js';
 import {
   STANCE_PROFILES,
   type CombatRangeName,
@@ -570,30 +570,17 @@ function grantSkillPool(character: CharacterRecord, skillId: string, amount: num
   return true;
 }
 
-function isTrainingRoom(room: Room) {
-  return Boolean(room.guild) || room.id === 'crossing-MA01-001' || room.id === 'crossing-MA01-002';
-}
-
 function trainCharacter(character: CharacterRecord, room: Room, requestedSkill: string, events: string[]) {
-  if (!isTrainingRoom(room)) {
-    events.push('This is not a useful place to train.');
+  const training = resolveTrainingDecision(character, room, requestedSkill);
+  if (!training.allowed) {
+    events.push(...training.events);
     return false;
   }
 
-  const skillId = requestedSkill || primarySkillForGuild(room.guild ?? character.guildId);
-  const skill = character.skills[skillId];
-  if (!skill) {
-    events.push(`You do not know how to train "${skillId}".`);
-    return false;
+  for (const gain of training.gains) {
+    grantSkillPool(character, gain.skillId, gain.amount, events);
   }
-
-  const primarySkillId = primarySkillForGuild(room.guild ?? character.guildId);
-  const isPrimary = skillId === primarySkillId;
-  grantSkillPool(character, skillId, isPrimary ? 5 : 3, events);
-  if (skillId !== 'athletics') {
-    grantSkillPool(character, 'athletics', 1, events);
-  }
-  events.push(`You drill ${skill.name}.`);
+  events.push(...training.events);
   return true;
 }
 
