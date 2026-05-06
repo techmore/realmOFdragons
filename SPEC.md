@@ -59,10 +59,12 @@ Completed current slice:
 - Added unit coverage for starter gear, shop ranged gear, ammo pouch quantities, damaged ammo salvage, forage items, unknown gear, and item detail list composition.
 - Extracted pure shop buy matching, affordability, and purchase delivery decisions into `server/src/economy.ts`.
 - Expanded economy unit coverage for buy-by-name lookup, no damaged-item buy matching, affordability, ammo-bundle delivery, and inventory delivery.
+- Extracted pure inventory/equipment request helpers into `server/src/items.ts`.
+- Expanded item unit coverage for inventory lookup, worn lookup, hand-slot resolution, available hand selection, and wearable classification.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting inventory/equipment command mutations.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting inventory/equipment command mutation results for hold, stow, wear, and remove.
 
 Core Philosophy
 

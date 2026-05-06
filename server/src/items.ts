@@ -26,6 +26,8 @@ export type ItemDetail = {
   shopAvailable: boolean;
 };
 
+export type HandSlotName = 'left' | 'right';
+
 export const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | 'shopAvailable'>> = {
   'leather backpack': {
     code: 'leather backpack',
@@ -94,6 +96,46 @@ export function displayNameFromCode(code: string): string {
     .replace(/^foraged-/, '')
     .replace(/-/g, ' ')
     .trim();
+}
+
+export function normalizeItemRequest(raw: string): string {
+  return raw.toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+export function findInventoryIndex(character: CharacterRecord, requestedItem: string): number {
+  const normalized = normalizeItemRequest(requestedItem);
+  return character.inventory.findIndex((item) => {
+    const code = normalizeItemRequest(item);
+    return code === normalized || code.replace(/\s+/g, '-') === normalized;
+  });
+}
+
+export function findWornIndex(character: CharacterRecord, requestedItem: string): number {
+  const normalized = normalizeItemRequest(requestedItem);
+  return (character.worn ?? []).findIndex((item) => {
+    const code = normalizeItemRequest(item);
+    return code === normalized || code.replace(/\s+/g, '-') === normalized;
+  });
+}
+
+export function resolveHandSlot(character: CharacterRecord, requested: string): HandSlotName | undefined {
+  const normalized = normalizeItemRequest(requested);
+  if (normalized === 'left' || normalized === 'left hand') return 'left';
+  if (normalized === 'right' || normalized === 'right hand') return 'right';
+  if (character.hands.left && normalizeItemRequest(character.hands.left) === normalized) return 'left';
+  if (character.hands.right && normalizeItemRequest(character.hands.right) === normalized) return 'right';
+  return undefined;
+}
+
+export function resolveAvailableHandSlot(character: CharacterRecord, requestedSlot = ''): HandSlotName | undefined {
+  if (requestedSlot === 'left' || requestedSlot === 'right') return requestedSlot;
+  if (character.hands.right === null) return 'right';
+  if (character.hands.left === null) return 'left';
+  return undefined;
+}
+
+export function canWearItem(detail: ItemDetail): boolean {
+  return Boolean(detail.slot) && ['armor', 'container', 'utility'].includes(detail.category);
 }
 
 function findShopItem(code: string, rooms: Record<string, Room> = worldRooms): RoomShopItem | undefined {

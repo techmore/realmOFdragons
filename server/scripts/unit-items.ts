@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import type { CharacterRecord, SkillState } from '../src/storage.js';
-import { buildItemDetails, displayNameFromCode, resolveItemDetail } from '../src/items.js';
+import {
+  buildItemDetails,
+  canWearItem,
+  displayNameFromCode,
+  findInventoryIndex,
+  findWornIndex,
+  resolveAvailableHandSlot,
+  resolveHandSlot,
+  resolveItemDetail,
+} from '../src/items.js';
 import { worldRooms } from '../src/world.js';
 
 function skill(name: string, rank = 0, pool = 0): SkillState {
@@ -53,12 +62,27 @@ const unit = character();
 assert.equal(displayNameFromCode('damaged-itm-sting-arrow'), 'damaged itm sting arrow');
 assert.equal(displayNameFromCode('foraged-fieldherb'), 'fieldherb');
 
+assert.equal(findInventoryIndex(unit, 'training sword'), 0);
+assert.equal(findInventoryIndex(unit, 'training-sword'), 0);
+assert.equal(findInventoryIndex(unit, 'missing sword'), -1);
+assert.equal(findWornIndex(character({ worn: ['leather backpack'] }), 'leather-backpack'), 0);
+assert.equal(resolveHandSlot(character({ hands: { left: 'training sword', right: null } }), 'training sword'), 'left');
+assert.equal(resolveHandSlot(unit, 'right hand'), 'right');
+assert.equal(resolveAvailableHandSlot(unit), 'right');
+assert.equal(resolveAvailableHandSlot(character({ hands: { left: 'training sword', right: 'itm-practice-bow' } })), undefined);
+assert.equal(resolveAvailableHandSlot(unit, 'left'), 'left');
+
 const starterSword = resolveItemDetail('training sword', marksmanRoom, unit);
 assert.equal(starterSword.name, 'training sword');
 assert.equal(starterSword.source, 'starter');
 assert.equal(starterSword.category, 'weapon');
 assert.equal(starterSword.weaponRange, 'melee');
 assert.equal(starterSword.carried, true);
+assert.equal(canWearItem(starterSword), false);
+
+const backpack = resolveItemDetail('leather backpack', marksmanRoom, character({ inventory: ['leather backpack'] }));
+assert.equal(backpack.slot, 'back');
+assert.equal(canWearItem(backpack), true);
 
 const bow = resolveItemDetail('itm-practice-bow', marksmanRoom, unit);
 assert.equal(bow.name, 'practice bow');

@@ -47,7 +47,17 @@ import {
   originalAmmoCodeFromDamaged,
   resolveShopPurchase,
 } from './economy.js';
-import { buildItemDetails, displayNameFromCode, resolveItemDetail, type ItemDetail } from './items.js';
+import {
+  buildItemDetails,
+  canWearItem,
+  displayNameFromCode,
+  findInventoryIndex,
+  findWornIndex,
+  resolveAvailableHandSlot,
+  resolveHandSlot,
+  resolveItemDetail,
+  type ItemDetail,
+} from './items.js';
 import { WebSocketServer, WebSocket } from 'ws';
 
 type TokenClaims = {
@@ -1136,48 +1146,13 @@ function buildItemDetailEvents(character: CharacterRecord, room: Room, requested
   ];
 }
 
-function normalizeItemRequest(raw: string): string {
-  return raw.toLowerCase().trim().replace(/\s+/g, ' ');
-}
-
-function findInventoryIndex(character: CharacterRecord, requestedItem: string): number {
-  const normalized = normalizeItemRequest(requestedItem);
-  return character.inventory.findIndex((item) => {
-    const code = normalizeItemRequest(item);
-    return code === normalized || code.replace(/\s+/g, '-') === normalized;
-  });
-}
-
-function findWornIndex(character: CharacterRecord, requestedItem: string): number {
-  const normalized = normalizeItemRequest(requestedItem);
-  return (character.worn ?? []).findIndex((item) => {
-    const code = normalizeItemRequest(item);
-    return code === normalized || code.replace(/\s+/g, '-') === normalized;
-  });
-}
-
-function resolveHandSlot(character: CharacterRecord, requested: string): 'left' | 'right' | undefined {
-  const normalized = normalizeItemRequest(requested);
-  if (normalized === 'left' || normalized === 'left hand') return 'left';
-  if (normalized === 'right' || normalized === 'right hand') return 'right';
-  if (character.hands.left && normalizeItemRequest(character.hands.left) === normalized) return 'left';
-  if (character.hands.right && normalizeItemRequest(character.hands.right) === normalized) return 'right';
-  return undefined;
-}
-
 function holdItem(character: CharacterRecord, room: Room, requestedItem: string, requestedSlot: string, events: string[]) {
   const inventoryIndex = findInventoryIndex(character, requestedItem);
   if (inventoryIndex < 0) {
     events.push(`You are not carrying "${requestedItem}" in your inventory.`);
     return false;
   }
-  const slot = requestedSlot === 'left' || requestedSlot === 'right'
-    ? requestedSlot
-    : character.hands.right === null
-      ? 'right'
-      : character.hands.left === null
-        ? 'left'
-        : undefined;
+  const slot = resolveAvailableHandSlot(character, requestedSlot);
   if (!slot) {
     events.push('Both hands are full. Stow something first.');
     return false;
@@ -1216,14 +1191,19 @@ function wearItem(character: CharacterRecord, room: Room, requestedItem: string,
     return false;
   }
   const detail = resolveItemDetail(itemCode, room, character);
-  if (!detail.slot || !['armor', 'container', 'utility'].includes(detail.category)) {
+  if (!canWearItem(detail)) {
+    events.push(`${detail.name} is not something you can wear yet.`);
+    return false;
+  }
+  const equipmentSlot = detail.slot;
+  if (!equipmentSlot) {
     events.push(`${detail.name} is not something you can wear yet.`);
     return false;
   }
   character.equipment = character.equipment ?? {};
-  if (character.equipment[detail.slot]) {
-    const current = resolveItemDetail(character.equipment[detail.slot]!, room, character);
-    events.push(`Your ${detail.slot} slot is already occupied by ${current.name}.`);
+  if (character.equipment[equipmentSlot]) {
+    const current = resolveItemDetail(character.equipment[equipmentSlot]!, room, character);
+    events.push(`Your ${equipmentSlot} slot is already occupied by ${current.name}.`);
     return false;
   }
   if (inventoryIndex >= 0) {
@@ -1235,8 +1215,8 @@ function wearItem(character: CharacterRecord, room: Room, requestedItem: string,
   if (!character.worn.includes(itemCode)) {
     character.worn.push(itemCode);
   }
-  character.equipment[detail.slot] = itemCode;
-  events.push(`You wear ${detail.name} on your ${detail.slot} slot.`);
+  character.equipment[equipmentSlot] = itemCode;
+  events.push(`You wear ${detail.name} on your ${equipmentSlot} slot.`);
   return true;
 }
 
