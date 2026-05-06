@@ -318,6 +318,19 @@ Next priority:
 
 - Make browser smoke CI-compatible by using Playwright-managed Chromium on Linux or conditionally detecting installed browsers.
 
+Implementation Notes - 2026-05-05, CI Browser Smoke
+
+Completed in the current Node/React prototype:
+
+- Browser smoke now uses `CHROME_PATH` when provided and falls back to Playwright-managed Chromium otherwise.
+- Added Playwright browser installation to GitHub Actions.
+- Added browser smoke to `npm run ci:check`, so CI now covers login, registration, character creation, typed commands, quick commands, and numpad movement.
+- Browser telemetry reports whether it used system Chrome or Playwright Chromium.
+
+Next priority:
+
+- Add telemetry trend artifacts for gameplay coverage counts: races, guild rooms, shop rooms, circle reached, browser command count, and smoke durations in a compact machine-readable summary.
+
 Implementation Notes - 2026-05-05, Check Telemetry Artifacts
 
 Completed in the current Node/React prototype:

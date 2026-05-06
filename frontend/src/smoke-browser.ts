@@ -1,7 +1,12 @@
 import { chromium } from 'playwright-core';
+import { existsSync } from 'node:fs';
 
 const appUrl = process.env.DR_WEB_BASE_URL ?? 'http://localhost:4200';
-const chromePath = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const defaultChromePath =
+  process.platform === 'darwin' && existsSync('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
+    ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+    : undefined;
+const chromePath = process.env.CHROME_PATH || defaultChromePath;
 const unique = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const email = `browser-${unique}@example.test`;
 const password = 'browser-password-01';
@@ -13,7 +18,7 @@ function assert(condition: unknown, message: string): asserts condition {
 
 async function main(): Promise<void> {
   const browser = await chromium.launch({
-    executablePath: chromePath,
+    ...(chromePath ? { executablePath: chromePath } : {}),
     headless: true,
   });
 
@@ -61,7 +66,18 @@ async function main(): Promise<void> {
       assert(content.includes(expected), `Expected browser UI to include ${expected}`);
     }
 
-    console.log(JSON.stringify({ ok: true, suite: 'frontend:smoke-browser', account: email }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          ok: true,
+          suite: 'frontend:smoke-browser',
+          account: email,
+          browser: chromePath ? 'system-chrome' : 'playwright-chromium',
+        },
+        null,
+        2,
+      ),
+    );
   } finally {
     await browser.close();
   }

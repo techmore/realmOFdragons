@@ -14,6 +14,7 @@ const baseSteps = [
 
 const ciSteps = [
   ...baseSteps,
+  { name: 'browser-smoke', command: 'node', args: ['scripts/with-test-app.mjs', 'npm', 'run', 'smoke:browser'] },
   { name: 'api-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', 'run', 'smoke:api'] },
 ];
 
