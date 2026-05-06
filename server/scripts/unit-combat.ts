@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {
   STANCE_PROFILES,
   applyBalanceChange,
+  buildCombatRangeEvents,
   buildCombatStatusEvents,
   buildPostAttackStatusEvents,
   buildRoomTargetsFromTemplates,
@@ -147,6 +148,21 @@ assert.deepEqual(buildCombatStatusEvents(
   'Weapon: practice bow (missile).',
   'Ready in: 450ms',
 ]);
+assert.deepEqual(buildCombatRangeEvents(undefined), ['You are not engaged with a target.']);
+assert.deepEqual(buildCombatRangeEvents({
+  targetName: 'test goblin',
+  targetHp: 7,
+  targetMaxHp: 12,
+  range: 'melee',
+  advantage: 0,
+}), ['You are at melee range from test goblin.']);
+assert.deepEqual(buildCombatRangeEvents({
+  targetName: 'test rat',
+  targetHp: 4,
+  targetMaxHp: 8,
+  range: 'bad-range',
+  advantage: 0,
+}), ['You are at missile range from test rat.']);
 
 const targetTemplates = [
   { id: 'test-rat', name: 'test rat', maxHp: 8, aggression: 30 },
@@ -194,4 +210,4 @@ assert.equal(buildTargetDetailEvents(targetTemplates[0], 'test rat', {
   range: 'melee',
 })[4], 'Suggested next verb: attack test rat.');
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true, combatStatusChecked: true }, null, 2));
+console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true, combatStatusChecked: true, combatRangeChecked: true }, null, 2));

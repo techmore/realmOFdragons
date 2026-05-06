@@ -56,6 +56,7 @@ import {
   normalizeRange,
   normalizeStance,
   buildPostAttackStatusEvents,
+  buildCombatRangeEvents,
   buildCombatStatusEvents,
   buildRoomTargetsFromTemplates,
   buildTargetDetailEvents as buildCombatTargetDetailEvents,
@@ -1273,11 +1274,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'range') {
-    if (!resolvedCharacter.combat) {
-      events.push('You are not engaged with a target.');
-    } else {
-      events.push(`You are at ${formatRange(normalizeRange(resolvedCharacter.combat.range))} from ${resolvedCharacter.combat.targetName}.`);
-    }
+    events.push(...buildCombatRangeEvents(resolvedCharacter.combat));
     return buildCommandResult(resolvedCharacter, room, events);
   }
 

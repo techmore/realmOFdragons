@@ -166,6 +166,14 @@ export function buildCombatStatusEvents(
   ];
 }
 
+export function buildCombatRangeEvents(combat: CombatStatusCharacter['combat']): string[] {
+  if (!combat) {
+    return ['You are not engaged with a target.'];
+  }
+
+  return [`You are at ${formatRange(normalizeRange(combat.range))} from ${combat.targetName}.`];
+}
+
 export function buildRoomTargetsFromTemplates(targets: CombatTargetTemplate[]): RoomTarget[] {
   return targets.map((target) => ({
     id: target.id,

@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted combat `range` command formatting into pure combat helpers with unit coverage for unengaged characters, engaged melee targets, and malformed stored range fallback.
+- The Express `range` command now delegates distance text to combat-owned formatting.
 - Extracted combat status command formatting into pure combat helpers with unit coverage for idle equipment/stance summaries, normalized fallback values, and engaged target status output.
 - The Express `combat` command now delegates combat status text to combat-owned formatting while passing equipment summaries and held weapon state from the item module.
 - Extracted target detail/appraisal formatting into pure combat helpers with unit coverage for missing target prompts, unseen targets, unengaged targets, engaged ranged targets, and engaged melee targets.
@@ -201,7 +203,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract combat range command formatting into combat helpers with unit coverage.
+- Extract combat circle command formatting into combat helpers with unit coverage.
 
 Core Philosophy
 
