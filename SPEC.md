@@ -445,4 +445,4 @@ Completed in the current Node/React prototype:
 
 Next priority:
 
-- Render target vitality/aggression metadata in the web UI target affordance, and add browser/static smoke assertions for that richer target display.
+- Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
