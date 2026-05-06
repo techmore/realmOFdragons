@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Test fixtures now support controlled legacy race-roll metadata seeding for API smoke coverage.
+- API smoke now verifies legacy modern stored metadata normalizes to `modern_fixed` / `Modern fixed racial start` through `/v1/test/characters/:id/state`.
+- API smoke now verifies explicit legacy classic-random stored metadata keeps classic mode while hiding old prototype role labels from API-visible score output.
 - Added stored character race-roll metadata normalization for old file-backed prototype role titles.
 - Modern fixed stored characters are normalized to `modern_fixed` / `Modern fixed racial start` when loaded.
 - Classic-random stored characters keep explicit classic mode but migrate old role trace wording to private test-profile wording.
@@ -127,7 +130,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add API smoke coverage for stored-character metadata migration through the existing test fixture state endpoint.
+- Add browser/static smoke coverage that legacy-normalized characters show stat mode without prototype role labels in the web UI.
 
 Core Philosophy
 

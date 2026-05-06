@@ -2499,6 +2499,7 @@ app.post('/v1/test/characters/:characterId/state', authRequired, async (req: Aut
   const roomId = String(req.body?.roomId ?? '').trim();
   const clearActiveCombat = req.body?.clearCombat === true;
   const inventoryAppend = Array.isArray(req.body?.inventoryAppend) ? req.body.inventoryAppend : [];
+  const legacyRaceMetadata = String(req.body?.legacyRaceMetadata ?? '').trim();
 
   if (typeof healthCurrent === 'number' && Number.isFinite(healthCurrent)) {
     resolved.health.current = Math.max(0, Math.min(resolved.health.max, Math.floor(healthCurrent)));
@@ -2517,6 +2518,25 @@ app.post('/v1/test/characters/:characterId/state', authRequired, async (req: Aut
     if (typeof itemCode === 'string' && itemCode.trim()) {
       resolved.inventory.push(itemCode.trim());
     }
+  }
+
+  if (legacyRaceMetadata) {
+    if (legacyRaceMetadata === 'modern') {
+      delete resolved.statGenerationMode;
+      resolved.role = 'frontline';
+      resolved.roleTitle = 'Frontline';
+      resolved.rollTrace = ['Race selected: Human', 'Role selected: Frontline (frontline)'];
+      resolved.rollProfileVersion = 1;
+    } else if (legacyRaceMetadata === 'classic') {
+      resolved.statGenerationMode = 'classic_random';
+      resolved.role = 'berserker';
+      resolved.roleTitle = 'Berserker';
+      resolved.rollTrace = ['Race selected: Kaldar', 'Role selected: Berserker (berserker)'];
+      resolved.rollProfileVersion = 1;
+    } else {
+      return res.status(400).json({ error: `Unknown legacy race metadata fixture: ${legacyRaceMetadata}` });
+    }
+    ensureCharacterShape(resolved);
   }
 
   setActionCooldown(resolved, 0);

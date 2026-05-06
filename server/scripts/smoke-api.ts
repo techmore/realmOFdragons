@@ -33,11 +33,14 @@ interface CharacterSummary {
   id: string;
   name: string;
   race: string;
+  role?: string;
+  roleTitle?: string;
   guildId: string;
   guildName: string;
   roomId: string;
   circle: number;
   stats: Record<string, number>;
+  rollProfileVersion?: number;
   statGenerationMode?: string;
   inventory: string[];
   ammoPouch?: Record<string, number>;
@@ -324,6 +327,38 @@ async function runIdentitySuite(context: SmokeContext): Promise<void> {
   context.summary.guildCreationRejected = true;
   context.summary.creationStartsUnaffiliated = true;
   context.summary.cleanRaceDescriptionsChecked = context.races.length;
+
+  const legacyModern = await request<CommandResult>(`/v1/test/characters/${current.id}/state`, {
+    method: 'POST',
+    headers: authHeaders(context.accessToken),
+    body: JSON.stringify({ legacyRaceMetadata: 'modern' }),
+  });
+  assert(legacyModern.character.statGenerationMode === 'modern_fixed', 'Expected legacy missing stat mode to normalize to modern_fixed.');
+  assert(legacyModern.character.role === 'modern_fixed', `Expected legacy modern role to normalize, got ${legacyModern.character.role}.`);
+  assert(legacyModern.character.roleTitle === 'Modern fixed racial start', `Expected legacy modern role title to normalize, got ${legacyModern.character.roleTitle}.`);
+
+  const legacyClassic = await request<CommandResult>(`/v1/test/characters/${current.id}/state`, {
+    method: 'POST',
+    headers: authHeaders(context.accessToken),
+    body: JSON.stringify({ legacyRaceMetadata: 'classic' }),
+  });
+  assert(legacyClassic.character.statGenerationMode === 'classic_random', 'Expected explicit legacy classic mode to remain classic_random.');
+  assert(
+    String(legacyClassic.character.roleTitle ?? '').startsWith('Private classic-random test profile '),
+    `Expected legacy classic role title to be private, got ${legacyClassic.character.roleTitle}.`,
+  );
+
+  const legacyScore = await command(context.accessToken, current.id, 'score');
+  assert(legacyScore.events.some((event) => event.includes('classic random roll')), 'Expected score to report classic random roll mode.');
+  assert(!legacyScore.events.some((event) => event.includes('Berserker') || event.includes('Frontline')), 'Expected score to avoid legacy prototype role labels.');
+
+  current = await request<CharacterSummary>(`/v1/characters/${current.id}/reroll`, {
+    method: 'POST',
+    headers: authHeaders(context.accessToken),
+    body: JSON.stringify({ race: context.races[0].name, statMode: 'modern_fixed' }),
+  });
+  context.character = current;
+  context.summary.storedRaceMetadataApiMigrationChecked = true;
 }
 
 async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
