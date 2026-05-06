@@ -12,7 +12,7 @@ import {
   guilds,
   worldRooms,
 } from './world.js';
-import { FileStorage, LoginSession, AccountRecord, CharacterRecord, ScriptRecord, type EquipmentSlots } from './storage.js';
+import { FileStorage, LoginSession, AccountRecord, CharacterRecord, ScriptRecord } from './storage.js';
 import {
   getAllRaces,
   isValidRace,
@@ -48,9 +48,12 @@ import {
   resolveShopPurchase,
 } from './economy.js';
 import {
+  buildEquipmentSummary,
+  buildInventoryEquipmentEvents,
   buildItemDetails,
   canWieldItem,
   displayNameFromCode,
+  formatEquipmentModifiers,
   holdInventoryItem,
   parseHeldItemRequest,
   removeWornInventoryItem,
@@ -113,13 +116,6 @@ type RoomTarget = {
   name: string;
   vitality: number;
   aggression: number;
-};
-
-type EquipmentSummary = {
-  slots: EquipmentSlots;
-  totalArmor: number;
-  totalEvasionPenalty: number;
-  totalAttackModifier: number;
 };
 
 type SocketState = {
@@ -487,30 +483,6 @@ function consumeAmmo(character: CharacterRecord, code: string): boolean {
     return true;
   }
   return false;
-}
-
-function buildEquipmentSummary(character: CharacterRecord, room?: Room): EquipmentSummary {
-  const slots = character.equipment ?? {};
-  const summary: EquipmentSummary = {
-    slots,
-    totalArmor: 0,
-    totalEvasionPenalty: 0,
-    totalAttackModifier: 0,
-  };
-  const detailRoom = room ?? worldRooms[character.roomId] ?? worldRooms['crossing-TG01-001'];
-  for (const itemCode of Object.values(slots)) {
-    if (!itemCode) continue;
-    const detail = resolveItemDetail(itemCode, detailRoom, character);
-    summary.totalArmor += detail.armor;
-    summary.totalEvasionPenalty += detail.evasionPenalty;
-    summary.totalAttackModifier += detail.attackModifier;
-  }
-  for (const itemCode of [character.hands.left, character.hands.right]) {
-    if (!itemCode) continue;
-    const detail = resolveItemDetail(itemCode, detailRoom, character);
-    summary.totalAttackModifier += detail.attackModifier;
-  }
-  return summary;
 }
 
 function findHeldWeapon(character: CharacterRecord, room?: Room): ItemDetail | undefined {
@@ -1258,7 +1230,7 @@ function buildCombatEvents(character: CharacterRecord): string[] {
     return [
       'You are not in combat.',
       `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
-      `Equipment: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`,
+      `Equipment: ${formatEquipmentModifiers(equipment)}.`,
       `Weapon: ${findHeldWeapon(character)?.name ?? 'unarmed'} (${findHeldWeapon(character)?.weaponRange ?? 'melee'}).`,
     ];
   }
@@ -2043,13 +2015,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'inventory' || command === 'inv') {
     const equipment = buildEquipmentSummary(resolvedCharacter, room);
-    events.push(`You are carrying ${resolvedCharacter.inventory.length} item(s).`);
-    events.push(...resolvedCharacter.inventory.map((item) => ` - ${item}`));
-    events.push(`Ammo: ${formatAmmoPouch(resolvedCharacter)}.`);
-    events.push(`Loaded: ${formatLoadedAmmo(resolvedCharacter)}.`);
-    events.push(`Recoverable: ${formatRecoverableAmmo(resolvedCharacter)}.`);
-    events.push(`Equipment slots: ${Object.entries(equipment.slots).map(([slot, item]) => `${slot}: ${item}`).join(', ') || 'none'}.`);
-    events.push(`Equipment modifiers: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`);
+    events.push(
+      ...buildInventoryEquipmentEvents(
+        resolvedCharacter,
+        equipment,
+        formatAmmoPouch(resolvedCharacter),
+        formatLoadedAmmo(resolvedCharacter),
+        formatRecoverableAmmo(resolvedCharacter),
+      ),
+    );
     return buildCommandResult(resolvedCharacter, room, events);
   }
 

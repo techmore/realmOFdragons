@@ -65,10 +65,12 @@ Completed current slice:
 - Expanded item unit coverage for successful and failed hand/equipment state transitions.
 - Extracted hold/wield item request parsing and wieldable item validation into `server/src/items.ts`.
 - Expanded item unit coverage for optional hand-slot parsing and weapon/ranged wieldability classification.
+- Extracted equipment summary calculation, equipment modifier formatting, and inventory event formatting into `server/src/items.ts`.
+- Expanded item unit coverage for equipment totals, slot formatting, and inventory/equipment command event presentation.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting inventory/equipment presentation summaries and command-result event formatting.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting item detail request matching and appraisal event formatting.
 
 Core Philosophy
 

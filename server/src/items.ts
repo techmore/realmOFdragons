@@ -1,4 +1,4 @@
-import type { CharacterRecord, EquipmentSlot } from './storage.js';
+import type { CharacterRecord, EquipmentSlot, EquipmentSlots } from './storage.js';
 import { type Room, type RoomShopItem, worldRooms } from './world.js';
 import type { CombatRangeName } from './combat.js';
 import { isDamagedAmmoCode, originalAmmoCodeFromDamaged } from './economy.js';
@@ -32,6 +32,13 @@ export type HeldItemRequest = {
   requestedItem: string;
   requestedSlot: HandSlotName | '';
   hasExplicitSlot: boolean;
+};
+
+export type EquipmentSummary = {
+  slots: EquipmentSlots;
+  totalArmor: number;
+  totalEvasionPenalty: number;
+  totalAttackModifier: number;
 };
 
 export const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | 'shopAvailable'>> = {
@@ -246,6 +253,56 @@ export function removeWornInventoryItem(character: CharacterRecord, room: Room, 
   character.inventory.push(itemCode);
   const detail = resolveItemDetail(itemCode, room, character);
   return itemMutation(true, [`You remove ${detail.name} and place it in your inventory.`]);
+}
+
+export function buildEquipmentSummary(character: CharacterRecord, room?: Room, rooms: Record<string, Room> = worldRooms): EquipmentSummary {
+  const slots = character.equipment ?? {};
+  const summary: EquipmentSummary = {
+    slots,
+    totalArmor: 0,
+    totalEvasionPenalty: 0,
+    totalAttackModifier: 0,
+  };
+  const detailRoom = room ?? rooms[character.roomId] ?? rooms['crossing-TG01-001'];
+  for (const itemCode of Object.values(slots)) {
+    if (!itemCode) continue;
+    const detail = resolveItemDetail(itemCode, detailRoom, character, rooms);
+    summary.totalArmor += detail.armor;
+    summary.totalEvasionPenalty += detail.evasionPenalty;
+    summary.totalAttackModifier += detail.attackModifier;
+  }
+  for (const itemCode of [character.hands.left, character.hands.right]) {
+    if (!itemCode) continue;
+    const detail = resolveItemDetail(itemCode, detailRoom, character, rooms);
+    summary.totalAttackModifier += detail.attackModifier;
+  }
+  return summary;
+}
+
+export function formatEquipmentSlots(slots: EquipmentSlots): string {
+  return Object.entries(slots).map(([slot, item]) => `${slot}: ${item}`).join(', ') || 'none';
+}
+
+export function formatEquipmentModifiers(summary: EquipmentSummary): string {
+  return `armor ${summary.totalArmor}, evasion penalty ${summary.totalEvasionPenalty}, attack modifier ${summary.totalAttackModifier}`;
+}
+
+export function buildInventoryEquipmentEvents(
+  character: CharacterRecord,
+  summary: EquipmentSummary,
+  ammoStatus: string,
+  loadedStatus: string,
+  recoverableStatus: string,
+): string[] {
+  return [
+    `You are carrying ${character.inventory.length} item(s).`,
+    ...character.inventory.map((item) => ` - ${item}`),
+    `Ammo: ${ammoStatus}.`,
+    `Loaded: ${loadedStatus}.`,
+    `Recoverable: ${recoverableStatus}.`,
+    `Equipment slots: ${formatEquipmentSlots(summary.slots)}.`,
+    `Equipment modifiers: ${formatEquipmentModifiers(summary)}.`,
+  ];
 }
 
 function findShopItem(code: string, rooms: Record<string, Room> = worldRooms): RoomShopItem | undefined {

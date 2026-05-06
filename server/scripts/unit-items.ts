@@ -1,12 +1,16 @@
 import assert from 'node:assert/strict';
 import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
+  buildEquipmentSummary,
+  buildInventoryEquipmentEvents,
   buildItemDetails,
   canWieldItem,
   canWearItem,
   displayNameFromCode,
   findInventoryIndex,
   findWornIndex,
+  formatEquipmentModifiers,
+  formatEquipmentSlots,
   holdInventoryItem,
   parseHeldItemRequest,
   removeWornInventoryItem,
@@ -203,5 +207,29 @@ assert.equal(removeUnit.equipment?.back, undefined);
 const missingRemove = removeWornInventoryItem(character(), marksmanRoom, 'leather backpack');
 assert.equal(missingRemove.success, false);
 assert.deepEqual(missingRemove.events, ['You are not wearing "leather backpack".']);
+
+const equipmentSummary = buildEquipmentSummary(character({
+  inventory: ['foraged-fieldherb'],
+  hands: { left: null, right: 'training sword' },
+  equipment: { back: 'leather backpack', belt: 'repair cloth' },
+}), marksmanRoom);
+assert.deepEqual(equipmentSummary.slots, { back: 'leather backpack', belt: 'repair cloth' });
+assert.equal(equipmentSummary.totalArmor, 0);
+assert.equal(equipmentSummary.totalEvasionPenalty, 0);
+assert.equal(equipmentSummary.totalAttackModifier, 1);
+assert.equal(formatEquipmentSlots(equipmentSummary.slots), 'back: leather backpack, belt: repair cloth');
+assert.equal(formatEquipmentModifiers(equipmentSummary), 'armor 0, evasion penalty 0, attack modifier 1');
+assert.deepEqual(
+  buildInventoryEquipmentEvents(character({ inventory: ['training sword'], equipment: { back: 'leather backpack' } }), equipmentSummary, 'practice arrow x4', 'none', 'none'),
+  [
+    'You are carrying 1 item(s).',
+    ' - training sword',
+    'Ammo: practice arrow x4.',
+    'Loaded: none.',
+    'Recoverable: none.',
+    'Equipment slots: back: leather backpack, belt: repair cloth.',
+    'Equipment modifiers: armor 0, evasion penalty 0, attack modifier 1.',
+  ],
+);
 
 console.log(JSON.stringify({ ok: true, suite: 'unit:items' }, null, 2));
