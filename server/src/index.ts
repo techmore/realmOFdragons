@@ -858,6 +858,18 @@ function buildTargetDetailEvents(character: CharacterRecord, requestedTarget: st
   ];
 }
 
+function buildVerbEvents(): string[] {
+  return [
+    'Verb groups:',
+    'Info: help, help scan, verb, look, exits, score, skills, inventory, balance, range, combat.',
+    'Movement: north, south, east, west, n, s, e, w, go <direction>, enter, exit, up, down, ne, nw, se, sw.',
+    'Targets: scan, target, target <name>, appraise <target>.',
+    'Combat: stance, stance balanced, stance offensive, stance defensive, stance evasive, advance <target>, retreat, attack <target>, circle, jab, bash, defend, flee, wait <ms>, rest.',
+    'Progression: train, train <skill>, circle, join guild.',
+    'Shops: shop, shop buy <code>, shop sell <code>.',
+  ];
+}
+
 function buildCharacterCombat(character: CharacterRecord, requestedTarget?: string): CharacterCombatSnapshot | null {
   const enemies = getRoomEnemies(character.roomId);
   if (!enemies.length) return null;
@@ -1074,6 +1086,8 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     command === 'help' ||
     command === 'help scan' ||
     command === 'help targets' ||
+    command === 'verb' ||
+    command === 'verbs' ||
     command === 'look' ||
     command === 'l' ||
     command === 'scan' ||
@@ -1147,9 +1161,14 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'help') {
     events.push(
-      'Commands: look, scan, help scan, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, scan, help scan, verb, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
+  if (command === 'verb' || command === 'verbs') {
+    events.push(...buildVerbEvents());
     return buildCommandResult(resolvedCharacter, room, events);
   }
 

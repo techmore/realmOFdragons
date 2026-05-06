@@ -434,6 +434,10 @@ async function runTargetSuite(context: SmokeContext): Promise<void> {
   assert(result.events.some((event) => event.includes('forage wolf-cub')), 'Expected target suite scan to list forage wolf-cub.');
   assert(result.targets.some((target) => target.name === 'forage wolf-cub'), 'Expected target suite structured wolf-cub.');
 
+  result = await command(context.accessToken, current.id, 'verb');
+  assert(result.events.some((event) => event.includes('Verb groups:')), 'Expected verb groups header.');
+  assert(result.events.some((event) => event.includes('Targets: scan, target')), 'Expected target verb group.');
+
   result = await command(context.accessToken, current.id, 'help targets');
   assert(result.events.some((event) => event.includes('advance <target>')), 'Expected help targets action guidance.');
 

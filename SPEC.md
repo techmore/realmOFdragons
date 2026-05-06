@@ -481,6 +481,19 @@ Next priority:
 
 - Add a server-side `verb` command that returns grouped command hints matching the README command reference, so players can discover verbs in-game instead of relying on documentation.
 
+Implementation Notes - 2026-05-05, Verb Discovery Command
+
+Completed in the current Node/React prototype:
+
+- Added passive `verb` and `verbs` commands.
+- `verb` returns grouped hints for info, movement, targets, combat, progression, and shops.
+- General `help` now advertises `verb`.
+- Focused target smoke verifies the verb header and target verb group.
+
+Next priority:
+
+- Add a web quick-control button for `verb` and browser/static smoke coverage so players can discover grouped command hints from the UI.
+
 Implementation Notes - 2026-05-05, Target Details Command
 
 Completed in the current Node/React prototype:
