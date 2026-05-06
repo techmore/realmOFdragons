@@ -31,6 +31,14 @@ export type TrainingDecision =
       events: string[];
     };
 
+export interface SkillPoolGainResult {
+  applied: boolean;
+  skillId: string;
+  rank: number;
+  pool: number;
+  events: string[];
+}
+
 export function totalSkillRanks(character: Pick<CharacterRecord, 'skills'>): number {
   return Object.values(character.skills).reduce((sum, skill) => sum + skill.rank, 0);
 }
@@ -149,5 +157,34 @@ export function resolveTrainingDecision(
     primarySkillId,
     gains,
     events: [`You drill ${skill.name}.`],
+  };
+}
+
+export function applySkillPoolGain(
+  character: Pick<CharacterRecord, 'skills'>,
+  skillId: string,
+  amount: number,
+): SkillPoolGainResult {
+  const skill = character.skills[skillId];
+  if (!skill) {
+    return { applied: false, skillId, rank: 0, pool: 0, events: [] };
+  }
+
+  const gain = Math.max(1, Math.floor(amount));
+  skill.pool += gain;
+  const needed = Math.max(4, (skill.rank + 1) * 5);
+  const events: string[] = [];
+  if (skill.pool >= needed) {
+    skill.pool -= needed;
+    skill.rank += 1;
+    events.push(`${skill.name} improves to rank ${skill.rank}.`);
+  }
+
+  return {
+    applied: true,
+    skillId,
+    rank: skill.rank,
+    pool: skill.pool,
+    events,
   };
 }

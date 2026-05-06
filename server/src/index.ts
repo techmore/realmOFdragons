@@ -24,7 +24,7 @@ import {
   type StatGenerationMode,
   type StatBlock,
 } from './races.js';
-import { buildCircleStatus, nextCircleRequirement, primarySkillForGuild, resolveCircleAdvancement, resolveCircleAdvancementRequest, resolveTrainingDecision, totalSkillRanks } from './progression.js';
+import { applySkillPoolGain, buildCircleStatus, nextCircleRequirement, primarySkillForGuild, resolveCircleAdvancement, resolveCircleAdvancementRequest, resolveTrainingDecision, totalSkillRanks } from './progression.js';
 import {
   STANCE_PROFILES,
   type CombatRangeName,
@@ -557,17 +557,9 @@ function ensureProgressionShape(character: CharacterRecord): boolean {
 }
 
 function grantSkillPool(character: CharacterRecord, skillId: string, amount: number, events: string[]) {
-  const skill = character.skills[skillId];
-  if (!skill) return false;
-  const gain = Math.max(1, Math.floor(amount));
-  skill.pool += gain;
-  const needed = Math.max(4, (skill.rank + 1) * 5);
-  if (skill.pool >= needed) {
-    skill.pool -= needed;
-    skill.rank += 1;
-    events.push(`${skill.name} improves to rank ${skill.rank}.`);
-  }
-  return true;
+  const gain = applySkillPoolGain(character, skillId, amount);
+  events.push(...gain.events);
+  return gain.applied;
 }
 
 function trainCharacter(character: CharacterRecord, room: Room, requestedSkill: string, events: string[]) {

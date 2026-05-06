@@ -7,6 +7,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted skill pool gain and rank-up mutation into a pure progression helper.
+- Progression unit coverage now verifies pool accumulation, rank-up event output, minimum gain normalization, and unknown-skill no-op behavior.
+- All route-local skill awards now use the progression helper through the existing `grantSkillPool` adapter.
 - Extracted training room eligibility, target skill selection, primary-skill detection, and skill gain decisions into pure progression helpers.
 - Progression unit coverage now verifies train rejection outside training rooms, default guild-primary training, off-primary training, athletics-only gain behavior, and unknown-skill rejection.
 - The Express command handler now delegates training decisions to progression and only applies the returned skill gains.
@@ -165,7 +168,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract skill pool application and rank-up mutation into pure progression helpers with unit coverage.
+- Replace the remaining route-local `grantSkillPool` adapter with direct progression helper calls where practical.
 
 Core Philosophy
 

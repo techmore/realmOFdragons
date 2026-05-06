@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
+  applySkillPoolGain,
   buildCircleStatus,
   canCircle,
   isTrainingRoom,
@@ -247,6 +248,43 @@ assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001',
   events: ['You do not know how to train "alchemy".'],
 });
 
+const gainCharacter = character();
+assert.deepEqual(applySkillPoolGain(gainCharacter, 'melee', 2), {
+  applied: true,
+  skillId: 'melee',
+  rank: 0,
+  pool: 2,
+  events: [],
+});
+assert.equal(gainCharacter.skills.melee.rank, 0);
+assert.equal(gainCharacter.skills.melee.pool, 2);
+
+assert.deepEqual(applySkillPoolGain(gainCharacter, 'melee', 3), {
+  applied: true,
+  skillId: 'melee',
+  rank: 1,
+  pool: 0,
+  events: ['Melee improves to rank 1.'],
+});
+assert.equal(gainCharacter.skills.melee.rank, 1);
+assert.equal(gainCharacter.skills.melee.pool, 0);
+
+assert.deepEqual(applySkillPoolGain(gainCharacter, 'melee', 0), {
+  applied: true,
+  skillId: 'melee',
+  rank: 1,
+  pool: 1,
+  events: [],
+});
+
+assert.deepEqual(applySkillPoolGain(gainCharacter, 'alchemy', 5), {
+  applied: false,
+  skillId: 'alchemy',
+  rank: 0,
+  pool: 0,
+  events: [],
+});
+
 console.log(
   JSON.stringify(
     {
@@ -256,6 +294,7 @@ console.log(
       circleStatusChecked: true,
       circleAdvancementChecked: true,
       trainingDecisionChecked: true,
+      skillPoolGainChecked: true,
     },
     null,
     2,
