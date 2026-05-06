@@ -31,7 +31,7 @@ function tail(text, maxLength = 12000) {
   return text.length > maxLength ? text.slice(text.length - maxLength) : text;
 }
 
-function markdownSummary(results) {
+function markdownSummary(results, coverage) {
   const lines = [
     '# Realm of Dragons Check Telemetry',
     '',
@@ -45,6 +45,30 @@ function markdownSummary(results) {
   for (const result of results) {
     const status = result.exitCode === 0 ? 'pass' : 'fail';
     lines.push(`| ${result.name} | ${status} | ${result.durationMs} | \`${result.commandLine}\` |`);
+  }
+
+  if (coverage) {
+    lines.push('');
+    lines.push('## Gameplay Coverage');
+    lines.push('');
+    lines.push('| Area | Covered |');
+    lines.push('| --- | --- |');
+    lines.push(`| Combat smoke | ${coverage.gameplay.combatChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Scan visibility | ${coverage.gameplay.scanChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Structured targets | ${coverage.gameplay.structuredTargetsChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Target details command | ${coverage.gameplay.targetDetailsChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
+    lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
+    lines.push('');
+    lines.push('## Gameplay Counts');
+    lines.push('');
+    lines.push('| Metric | Value |');
+    lines.push('| --- | ---: |');
+    lines.push(`| Races rolled | ${coverage.gameplay.racesRolled} |`);
+    lines.push(`| Guild rooms walked | ${coverage.gameplay.guildRoomsWalked} |`);
+    lines.push(`| Shop rooms walked | ${coverage.gameplay.shopRoomsWalked} |`);
+    lines.push(`| Circle reached | ${coverage.gameplay.circleReached} |`);
+    lines.push(`| Browser command count | ${coverage.frontend.browserCommandCount} |`);
   }
 
   lines.push('');
@@ -198,8 +222,9 @@ const summary = {
 };
 
 writeFileSync(join(telemetryDir, 'summary.json'), `${JSON.stringify(summary, null, 2)}\n`);
-writeFileSync(join(telemetryDir, 'summary.md'), markdownSummary(results));
-writeFileSync(join(telemetryDir, 'coverage-summary.json'), `${JSON.stringify(coverageSummary(results), null, 2)}\n`);
+const coverage = coverageSummary(results);
+writeFileSync(join(telemetryDir, 'summary.md'), markdownSummary(results, coverage));
+writeFileSync(join(telemetryDir, 'coverage-summary.json'), `${JSON.stringify(coverage, null, 2)}\n`);
 
 console.log(`\n[telemetry] wrote ${join(telemetryDir, 'summary.json')}`);
 console.log(`[telemetry] wrote ${join(telemetryDir, 'summary.md')}`);

@@ -418,6 +418,18 @@ Next priority:
 
 - Add a small target-details section to the generated Markdown telemetry report so human review can see gameplay coverage booleans without opening JSON.
 
+Implementation Notes - 2026-05-05, Markdown Gameplay Coverage
+
+Completed in the current Node/React prototype:
+
+- `artifacts/telemetry/summary.md` now includes a Gameplay Coverage table.
+- The Markdown summary calls out combat smoke, scan visibility, structured targets, target details command, browser target-details action, and shop economy coverage.
+- The Markdown summary also includes key gameplay counts: races rolled, guild rooms walked, shop rooms walked, circle reached, and browser command count.
+
+Next priority:
+
+- Add a focused target-details smoke suite mode so `npm --prefix server run smoke:api combat` can be split further into fast target inspection coverage without running full progression/economy.
+
 Implementation Notes - 2026-05-05, Target Details Command
 
 Completed in the current Node/React prototype:
