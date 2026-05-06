@@ -3,6 +3,7 @@ import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
   addAmmo,
   addRecoverableAmmo,
+  buildAmmoStatusEvents,
   buildEquipmentSummary,
   buildInventoryEquipmentEvents,
   buildItemDetailEvents,
@@ -25,6 +26,7 @@ import {
   getLoadedAmmo,
   holdInventoryItem,
   parseHeldItemRequest,
+  prepareRangedFire,
   recoverAmmunition,
   reloadRangedWeapon,
   removeWornInventoryItem,
@@ -188,10 +190,33 @@ assert.equal(formatRecoverableAmmo(loadedUnit), 'itm-sting-arrow x2');
 const alreadyLoaded = reloadRangedWeapon(loadedUnit, marksmanRoom);
 assert.equal(alreadyLoaded.success, false);
 assert.deepEqual(alreadyLoaded.events, ['practice bow is already loaded with itm-sting-arrow.']);
+assert.deepEqual(buildAmmoStatusEvents(loadedUnit, marksmanRoom), [
+  'Ammo pouch: itm-sting-arrow x3.',
+  'Loaded: itm-practice-bow: itm-sting-arrow.',
+  'Recoverable: itm-sting-arrow x2.',
+  'practice bow uses practice arrow (itm-sting-arrow); 3 ready in your quiver.',
+  'practice bow is loaded with itm-sting-arrow.',
+]);
+const firedShot = prepareRangedFire(loadedUnit, heldWeapon);
+assert.equal(firedShot.success, true);
+assert.equal(firedShot.consumedAmmo, 'itm-sting-arrow');
+assert.deepEqual(firedShot.events, ['You loose loaded practice arrow. 3 remain in your quiver.']);
+assert.equal(getLoadedAmmo(loadedUnit, heldWeapon!), undefined);
 clearLoadedAmmo(loadedUnit, heldWeapon!);
 assert.equal(getLoadedAmmo(loadedUnit, heldWeapon!), undefined);
 assert.equal(formatLoadedAmmo(loadedUnit), 'none');
 assert.equal(findHeldWeapon(character({ hands: { left: 'repair cloth', right: null } }), marksmanRoom), undefined);
+assert.deepEqual(buildAmmoStatusEvents(character({ hands: { left: 'repair cloth', right: null } }), marksmanRoom), [
+  'Ammo pouch: itm-sting-arrow x4.',
+  'Loaded: none.',
+  'Recoverable: none.',
+  'No ranged weapon is currently in hand.',
+]);
+assert.deepEqual(prepareRangedFire(character({ hands: { left: null, right: 'training sword' } }), undefined).events, ['You need a ranged weapon in hand to fire or shoot.']);
+const unloadedFireUnit = character({ hands: { left: null, right: 'itm-practice-bow' }, loadedAmmo: {}, ammoPouch: { 'itm-sting-arrow': 1 } });
+assert.deepEqual(prepareRangedFire(unloadedFireUnit, findHeldWeapon(unloadedFireUnit, marksmanRoom)).events, ['practice bow is not loaded. Use reload before fire or shoot.']);
+const emptyFireUnit = character({ hands: { left: null, right: 'itm-practice-bow' }, loadedAmmo: {}, ammoPouch: {}, inventory: [] });
+assert.deepEqual(prepareRangedFire(emptyFireUnit, findHeldWeapon(emptyFireUnit, marksmanRoom)).events, ['Your quiver is empty: you need practice arrow (itm-sting-arrow) to use practice bow.']);
 const noWeaponReload = reloadRangedWeapon(character({ hands: { left: null, right: 'training sword' } }), marksmanRoom);
 assert.equal(noWeaponReload.success, false);
 assert.deepEqual(noWeaponReload.events, ['You need a ranged weapon in hand to reload.']);

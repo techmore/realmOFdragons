@@ -43,6 +43,10 @@ export type EquipmentSummary = {
 
 export type AmmoRecoveryOutcome = 'lost' | 'damaged' | 'intact';
 
+export type RangedFireReadinessResult = ItemMutationResult & {
+  consumedAmmo?: string;
+};
+
 export const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | 'shopAvailable'>> = {
   'leather backpack': {
     code: 'leather backpack',
@@ -369,6 +373,47 @@ export function reloadRangedWeapon(character: CharacterRecord, room: Room): Item
   consumeAmmo(character, ammoCode);
   setLoadedAmmo(character, weapon, ammoCode);
   return itemMutation(true, [`You load ${ammoName} into ${weapon.name}. ${countAmmo(character, ammoCode)} remain in your quiver.`]);
+}
+
+export function buildAmmoStatusEvents(character: CharacterRecord, room: Room): string[] {
+  const weapon = findHeldWeapon(character, room);
+  const events = [
+    `Ammo pouch: ${formatAmmoPouch(character)}.`,
+    `Loaded: ${formatLoadedAmmo(character)}.`,
+    `Recoverable: ${formatRecoverableAmmo(character)}.`,
+  ];
+  if (weapon?.weaponRange === 'ranged') {
+    const ammoCode = weapon.ammoCode ?? 'itm-sting-arrow';
+    const loaded = getLoadedAmmo(character, weapon);
+    events.push(`${weapon.name} uses ${weapon.ammoName ?? 'practice arrow'} (${ammoCode}); ${countAmmo(character, ammoCode)} ready in your quiver.`);
+    events.push(loaded ? `${weapon.name} is loaded with ${loaded}.` : `${weapon.name} is not loaded. Use reload before fire or shoot.`);
+  } else {
+    events.push('No ranged weapon is currently in hand.');
+  }
+  return events;
+}
+
+export function prepareRangedFire(character: CharacterRecord, weapon: ItemDetail | undefined): RangedFireReadinessResult {
+  if (weapon?.weaponRange !== 'ranged') {
+    return { success: false, events: ['You need a ranged weapon in hand to fire or shoot.'] };
+  }
+  const ammoCode = weapon.ammoCode ?? 'itm-sting-arrow';
+  const loaded = getLoadedAmmo(character, weapon);
+  if (loaded !== ammoCode) {
+    if (countAmmo(character, ammoCode) <= 0) {
+      return {
+        success: false,
+        events: [`Your quiver is empty: you need ${weapon.ammoName ?? 'practice arrow'} (${ammoCode}) to use ${weapon.name}.`],
+      };
+    }
+    return { success: false, events: [`${weapon.name} is not loaded. Use reload before fire or shoot.`] };
+  }
+  clearLoadedAmmo(character, weapon);
+  return {
+    success: true,
+    consumedAmmo: ammoCode,
+    events: [`You loose loaded ${weapon.ammoName ?? ammoCode}. ${countAmmo(character, ammoCode)} remain in your quiver.`],
+  };
 }
 
 export function buildEquipmentSummary(character: CharacterRecord, room?: Room, rooms: Record<string, Room> = worldRooms): EquipmentSummary {

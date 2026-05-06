@@ -50,11 +50,11 @@ import {
 import {
   addAmmo,
   buildEquipmentSummary,
+  buildAmmoStatusEvents,
   buildInventoryEquipmentEvents,
   buildItemDetailEvents,
   buildItemDetails,
   canWieldItem,
-  clearLoadedAmmo,
   consumeAmmo,
   countAmmo,
   displayNameFromCode,
@@ -64,9 +64,9 @@ import {
   formatEquipmentModifiers,
   formatLoadedAmmo,
   formatRecoverableAmmo,
-  getLoadedAmmo,
   holdInventoryItem,
   parseHeldItemRequest,
+  prepareRangedFire,
   recoverAmmunition,
   reloadRangedWeapon,
   removeWornInventoryItem,
@@ -1498,18 +1498,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'ammo' || command === 'quiver') {
-    const weapon = findHeldWeapon(resolvedCharacter, room);
-    events.push(`Ammo pouch: ${formatAmmoPouch(resolvedCharacter)}.`);
-    events.push(`Loaded: ${formatLoadedAmmo(resolvedCharacter)}.`);
-    events.push(`Recoverable: ${formatRecoverableAmmo(resolvedCharacter)}.`);
-    if (weapon?.weaponRange === 'ranged') {
-      const ammoCode = weapon.ammoCode ?? 'itm-sting-arrow';
-      const loaded = getLoadedAmmo(resolvedCharacter, weapon);
-      events.push(`${weapon.name} uses ${weapon.ammoName ?? 'practice arrow'} (${ammoCode}); ${countAmmo(resolvedCharacter, ammoCode)} ready in your quiver.`);
-      events.push(loaded ? `${weapon.name} is loaded with ${loaded}.` : `${weapon.name} is not loaded. Use reload before fire or shoot.`);
-    } else {
-      events.push('No ranged weapon is currently in hand.');
-    }
+    events.push(...buildAmmoStatusEvents(resolvedCharacter, room));
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
@@ -1707,7 +1696,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     const equipment = buildEquipmentSummary(resolvedCharacter, room);
     const weapon = findHeldWeapon(resolvedCharacter, room);
     if (rangedAlias && weapon?.weaponRange !== 'ranged') {
-      events.push('You need a ranged weapon in hand to fire or shoot.');
+      events.push(...prepareRangedFire(resolvedCharacter, weapon).events);
       await persist();
       return buildCommandResult(resolvedCharacter, room, events);
     }
@@ -1741,21 +1730,14 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
     let consumedAmmo: string | undefined;
     if (weapon?.weaponRange === 'ranged') {
-      const ammoCode = weapon.ammoCode ?? 'itm-sting-arrow';
-      const loaded = getLoadedAmmo(resolvedCharacter, weapon);
-      if (loaded !== ammoCode) {
-        if (countAmmo(resolvedCharacter, ammoCode) <= 0) {
-          events.push(`Your quiver is empty: you need ${weapon.ammoName ?? 'practice arrow'} (${ammoCode}) to use ${weapon.name}.`);
-        } else {
-          events.push(`${weapon.name} is not loaded. Use reload before fire or shoot.`);
-        }
+      const readiness = prepareRangedFire(resolvedCharacter, weapon);
+      events.push(...readiness.events);
+      if (!readiness.success) {
         await persist();
         return buildCommandResult(resolvedCharacter, room, events);
       }
-      clearLoadedAmmo(resolvedCharacter, weapon);
-      consumedAmmo = ammoCode;
+      consumedAmmo = readiness.consumedAmmo;
       modified = true;
-      events.push(`You loose loaded ${weapon.ammoName ?? consumedAmmo}. ${countAmmo(resolvedCharacter, ammoCode)} remain in your quiver.`);
     }
 
     const template = ENEMY_TEMPLATES.find((entry) => entry.id === resolvedCharacter.combat?.targetId);
