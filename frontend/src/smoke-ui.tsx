@@ -1,9 +1,15 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { GameStatusPanels, type Character, type Room } from './App.js';
+import { GameStatusPanels, shopSalePresentation, type Character, type ItemDetail, type Room } from './App.js';
 
 function assertIncludes(markup: string, expected: string): void {
   if (!markup.includes(expected)) {
     throw new Error(`Expected UI markup to include: ${expected}`);
+  }
+}
+
+function assertEqual(actual: unknown, expected: unknown, label: string): void {
+  if (actual !== expected) {
+    throw new Error(`Expected ${label} to be ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
   }
 }
 
@@ -82,6 +88,71 @@ const character: Character = {
   roundtimeMs: 0,
 };
 
+const testBladeDetail: ItemDetail = {
+  code: 'itm-test-blade',
+  name: 'test blade',
+  category: 'weapon',
+  description: 'A static smoke blade.',
+  value: 3,
+  currency: 'trias',
+  source: 'shop',
+  slot: undefined,
+  armor: 0,
+  evasionPenalty: 0,
+  attackModifier: 2,
+  weaponRange: 'melee',
+  validAttackRanges: ['melee'],
+  trainingSkill: 'melee',
+  ammoCode: undefined,
+  ammoName: undefined,
+  carried: true,
+  shopAvailable: true,
+};
+
+const practiceArrowDetail: ItemDetail = {
+  code: 'itm-sting-arrow',
+  name: 'practice arrow',
+  category: 'ammo',
+  description: 'A bundled practice arrow.',
+  value: 12,
+  currency: 'trias',
+  source: 'shop',
+  slot: undefined,
+  armor: 0,
+  evasionPenalty: 0,
+  attackModifier: 0,
+  weaponRange: undefined,
+  validAttackRanges: undefined,
+  trainingSkill: undefined,
+  ammoCode: undefined,
+  ammoName: undefined,
+  bundleSize: 5,
+  quantity: 4,
+  carried: true,
+  shopAvailable: true,
+};
+
+const damagedArrowDetail: ItemDetail = {
+  code: 'damaged-itm-sting-arrow',
+  name: 'damaged practice arrow',
+  category: 'salvage',
+  description: 'damaged practice arrow is broken ranged ammunition.',
+  value: 1,
+  currency: 'trias',
+  source: 'loot',
+  slot: undefined,
+  armor: 0,
+  evasionPenalty: 0,
+  attackModifier: 0,
+  weaponRange: undefined,
+  validAttackRanges: undefined,
+  trainingSkill: undefined,
+  ammoCode: undefined,
+  ammoName: undefined,
+  carried: true,
+  shopAvailable: false,
+};
+
 const markup = renderToStaticMarkup(
   <GameStatusPanels
     character={character}
@@ -90,48 +161,8 @@ const markup = renderToStaticMarkup(
     skillEntries={Object.entries(character.skills)}
     localTargets={[{ id: 'rv-wolf-cub', name: 'forage wolf-cub', vitality: 12, aggression: 55 }]}
     itemDetails={[
-      {
-        code: 'itm-test-blade',
-        name: 'test blade',
-        category: 'weapon',
-        description: 'A static smoke blade.',
-        value: 3,
-        currency: 'trias',
-        source: 'shop',
-        slot: undefined,
-        armor: 0,
-        evasionPenalty: 0,
-        attackModifier: 2,
-        weaponRange: 'melee',
-        validAttackRanges: ['melee'],
-        trainingSkill: 'melee',
-        ammoCode: undefined,
-        ammoName: undefined,
-        carried: true,
-        shopAvailable: true,
-      },
-      {
-        code: 'itm-sting-arrow',
-        name: 'practice arrow',
-        category: 'ammo',
-        description: 'A bundled practice arrow.',
-        value: 12,
-        currency: 'trias',
-        source: 'shop',
-        slot: undefined,
-        armor: 0,
-        evasionPenalty: 0,
-        attackModifier: 0,
-        weaponRange: undefined,
-        validAttackRanges: undefined,
-        trainingSkill: undefined,
-        ammoCode: undefined,
-        ammoName: undefined,
-        bundleSize: 5,
-        quantity: 4,
-        carried: true,
-        shopAvailable: true,
-      },
+      testBladeDetail,
+      practiceArrowDetail,
       {
         code: 'forage wolf-cub fang',
         name: 'forage wolf-cub fang',
@@ -152,26 +183,7 @@ const markup = renderToStaticMarkup(
         carried: true,
         shopAvailable: false,
       },
-      {
-        code: 'damaged-itm-sting-arrow',
-        name: 'damaged practice arrow',
-        category: 'salvage',
-        description: 'damaged practice arrow is broken ranged ammunition.',
-        value: 1,
-        currency: 'trias',
-        source: 'loot',
-        slot: undefined,
-        armor: 0,
-        evasionPenalty: 0,
-        attackModifier: 0,
-        weaponRange: undefined,
-        validAttackRanges: undefined,
-        trainingSkill: undefined,
-        ammoCode: undefined,
-        ammoName: undefined,
-        carried: true,
-        shopAvailable: false,
-      },
+      damagedArrowDetail,
     ]}
   />,
 );
@@ -278,4 +290,34 @@ for (const expected of [
   assertIncludes(noShopMarkup, expected);
 }
 
-console.log(JSON.stringify({ ok: true, suite: 'frontend:smoke-ui' }, null, 2));
+const stockedCarried = shopSalePresentation('itm-test-blade', room, testBladeDetail, 'carried');
+assertEqual(stockedCarried.resaleEstimate, 2, 'stocked carried resale estimate');
+assertEqual(stockedCarried.sellHint, 'Test Gear Stand stocks this item and can buy it for about 2 trias.', 'stocked carried sale hint');
+
+const damagedSalvage = shopSalePresentation('damaged-itm-sting-arrow', room, damagedArrowDetail, 'carried');
+assertEqual(damagedSalvage.resaleEstimate, 1, 'damaged salvage resale estimate');
+assertEqual(damagedSalvage.sellHint, 'Test Gear Stand buys matching salvage for about 1 trias.', 'damaged salvage sale hint');
+
+const ammoPouch = shopSalePresentation('itm-sting-arrow', room, practiceArrowDetail, 'ammoPouch');
+assertEqual(ammoPouch.bundleSize, 5, 'ammo pouch bundle size');
+assertEqual(ammoPouch.resaleEstimate, 1, 'ammo pouch resale estimate');
+assertEqual(ammoPouch.sellHint, 'Test Gear Stand buys practice arrow from your ammo pouch for about 1 trias each.', 'ammo pouch sale hint');
+
+const unknownAmmo = shopSalePresentation('itm-unknown-arrow', room, undefined, 'ammoPouch');
+assertEqual(unknownAmmo.resaleEstimate, undefined, 'unknown ammo resale estimate');
+assertEqual(unknownAmmo.sellHint, 'Test Gear Stand does not stock itm-unknown-arrow.', 'unknown ammo sale hint');
+
+const noShopAmmo = shopSalePresentation('itm-sting-arrow', { ...room, shop: undefined }, practiceArrowDetail, 'ammoPouch');
+assertEqual(noShopAmmo.sellHint, 'Selling ammo requires a local shop.', 'no-shop ammo sale hint');
+
+console.log(
+  JSON.stringify(
+    {
+      ok: true,
+      suite: 'frontend:smoke-ui',
+      shopEconomyHelperCasesChecked: true,
+    },
+    null,
+    2,
+  ),
+);

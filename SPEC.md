@@ -50,10 +50,12 @@ Completed current slice:
 - Static and browser smoke now verify ammo pouch metadata presentation.
 - Frontend shop/economy presentation now uses shared helper logic for carried items and ammo-pouch stacks.
 - Inventory and ammo pouch sell hints now show consistent estimated resale text from one pricing model.
+- Static frontend smoke now exercises shop/economy helper edge cases directly: stocked carried goods, damaged salvage, ammo pouch resale, unknown ammo, and no-shop rooms.
+- Coverage shape validation now requires the static shop/economy helper cases to pass.
 
 Current next priority:
 
-- Add unit-style frontend smoke coverage for shop/economy helper edge cases such as unknown ammo, damaged salvage, stocked carried goods, and no-shop rooms.
+- Add architecture notes for the intended portable game-core boundary before deeper backend refactors, covering current Node prototype constraints and a possible future Go server.
 
 Core Philosophy
 

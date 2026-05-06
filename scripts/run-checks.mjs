@@ -185,6 +185,7 @@ function coverageSummary(results) {
       }
     })
     .filter(Boolean);
+  const staticUiPayload = parseLastJsonObject(byName.get('frontend-ui-smoke')?.stdoutTail ?? '') ?? {};
 
   return {
     ok: results.every((result) => result.exitCode === 0),
@@ -245,6 +246,7 @@ function coverageSummary(results) {
     frontend: {
       staticUiSmoke: byName.get('frontend-ui-smoke')?.exitCode === 0,
       staticCommandDiscoveryChecked: byName.get('frontend-ui-smoke')?.exitCode === 0,
+      staticShopEconomyHelperCasesChecked: staticUiPayload.shopEconomyHelperCasesChecked === true,
       browserSmoke: byName.has('browser-smoke') ? byName.get('browser-smoke')?.exitCode === 0 : null,
       browser: browserPayload.browser ?? null,
       browserAccountCreated: Boolean(browserPayload.account),
@@ -284,6 +286,7 @@ function assertCoverageShape(coverage) {
   expect(Array.isArray(coverage.unitSuites), 'unitSuites array');
 
   expect(coverage.frontend.staticUiSmoke === true, 'frontend.staticUiSmoke');
+  expect(coverage.frontend.staticShopEconomyHelperCasesChecked === true, 'frontend.staticShopEconomyHelperCasesChecked');
   expect(coverage.frontend.browserSmoke === true, 'frontend.browserSmoke');
   expect(coverage.frontend.browserScriptPresetSaved === true, 'frontend.browserScriptPresetSaved');
   expect(coverage.frontend.browserDamagedAmmoItemDetailsVisible === true, 'frontend.browserDamagedAmmoItemDetailsVisible');

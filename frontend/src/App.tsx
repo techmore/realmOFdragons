@@ -1606,5 +1606,5 @@ function App() {
   );
 }
 
-export { App, GameStatusPanels };
-export type { Character, CharacterSkill, ItemDetail, Room };
+export { App, GameStatusPanels, shopSalePresentation };
+export type { Character, CharacterSkill, ItemDetail, Room, ShopSalePresentation };
