@@ -25,9 +25,9 @@ import {
   type StatBlock,
 } from './races.js';
 import {
-  GUILD_NAMES,
   applySkillPoolGain,
   buildCircleStatus,
+  buildGuildRegistrarDisplay,
   buildStarterSkills,
   ensureProgressionShape,
   nextCircleRequirement,
@@ -965,11 +965,7 @@ function buildSurveyEvents(room: Room): string[] {
     events.push('Shop: none visible.');
   }
 
-  if (room.guild) {
-    events.push(`Guild registrar: ${GUILD_NAMES[room.guild] ?? room.guild}.`);
-  } else {
-    events.push('Guild registrar: none visible.');
-  }
+  events.push(buildGuildRegistrarDisplay(room).event);
 
   const enemies = getRoomEnemies(room.id);
   if (enemies.length) {

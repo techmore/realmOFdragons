@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted guild registrar display labels into pure progression helpers with unit coverage for no registrar, canonical guild labels, and unknown fallback labels.
+- `survey` now renders guild registrar text from progression-owned formatting instead of resolving guild display names inline in the Express command module.
 - Extracted guild join/no-registrar decision and guild identity output into pure progression helpers with unit coverage for empty rooms, canonical DR guilds, legacy tutorial guilds, and unknown fallback labels.
 - `join guild` now applies the guild identity returned by progression instead of resolving registrar state inline in the command handler.
 - Extracted starter skill construction, guild display-name normalization, circle floor normalization, and skill shape repair into pure progression helpers.
@@ -175,7 +177,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract guild registrar display labels into pure progression helpers with unit coverage.
+- Extract score and skills command summary formatting into pure progression helpers with unit coverage.
 
 Core Philosophy
 

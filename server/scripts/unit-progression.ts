@@ -5,6 +5,7 @@ import {
   STARTER_SKILLS,
   applySkillPoolGain,
   buildCircleStatus,
+  buildGuildRegistrarDisplay,
   buildStarterSkills,
   canCircle,
   ensureProgressionShape,
@@ -267,6 +268,27 @@ assert.deepEqual(resolveGuildJoinDecision({ guild: 'cleanroom_test_guild' }), {
   events: ['You are now registered with cleanroom_test_guild.'],
 });
 
+assert.deepEqual(buildGuildRegistrarDisplay({}), {
+  visible: false,
+  guildId: null,
+  guildName: null,
+  event: 'Guild registrar: none visible.',
+});
+
+assert.deepEqual(buildGuildRegistrarDisplay({ guild: 'barbarian' }), {
+  visible: true,
+  guildId: 'barbarian',
+  guildName: 'Barbarian Guild',
+  event: 'Guild registrar: Barbarian Guild.',
+});
+
+assert.deepEqual(buildGuildRegistrarDisplay({ guild: 'cleanroom_test_guild' }), {
+  visible: true,
+  guildId: 'cleanroom_test_guild',
+  guildName: 'cleanroom_test_guild',
+  event: 'Guild registrar: cleanroom_test_guild.',
+});
+
 assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-TG01-001' }), {
   allowed: false,
   reason: 'wrong_room',
@@ -358,6 +380,7 @@ console.log(
       circleStatusChecked: true,
       circleAdvancementChecked: true,
       guildJoinDecisionChecked: true,
+      guildRegistrarDisplayChecked: true,
       trainingDecisionChecked: true,
       skillPoolGainChecked: true,
       progressionShapeChecked: true,

@@ -57,6 +57,13 @@ export type GuildJoinDecision =
   | { joined: true; guildId: string; guildName: string; events: string[] }
   | { joined: false; reason: 'no_registrar'; events: string[] };
 
+export interface GuildRegistrarDisplay {
+  visible: boolean;
+  guildId: string | null;
+  guildName: string | null;
+  event: string;
+}
+
 export interface CircleAdvancementResult {
   advanced: boolean;
   circle: number;
@@ -172,6 +179,26 @@ export function resolveGuildJoinDecision(room: GuildJoinRoomSummary): GuildJoinD
     guildId,
     guildName,
     events: [`You are now registered with ${guildName}.`],
+  };
+}
+
+export function buildGuildRegistrarDisplay(room: GuildJoinRoomSummary): GuildRegistrarDisplay {
+  if (!room.guild) {
+    return {
+      visible: false,
+      guildId: null,
+      guildName: null,
+      event: 'Guild registrar: none visible.',
+    };
+  }
+
+  const guildId = room.guild;
+  const guildName = GUILD_NAMES[guildId] ?? guildId;
+  return {
+    visible: true,
+    guildId,
+    guildName,
+    event: `Guild registrar: ${guildName}.`,
   };
 }
 
