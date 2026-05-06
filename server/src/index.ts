@@ -61,15 +61,13 @@ import {
   shiftCombatRange,
 } from './combat.js';
 import {
-  canAfford,
   estimateAmmoPouchSalePrice,
   estimateInventorySalePrice,
-  findLocalShopBuyItem,
   findLocalShopSaleItem,
   isDamagedAmmoCode,
   listShopItems,
   originalAmmoCodeFromDamaged,
-  resolveShopPurchase,
+  resolveShopBuyDecision,
 } from './economy.js';
 import {
   addAmmo,
@@ -1852,33 +1850,24 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command.startsWith('shop buy ')) {
     const code = command.slice(9).trim();
-    if (!code) {
-      events.push('Specify an item code or name: shop buy <code>.');
-      return buildCommandResult(resolvedCharacter, room, events);
-    }
-    if (!room.shop) {
-      events.push('No shop is present here.');
+    const decision = resolveShopBuyDecision(room.shop, code, resolvedCharacter.wallet, (item) => {
+      const itemDetail = resolveItemDetail(item.code, room, resolvedCharacter);
+      return { category: itemDetail.category, bundleSize: itemDetail.bundleSize };
+    });
+    if (!decision.allowed) {
+      events.push(...decision.events);
     } else {
-      const item = findLocalShopBuyItem(room.shop.items, code);
-      if (!item) {
-        events.push(`I could not find "${code}" here.`);
-      } else if (!canAfford(resolvedCharacter.wallet, item)) {
-        events.push(`You cannot afford ${item.name}: ${item.price} ${item.currency} required.`);
+        spendFunds(resolvedCharacter.wallet, decision.item.currency, decision.item.price);
+        if (decision.purchase.delivery === 'ammoPouch') {
+          addAmmo(resolvedCharacter, decision.item.code, decision.purchase.quantity);
       } else {
-        spendFunds(resolvedCharacter.wallet, item.currency, item.price);
-        const itemDetail = resolveItemDetail(item.code, room, resolvedCharacter);
-        const purchase = resolveShopPurchase(item, resolvedCharacter.wallet, itemDetail.category, itemDetail.bundleSize);
-        if (purchase.delivery === 'ammoPouch') {
-          addAmmo(resolvedCharacter, item.code, purchase.quantity);
-        } else {
-          resolvedCharacter.inventory.push(item.code);
+          resolvedCharacter.inventory.push(decision.item.code);
         }
         events.push(...applySkillPoolGain(resolvedCharacter, 'trading', 1).events);
         modified = true;
         setActionCooldown(resolvedCharacter, 450);
-        events.push(`You buy ${item.name} for ${item.price} ${item.currency}${purchase.delivery === 'ammoPouch' ? ` (${purchase.quantity} bundled).` : '.'}`);
+        events.push(...decision.events);
         events.push(`Wallet: ${formatWallet(resolvedCharacter.wallet)}.`);
-      }
     }
     if (modified) {
       await persist();

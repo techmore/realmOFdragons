@@ -10,6 +10,7 @@ import {
   isDamagedAmmoCode,
   listShopItems,
   originalAmmoCodeFromDamaged,
+  resolveShopBuyDecision,
   resolveShopPurchase,
 } from '../src/economy.js';
 
@@ -73,4 +74,48 @@ assert.deepEqual(listShopItems({ code: 'test-shop', name: 'Test Shop', items: sh
   'itm-test-blade test blade — 3 trias',
 ]);
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:economy', shopListFormattingChecked: true }, null, 2));
+const testShop = { code: 'test-shop', name: 'Test Shop', items: shopItems };
+assert.deepEqual(resolveShopBuyDecision(testShop, '', wallet), {
+  allowed: false,
+  reason: 'missing_code',
+  events: ['Specify an item code or name: shop buy <code>.'],
+});
+assert.deepEqual(resolveShopBuyDecision(undefined, 'itm-test-blade', wallet), {
+  allowed: false,
+  reason: 'no_shop',
+  events: ['No shop is present here.'],
+});
+assert.deepEqual(resolveShopBuyDecision(testShop, 'itm-missing', wallet), {
+  allowed: false,
+  reason: 'not_found',
+  events: ['I could not find "itm-missing" here.'],
+});
+assert.deepEqual(resolveShopBuyDecision(testShop, 'itm-test-blade', { ...wallet, trias: 2 }), {
+  allowed: false,
+  reason: 'unaffordable',
+  events: ['You cannot afford test blade: 3 trias required.'],
+});
+assert.deepEqual(resolveShopBuyDecision(testShop, 'itm-test-blade', wallet), {
+  allowed: true,
+  item: testBlade,
+  purchase: {
+    item: testBlade,
+    delivery: 'inventory',
+    quantity: 1,
+    affordable: true,
+  },
+  events: ['You buy test blade for 3 trias.'],
+});
+assert.deepEqual(resolveShopBuyDecision(testShop, 'practice arrow', wallet, () => ({ category: 'ammo', bundleSize: 7 })), {
+  allowed: true,
+  item: practiceArrow,
+  purchase: {
+    item: practiceArrow,
+    delivery: 'ammoPouch',
+    quantity: 7,
+    affordable: true,
+  },
+  events: ['You buy practice arrow for 1 trias (7 bundled).'],
+});
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:economy', shopListFormattingChecked: true, shopBuyDecisionChecked: true }, null, 2));

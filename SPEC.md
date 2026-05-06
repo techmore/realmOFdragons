@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted `shop buy` command decision/output into pure economy helpers with unit coverage for missing code, no shop, not found, unaffordable, inventory delivery, and bundled ammo delivery.
+- The Express `shop buy` command now uses economy-owned buy decisions while retaining route-local wallet, inventory, ammo, cooldown, and skill mutations.
 - Extracted `shop` command list formatting into pure economy helpers with unit coverage for no-shop fallback and catalog item rows.
 - The Express `shop` command now uses economy-owned shop list formatting before appending the current wallet line.
 - Extracted roll profile command formatting into pure race helpers with unit coverage for populated traces, empty traces, and invalid profile versions.
@@ -183,7 +185,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract shop buy command decision/output into pure economy helpers with unit coverage.
+- Extract shop sell command decision/output into pure economy helpers with unit coverage.
 
 Core Philosophy
 
