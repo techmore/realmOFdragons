@@ -81,10 +81,12 @@ Completed current slice:
 - Expanded item unit coverage for valid ranged attacks, ranged-too-close failures, melee-too-far failures, and unarmed range failures.
 - Extracted weapon attack opening event formatting and unarmed fallback messaging into `server/src/items.ts`.
 - Expanded item unit coverage for ranged weapon, melee weapon, and unarmed attack opening text.
+- Extracted attack hit, miss, target HP, advantage shift, and collapse event formatting into `server/src/combat.ts`.
+- Expanded combat unit coverage for nonlethal hits, lethal hits, and misses.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting attack hit/miss combat result event formatting.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting attack cycle/cooldown event formatting and target-vanished handling.
 
 Core Philosophy
 

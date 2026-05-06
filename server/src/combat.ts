@@ -72,3 +72,39 @@ export function shiftAdvantageValue(advantage: unknown, amount: number): number 
 export function formatAdvantage(advantage: number): string {
   return ADVANTAGE_LABELS.get(normalizeAdvantage(advantage)) ?? ADVANTAGE_LABELS.get(0)!;
 }
+
+export type AttackRollResult = {
+  hit: boolean;
+  roll: number;
+  threshold: number;
+};
+
+export type AttackOutcomeResult = {
+  targetHp: number;
+  collapsed: boolean;
+  advantageShift: number;
+  events: string[];
+};
+
+export function resolveAttackOutcome(targetName: string, currentHp: number, damage: number, attack: AttackRollResult): AttackOutcomeResult {
+  if (!attack.hit) {
+    return {
+      targetHp: currentHp,
+      collapsed: false,
+      advantageShift: -1,
+      events: [`You miss ${targetName}.`],
+    };
+  }
+
+  const targetHp = Math.max(0, currentHp - Math.max(0, Math.floor(damage)));
+  const events = [`You hit ${targetName} for ${Math.max(0, Math.floor(damage))} (${attack.roll}/${attack.threshold}).`];
+  if (targetHp <= 0) {
+    events.push(`${targetName} collapses.`);
+  }
+  return {
+    targetHp,
+    collapsed: targetHp <= 0,
+    advantageShift: 1,
+    events,
+  };
+}

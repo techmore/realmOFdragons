@@ -34,6 +34,7 @@ import {
   normalizeBalance,
   normalizeRange,
   normalizeStance,
+  resolveAttackOutcome,
   shiftAdvantageValue,
   shiftCombatRange,
 } from './combat.js';
@@ -1761,19 +1762,20 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       modified = true;
     }
 
-    if (playerAttack.hit) {
-      const damage = resolveAttackDamage(
+    const damage = playerAttack.hit
+      ? resolveAttackDamage(
         resolvedCharacter.stats.strength,
         resolvedCharacter.stats.discipline + stanceProfile.damage + equipment.totalAttackModifier,
         template.damageMin,
         template.damageMax,
-      );
-      target.targetHp = Math.max(0, target.targetHp - damage);
-      shiftAdvantage(resolvedCharacter, 1);
-      modified = true;
-      events.push(`You hit ${target.targetName} for ${damage} (${playerAttack.roll}/${playerAttack.threshold}).`);
-      if (target.targetHp <= 0) {
-        events.push(`${target.targetName} collapses.`);
+      )
+      : 0;
+    const attackOutcome = resolveAttackOutcome(target.targetName, target.targetHp, damage, playerAttack);
+    target.targetHp = attackOutcome.targetHp;
+    shiftAdvantage(resolvedCharacter, attackOutcome.advantageShift);
+    modified = true;
+    events.push(...attackOutcome.events);
+    if (attackOutcome.collapsed) {
         resolvedCharacter.inventory.push(`${target.targetName} fang`);
         grantSkillPool(resolvedCharacter, weapon?.trainingSkill ?? 'melee', 4, events);
         grantSkillPool(resolvedCharacter, 'survival', 2, events);
@@ -1781,10 +1783,6 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         setActionCooldown(resolvedCharacter, 700);
         await persist();
         return buildCommandResult(resolvedCharacter, room, events);
-      }
-    } else {
-      events.push(`You miss ${target.targetName}.`);
-      shiftAdvantage(resolvedCharacter, -1);
     }
     reduceBalance(resolvedCharacter, stanceProfile.cost);
     events.push(`Position: ${formatAdvantage(resolvedCharacter.combat.advantage)}.`);

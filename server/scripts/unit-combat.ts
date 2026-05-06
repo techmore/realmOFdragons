@@ -9,6 +9,7 @@ import {
   normalizeBalance,
   normalizeRange,
   normalizeStance,
+  resolveAttackOutcome,
   shiftAdvantageValue,
   shiftCombatRange,
 } from '../src/combat.js';
@@ -57,5 +58,24 @@ assert.equal(STANCE_PROFILES.offensive.attack > STANCE_PROFILES.balanced.attack,
 assert.equal(STANCE_PROFILES.defensive.defense > STANCE_PROFILES.balanced.defense, true);
 assert.equal(STANCE_PROFILES.evasive.defense > STANCE_PROFILES.defensive.defense, true);
 assert.equal(STANCE_PROFILES.offensive.cost > STANCE_PROFILES.balanced.cost, true);
+
+assert.deepEqual(resolveAttackOutcome('forage wolf-cub', 12, 5, { hit: true, roll: 88, threshold: 42 }), {
+  targetHp: 7,
+  collapsed: false,
+  advantageShift: 1,
+  events: ['You hit forage wolf-cub for 5 (88/42).'],
+});
+assert.deepEqual(resolveAttackOutcome('forage wolf-cub', 4, 5, { hit: true, roll: 88, threshold: 42 }), {
+  targetHp: 0,
+  collapsed: true,
+  advantageShift: 1,
+  events: ['You hit forage wolf-cub for 5 (88/42).', 'forage wolf-cub collapses.'],
+});
+assert.deepEqual(resolveAttackOutcome('forage wolf-cub', 12, 0, { hit: false, roll: 12, threshold: 42 }), {
+  targetHp: 12,
+  collapsed: false,
+  advantageShift: -1,
+  events: ['You miss forage wolf-cub.'],
+});
 
 console.log(JSON.stringify({ ok: true, suite: 'unit:combat' }, null, 2));
