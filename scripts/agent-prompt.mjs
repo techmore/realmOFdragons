@@ -4,7 +4,11 @@ import { readFileSync } from 'node:fs';
 const spec = readFileSync('SPEC.md', 'utf8');
 const agents = readFileSync('AGENTS.md', 'utf8');
 
-const nextPriority = [...spec.matchAll(/Next priority:\n\n- ([^\n]+)/g)].at(-1)?.[1] ?? 'Read SPEC.md and pick the next unfinished priority.';
+const currentPriority = spec.match(/## Current Status[\s\S]*?Current next priority:\n\n- ([^\n]+)/)?.[1];
+const nextPriority =
+  currentPriority ??
+  [...spec.matchAll(/Next priority:\n\n- ([^\n]+)/g)].at(-1)?.[1] ??
+  'Read SPEC.md and pick the next unfinished priority.';
 
 const prompt = `Take over this repo as the lead developer for a clean-room DragonRealms clone.
 

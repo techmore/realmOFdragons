@@ -3,6 +3,21 @@ Copy this into your repo as SPEC.md and treat it as a living document. Update it
 
 DragonRealms Clean-Room Clone - Master Specification
 Project Goal: Build a fully playable, open-source MUD that captures the observable feel and mechanics of DragonRealms (Elanthia) through legitimate play and documentation only. No proprietary code, packets, or binaries.
+
+## Current Status
+
+Authoritative current priority for agents and automation. Historical `Next priority` entries below are implementation-log breadcrumbs and may be stale.
+
+Completed current slice:
+
+- Added a web command discovery note near controls for `verb`, `help scan`, and `target <name>`.
+- Added telemetry fields for static/browser command discovery guidance.
+- Added in-game and web `verb` discovery coverage, target-detail coverage, and focused target smoke telemetry.
+
+Current next priority:
+
+- Add a short `npm run agent:prompt` smoke assertion to the local check path so prompt generation regressions are caught before autonomous follow-up work starts.
+
 Core Philosophy
 
 Skill-based, not level-based (circles earned via experience).
@@ -392,6 +407,18 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
+
+Implementation Notes - 2026-05-06, Current Status Priority Index
+
+Completed in the current Node/React prototype:
+
+- Added an authoritative `Current Status` block near the top of `SPEC.md`.
+- Marked historical `Next priority` entries as implementation-log breadcrumbs that may be stale.
+- Updated `scripts/agent-prompt.mjs` to prefer `Current Status` current priority before falling back to the last historical `Next priority`.
+
+Next priority:
+
+- Add a short `npm run agent:prompt` smoke assertion to the local check path so prompt generation regressions are caught before autonomous follow-up work starts.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 
