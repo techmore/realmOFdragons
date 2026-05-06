@@ -10,13 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Browser smoke now loads a script preset, renames it, saves it, and verifies the saved script appears.
-- Browser smoke reports `scriptPresetSaved`.
-- Coverage summary, Markdown telemetry, and README coverage fields now include browser script preset save coverage.
+- API smoke now verifies script create, run, list, delete, and post-delete removal.
+- API smoke reports script lifecycle coverage fields.
+- Coverage summary, Markdown telemetry, and README coverage fields now include script lifecycle coverage.
 
 Current next priority:
 
-- Add API smoke coverage for script deletion or script run result telemetry so saved script lifecycle coverage includes create, run, and delete.
+- Add a focused `scripts` telemetry row to Markdown/count summaries so script lifecycle coverage is easier to distinguish from general API smoke.
 
 Core Philosophy
 
@@ -474,6 +474,20 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add API smoke coverage for script deletion or script run result telemetry so saved script lifecycle coverage includes create, run, and delete.
+
+Implementation Notes - 2026-05-06, Script Lifecycle API Smoke
+
+Completed in the current Node/React prototype:
+
+- API script smoke now creates a script, runs it, lists scripts, deletes it, and verifies removal from the script list.
+- API smoke now reports `scriptCreatedChecked`, `scriptRunChecked`, and `scriptDeletedChecked`.
+- Coverage summary now derives `scriptLifecycleChecked`.
+- Markdown telemetry now includes Script create/run/delete lifecycle coverage.
+- README coverage fields now document script lifecycle coverage.
+
+Next priority:
+
+- Add a focused `scripts` telemetry row to Markdown/count summaries so script lifecycle coverage is easier to distinguish from general API smoke.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

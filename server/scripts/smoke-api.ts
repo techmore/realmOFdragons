@@ -62,6 +62,8 @@ interface ShopRoomSummary {
 
 interface ScriptRecord {
   id: string;
+  name?: string;
+  commands?: string[];
 }
 
 interface SmokeContext {
@@ -250,7 +252,27 @@ async function runScriptSuite(context: SmokeContext): Promise<void> {
   });
   assert(scriptRun.steps.length === 3, `Expected 3 script steps, got ${scriptRun.steps.length}`);
 
+  const listed = await request<{ scripts: ScriptRecord[] }>('/v1/scripts', {
+    headers: authHeaders(context.accessToken),
+  });
+  assert(listed.scripts.some((entry) => entry.id === script.id), 'Expected created script in script listing.');
+
+  const deleted = await request<{ deleted: boolean; scriptId: string }>(`/v1/scripts/${script.id}`, {
+    method: 'DELETE',
+    headers: authHeaders(context.accessToken),
+  });
+  assert(deleted.deleted === true, 'Expected script deletion confirmation.');
+  assert(deleted.scriptId === script.id, 'Expected deleted script id to match created script.');
+
+  const afterDelete = await request<{ scripts: ScriptRecord[] }>('/v1/scripts', {
+    headers: authHeaders(context.accessToken),
+  });
+  assert(!afterDelete.scripts.some((entry) => entry.id === script.id), 'Expected deleted script to be removed from listing.');
+
   context.summary.scriptSteps = scriptRun.steps.length;
+  context.summary.scriptCreatedChecked = true;
+  context.summary.scriptRunChecked = true;
+  context.summary.scriptDeletedChecked = true;
 }
 
 async function runProgressionSuite(context: SmokeContext): Promise<void> {

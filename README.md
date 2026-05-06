@@ -98,6 +98,10 @@ Coverage fields currently distinguish broad combat coverage from target-specific
 - `gameplay.targetDetailsChecked`
 - `gameplay.focusedTargetSmokeChecked`
 - `gameplay.agentPromptCurrentStatusChecked`
+- `gameplay.scriptLifecycleChecked`
+- `gameplay.scriptCreatedChecked`
+- `gameplay.scriptRunChecked`
+- `gameplay.scriptDeletedChecked`
 - `frontend.staticCommandDiscoveryChecked`
 - `frontend.browserCommandDiscoveryVisible`
 - `frontend.browserScriptDiscoveryVisible`

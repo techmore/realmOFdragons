@@ -68,6 +68,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser verb discovery action | ${coverage.frontend.browserVerbDiscoveryClicked ? 'yes' : 'no'} |`);
     lines.push(`| Agent prompt current status | ${coverage.gameplay.agentPromptCurrentStatusChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Script create/run/delete lifecycle | ${coverage.gameplay.scriptLifecycleChecked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
     lines.push('');
     lines.push('## Gameplay Counts');
@@ -148,6 +149,13 @@ function coverageSummary(results) {
       shopRoomsWalked: apiPayload.shopRoomsWalked ?? 0,
       circleReached: apiPayload.circleReached ?? 0,
       scriptSteps: apiPayload.scriptSteps ?? 0,
+      scriptCreatedChecked: apiPayload.scriptCreatedChecked === true,
+      scriptRunChecked: apiPayload.scriptRunChecked === true,
+      scriptDeletedChecked: apiPayload.scriptDeletedChecked === true,
+      scriptLifecycleChecked:
+        apiPayload.scriptCreatedChecked === true &&
+        apiPayload.scriptRunChecked === true &&
+        apiPayload.scriptDeletedChecked === true,
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
       combatChecked: apiPayload.combatChecked === true,
       scanChecked: apiPayload.scanChecked === true,
