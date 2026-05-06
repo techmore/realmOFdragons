@@ -417,4 +417,4 @@ Completed in the current Node/React prototype:
 
 Next priority:
 
-- Add a first target-selection affordance in the UI: when scan output identifies local enemies, expose an easy `advance <target>` / `attack <target>` action without requiring manual typing.
+- Add server-provided structured room target data to command responses so the UI no longer has to parse scan text.
