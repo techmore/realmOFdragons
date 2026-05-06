@@ -55,10 +55,12 @@ Completed current slice:
 - Added `ARCHITECTURE.md` documenting the current Node/React prototype constraints, the portable game-core boundary, REST/WebSocket split, Postgres direction, and conditions for a future Go server.
 - Extracted pure server shop/economy sale helpers into `server/src/economy.ts`.
 - Added unit coverage for backend shop sale matching, damaged ammo sale mapping, inventory resale, and ammo pouch resale.
+- Extracted server item detail resolution into `server/src/items.ts`.
+- Added unit coverage for starter gear, shop ranged gear, ammo pouch quantities, damaged ammo salvage, forage items, unknown gear, and item detail list composition.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting item detail resolution or shop buy rules.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting shop buy rules or inventory/equipment command mutations.
 
 Core Philosophy
 
