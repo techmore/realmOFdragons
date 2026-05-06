@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { fixedStartingStatsForRace, getAllRaces, normalizeStoredRaceRollMetadata, rollCharacterForRace, type StatBlock } from '../src/races.js';
+import { buildRollProfileEvents, fixedStartingStatsForRace, getAllRaces, normalizeStoredRaceRollMetadata, rollCharacterForRace, type StatBlock } from '../src/races.js';
 
 const expectedFixedStats: Record<string, StatBlock> = {
   Dwarf: { strength: 10, reflex: 8, agility: 8, discipline: 12, stamina: 12, wisdom: 10, intelligence: 10, charisma: 10 },
@@ -62,4 +62,11 @@ assert.equal(normalizeStoredRaceRollMetadata(legacyClassic), true);
 assert.equal(legacyClassic.roleTitle, 'Private classic-random test profile A');
 assert.deepEqual(legacyClassic.rollTrace, ['Race selected: Kaldar', 'Private classic-random test profile selected: Berserker (berserker)']);
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:races', fixedRaceStatsChecked: races.length, storedRaceMetadataMigrationChecked: true }, null, 2));
+assert.deepEqual(buildRollProfileEvents({
+  rollProfileVersion: 2,
+  rollTrace: ['Race selected: Human', 'Stat generation mode: modern_fixed'],
+}), ['Current roll profile v2, Race selected: Human.']);
+assert.deepEqual(buildRollProfileEvents({ rollProfileVersion: 2, rollTrace: [] }), ['Current roll profile v2, No trace.']);
+assert.deepEqual(buildRollProfileEvents({ rollProfileVersion: Number.NaN, rollTrace: undefined }), ['Current roll profile v0, No trace.']);
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:races', fixedRaceStatsChecked: races.length, storedRaceMetadataMigrationChecked: true, rollProfileEventsChecked: true }, null, 2));

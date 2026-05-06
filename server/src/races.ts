@@ -43,6 +43,11 @@ export interface RaceRollResult {
   statGenerationMode: StatGenerationMode;
 }
 
+export interface RollProfileSummary {
+  rollProfileVersion?: number;
+  rollTrace?: string[];
+}
+
 const STAT_NAMES: StatName[] = [
   'strength',
   'reflex',
@@ -367,6 +372,12 @@ export function normalizeStoredRaceRollMetadata(character: {
   }
 
   return changed;
+}
+
+export function buildRollProfileEvents(summary: RollProfileSummary): string[] {
+  const version = Number.isFinite(summary.rollProfileVersion) ? Math.floor(summary.rollProfileVersion ?? 0) : 0;
+  const firstTrace = summary.rollTrace?.[0] || 'No trace';
+  return [`Current roll profile v${version}, ${firstTrace}.`];
 }
 
 export function fixedStartingStatsForRace(raceInput: string): StatBlock {

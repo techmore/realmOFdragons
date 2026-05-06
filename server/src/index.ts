@@ -14,6 +14,7 @@ import {
 } from './world.js';
 import { FileStorage, LoginSession, AccountRecord, CharacterRecord, ScriptRecord } from './storage.js';
 import {
+  buildRollProfileEvents,
   getAllRaces,
   isValidRace,
   normalizeStoredRaceRollMetadata,
@@ -1843,7 +1844,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command.startsWith('roll')) {
-    events.push(`Current roll profile v${resolvedCharacter.rollProfileVersion}, ${resolvedCharacter.rollTrace[0] || 'No trace'}.`);
+    events.push(...buildRollProfileEvents(resolvedCharacter));
     await persist();
     return buildCommandResult(resolvedCharacter, room, events);
   }

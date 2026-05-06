@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted roll profile command formatting into pure race helpers with unit coverage for populated traces, empty traces, and invalid profile versions.
+- The Express `roll` command now delegates race-roll metadata summary text to the race module.
 - Extracted `score` and `skills` command summary formatting into pure progression helpers with unit coverage for skill rows, modern fixed stat mode, and classic random stat mode labels.
 - The Express command handler now delegates score/skills event construction to progression while passing in preformatted wallet, stance, and balance labels.
 - Extracted guild registrar display labels into pure progression helpers with unit coverage for no registrar, canonical guild labels, and unknown fallback labels.
@@ -179,7 +181,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract roll profile command formatting into race/progression helpers with unit coverage.
+- Extract shop command list formatting into pure economy helpers with unit coverage.
 
 Core Philosophy
 
