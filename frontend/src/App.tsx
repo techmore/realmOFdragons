@@ -207,7 +207,7 @@ type GameStatusPanelsProps = {
   room: Room | null;
   selectedCharacter: Character | null;
   skillEntries: Array<[string, CharacterSkill]>;
-  localTargets?: string[];
+  localTargets?: RoomTarget[];
   loading?: boolean;
   onCommand?: (command: string) => void;
 };
@@ -490,12 +490,13 @@ function GameStatusPanels({
             <h3>Visible Targets</h3>
             <div className="action-grid">
               {localTargets.map((target) => (
-                <span key={target} className="target-actions">
-                  <strong>{target}</strong>
-                  <button type="button" onClick={() => onCommand(`advance ${target}`)} disabled={loading || !character}>
+                <span key={target.id} className="target-actions">
+                  <strong>{target.name}</strong>
+                  <small>Vitality {target.vitality} · Aggression {target.aggression}</small>
+                  <button type="button" onClick={() => onCommand(`advance ${target.name}`)} disabled={loading || !character}>
                     advance
                   </button>
-                  <button type="button" onClick={() => onCommand(`attack ${target}`)} disabled={loading || !character}>
+                  <button type="button" onClick={() => onCommand(`attack ${target.name}`)} disabled={loading || !character}>
                     attack
                   </button>
                 </span>
@@ -595,7 +596,7 @@ function App() {
     'Welcome to Clean-Room DR test client.',
     'Register/login, create/select a character, then use numpad or command input.',
   ]);
-  const [localTargets, setLocalTargets] = useState<string[]>([]);
+  const [localTargets, setLocalTargets] = useState<RoomTarget[]>([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const logRef = useRef<HTMLDivElement | null>(null);
@@ -690,7 +691,7 @@ function App() {
     setSelectedCharacterId(characterId);
     setCharacter(data.character);
     setRoom(data.room);
-    setLocalTargets(data.targets.map((target) => target.name));
+    setLocalTargets(data.targets);
     appendHistory(`Loaded ${data.character.name} in ${data.room.title}.`);
   };
 
@@ -792,7 +793,7 @@ function App() {
     setCharacter(result.character);
     setRoom(result.room);
     setCharacters((current) => current.map((entry) => (entry.id === result.character.id ? result.character : entry)));
-    setLocalTargets(result.targets.map((target) => target.name));
+    setLocalTargets(result.targets);
     for (const event of result.events) {
       appendHistory(event);
     }
@@ -955,7 +956,7 @@ function App() {
       }
       setCharacter(result.character);
       setRoom(result.room);
-      setLocalTargets((result.targets ?? []).map((target) => target.name));
+      setLocalTargets(result.targets ?? []);
       setCharacters((current) =>
         current.map((entry) => (entry.id === result.character.id ? result.character : entry)),
       );

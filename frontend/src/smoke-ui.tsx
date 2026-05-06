@@ -75,7 +75,7 @@ const markup = renderToStaticMarkup(
     room={room}
     selectedCharacter={character}
     skillEntries={Object.entries(character.skills)}
-    localTargets={['forage wolf-cub']}
+    localTargets={[{ id: 'rv-wolf-cub', name: 'forage wolf-cub', vitality: 12, aggression: 55 }]}
   />,
 );
 
@@ -94,6 +94,7 @@ for (const expected of [
   'bash',
   'Directional movement controls',
   'Visible Targets',
+  'Vitality 12 · Aggression 55',
   'advance',
   'attack',
   'Character',

@@ -379,6 +379,20 @@ Next priority:
 
 - Render target vitality/aggression metadata in the web UI target affordance, and add browser/static smoke assertions for that richer target display.
 
+Implementation Notes - 2026-05-05, Target Metadata UI
+
+Completed in the current Node/React prototype:
+
+- Frontend stores full structured room target records instead of target names.
+- Visible target actions now display target vitality and aggression metadata.
+- `advance <target>` and `attack <target>` actions continue to use target names from structured API data.
+- Static UI smoke asserts the target metadata display.
+- Browser smoke asserts `forage wolf-cub` vitality/aggression metadata before clicking target-specific advance.
+
+Next priority:
+
+- Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
+
 Implementation Notes - 2026-05-05, Enemy Visibility Commands
 
 Completed in the current Node/React prototype:
