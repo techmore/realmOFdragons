@@ -455,6 +455,11 @@ function findPathBetweenRooms(worldRooms: Record<string, Room>, start: string, d
   return [];
 }
 
+function localShopSellMatch(itemCode: string, room: Room | null): RoomShopItem | undefined {
+  const catalogCode = itemCode.startsWith('damaged-') ? itemCode.replace(/^damaged-/, '') : itemCode;
+  return room?.shop?.items.find((entry) => entry.code === catalogCode);
+}
+
 function GameStatusPanels({
   character,
   room,
@@ -665,22 +670,34 @@ function GameStatusPanels({
         <p>Loaded: {Object.entries(character?.loadedAmmo ?? {}).map(([weapon, ammo]) => `${weapon}: ${ammo}`).join(', ') || 'none'}</p>
         <p>Recoverable: {Object.entries(character?.recoverableAmmo ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none'}</p>
         <ul>
-          {(character?.inventory ?? []).map((item, index) => (
-            <li key={`${item}-${index}`}>
-              <span>{itemDetails.find((entry) => entry.code === item)?.name ?? item}</span>
-              <button type="button" onClick={() => onCommand(`appraise ${item}`)} disabled={loading || !character}>
-                appraise
-              </button>
-              <button
-                type="button"
-                onClick={() => onCommand(`shop sell ${item}`)}
-                disabled={loading || !character || !room?.shop}
-                title={room?.shop ? `Sell ${item} to ${room.shop.name}` : 'Selling requires a local shop.'}
-              >
-                sell
-              </button>
-            </li>
-          ))}
+          {(character?.inventory ?? []).map((item, index) => {
+            const detail = itemDetails.find((entry) => entry.code === item);
+            const sellMatch = localShopSellMatch(item, room);
+            const sellHint = sellMatch
+              ? item.startsWith('damaged-')
+                ? `${room?.shop?.name} buys matching salvage for ${sellMatch.currency}.`
+                : `${room?.shop?.name} stocks this item and can buy it.`
+              : room?.shop
+                ? `${room.shop.name} does not stock this item.`
+                : 'Selling requires a local shop.';
+            return (
+              <li key={`${item}-${index}`}>
+                <span>{detail?.name ?? item}</span>
+                <small>{sellHint}</small>
+                <button type="button" onClick={() => onCommand(`appraise ${item}`)} disabled={loading || !character}>
+                  appraise
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onCommand(`shop sell ${item}`)}
+                  disabled={loading || !character || !room?.shop}
+                  title={sellHint}
+                >
+                  sell
+                </button>
+              </li>
+            );
+          })}
         </ul>
         {itemDetails.length ? (
           <>

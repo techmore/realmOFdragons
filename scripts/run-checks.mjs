@@ -75,6 +75,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Browser damaged ammo item details | ${coverage.frontend.browserDamagedAmmoItemDetailsVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser damaged ammo inventory sale | ${coverage.frontend.browserDamagedAmmoSoldFromInventory ? 'yes' : 'no'} |`);
     lines.push(`| Browser disabled sell hint | ${coverage.frontend.browserDisabledSellHintVisible ? 'yes' : 'no'} |`);
+    lines.push(`| Browser shop-aware sell hint | ${coverage.frontend.browserShopAwareSellHintVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser verb discovery action | ${coverage.frontend.browserVerbDiscoveryClicked ? 'yes' : 'no'} |`);
     lines.push(`| Agent prompt current status | ${coverage.gameplay.agentPromptCurrentStatusChecked ? 'yes' : 'no'} |`);
@@ -249,6 +250,7 @@ function coverageSummary(results) {
       browserDamagedAmmoItemDetailsVisible: browserPayload.damagedAmmoItemDetailsVisible === true,
       browserDamagedAmmoSoldFromInventory: browserPayload.damagedAmmoSoldFromInventory === true,
       browserDisabledSellHintVisible: browserPayload.disabledSellHintVisible === true,
+      browserShopAwareSellHintVisible: browserPayload.shopAwareSellHintVisible === true,
       browserTargetDetailsClicked: browserPayload.targetDetailsClicked === true,
       browserVerbDiscoveryClicked: browserPayload.verbDiscoveryClicked === true,
       browserCommandDiscoveryVisible: browserPayload.commandDiscoveryVisible === true,
@@ -277,6 +279,7 @@ function assertCoverageShape(coverage) {
   expect(coverage.frontend.browserDamagedAmmoItemDetailsVisible === true, 'frontend.browserDamagedAmmoItemDetailsVisible');
   expect(coverage.frontend.browserDamagedAmmoSoldFromInventory === true, 'frontend.browserDamagedAmmoSoldFromInventory');
   expect(coverage.frontend.browserDisabledSellHintVisible === true, 'frontend.browserDisabledSellHintVisible');
+  expect(coverage.frontend.browserShopAwareSellHintVisible === true, 'frontend.browserShopAwareSellHintVisible');
   expect(coverage.scripts.focusedSmoke === true, 'scripts.focusedSmoke');
   expect(coverage.scripts.lifecycle === true, 'scripts.lifecycle');
   expect(coverage.scripts.created === true, 'scripts.created');

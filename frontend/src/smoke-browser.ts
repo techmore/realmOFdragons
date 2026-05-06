@@ -115,6 +115,11 @@ async function main(): Promise<void> {
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
 
+    await page
+      .locator('.equip li')
+      .filter({ hasText: 'damaged practice arrow' })
+      .getByText('Marksman Supply Stand buys matching salvage for trias.')
+      .waitFor();
     await page.locator('.equip li').filter({ hasText: 'damaged practice arrow' }).getByRole('button', { name: 'sell' }).click();
     await page.locator('.terminal-pane .log').getByText('You sell damaged practice arrow').waitFor();
 
@@ -252,6 +257,7 @@ async function main(): Promise<void> {
           damagedAmmoItemDetailsVisible: true,
           damagedAmmoSoldFromInventory: true,
           disabledSellHintVisible: true,
+          shopAwareSellHintVisible: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,
