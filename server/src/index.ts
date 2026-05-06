@@ -496,6 +496,35 @@ function trainCharacter(character: CharacterRecord, room: Room, requestedSkill: 
   return true;
 }
 
+function isForageRoom(room: Room) {
+  return room.code.zone === 'crossing-outskirts' || room.code.zone === 'crossing-hunting';
+}
+
+function forageRoomItem(room: Room) {
+  if (room.id === 'crossing-RV02-004') return { code: 'foraged-mudroot', name: 'mudroot sprig' };
+  if (room.id === 'crossing-RV02-005') return { code: 'foraged-ridgegrass', name: 'ridge grass bundle' };
+  if (room.id === 'crossing-RV02-003') return { code: 'foraged-willowbark', name: 'willow bark strip' };
+  return { code: 'foraged-fieldherb', name: 'field herb bundle' };
+}
+
+function forageRoom(character: CharacterRecord, room: Room, events: string[]) {
+  if (character.combat) {
+    events.push('You are too engaged to forage safely.');
+    return false;
+  }
+  if (!isForageRoom(room)) {
+    events.push('You find nothing useful to forage here.');
+    return false;
+  }
+
+  const item = forageRoomItem(room);
+  character.inventory.push(item.code);
+  grantSkillPool(character, 'survival', 2, events);
+  events.push(`You forage carefully and find ${item.name}.`);
+  events.push(`You place ${item.code} in your pack.`);
+  return true;
+}
+
 function applyMeleeRetaliation(character: CharacterRecord, template: EnemyTemplate, now: number, events: string[]) {
   if (!character.combat) return false;
   const stanceProfile = STANCE_PROFILES[character.stance];
@@ -864,6 +893,7 @@ function buildVerbEvents(): string[] {
     'Info: help, help scan, verb, look, exits, score, skills, inventory, balance, range, combat.',
     'Movement: north, south, east, west, n, s, e, w, go <direction>, enter, exit, up, down, ne, nw, se, sw.',
     'Targets: scan, target, target <name>, appraise <target>.',
+    'Survival: forage, inventory, train survival.',
     'Combat: stance, stance balanced, stance offensive, stance defensive, stance evasive, advance <target>, retreat, attack <target>, circle, jab, bash, defend, flee, wait <ms>, rest.',
     'Progression: train, train <skill>, circle, join guild.',
     'Shops: shop, shop buy <code>, shop sell <code>.',
@@ -1161,7 +1191,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'help') {
     events.push(
-      'Commands: look, scan, help scan, verb, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, scan, forage, help scan, verb, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
     return buildCommandResult(resolvedCharacter, room, events);
@@ -1526,6 +1556,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'scan') {
     events.push(...buildEnemyScanEvents(room.id));
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
+  if (command === 'forage') {
+    if (forageRoom(resolvedCharacter, room, events)) {
+      setActionCooldown(resolvedCharacter, 750);
+      modified = true;
+      await persist();
+    }
     return buildCommandResult(resolvedCharacter, room, events);
   }
 

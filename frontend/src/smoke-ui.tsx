@@ -92,6 +92,7 @@ for (const expected of [
   'target &lt;name&gt;',
   'verb',
   'scan',
+  'forage',
   'range',
   'advance',
   'jab',

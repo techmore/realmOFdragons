@@ -337,7 +337,14 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   let current = await walkTo(context.accessToken, context.character, 'crossing-RV02-002');
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
 
-  let result = await command(context.accessToken, current.id, 'scan');
+  let result = await command(context.accessToken, current.id, 'forage');
+  assert(result.events.some((event) => event.includes('You forage carefully')), 'Expected forage output in outskirts.');
+  assert(result.character.inventory.some((item) => item.startsWith('foraged-')), 'Expected forage to add an inventory item.');
+  current = result.character;
+
+  current = (await command(context.accessToken, current.id, 'wait 900')).character;
+
+  result = await command(context.accessToken, current.id, 'scan');
   assert(result.events.some((event) => event.includes('forage wolf-cub')), 'Expected scan to list forage wolf-cub.');
   assert(result.events.some((event) => event.includes('Vitality estimates')), 'Expected scan stat explanation.');
   assert(result.targets.some((target) => target.name === 'forage wolf-cub'), 'Expected structured target forage wolf-cub.');
@@ -443,6 +450,7 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   context.summary.finalCombat = rested.character.combat ?? null;
   context.summary.finalRoom = rested.character.roomId;
   context.summary.combatChecked = true;
+  context.summary.forageChecked = true;
   context.summary.scanChecked = true;
   context.summary.structuredTargetsChecked = true;
   context.summary.targetDetailsChecked = true;

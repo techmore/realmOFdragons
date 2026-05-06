@@ -10,13 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- `scripts/run-checks.mjs` now validates `coverage-summary.json` shape on successful runs.
-- Coverage validation requires `gameplay`, `scripts`, `frontend`, durations, unit suites, script lifecycle, browser smoke, and core gameplay fields.
-- README now documents coverage-summary shape validation for CI/local consumers.
+- Added a gameplay `forage` command for Crossing outskirts and hunting rooms.
+- `forage` adds a found item to inventory and grants Survival learning.
+- Web quick controls, static UI smoke, API smoke, telemetry, and README now include forage coverage.
 
 Current next priority:
 
-- Add a small unit-style telemetry validation fixture so coverage shape validation can be tested without running the full smoke suite.
+- Add a small foraging result table or room-specific forage metadata to the world model so finds are data-driven instead of hardcoded in command logic.
 
 Core Philosophy
 
@@ -542,6 +542,22 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add a small unit-style telemetry validation fixture so coverage shape validation can be tested without running the full smoke suite.
+
+Implementation Notes - 2026-05-06, Beginner Forage Command
+
+Completed in the current Node/React prototype:
+
+- Added `forage` as an active survival command in Crossing outskirts and beginner hunting rooms.
+- Foraging adds a room-appropriate found item to inventory and grants Survival learning.
+- `verb`, `help`, and web quick controls now expose `forage`.
+- Static UI smoke verifies the forage quick control.
+- API smoke verifies forage output and inventory gain before beginner combat coverage.
+- Coverage telemetry now reports `forageChecked`.
+- README documents `forage` in the command reference.
+
+Next priority:
+
+- Add a small foraging result table or room-specific forage metadata to the world model so finds are data-driven instead of hardcoded in command logic.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

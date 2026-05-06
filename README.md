@@ -150,6 +150,7 @@ Core information:
 - `balance`: show current balance and stance label.
 - `range`: show current combat range if engaged.
 - `combat`: show target, target HP, range, advantage, stance, and balance.
+- `forage`: search outdoor outskirts or hunting rooms for simple survival finds.
 
 Movement:
 
