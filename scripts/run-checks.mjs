@@ -88,6 +88,11 @@ function markdownSummary(results, coverage) {
     lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser verb discovery action | ${coverage.frontend.browserVerbDiscoveryClicked ? 'yes' : 'no'} |`);
     lines.push(`| Agent prompt current status | ${coverage.gameplay.agentPromptCurrentStatusChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Race selected during creation/reroll | ${coverage.gameplay.drRaceSelectionChecked ? 'yes' : 'no'} |`);
+    lines.push(`| New characters start unaffiliated | ${coverage.gameplay.drCreationStartsUnaffiliatedChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Guild rejected during character creation | ${coverage.gameplay.drGuildCreationRejected ? 'yes' : 'no'} |`);
+    lines.push(`| Guild joined in-world only | ${coverage.gameplay.drGuildJoinedInWorldOnlyChecked ? 'yes' : 'no'} |`);
+    lines.push(`| All DR race/guild Circle 1 combinations | ${coverage.gameplay.drRaceGuildCircleOneMatrixChecked ? 'yes' : 'no'} |`);
     lines.push(`| Script create/run/delete lifecycle | ${coverage.gameplay.scriptLifecycleChecked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
     lines.push(`| Ammo stack resale | ${coverage.gameplay.ammoSellChecked ? 'yes' : 'no'} |`);
@@ -110,6 +115,10 @@ function markdownSummary(results, coverage) {
     lines.push('| Metric | Value |');
     lines.push('| --- | ---: |');
     lines.push(`| Races rolled | ${coverage.gameplay.racesRolled} |`);
+    lines.push(`| Circle 1 races checked | ${coverage.gameplay.circleOneRacesChecked} |`);
+    lines.push(`| Race/guild Circle 1 combinations | ${coverage.gameplay.raceGuildMatrixChecked} |`);
+    lines.push(`| DR races in matrix | ${coverage.gameplay.raceGuildMatrixRaceCount} |`);
+    lines.push(`| DR guilds in matrix | ${coverage.gameplay.raceGuildMatrixGuildCount} |`);
     lines.push(`| Guild rooms walked | ${coverage.gameplay.guildRoomsWalked} |`);
     lines.push(`| Shop rooms walked | ${coverage.gameplay.shopRoomsWalked} |`);
     lines.push(`| Circle reached | ${coverage.gameplay.circleReached} |`);
@@ -198,6 +207,10 @@ function coverageSummary(results) {
     durationsMs: Object.fromEntries(results.map((result) => [result.name, result.durationMs])),
     gameplay: {
       racesRolled: apiPayload.racesRolled ?? 0,
+      circleOneRacesChecked: apiPayload.circleOneRacesChecked ?? 0,
+      raceGuildMatrixChecked: apiPayload.raceGuildMatrixChecked ?? 0,
+      raceGuildMatrixRaceCount: apiPayload.raceGuildMatrixRaceCount ?? 0,
+      raceGuildMatrixGuildCount: apiPayload.raceGuildMatrixGuildCount ?? 0,
       guildRoomsWalked: apiPayload.guildRoomsWalked ?? 0,
       shopRoomsWalked: apiPayload.shopRoomsWalked ?? 0,
       circleReached: apiPayload.circleReached ?? 0,
@@ -232,6 +245,15 @@ function coverageSummary(results) {
       focusedTargetSmokeChecked: targetPayload.targetDetailsChecked === true,
       verbDiscoveryChecked: targetPayload.verbDiscoveryChecked === true,
       agentPromptCurrentStatusChecked: agentPromptPayload.currentStatusPriorityChecked === true,
+      drRaceSelectionChecked: (apiPayload.racesRolled ?? 0) === 11 && (apiPayload.fixedRaceStatsChecked ?? 0) === 11,
+      drCreationStartsUnaffiliatedChecked: apiPayload.creationStartsUnaffiliated === true,
+      drGuildCreationRejected: apiPayload.guildCreationRejected === true,
+      drGuildJoinedInWorldOnlyChecked: apiPayload.raceGuildMatrixStartsCommoner === true && (apiPayload.guildRoomsWalked ?? 0) === 11,
+      drRaceGuildCircleOneMatrixChecked:
+        apiPayload.raceGuildMatrixChecked === 121 &&
+        apiPayload.raceGuildMatrixRaceCount === 11 &&
+        apiPayload.raceGuildMatrixGuildCount === 11 &&
+        apiPayload.raceGuildMatrixCircle === 1,
       finalRoom: apiPayload.finalRoom ?? null,
       finalCombatActive: Boolean(apiPayload.finalCombat),
     },
@@ -331,6 +353,11 @@ function assertCoverageShape(coverage) {
   expect(coverage.gameplay.ammoRecoveryChecked === true, 'gameplay.ammoRecoveryChecked');
   expect(coverage.gameplay.ammoDamageLossChecked === true, 'gameplay.ammoDamageLossChecked');
   expect(coverage.gameplay.scriptLifecycleChecked === true, 'gameplay.scriptLifecycleChecked');
+  expect(coverage.gameplay.drRaceSelectionChecked === true, 'gameplay.drRaceSelectionChecked');
+  expect(coverage.gameplay.drCreationStartsUnaffiliatedChecked === true, 'gameplay.drCreationStartsUnaffiliatedChecked');
+  expect(coverage.gameplay.drGuildCreationRejected === true, 'gameplay.drGuildCreationRejected');
+  expect(coverage.gameplay.drGuildJoinedInWorldOnlyChecked === true, 'gameplay.drGuildJoinedInWorldOnlyChecked');
+  expect(coverage.gameplay.drRaceGuildCircleOneMatrixChecked === true, 'gameplay.drRaceGuildCircleOneMatrixChecked');
 
   if (mode === 'local') {
     expect(coverage.gameplay.focusedTargetSmokeChecked === true, 'gameplay.focusedTargetSmokeChecked');

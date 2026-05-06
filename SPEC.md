@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Agent telemetry now has explicit rows for DragonRealms race selection, unaffiliated character creation, guild-at-creation rejection, in-world guild joining, and all 121 race/guild Circle 1 combinations.
+- Coverage summary JSON now promotes race/guild matrix counts so reports show 11 races, 11 guilds, and 121 Circle 1 combinations directly.
+- Agent check coverage shape now fails if the DragonRealms race/guild creation rules disappear from smoke telemetry.
 - Static UI smoke now renders a legacy classic-random character fixture and verifies the web character panel shows stat mode without old prototype role labels.
 - Browser smoke now seeds legacy race-roll metadata through the test fixture endpoint, refreshes the live UI through `score`, and verifies `Classic random roll` is visible without `Berserker`/`Frontline`.
 - Local telemetry now reports static and browser coverage for legacy race stat mode visibility and hidden prototype race role labels.
@@ -133,7 +136,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add focused agent telemetry rows for DragonRealms race/guild creation rules: race selected during creation, guild joined in-world only, and all 121 race/guild Circle 1 combinations.
+- Add focused telemetry rows for canonical DragonRealms guild identity coverage: exactly 11 exposed guilds, no prototype guilds, and successful registrar joins.
 
 Core Philosophy
 
