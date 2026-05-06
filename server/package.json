@@ -13,6 +13,7 @@
     "smoke:scripts": "tsx scripts/smoke-api.ts scripts",
     "smoke:progression": "tsx scripts/smoke-api.ts progression",
     "smoke:economy": "tsx scripts/smoke-api.ts economy",
+    "smoke:targets": "tsx scripts/smoke-api.ts targets",
     "smoke:combat": "tsx scripts/smoke-api.ts combat"
   },
   "dependencies": {

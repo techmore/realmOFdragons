@@ -1,6 +1,6 @@
 type JsonObject = Record<string, unknown>;
 
-type SmokeSuite = 'all' | 'identity' | 'scripts' | 'progression' | 'economy' | 'combat';
+type SmokeSuite = 'all' | 'identity' | 'scripts' | 'progression' | 'economy' | 'targets' | 'combat';
 
 interface AuthTokens {
   accessToken: string;
@@ -72,7 +72,7 @@ interface SmokeContext {
   summary: Record<string, unknown>;
 }
 
-const suites: SmokeSuite[] = ['all', 'identity', 'scripts', 'progression', 'economy', 'combat'];
+const suites: SmokeSuite[] = ['all', 'identity', 'scripts', 'progression', 'economy', 'targets', 'combat'];
 const requestedSuite = (process.argv[2] ?? 'all') as SmokeSuite;
 const baseUrl = (process.env.DR_API_BASE_URL ?? 'http://localhost:4000').replace(/\/+$/, '');
 const password = 'smoke-password-01';
@@ -426,11 +426,44 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   context.summary.targetDetailsChecked = true;
 }
 
+async function runTargetSuite(context: SmokeContext): Promise<void> {
+  let current = await walkTo(context.accessToken, context.character, 'crossing-RV02-002');
+  current = (await command(context.accessToken, current.id, 'wait 900')).character;
+
+  let result = await command(context.accessToken, current.id, 'scan');
+  assert(result.events.some((event) => event.includes('forage wolf-cub')), 'Expected target suite scan to list forage wolf-cub.');
+  assert(result.targets.some((target) => target.name === 'forage wolf-cub'), 'Expected target suite structured wolf-cub.');
+
+  result = await command(context.accessToken, current.id, 'help targets');
+  assert(result.events.some((event) => event.includes('advance <target>')), 'Expected help targets action guidance.');
+
+  result = await command(context.accessToken, current.id, 'target forage wolf-cub');
+  assert(result.events.some((event) => event.includes('Target: forage wolf-cub')), 'Expected target details name.');
+  assert(result.events.some((event) => event.includes('Suggested next verb: advance forage wolf-cub')), 'Expected target details suggestion.');
+
+  result = await command(context.accessToken, current.id, 'appraise forage wolf-cub');
+  assert(result.events.some((event) => event.includes('Aggression: 55')), 'Expected appraise target aggression.');
+
+  result = await command(context.accessToken, current.id, 'advance forage wolf-cub');
+  assert(result.character.combat?.range, 'Expected target suite engagement.');
+
+  result = await command(context.accessToken, result.character.id, 'target');
+  assert(result.events.some((event) => event.includes('Range:')), 'Expected target suite engaged range details.');
+
+  context.character = result.character;
+  context.summary.finalCombat = result.character.combat ?? null;
+  context.summary.finalRoom = result.character.roomId;
+  context.summary.scanChecked = true;
+  context.summary.structuredTargetsChecked = true;
+  context.summary.targetDetailsChecked = true;
+}
+
 async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void> {
   if (suite === 'identity') await runIdentitySuite(context);
   if (suite === 'scripts') await runScriptSuite(context);
   if (suite === 'progression') await runProgressionSuite(context);
   if (suite === 'economy') await runEconomySuite(context);
+  if (suite === 'targets') await runTargetSuite(context);
   if (suite === 'combat') await runCombatSuite(context);
   if (suite === 'all') {
     await runIdentitySuite(context);

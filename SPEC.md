@@ -430,6 +430,19 @@ Next priority:
 
 - Add a focused target-details smoke suite mode so `npm --prefix server run smoke:api combat` can be split further into fast target inspection coverage without running full progression/economy.
 
+Implementation Notes - 2026-05-05, Focused Target Smoke Suite
+
+Completed in the current Node/React prototype:
+
+- Added a `targets` API smoke suite.
+- Added `npm --prefix server run smoke:targets`.
+- The focused suite covers scan visibility, structured targets, `help targets`, `target <name>`, `appraise <target>`, engagement, and bare `target` range details.
+- The focused suite reports scan, structured target, and target-details coverage booleans.
+
+Next priority:
+
+- Add the focused `targets` smoke suite to telemetry as a separate optional/local step or targeted npm script documentation, so target regressions can be checked without running the full all-suite path.
+
 Implementation Notes - 2026-05-05, Target Details Command
 
 Completed in the current Node/React prototype:
