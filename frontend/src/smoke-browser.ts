@@ -49,6 +49,10 @@ async function main(): Promise<void> {
     await page.getByRole('button', { name: 'range', exact: true }).click();
     await page.getByText('You are not engaged with a target.').waitFor();
 
+    await page.getByRole('button', { name: 'verb', exact: true }).click();
+    await page.locator('.terminal-pane .log').getByText('Verb groups:').waitFor();
+    await page.locator('.terminal-pane .log').getByText('Targets: scan, target, target <name>, appraise <target>.').waitFor();
+
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').focus();
     await page.keyboard.press('Numpad6');
     await page.getByText(/You go east/).waitFor();
@@ -120,7 +124,7 @@ async function main(): Promise<void> {
           suite: 'frontend:smoke-browser',
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
-          commandCount: 15,
+          commandCount: 16,
           targetDetailsClicked: true,
         },
         null,

@@ -87,6 +87,7 @@ for (const expected of [
   'Test Gear Stand',
   'buy itm-test-blade',
   'Controls',
+  'verb',
   'scan',
   'range',
   'advance',

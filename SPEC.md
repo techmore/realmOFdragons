@@ -494,6 +494,19 @@ Next priority:
 
 - Add a web quick-control button for `verb` and browser/static smoke coverage so players can discover grouped command hints from the UI.
 
+Implementation Notes - 2026-05-05, Web Verb Discovery
+
+Completed in the current Node/React prototype:
+
+- Added `verb` to the web quick controls.
+- Static UI smoke verifies the `verb` button is rendered.
+- Browser smoke clicks `verb` and verifies grouped command discovery output, including the target command group.
+- Browser command telemetry now counts the additional `verb` interaction.
+
+Next priority:
+
+- Add telemetry fields for verb discovery coverage from focused target smoke and browser smoke, then surface them in coverage summary and Markdown telemetry.
+
 Implementation Notes - 2026-05-05, Target Details Command
 
 Completed in the current Node/React prototype:
