@@ -1930,9 +1930,8 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'score') {
-    events.push(
-      `You are ${resolvedCharacter.name}, race ${resolvedCharacter.raceDisplayName} (${resolvedCharacter.roleTitle}) score ${resolvedCharacter.role}.`,
-    );
+    events.push(`You are ${resolvedCharacter.name}, race ${resolvedCharacter.raceDisplayName}.`);
+    events.push(`Stats: ${resolvedCharacter.statGenerationMode === 'classic_random' ? 'classic random roll' : 'modern fixed racial start'}.`);
     events.push(`Guild: ${resolvedCharacter.guildName}. Circle ${resolvedCharacter.circle}.`);
     events.push(`Wallet: ${formatWallet(resolvedCharacter.wallet)}.`);
     events.push(`Health ${resolvedCharacter.health.current}/${resolvedCharacter.health.max}.`);
@@ -2093,15 +2092,7 @@ app.get('/v1/races', (_req: Request, res: Response) => {
       id: race.id,
       name: race.name,
       description: race.description,
-      minStat: race.minStat,
-      maxStat: race.maxStat,
-      statModifiers: race.statModifiers,
       fixedStartingStats: race.fixedStartingStats,
-      roles: race.roles.map((role) => ({
-        id: role.id,
-        title: role.title,
-        rollModifiers: role.rollModifiers,
-      })),
     })),
   });
 });

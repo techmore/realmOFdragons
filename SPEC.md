@@ -10,6 +10,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Public `/v1/races` no longer exposes prototype random-roll roles or stat modifiers during normal DragonRealms character creation.
+- Web character panels and reroll logs now show stat generation mode instead of prototype role labels.
+- The `score` command now reports race plus fixed/classic stat mode without surfacing prototype archetype labels.
+- Unit and static UI fixtures now use modern fixed racial start metadata and canonical DragonRealms guild identities.
 - Added `unit:races` coverage for the exact fixed starting stat table for all 11 DragonRealms races.
 - Unit coverage now verifies modern fixed rolls return exact fixed base/final stats and classic random remains explicit opt-in.
 - API smoke now verifies `/v1/races`, character creation, reroll, and race/guild matrix stats all match fixed racial starts.
@@ -111,7 +115,7 @@ Completed current slice:
 
 Current next priority:
 
-- Replace remaining prototype race flavor descriptions/role labels with DragonRealms-clean descriptions that do not imply non-canonical archetypes.
+- Replace internal prototype race descriptions with DragonRealms-clean summaries and add smoke coverage that public race descriptions do not expose prototype archetype wording.
 
 Core Philosophy
 

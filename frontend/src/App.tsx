@@ -170,15 +170,7 @@ type Race = {
   id: string;
   name: string;
   description?: string;
-  minStat?: number;
-  maxStat?: number;
-  statModifiers?: Record<string, number>;
   fixedStartingStats?: Stats;
-  roles?: Array<{
-    id: string;
-    title: string;
-    rollModifiers?: Record<string, number>;
-  }>;
 };
 
 type Script = {
@@ -697,7 +689,7 @@ function GameStatusPanels({
 
       <section className="panel equip">
         <h2>Character</h2>
-        <p>{selectedCharacter ? `${selectedCharacter.name} | ${selectedCharacter.raceDisplayName} | ${selectedCharacter.roleTitle}` : 'No character selected'}</p>
+        <p>{selectedCharacter ? `${selectedCharacter.name} | ${selectedCharacter.raceDisplayName} | ${formatStatGenerationMode(selectedCharacter.statGenerationMode)}` : 'No character selected'}</p>
         <p>{character ? `${character.guildName} | Circle ${character.circle}` : 'No guild data'}</p>
         <p>{character ? `Stance ${character.stance} | Balance ${character.balance}` : 'No combat posture'}</p>
         <div className="stat-grid">
@@ -922,11 +914,7 @@ function App() {
         id: entry.id,
         name: entry.name,
         description: entry.description,
-        minStat: entry.minStat,
-        maxStat: entry.maxStat,
-        statModifiers: entry.statModifiers,
         fixedStartingStats: entry.fixedStartingStats,
-        roles: entry.roles,
       })),
     );
     setGuilds(guildData.guilds);
@@ -1279,7 +1267,7 @@ function App() {
         body,
       });
       appendHistory(
-        `Rerolled ${result.name}: ${result.raceDisplayName} / ${result.roleTitle} (trace v${result.rollProfileVersion}).`,
+        `Rerolled ${result.name}: ${result.raceDisplayName} / ${formatStatGenerationMode(result.statGenerationMode)} (trace v${result.rollProfileVersion}).`,
       );
       setCharacter(result);
       setCharacters((current) => current.map((entry) => (entry.id === result.id ? result : entry)));
@@ -1304,7 +1292,7 @@ function App() {
         });
         setCharacter(result);
         setCharacters((current) => current.map((entry) => (entry.id === result.id ? result : entry)));
-        appendHistory(`As ${result.raceDisplayName}: ${result.roleTitle} => STR ${result.stats.strength}, DIS ${result.stats.discipline}`);
+        appendHistory(`As ${result.raceDisplayName}: ${formatStatGenerationMode(result.statGenerationMode)} => STR ${result.stats.strength}, DIS ${result.stats.discipline}`);
       }
       appendHistory('Reroll sweep complete.');
     } catch (error) {

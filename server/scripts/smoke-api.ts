@@ -24,6 +24,8 @@ interface RaceSummary {
   id: string;
   name: string;
   fixedStartingStats: Record<string, number>;
+  roles?: unknown;
+  statModifiers?: unknown;
 }
 
 interface CharacterSummary {
@@ -234,6 +236,8 @@ async function createContext(): Promise<SmokeContext> {
   assert(races.races.length >= 1, 'Expected at least one race.');
   for (const race of races.races) {
     assert(Object.keys(race.fixedStartingStats ?? {}).length === 8, `Expected fixed starting stats for ${race.name}.`);
+    assert(!race.roles, `Expected public race API to omit prototype role data for ${race.name}.`);
+    assert(!race.statModifiers, `Expected public race API to omit prototype stat modifiers for ${race.name}.`);
   }
 
   await request<JsonObject>('/v1/auth/register', {
