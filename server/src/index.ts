@@ -1097,9 +1097,19 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
+  if (command === 'help scan' || command === 'help targets') {
+    events.push(
+      'Scan shows immediate room targets and their beginner combat metadata.',
+      'Vitality estimates how long a target can stay in the fight; aggression estimates how quickly it presses or attacks.',
+      'Use scan to list local targets, advance <target> to engage, range to check distance, and attack <target> once you are at melee range.',
+    );
+    events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
   if (command === 'help') {
     events.push(
-      'Commands: look, scan, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, scan, help scan, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
     return buildCommandResult(resolvedCharacter, room, events);

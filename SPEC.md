@@ -393,6 +393,19 @@ Next priority:
 
 - Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
 
+Implementation Notes - 2026-05-05, Scan Help Branch
+
+Completed in the current Node/React prototype:
+
+- Added `help scan` and `help targets` as command-specific beginner guidance.
+- General `help` now advertises `help scan`.
+- Scan help explains target discovery, vitality, aggression, range checks, advancing, and melee attack gating.
+- API smoke verifies the scan help branch alongside structured target metadata.
+
+Next priority:
+
+- Add a compact in-game target details command, such as `target <name>` or `appraise <target>`, that reports one selected target's vitality, aggression, engagement range, and suggested next verb.
+
 Implementation Notes - 2026-05-05, Target Metadata Guidance
 
 Completed in the current Node/React prototype:
