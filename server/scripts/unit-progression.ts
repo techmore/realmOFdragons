@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import type { CharacterRecord, SkillState } from '../src/storage.js';
-import { canCircle, nextCircleRequirement, primarySkillForGuild, resolveCircleAdvancementRequest, totalSkillRanks } from '../src/progression.js';
+import {
+  buildCircleStatus,
+  canCircle,
+  nextCircleRequirement,
+  primarySkillForGuild,
+  resolveCircleAdvancement,
+  resolveCircleAdvancementRequest,
+  totalSkillRanks,
+} from '../src/progression.js';
 
 function skill(name: string, rank: number, pool = 0): SkillState {
   return { name, rank, pool };
@@ -162,4 +170,42 @@ assert.deepEqual(
   },
 );
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:progression', circleAdvancementRequestChecked: true }, null, 2));
+const circleReady = character({
+  circle: 1,
+  skills: {
+    melee: skill('Melee', 4),
+    athletics: skill('Athletics', 2),
+  },
+});
+
+assert.deepEqual(buildCircleStatus(circleReady), [
+  'Unit is Circle 1 in Barbarian Guild.',
+  'Next Circle 2: total skill ranks 6/6.',
+  'Melee rank 4/4.',
+]);
+
+assert.deepEqual(resolveCircleAdvancement(character()), {
+  advanced: false,
+  circle: 1,
+  events: [],
+});
+
+assert.deepEqual(resolveCircleAdvancement(circleReady), {
+  advanced: true,
+  circle: 2,
+  events: ['You advance to Circle 2.'],
+});
+
+console.log(
+  JSON.stringify(
+    {
+      ok: true,
+      suite: 'unit:progression',
+      circleAdvancementRequestChecked: true,
+      circleStatusChecked: true,
+      circleAdvancementChecked: true,
+    },
+    null,
+    2,
+  ),
+);

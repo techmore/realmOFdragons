@@ -9,6 +9,12 @@ export type CircleAdvancementDecision =
   | { allowed: true; registrarRoomId: string }
   | { allowed: false; reason: 'commoner' | 'wrong_room'; events: string[] };
 
+export interface CircleAdvancementResult {
+  advanced: boolean;
+  circle: number;
+  events: string[];
+}
+
 export function totalSkillRanks(character: Pick<CharacterRecord, 'skills'>): number {
   return Object.values(character.skills).reduce((sum, skill) => sum + skill.rank, 0);
 }
@@ -45,6 +51,30 @@ export function canCircle(character: Pick<CharacterRecord, 'circle' | 'guildId' 
   const requirement = nextCircleRequirement(character);
   const primarySkill = character.skills[primarySkillForGuild(character.guildId)];
   return totalSkillRanks(character) >= requirement.totalRanks && (primarySkill?.rank ?? 0) >= requirement.primaryRank;
+}
+
+export function buildCircleStatus(character: Pick<CharacterRecord, 'name' | 'circle' | 'guildId' | 'guildName' | 'skills'>): string[] {
+  const requirement = nextCircleRequirement(character);
+  const primarySkillId = primarySkillForGuild(character.guildId);
+  const primarySkill = character.skills[primarySkillId];
+  return [
+    `${character.name} is Circle ${character.circle} in ${character.guildName}.`,
+    `Next Circle ${requirement.nextCircle}: total skill ranks ${totalSkillRanks(character)}/${requirement.totalRanks}.`,
+    `${primarySkill?.name ?? 'Primary skill'} rank ${primarySkill?.rank ?? 0}/${requirement.primaryRank}.`,
+  ];
+}
+
+export function resolveCircleAdvancement(character: Pick<CharacterRecord, 'circle' | 'guildId' | 'skills'>): CircleAdvancementResult {
+  if (!canCircle(character)) {
+    return { advanced: false, circle: character.circle, events: [] };
+  }
+
+  const nextCircle = character.circle + 1;
+  return {
+    advanced: true,
+    circle: nextCircle,
+    events: [`You advance to Circle ${nextCircle}.`],
+  };
 }
 
 export function resolveCircleAdvancementRequest(

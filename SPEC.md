@@ -7,6 +7,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted circle status text and circle advancement decision output into pure progression helpers.
+- Progression unit coverage now verifies circle status formatting plus non-advancing and advancing circle decisions.
+- The Express command handler now delegates circle status and circle increment decisions to the progression module while retaining health recalculation after advancement.
 - Extracted circle advancement request gating into a pure progression helper.
 - Progression unit coverage now verifies commoners cannot circle, joined characters must stand at their own registrar, missing registrar data fails closed, and valid registrar requests pass.
 - The Express command handler now delegates non-combat circle advancement gating to the progression module.
@@ -159,7 +162,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract circle status and advancement mutation into pure progression helpers with unit coverage.
+- Extract training room/skill gain decisions into pure progression helpers with unit coverage.
 
 Core Philosophy
 

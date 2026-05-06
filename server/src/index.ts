@@ -24,7 +24,7 @@ import {
   type StatGenerationMode,
   type StatBlock,
 } from './races.js';
-import { canCircle, nextCircleRequirement, primarySkillForGuild, resolveCircleAdvancementRequest, totalSkillRanks } from './progression.js';
+import { buildCircleStatus, nextCircleRequirement, primarySkillForGuild, resolveCircleAdvancement, resolveCircleAdvancementRequest, totalSkillRanks } from './progression.js';
 import {
   STANCE_PROFILES,
   type CombatRangeName,
@@ -568,17 +568,6 @@ function grantSkillPool(character: CharacterRecord, skillId: string, amount: num
     events.push(`${skill.name} improves to rank ${skill.rank}.`);
   }
   return true;
-}
-
-function buildCircleStatus(character: CharacterRecord) {
-  const requirement = nextCircleRequirement(character);
-  const primarySkillId = primarySkillForGuild(character.guildId);
-  const primarySkill = character.skills[primarySkillId];
-  return [
-    `${character.name} is Circle ${character.circle} in ${character.guildName}.`,
-    `Next Circle ${requirement.nextCircle}: total skill ranks ${totalSkillRanks(character)}/${requirement.totalRanks}.`,
-    `${primarySkill?.name ?? 'Primary skill'} rank ${primarySkill?.rank ?? 0}/${requirement.primaryRank}.`,
-  ];
 }
 
 function isTrainingRoom(room: Room) {
@@ -1448,11 +1437,12 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       return buildCommandResult(resolvedCharacter, room, events);
     }
     events.push(...buildCircleStatus(resolvedCharacter));
-    if (canCircle(resolvedCharacter)) {
-      resolvedCharacter.circle += 1;
+    const advancement = resolveCircleAdvancement(resolvedCharacter);
+    if (advancement.advanced) {
+      resolvedCharacter.circle = advancement.circle;
       resolvedCharacter.health = calculateHealth(resolvedCharacter.stats);
       modified = true;
-      events.push(`You advance to Circle ${resolvedCharacter.circle}.`);
+      events.push(...advancement.events);
       await persist();
     }
     return buildCommandResult(resolvedCharacter, room, events);
