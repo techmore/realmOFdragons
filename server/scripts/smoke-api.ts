@@ -434,6 +434,40 @@ async function runRaceEndpointSuite(context: SmokeContext): Promise<void> {
     canonicalCreationsChecked += 1;
   }
 
+  const guilds = await request<{ guilds: GuildSummary[] }>('/v1/world/guilds');
+  const barbarianGuild = guilds.guilds.find((guild) => guild.id === 'barbarian');
+  assert(barbarianGuild, 'Expected Barbarian Guild for reroll preservation smoke.');
+
+  let rerollCharacter = await walkTo(context.accessToken, context.character, barbarianGuild.roomId);
+  const joined = await command(context.accessToken, rerollCharacter.id, 'join guild');
+  assert(joined.character.guildId === barbarianGuild.id, `Expected reroll smoke character to join ${barbarianGuild.id}.`);
+  assert(joined.character.circle === 1, `Expected reroll smoke character to remain Circle 1 after joining ${barbarianGuild.id}.`);
+  rerollCharacter = joined.character;
+
+  const invalidRerollError = await requestFailure(`/v1/characters/${rerollCharacter.id}/reroll`, {
+    method: 'POST',
+    headers: authHeaders(context.accessToken),
+    body: JSON.stringify({ race: 'Orc' }),
+  });
+  assert(invalidRerollError.includes('Unknown race: Orc'), 'Expected non-DragonRealms race reroll rejection.');
+
+  let canonicalRerollsChecked = 0;
+  for (const race of context.races) {
+    const rerolled = await request<CharacterSummary>(`/v1/characters/${rerollCharacter.id}/reroll`, {
+      method: 'POST',
+      headers: authHeaders(context.accessToken),
+      body: JSON.stringify({ race: race.name }),
+    });
+    assert(rerolled.race === race.id || rerolled.race.toLowerCase() === race.name.toLowerCase(), `Expected rerolled race ${race.name}, got ${rerolled.race}.`);
+    assert(rerolled.circle === 1, `Expected rerolled ${race.name} character to preserve Circle 1, got Circle ${rerolled.circle}.`);
+    assert(rerolled.guildId === barbarianGuild.id, `Expected rerolled ${race.name} character to preserve guild ${barbarianGuild.id}.`);
+    assert(rerolled.guildName === barbarianGuild.name, `Expected rerolled ${race.name} character to preserve guild name ${barbarianGuild.name}.`);
+    assert(rerolled.statGenerationMode === 'modern_fixed', `Expected rerolled ${race.name} character to use modern_fixed stats.`);
+    assert(JSON.stringify(rerolled.stats) === JSON.stringify(race.fixedStartingStats), `Expected rerolled ${race.name} stats to match fixed starting stats.`);
+    rerollCharacter = rerolled;
+    canonicalRerollsChecked += 1;
+  }
+
   context.summary.raceEndpointChecked = true;
   context.summary.raceEndpointCanonicalCount = context.races.length;
   context.summary.raceEndpointFixedStatTablesChecked = context.races.length;
@@ -441,6 +475,9 @@ async function runRaceEndpointSuite(context: SmokeContext): Promise<void> {
   context.summary.raceEndpointOnlyCanonical = true;
   context.summary.invalidRaceCreationRejected = true;
   context.summary.raceCreationCanonicalCircleOneChecked = canonicalCreationsChecked;
+  context.summary.invalidRaceRerollRejected = true;
+  context.summary.raceRerollCanonicalGuildCirclePreserved = canonicalRerollsChecked;
+  context.character = rerollCharacter;
 }
 
 async function runGuildEndpointSuite(context: SmokeContext): Promise<void> {

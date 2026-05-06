@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Focused race smoke now rejects non-DragonRealms race rerolls.
+- Focused race smoke now joins a character to the Barbarian Guild, rerolls through every canonical DragonRealms race, and verifies each reroll preserves guild identity and Circle 1.
+- Local telemetry now reports non-DragonRealms reroll rejection and canonical race reroll guild/circle preservation.
 - Focused race smoke now rejects a non-DragonRealms `Orc` character creation request.
 - Focused race smoke now creates one character for every canonical DragonRealms race and verifies each starts Circle 1, commoner, unaffiliated, modern-fixed, and with fixed racial stats.
 - Local telemetry now reports non-DragonRealms race rejection and canonical race creation Circle 1 coverage.
@@ -150,7 +153,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add focused smoke coverage that reroll rejects non-DragonRealms race names and preserves canonical race choices without changing guild/circle.
+- Clean stale SPEC architecture guidance so Node/React, file-backed prototype storage, future Postgres, and future WebSocket gameplay are authoritative.
 
 Core Philosophy
 
