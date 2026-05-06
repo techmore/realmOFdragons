@@ -334,7 +334,7 @@ Completed in the current Node/React prototype:
 
 Next priority:
 
-- Add command visibility for available local enemies, starting with a `scan` or enhanced `look` output that lists beginner-safe targets in hunting rooms.
+- Add scan/target visibility to the web UI controls and browser smoke so players can discover enemies from both command input and quick actions.
 
 Implementation Notes - 2026-05-05, Enemy Visibility Commands
 
