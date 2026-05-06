@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted `shop` command list formatting into pure economy helpers with unit coverage for no-shop fallback and catalog item rows.
+- The Express `shop` command now uses economy-owned shop list formatting before appending the current wallet line.
 - Extracted roll profile command formatting into pure race helpers with unit coverage for populated traces, empty traces, and invalid profile versions.
 - The Express `roll` command now delegates race-roll metadata summary text to the race module.
 - Extracted `score` and `skills` command summary formatting into pure progression helpers with unit coverage for skill rows, modern fixed stat mode, and classic random stat mode labels.
@@ -181,7 +183,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract shop command list formatting into pure economy helpers with unit coverage.
+- Extract shop buy command decision/output into pure economy helpers with unit coverage.
 
 Core Philosophy
 

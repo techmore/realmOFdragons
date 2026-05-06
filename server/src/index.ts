@@ -7,7 +7,6 @@ import { createServer } from 'node:http';
 import {
   Room,
   RoomId,
-  RoomShop,
   directionAliases,
   guilds,
   worldRooms,
@@ -68,6 +67,7 @@ import {
   findLocalShopBuyItem,
   findLocalShopSaleItem,
   isDamagedAmmoCode,
+  listShopItems,
   originalAmmoCodeFromDamaged,
   resolveShopPurchase,
 } from './economy.js';
@@ -1071,12 +1071,6 @@ function resolveAttackDamage(stat: number, bonus: number, min: number, max: numb
   const base = Math.max(0, Math.floor((stat + bonus) / 12));
   const variance = randomInt(min, max + 1);
   return Math.max(1, 1 + base + variance);
-}
-
-function listShopItems(shop?: RoomShop) {
-  if (!shop) return ['No shop is open in this location.'];
-  const rows = shop.items.map((item) => `${item.code} ${item.name} — ${item.price} ${item.currency}`);
-  return [`${shop.name}:`, ...rows];
 }
 
 function parseScriptCommandLines(raw: unknown): string[] {

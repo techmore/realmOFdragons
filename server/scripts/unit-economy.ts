@@ -8,6 +8,7 @@ import {
   findLocalShopBuyItem,
   findLocalShopSaleItem,
   isDamagedAmmoCode,
+  listShopItems,
   originalAmmoCodeFromDamaged,
   resolveShopPurchase,
 } from '../src/economy.js';
@@ -65,4 +66,11 @@ assert.deepEqual(resolveShopPurchase(testBlade, wallet, 'weapon'), {
 });
 assert.equal(resolveShopPurchase({ ...testBlade, price: 4 }, wallet, 'weapon').affordable, false);
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:economy' }, null, 2));
+assert.deepEqual(listShopItems(), ['No shop is open in this location.']);
+assert.deepEqual(listShopItems({ code: 'test-shop', name: 'Test Shop', items: shopItems }), [
+  'Test Shop:',
+  'itm-sting-arrow practice arrow — 1 trias',
+  'itm-test-blade test blade — 3 trias',
+]);
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:economy', shopListFormattingChecked: true }, null, 2));

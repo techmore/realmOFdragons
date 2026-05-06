@@ -1,4 +1,4 @@
-import type { RoomShopItem } from './world.js';
+import type { RoomShop, RoomShopItem } from './world.js';
 
 export const SHOP_SELL_RATE = 0.75;
 export const DAMAGED_AMMO_SELL_RATE = 0.25;
@@ -54,6 +54,12 @@ export function resolveShopPurchase(item: RoomShopItem, wallet: CurrencyWallet, 
     quantity: delivery === 'ammoPouch' ? bundleSize : 1,
     affordable: canAfford(wallet, item),
   };
+}
+
+export function listShopItems(shop?: RoomShop): string[] {
+  if (!shop) return ['No shop is open in this location.'];
+  const rows = shop.items.map((item) => `${item.code} ${item.name} — ${item.price} ${item.currency}`);
+  return [`${shop.name}:`, ...rows];
 }
 
 export function estimateAmmoPouchSalePrice(item: RoomShopItem, bundleSize = DEFAULT_AMMO_BUNDLE_SIZE): number {
