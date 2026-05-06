@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type { CharacterRecord, SkillState } from '../src/storage.js';
-import { canCircle, nextCircleRequirement, primarySkillForGuild, totalSkillRanks } from '../src/progression.js';
+import { canCircle, nextCircleRequirement, primarySkillForGuild, resolveCircleAdvancementRequest, totalSkillRanks } from '../src/progression.js';
 
 function skill(name: string, rank: number, pool = 0): SkillState {
   return { name, rank, pool };
@@ -118,4 +118,48 @@ assert.equal(
   true,
 );
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:progression' }, null, 2));
+const registrars = [{ id: 'barbarian', roomId: 'crossing-GU10-001' }];
+
+assert.deepEqual(
+  resolveCircleAdvancementRequest(
+    character({
+      guildId: 'commoner',
+      guildName: 'Unaffiliated',
+      roomId: 'crossing-TG01-001',
+    }),
+    registrars,
+  ),
+  {
+    allowed: false,
+    reason: 'commoner',
+    events: ['You need to join a guild before you can advance circles.'],
+  },
+);
+
+assert.deepEqual(
+  resolveCircleAdvancementRequest(character({ roomId: 'crossing-TG01-001' }), registrars),
+  {
+    allowed: false,
+    reason: 'wrong_room',
+    events: ['Travel to your Barbarian Guild registrar before requesting circle advancement.'],
+  },
+);
+
+assert.deepEqual(
+  resolveCircleAdvancementRequest(character({ guildId: 'bard', guildName: 'Bard Guild', roomId: 'crossing-GU10-001' }), registrars),
+  {
+    allowed: false,
+    reason: 'wrong_room',
+    events: ['Travel to your Bard Guild registrar before requesting circle advancement.'],
+  },
+);
+
+assert.deepEqual(
+  resolveCircleAdvancementRequest(character({ roomId: 'crossing-GU10-001' }), registrars),
+  {
+    allowed: true,
+    registrarRoomId: 'crossing-GU10-001',
+  },
+);
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:progression', circleAdvancementRequestChecked: true }, null, 2));

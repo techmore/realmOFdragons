@@ -1,5 +1,14 @@
 import type { CharacterRecord } from './storage.js';
 
+export interface GuildRegistrarSummary {
+  id: string;
+  roomId: string;
+}
+
+export type CircleAdvancementDecision =
+  | { allowed: true; registrarRoomId: string }
+  | { allowed: false; reason: 'commoner' | 'wrong_room'; events: string[] };
+
 export function totalSkillRanks(character: Pick<CharacterRecord, 'skills'>): number {
   return Object.values(character.skills).reduce((sum, skill) => sum + skill.rank, 0);
 }
@@ -36,4 +45,28 @@ export function canCircle(character: Pick<CharacterRecord, 'circle' | 'guildId' 
   const requirement = nextCircleRequirement(character);
   const primarySkill = character.skills[primarySkillForGuild(character.guildId)];
   return totalSkillRanks(character) >= requirement.totalRanks && (primarySkill?.rank ?? 0) >= requirement.primaryRank;
+}
+
+export function resolveCircleAdvancementRequest(
+  character: Pick<CharacterRecord, 'guildId' | 'guildName' | 'roomId'>,
+  registrars: GuildRegistrarSummary[],
+): CircleAdvancementDecision {
+  if (character.guildId === 'commoner') {
+    return {
+      allowed: false,
+      reason: 'commoner',
+      events: ['You need to join a guild before you can advance circles.'],
+    };
+  }
+
+  const registrar = registrars.find((guild) => guild.id === character.guildId);
+  if (!registrar || character.roomId !== registrar.roomId) {
+    return {
+      allowed: false,
+      reason: 'wrong_room',
+      events: [`Travel to your ${character.guildName} registrar before requesting circle advancement.`],
+    };
+  }
+
+  return { allowed: true, registrarRoomId: registrar.roomId };
 }

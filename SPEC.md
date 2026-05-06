@@ -7,6 +7,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted circle advancement request gating into a pure progression helper.
+- Progression unit coverage now verifies commoners cannot circle, joined characters must stand at their own registrar, missing registrar data fails closed, and valid registrar requests pass.
+- The Express command handler now delegates non-combat circle advancement gating to the progression module.
 - Removed stale template language that recommended Evennia/Python, Telnet-first play, and Evennia persistence.
 - SPEC now names the current authoritative prototype stack: Node.js/Express server, React web client, REST command API, file-backed prototype persistence, and TypeScript world fixtures.
 - SPEC now names the intended next architecture steps: extract transport-agnostic game-core modules, add Postgres for mutable account/character state after schemas stabilize, and add WebSocket gameplay sessions for live play.
@@ -156,7 +159,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract circle advancement decision logic into a pure progression helper with unit coverage.
+- Extract circle status and advancement mutation into pure progression helpers with unit coverage.
 
 Core Philosophy
 
