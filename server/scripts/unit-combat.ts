@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {
   STANCE_PROFILES,
   applyBalanceChange,
+  buildPostAttackStatusEvents,
   buildTargetVanishedEvents,
   formatAdvantage,
   formatBalance,
@@ -12,6 +13,7 @@ import {
   normalizeStance,
   resolveAttackOutcome,
   resolveAttackCycleStatus,
+  resolveAttackCooldownMs,
   shiftAdvantageValue,
   shiftCombatRange,
 } from '../src/combat.js';
@@ -90,5 +92,8 @@ assert.deepEqual(resolveAttackCycleStatus(1_000, 1_500), {
   events: [],
 });
 assert.deepEqual(buildTargetVanishedEvents(), ['Your target vanished from the world.']);
+assert.deepEqual(buildPostAttackStatusEvents(1, 3), ['Position: you have the edge.', 'Balance: very balanced.']);
+assert.equal(resolveAttackCooldownMs(59), 650);
+assert.equal(resolveAttackCooldownMs(60), 900);
 
 console.log(JSON.stringify({ ok: true, suite: 'unit:combat' }, null, 2));

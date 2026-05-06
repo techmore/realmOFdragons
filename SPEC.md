@@ -85,10 +85,12 @@ Completed current slice:
 - Expanded combat unit coverage for nonlethal hits, lethal hits, and misses.
 - Extracted attack cycle wait status/event formatting and target-vanished event formatting into `server/src/combat.ts`.
 - Expanded combat unit coverage for ready/not-ready attack cycles and target-vanished messaging.
+- Extracted post-attack position/balance event formatting and attack cooldown selection into `server/src/combat.ts`.
+- Expanded combat unit coverage for post-attack status text and low/high aggression cooldown thresholds.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting post-attack position/balance event formatting and action cooldown selection.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting incapacitation event formatting and post-attack retaliation resolution boundaries.
 
 Core Philosophy
 

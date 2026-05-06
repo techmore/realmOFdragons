@@ -108,6 +108,14 @@ export function buildTargetVanishedEvents(): string[] {
   return ['Your target vanished from the world.'];
 }
 
+export function buildPostAttackStatusEvents(advantage: number, balance: unknown): string[] {
+  return [`Position: ${formatAdvantage(advantage)}.`, `Balance: ${formatBalance(balance)}.`];
+}
+
+export function resolveAttackCooldownMs(aggression: number): number {
+  return Math.floor(Number(aggression) || 0) >= 60 ? 900 : 650;
+}
+
 export function resolveAttackOutcome(targetName: string, currentHp: number, damage: number, attack: AttackRollResult): AttackOutcomeResult {
   if (!attack.hit) {
     return {

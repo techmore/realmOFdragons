@@ -34,7 +34,9 @@ import {
   normalizeBalance,
   normalizeRange,
   normalizeStance,
+  buildPostAttackStatusEvents,
   buildTargetVanishedEvents,
+  resolveAttackCooldownMs,
   resolveAttackOutcome,
   resolveAttackCycleStatus,
   shiftAdvantageValue,
@@ -1787,8 +1789,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         return buildCommandResult(resolvedCharacter, room, events);
     }
     reduceBalance(resolvedCharacter, stanceProfile.cost);
-    events.push(`Position: ${formatAdvantage(resolvedCharacter.combat.advantage)}.`);
-    events.push(`Balance: ${formatBalance(resolvedCharacter.balance)}.`);
+    events.push(...buildPostAttackStatusEvents(resolvedCharacter.combat.advantage, resolvedCharacter.balance));
 
     applyMeleeRetaliation(resolvedCharacter, template, now, events);
     if (resolvedCharacter.health.current <= 0) {
@@ -1800,7 +1801,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       return buildCommandResult(resolvedCharacter, room, events);
     }
     modified = true;
-    setActionCooldown(resolvedCharacter, template.aggression >= 60 ? 900 : 650);
+    setActionCooldown(resolvedCharacter, resolveAttackCooldownMs(template.aggression));
     await persist();
     return buildCommandResult(resolvedCharacter, room, events);
   }
