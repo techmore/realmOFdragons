@@ -75,6 +75,59 @@ function markdownSummary(results) {
   return `${lines.join('\n')}\n`;
 }
 
+function parseLastJsonObject(text) {
+  const candidates = text.match(/\{[\s\S]*?\n\}/g) ?? [];
+  for (const candidate of candidates.reverse()) {
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      // Try the next candidate.
+    }
+  }
+  return undefined;
+}
+
+function coverageSummary(results) {
+  const byName = new Map(results.map((result) => [result.name, result]));
+  const apiPayload = parseLastJsonObject(byName.get('api-smoke')?.stdoutTail ?? '') ?? {};
+  const browserPayload = parseLastJsonObject(byName.get('browser-smoke')?.stdoutTail ?? '') ?? {};
+  const unitPayloads = (byName.get('unit-tests')?.stdoutTail.match(/\{[\s\S]*?\n\}/g) ?? [])
+    .map((candidate) => {
+      try {
+        return JSON.parse(candidate);
+      } catch {
+        return undefined;
+      }
+    })
+    .filter(Boolean);
+
+  return {
+    ok: results.every((result) => result.exitCode === 0),
+    mode,
+    generatedAt: new Date().toISOString(),
+    durationsMs: Object.fromEntries(results.map((result) => [result.name, result.durationMs])),
+    gameplay: {
+      racesRolled: apiPayload.racesRolled ?? 0,
+      guildRoomsWalked: apiPayload.guildRoomsWalked ?? 0,
+      shopRoomsWalked: apiPayload.shopRoomsWalked ?? 0,
+      circleReached: apiPayload.circleReached ?? 0,
+      scriptSteps: apiPayload.scriptSteps ?? 0,
+      shopEconomyChecked: apiPayload.shopEconomyChecked === true,
+      combatChecked: apiPayload.combatChecked === true,
+      finalRoom: apiPayload.finalRoom ?? null,
+      finalCombatActive: Boolean(apiPayload.finalCombat),
+    },
+    frontend: {
+      staticUiSmoke: byName.get('frontend-ui-smoke')?.exitCode === 0,
+      browserSmoke: byName.has('browser-smoke') ? byName.get('browser-smoke')?.exitCode === 0 : null,
+      browser: browserPayload.browser ?? null,
+      browserAccountCreated: Boolean(browserPayload.account),
+      browserCommandCount: browserPayload.commandCount ?? 0,
+    },
+    unitSuites: unitPayloads.map((payload) => payload.suite),
+  };
+}
+
 async function runStep(step) {
   const startedAt = Date.now();
   const commandLine = [step.command, ...step.args].join(' ');
@@ -142,8 +195,10 @@ const summary = {
 
 writeFileSync(join(telemetryDir, 'summary.json'), `${JSON.stringify(summary, null, 2)}\n`);
 writeFileSync(join(telemetryDir, 'summary.md'), markdownSummary(results));
+writeFileSync(join(telemetryDir, 'coverage-summary.json'), `${JSON.stringify(coverageSummary(results), null, 2)}\n`);
 
 console.log(`\n[telemetry] wrote ${join(telemetryDir, 'summary.json')}`);
 console.log(`[telemetry] wrote ${join(telemetryDir, 'summary.md')}`);
+console.log(`[telemetry] wrote ${join(telemetryDir, 'coverage-summary.json')}`);
 
 if (!summary.ok) process.exit(1);

@@ -73,6 +73,7 @@ async function main(): Promise<void> {
           suite: 'frontend:smoke-browser',
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
+          commandCount: 3,
         },
         null,
         2,

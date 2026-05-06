@@ -318,6 +318,19 @@ Next priority:
 
 - Make browser smoke CI-compatible by using Playwright-managed Chromium on Linux or conditionally detecting installed browsers.
 
+Implementation Notes - 2026-05-05, Telemetry Coverage Summary
+
+Completed in the current Node/React prototype:
+
+- Added `artifacts/telemetry/coverage-summary.json`.
+- Coverage summary includes check durations, unit suite names, browser source, browser command count, and gameplay counts from API smoke.
+- Gameplay coverage tracks races rolled, guild rooms walked, shop rooms walked, circle reached, script steps, shop economy coverage, combat coverage, final room, and final combat state.
+- Browser smoke now reports command count for trend telemetry.
+
+Next priority:
+
+- Add first gameplay content expansion beyond Crossing smoke coverage: additional beginner hunting rooms, enemy templates, and shop inventory variety while keeping all tests deterministic.
+
 Implementation Notes - 2026-05-05, CI Browser Smoke
 
 Completed in the current Node/React prototype:
