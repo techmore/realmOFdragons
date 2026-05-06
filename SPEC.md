@@ -393,6 +393,18 @@ Next priority:
 
 - Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
 
+Implementation Notes - 2026-05-06, Command Discovery Telemetry
+
+Completed in the current Node/React prototype:
+
+- Browser smoke now reports `commandDiscoveryVisible` for the always-visible command note.
+- Coverage summary now exposes `staticCommandDiscoveryChecked` and `browserCommandDiscoveryVisible`.
+- Markdown telemetry now includes Static command discovery note and Browser command discovery note rows.
+
+Next priority:
+
+- Replace stale repeated `Next priority` sections in `SPEC.md` with a single current priority block or add a short current-status index so future automation does not pick old tasks.
+
 Implementation Notes - 2026-05-06, Web Command Discovery Note
 
 Completed in the current Node/React prototype:

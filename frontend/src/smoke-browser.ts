@@ -130,6 +130,7 @@ async function main(): Promise<void> {
           commandCount: 16,
           targetDetailsClicked: true,
           verbDiscoveryClicked: true,
+          commandDiscoveryVisible: true,
         },
         null,
         2,

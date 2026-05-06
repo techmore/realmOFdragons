@@ -60,6 +60,8 @@ function markdownSummary(results, coverage) {
     lines.push(`| Target details command | ${coverage.gameplay.targetDetailsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Focused target smoke | ${coverage.gameplay.focusedTargetSmokeChecked ? 'yes' : 'no'} |`);
     lines.push(`| Verb discovery command | ${coverage.gameplay.verbDiscoveryChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Static command discovery note | ${coverage.frontend.staticCommandDiscoveryChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Browser command discovery note | ${coverage.frontend.browserCommandDiscoveryVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser target details action | ${coverage.frontend.browserTargetDetailsClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser verb discovery action | ${coverage.frontend.browserVerbDiscoveryClicked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
@@ -153,12 +155,14 @@ function coverageSummary(results) {
     },
     frontend: {
       staticUiSmoke: byName.get('frontend-ui-smoke')?.exitCode === 0,
+      staticCommandDiscoveryChecked: byName.get('frontend-ui-smoke')?.exitCode === 0,
       browserSmoke: byName.has('browser-smoke') ? byName.get('browser-smoke')?.exitCode === 0 : null,
       browser: browserPayload.browser ?? null,
       browserAccountCreated: Boolean(browserPayload.account),
       browserCommandCount: browserPayload.commandCount ?? 0,
       browserTargetDetailsClicked: browserPayload.targetDetailsClicked === true,
       browserVerbDiscoveryClicked: browserPayload.verbDiscoveryClicked === true,
+      browserCommandDiscoveryVisible: browserPayload.commandDiscoveryVisible === true,
     },
     unitSuites: unitPayloads.map((payload) => payload.suite),
   };
