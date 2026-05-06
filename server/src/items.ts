@@ -427,6 +427,13 @@ export function validateAttackRange(weapon: ItemDetail | undefined, attackRange:
   return itemMutation(false, [`You are too far away to strike. Current range: ${formatRange(attackRange)}.`, 'Advance to melee range first.']);
 }
 
+export function buildAttackOpeningEvents(weapon: ItemDetail | undefined): string[] {
+  if (weapon) {
+    return [`You attack with ${weapon.name} (${weapon.weaponRange ?? 'melee'} weapon, attack modifier ${weapon.attackModifier}).`];
+  }
+  return ['You attack unarmed; wield a weapon for better accuracy and damage.'];
+}
+
 export function buildEquipmentSummary(character: CharacterRecord, room?: Room, rooms: Record<string, Room> = worldRooms): EquipmentSummary {
   const slots = character.equipment ?? {};
   const summary: EquipmentSummary = {

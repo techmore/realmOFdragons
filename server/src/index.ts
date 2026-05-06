@@ -49,6 +49,7 @@ import {
 } from './economy.js';
 import {
   addAmmo,
+  buildAttackOpeningEvents,
   buildEquipmentSummary,
   buildAmmoStatusEvents,
   buildInventoryEquipmentEvents,
@@ -1701,11 +1702,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       await persist();
       return buildCommandResult(resolvedCharacter, room, events);
     }
-    if (weapon) {
-      events.push(`You attack with ${weapon.name} (${weapon.weaponRange ?? 'melee'} weapon, attack modifier ${weapon.attackModifier}).`);
-    } else {
-      events.push('You attack unarmed; wield a weapon for better accuracy and damage.');
-    }
+    events.push(...buildAttackOpeningEvents(weapon));
 
     const attackRange = normalizeRange(resolvedCharacter.combat.range);
     const rangeValidation = validateAttackRange(weapon, attackRange);

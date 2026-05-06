@@ -4,6 +4,7 @@ import {
   addAmmo,
   addRecoverableAmmo,
   buildAmmoStatusEvents,
+  buildAttackOpeningEvents,
   buildEquipmentSummary,
   buildInventoryEquipmentEvents,
   buildItemDetailEvents,
@@ -231,6 +232,9 @@ assert.deepEqual(validateAttackRange(undefined, 'pole'), {
   success: false,
   events: ['You are too far away to strike. Current range: pole range.', 'Advance to melee range first.'],
 });
+assert.deepEqual(buildAttackOpeningEvents(heldWeapon), ['You attack with practice bow (ranged weapon, attack modifier 2).']);
+assert.deepEqual(buildAttackOpeningEvents(starterSword), ['You attack with training sword (melee weapon, attack modifier 1).']);
+assert.deepEqual(buildAttackOpeningEvents(undefined), ['You attack unarmed; wield a weapon for better accuracy and damage.']);
 const noWeaponReload = reloadRangedWeapon(character({ hands: { left: null, right: 'training sword' } }), marksmanRoom);
 assert.equal(noWeaponReload.success, false);
 assert.deepEqual(noWeaponReload.events, ['You need a ranged weapon in hand to reload.']);

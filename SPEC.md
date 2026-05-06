@@ -79,10 +79,12 @@ Completed current slice:
 - Expanded item unit coverage for ammo status with and without ranged weapons, loaded fire consumption, unloaded fire failures, empty-quiver fire failures, and missing-ranged-weapon fire failures.
 - Extracted attack range validation and range failure event formatting into `server/src/items.ts`.
 - Expanded item unit coverage for valid ranged attacks, ranged-too-close failures, melee-too-far failures, and unarmed range failures.
+- Extracted weapon attack opening event formatting and unarmed fallback messaging into `server/src/items.ts`.
+- Expanded item unit coverage for ranged weapon, melee weapon, and unarmed attack opening text.
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting weapon attack opening event formatting and unarmed fallback messaging.
+- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting attack hit/miss combat result event formatting.
 
 Core Philosophy
 
