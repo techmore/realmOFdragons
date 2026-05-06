@@ -10,14 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Added an always-visible scripts/macros discovery note to the web Scripts panel.
-- Browser smoke verifies the scripts/macros note and a preset load button.
-- README now documents saved scripts/macros, presets, save/run flow, pace, and continue-on-error behavior.
-- Coverage summary and Markdown telemetry now report browser script discovery visibility.
+- Browser smoke now loads a script preset, renames it, saves it, and verifies the saved script appears.
+- Browser smoke reports `scriptPresetSaved`.
+- Coverage summary, Markdown telemetry, and README coverage fields now include browser script preset save coverage.
 
 Current next priority:
 
-- Add a focused browser or API smoke action that loads a script preset, saves it, and verifies the saved script appears in the UI/API.
+- Add API smoke coverage for script deletion or script run result telemetry so saved script lifecycle coverage includes create, run, and delete.
 
 Core Philosophy
 
@@ -461,6 +460,20 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add a focused browser or API smoke action that loads a script preset, saves it, and verifies the saved script appears in the UI/API.
+
+Implementation Notes - 2026-05-06, Browser Script Preset Save Smoke
+
+Completed in the current Node/React prototype:
+
+- Browser smoke loads the Crossing Guild Tour preset.
+- Browser smoke renames and saves the preset as an account script.
+- Browser smoke verifies the terminal save message and saved script visibility in the UI.
+- Browser smoke now reports `scriptPresetSaved`.
+- Coverage summary, Markdown telemetry, and README coverage fields now include browser script preset save coverage.
+
+Next priority:
+
+- Add API smoke coverage for script deletion or script run result telemetry so saved script lifecycle coverage includes create, run, and delete.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

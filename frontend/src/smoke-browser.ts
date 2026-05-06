@@ -41,7 +41,11 @@ async function main(): Promise<void> {
     await page.getByText('help scan').waitFor();
     await page.getByText('target <name>').waitFor();
     await page.getByText('Scripts are reusable command macros').waitFor();
-    await page.getByRole('button', { name: /load Crossing Guild Tour/ }).waitFor();
+    await page.getByRole('button', { name: /load Crossing Guild Tour/ }).click();
+    await page.getByLabel('Script name').fill('Browser Guild Tour');
+    await page.getByRole('button', { name: 'Save Script' }).click();
+    await page.locator('.terminal-pane .log').getByText('Saved script "Browser Guild Tour"').waitFor();
+    await page.locator('.script-item').getByText('Browser Guild Tour (16 cmds)').waitFor();
 
     await page.getByRole('textbox', { name: 'Name', exact: true }).fill(characterName);
     await page.getByRole('button', { name: 'Create Character' }).click();
@@ -134,6 +138,7 @@ async function main(): Promise<void> {
           verbDiscoveryClicked: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
+          scriptPresetSaved: true,
         },
         null,
         2,

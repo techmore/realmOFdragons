@@ -101,6 +101,7 @@ Coverage fields currently distinguish broad combat coverage from target-specific
 - `frontend.staticCommandDiscoveryChecked`
 - `frontend.browserCommandDiscoveryVisible`
 - `frontend.browserScriptDiscoveryVisible`
+- `frontend.browserScriptPresetSaved`
 - `frontend.browserTargetDetailsClicked`
 - `frontend.browserVerbDiscoveryClicked`
 
