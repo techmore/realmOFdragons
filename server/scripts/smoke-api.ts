@@ -402,6 +402,11 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   assert(result.itemDetails.some((item) => item.code === 'itm-practice-bow' && item.weaponRange === 'ranged'), 'Expected practice bow ranged metadata.');
   current = (await command(context.accessToken, result.character.id, 'wait 450')).character;
 
+  result = await command(context.accessToken, current.id, 'shop buy itm-sting-arrow');
+  assert(result.events.some((event) => event.includes('You buy practice arrow')), 'Expected to buy practice arrow.');
+  assert(result.itemDetails.some((item) => item.code === 'itm-sting-arrow' && item.category === 'ammo'), 'Expected practice arrow ammo metadata.');
+  current = (await command(context.accessToken, result.character.id, 'wait 450')).character;
+
   result = await command(context.accessToken, current.id, 'stow right');
   assert(result.events.some((event) => event.includes('You stow training sword')), 'Expected to stow starter sword.');
   current = (await command(context.accessToken, result.character.id, 'wait 300')).character;
@@ -459,10 +464,14 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   current = await walkTo(context.accessToken, result.character, 'crossing-RV02-002');
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
 
-  result = await command(context.accessToken, current.id, 'attack');
+  const arrowsBefore = current.inventory.filter((item) => item === 'itm-sting-arrow').length;
+  result = await command(context.accessToken, current.id, 'fire');
   assert(result.events.some((event) => event.includes('You attack with practice bow (ranged weapon')), 'Expected ranged weapon attack output.');
+  assert(result.events.some((event) => event.includes('You loose practice arrow')), 'Expected ranged attack to consume practice arrow.');
+  assert(result.character.inventory.filter((item) => item === 'itm-sting-arrow').length === arrowsBefore - 1, 'Expected practice arrow inventory count to decrease.');
   assert(!result.events.some((event) => event.includes('too far away')), 'Expected ranged weapon to attack from pole or missile range.');
   context.summary.rangedWeaponRangeChecked = true;
+  context.summary.rangedAliasAmmoChecked = true;
   current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
 
   if (current.combat?.range === 'melee') {

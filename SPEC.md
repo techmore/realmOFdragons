@@ -10,15 +10,15 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Item metadata now distinguishes melee and ranged weapons with valid attack ranges and training skill hints.
-- Ranged weapons can attack from missile/pole range; melee and unarmed attacks remain melee-only.
-- Ranged weapons are blocked at melee range with a retreat hint.
-- Frontend item cards show weapon range, valid ranges, and training skill.
-- API smoke buys/wields a practice bow and verifies ranged attack range behavior.
+- Added `fire` and `shoot` as ranged attack aliases.
+- Ranged weapons now declare required ammo metadata.
+- Practice arrows are categorized as ammo rather than ranged weapons.
+- Ranged attacks consume one practice arrow after passing range/cooldown checks.
+- API smoke buys practice arrows, fires a practice bow, and verifies ammo consumption telemetry.
 
 Current next priority:
 
-- Add explicit ranged command aliases (`fire`, `shoot`) and beginner ammo handling for practice arrows.
+- Add quiver/bundle handling for ammunition so arrows can be carried, counted, and bought in useful stacks instead of one inventory row per shot.
 
 Core Philosophy
 

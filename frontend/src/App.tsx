@@ -45,6 +45,8 @@ type ItemDetail = {
   weaponRange?: string;
   validAttackRanges?: string[];
   trainingSkill?: string;
+  ammoCode?: string;
+  ammoName?: string;
   carried: boolean;
   shopAvailable: boolean;
 };
@@ -563,7 +565,7 @@ function GameStatusPanels({
           <p><strong>New here?</strong> Use <code>verb</code> for grouped commands, <code>help scan</code> for target discovery, and <code>target &lt;name&gt;</code> before you advance.</p>
         </div>
         <div className="action-grid">
-          {['look', 'survey', 'verb', 'scan', 'forage', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'wield training sword', 'shop', 'join guild', 'combat', 'attack', 'defend', 'flee', 'rest'].map((entry) => (
+          {['look', 'survey', 'verb', 'scan', 'forage', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'wield training sword', 'shop', 'join guild', 'combat', 'attack', 'fire', 'shoot', 'defend', 'flee', 'rest'].map((entry) => (
             <button type="button" key={entry} onClick={() => onCommand(entry)} disabled={loading || !character}>
               {entry}
             </button>
@@ -676,6 +678,7 @@ function GameStatusPanels({
                   <small>{item.code} | {item.category} | {item.value} {item.currency}</small>
                   <small>slot {item.slot ?? 'held/carried'} | armor {item.armor} | evasion penalty {item.evasionPenalty} | attack {item.attackModifier}</small>
                   <small>weapon {item.weaponRange ?? 'none'} | ranges {item.validAttackRanges?.join(', ') ?? 'none'} | trains {item.trainingSkill ?? 'none'}</small>
+                  <small>ammo {item.ammoName ? `${item.ammoName} (${item.ammoCode})` : 'none'}</small>
                   <p className="subtle">{item.description}</p>
                   <div className="action-grid">
                     <button type="button" onClick={() => onCommand(`appraise ${item.code}`)} disabled={loading || !character}>

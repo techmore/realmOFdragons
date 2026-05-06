@@ -105,6 +105,8 @@ type ItemDetail = {
   weaponRange?: 'melee' | 'ranged';
   validAttackRanges?: CombatRangeName[];
   trainingSkill?: string;
+  ammoCode?: string;
+  ammoName?: string;
   carried: boolean;
   shopAvailable: boolean;
 };
@@ -447,10 +449,16 @@ function inferEquipmentStats(code: string, name: string, category: string): Pick
   return { armor: 0, evasionPenalty: 0, attackModifier: 0 };
 }
 
-function inferWeaponProfile(code: string, name: string, category: string): Pick<ItemDetail, 'weaponRange' | 'validAttackRanges' | 'trainingSkill'> {
+function inferWeaponProfile(code: string, name: string, category: string): Pick<ItemDetail, 'weaponRange' | 'validAttackRanges' | 'trainingSkill' | 'ammoCode' | 'ammoName'> {
   const text = `${code} ${name}`.toLowerCase();
-  if (category === 'ranged' || text.includes('bow') || text.includes('arrow')) {
-    return { weaponRange: 'ranged', validAttackRanges: ['missile', 'pole'], trainingSkill: 'missile' };
+  if (category === 'ranged' || text.includes('bow')) {
+    return {
+      weaponRange: 'ranged',
+      validAttackRanges: ['missile', 'pole'],
+      trainingSkill: 'missile',
+      ammoCode: 'itm-sting-arrow',
+      ammoName: 'practice arrow',
+    };
   }
   if (category === 'weapon') {
     return { weaponRange: 'melee', validAttackRanges: ['melee'], trainingSkill: 'melee' };
@@ -999,7 +1007,8 @@ function buildCommandResult(character: CharacterRecord, room: Room, events: stri
 
 function inferItemCategory(code: string, name: string): string {
   const text = `${code} ${name}`.toLowerCase();
-  if (text.includes('bow') || text.includes('arrow')) return 'ranged';
+  if (text.includes('arrow')) return 'ammo';
+  if (text.includes('bow')) return 'ranged';
   if (text.includes('knife') || text.includes('mace') || text.includes('sword') || text.includes('scraper')) return 'weapon';
   if (text.includes('glove') || text.includes('salve')) return 'armor';
   if (text.includes('herb') || text.includes('bark') || text.includes('root') || text.includes('grass')) return 'forage';
@@ -1143,6 +1152,7 @@ function buildItemDetailEvents(character: CharacterRecord, room: Room, requested
     `Category: ${item.category}. Source: ${item.source}.`,
     `Slot: ${item.slot ?? 'held/carried only'}. Armor ${item.armor}. Evasion penalty ${item.evasionPenalty}. Attack modifier ${item.attackModifier}.`,
     `Weapon range: ${item.weaponRange ?? 'none'}. Valid attack ranges: ${item.validAttackRanges?.join(', ') ?? 'none'}. Training skill: ${item.trainingSkill ?? 'none'}.`,
+    `Ammo: ${item.ammoCode ? `${item.ammoName} (${item.ammoCode})` : 'none'}.`,
     `Value: ${item.value} ${item.currency}.`,
     `Carried: ${item.carried ? 'yes' : 'no'}. Shop available here: ${item.shopAvailable ? 'yes' : 'no'}.`,
     item.description,
@@ -1887,8 +1897,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
-  if (command.startsWith('attack')) {
-    const requestedTarget = command.startsWith('attack ') ? command.slice(7).trim() : '';
+  if (command.startsWith('attack') || command.startsWith('fire') || command.startsWith('shoot')) {
+    const rangedAlias = command.startsWith('fire') || command.startsWith('shoot');
+    const requestedTarget = command.startsWith('attack ')
+      ? command.slice(7).trim()
+      : command.startsWith('fire ')
+        ? command.slice(5).trim()
+        : command.startsWith('shoot ')
+          ? command.slice(6).trim()
+          : '';
     if (!resolvedCharacter.combat) {
       const combat = buildCharacterCombat(resolvedCharacter, requestedTarget);
       if (!combat) {
@@ -1908,6 +1925,11 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
     const equipment = buildEquipmentSummary(resolvedCharacter, room);
     const weapon = findHeldWeapon(resolvedCharacter, room);
+    if (rangedAlias && weapon?.weaponRange !== 'ranged') {
+      events.push('You need a ranged weapon in hand to fire or shoot.');
+      await persist();
+      return buildCommandResult(resolvedCharacter, room, events);
+    }
     if (weapon) {
       events.push(`You attack with ${weapon.name} (${weapon.weaponRange ?? 'melee'} weapon, attack modifier ${weapon.attackModifier}).`);
     } else {
@@ -1934,6 +1956,20 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       events.push(`Your target is still in the attack cycle (${remaining}ms).`);
       await persist();
       return buildCommandResult(resolvedCharacter, room, events);
+    }
+
+    let consumedAmmo: string | undefined;
+    if (weapon?.weaponRange === 'ranged') {
+      const ammoCode = weapon.ammoCode ?? 'itm-sting-arrow';
+      const ammoIndex = resolvedCharacter.inventory.findIndex((item) => item === ammoCode);
+      if (ammoIndex < 0) {
+        events.push(`You need ${weapon.ammoName ?? 'practice arrow'} (${ammoCode}) to use ${weapon.name}.`);
+        await persist();
+        return buildCommandResult(resolvedCharacter, room, events);
+      }
+      consumedAmmo = resolvedCharacter.inventory.splice(ammoIndex, 1)[0];
+      modified = true;
+      events.push(`You loose ${weapon.ammoName ?? consumedAmmo}.`);
     }
 
     const template = ENEMY_TEMPLATES.find((entry) => entry.id === resolvedCharacter.combat?.targetId);
