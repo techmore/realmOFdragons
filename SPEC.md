@@ -402,4 +402,4 @@ Completed in the current Node/React prototype:
 
 Next priority:
 
-- Add scan/target visibility to the web UI controls and browser smoke so players can discover enemies from both command input and quick actions.
+- Add a first target-selection affordance in the UI: when scan output identifies local enemies, expose an easy `advance <target>` / `attack <target>` action without requiring manual typing.
