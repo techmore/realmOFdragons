@@ -1,6 +1,3 @@
-Here's a strong starting template for your SPEC.md.
-Copy this into your repo as SPEC.md and treat it as a living document. Update it constantly as you play DragonRealms and observe new behaviors. The more precise and example-rich you make it, the better Codex can implement matching mechanics.
-
 DragonRealms Clean-Room Clone - Master Specification
 Project Goal: Build a fully playable, open-source MUD that captures the observable feel and mechanics of DragonRealms (Elanthia) through legitimate play and documentation only. No proprietary code, packets, or binaries.
 
@@ -10,6 +7,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Removed stale template language that recommended Evennia/Python, Telnet-first play, and Evennia persistence.
+- SPEC now names the current authoritative prototype stack: Node.js/Express server, React web client, REST command API, file-backed prototype persistence, and TypeScript world fixtures.
+- SPEC now names the intended next architecture steps: extract transport-agnostic game-core modules, add Postgres for mutable account/character state after schemas stabilize, and add WebSocket gameplay sessions for live play.
 - Circle advancement now requires the character to belong to a guild and stand at that guild's registrar room.
 - Progression smoke now verifies a Barbarian cannot advance circles from Crossing Town Green and must return to the Barbarian registrar.
 - Local telemetry now reports guild-registrar-gated circle advancement coverage.
@@ -156,7 +156,7 @@ Completed current slice:
 
 Current next priority:
 
-- Clean stale SPEC architecture guidance so Node/React, file-backed prototype storage, future Postgres, and future WebSocket gameplay are authoritative.
+- Extract circle advancement decision logic into a pure progression helper with unit coverage.
 
 Core Philosophy
 
@@ -168,10 +168,28 @@ Rich world with rooms, items, crafting, magic, economy, and RP focus.
 
 1. Technical Foundation
 
-Server: Evennia (Python) – recommended for rapid prototyping of MUD features.
-Protocol: Telnet + optional web client.
-Persistence: Evennia’s object model (rooms, characters, items, scripts).
-Multiplayer: Real-time, concurrent players, basic instancing if needed later.
+Current prototype stack:
+
+- Server: Node.js and Express.
+- Client: React web UI with a MUD-style command log and structured panels.
+- Protocol now: REST account/management API plus request/response command API.
+- Persistence now: file-backed prototype storage for accounts, sessions, characters, and scripts.
+- World content now: source-controlled TypeScript fixtures for rooms, exits, shops, races, guilds, items, targets, and beginner progression.
+- Smoke/telemetry now: unit tests, API smoke, focused race/guild/target/economy/script smoke, static UI smoke, browser smoke, and coverage-shape validation.
+
+Near-term architecture direction:
+
+- Keep Node/Express and React while mechanics are changing quickly.
+- Continue extracting game behavior out of Express routes into transport-agnostic pure helpers.
+- Keep REST for account, character, script, world catalog, and fixture/admin flows.
+- Add WebSocket gameplay sessions for live command/event streaming once command results are stable.
+- Move mutable player/account state to Postgres after the character, inventory, skill, script, and session schemas stabilize.
+- Keep world definitions source-controlled until maps, shops, items, races, guilds, and beginner content stop changing every slice.
+
+Longer-term runtime direction:
+
+- Go remains a possible future authoritative server runtime, but only after game-core boundaries, persistence repositories, and WebSocket event contracts are explicit.
+- Do not rewrite the server yet; stabilize mechanics and contracts first.
 
 2. Character Creation & Basics
 
