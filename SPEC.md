@@ -26,10 +26,13 @@ Completed current slice:
 - Added `recover arrows`/`recover ammo` scavenging to move recoverable arrows back into ammo pouch stacks.
 - Web ammo readiness now shows recoverable ammunition.
 - Smoke telemetry now tracks ammo recovery scavenging.
+- Ranged shots now resolve deterministic recovery outcomes: intact, damaged, or lost.
+- Damaged arrows can be scavenged as broken ammunition inventory rather than usable ammo.
+- Smoke telemetry now tracks damaged/lost ammo outcome coverage.
 
 Current next priority:
 
-- Add ranged ammo loss chance and damaged-arrow outcomes so recovery is not always perfect.
+- Add item appraisal/sell handling for damaged recovered ammunition so broken arrows participate in the economy.
 
 Core Philosophy
 

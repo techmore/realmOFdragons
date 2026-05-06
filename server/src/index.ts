@@ -501,6 +501,26 @@ function addRecoverableAmmo(character: CharacterRecord, code: string, count: num
     Math.max(0, Math.floor(character.recoverableAmmo[code] ?? 0)) + Math.max(0, Math.floor(count));
 }
 
+function damagedAmmoCode(code: string) {
+  return `damaged-${code}`;
+}
+
+function resolveRangedAmmoRecovery(character: CharacterRecord, ammoCode: string, ammoName: string, recoveryRoll: number, events: string[]) {
+  const normalizedRoll = Math.max(0, Math.floor(recoveryRoll)) % 100;
+  if (normalizedRoll < 20) {
+    events.push(`${ammoName} splinters beyond recovery.`);
+    return 'lost';
+  }
+  if (normalizedRoll < 55) {
+    addRecoverableAmmo(character, damagedAmmoCode(ammoCode), 1);
+    events.push(`${ammoName} is damaged and may be recovered only as broken ammunition after the fight.`);
+    return 'damaged';
+  }
+  addRecoverableAmmo(character, ammoCode, 1);
+  events.push(`${ammoName} may be recovered after the fight.`);
+  return 'intact';
+}
+
 function countAmmo(character: CharacterRecord, code: string) {
   return Math.max(0, Math.floor(character.ammoPouch?.[code] ?? 0)) + character.inventory.filter((item) => item === code).length;
 }
@@ -1148,6 +1168,7 @@ function inferItemCategory(code: string, name: string): string {
 
 function displayNameFromCode(code: string): string {
   return code
+    .replace(/^damaged-/, 'damaged ')
     .replace(/^itm-/, '')
     .replace(/^foraged-/, '')
     .replace(/-/g, ' ')
@@ -1921,9 +1942,17 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       return buildCommandResult(resolvedCharacter, room, events);
     }
     for (const [ammoCode, count] of recoverableEntries) {
-      addAmmo(resolvedCharacter, ammoCode, count);
+      if (ammoCode.startsWith('damaged-')) {
+        const recoveredCode = ammoCode.replace(/^damaged-/, 'damaged ');
+        for (let index = 0; index < count; index += 1) {
+          resolvedCharacter.inventory.push(recoveredCode);
+        }
+        events.push(`You recover ${count} ${displayNameFromCode(ammoCode)} as broken ammunition.`);
+      } else {
+        addAmmo(resolvedCharacter, ammoCode, count);
+        events.push(`You recover ${count} ${displayNameFromCode(ammoCode)} into your ammo pouch.`);
+      }
       delete resolvedCharacter.recoverableAmmo![ammoCode];
-      events.push(`You recover ${count} ${displayNameFromCode(ammoCode)} into your ammo pouch.`);
     }
     grantSkillPool(resolvedCharacter, 'survival', 1, events);
     setActionCooldown(resolvedCharacter, 400);
@@ -2176,10 +2205,8 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       }
       clearLoadedAmmo(resolvedCharacter, weapon);
       consumedAmmo = ammoCode;
-      addRecoverableAmmo(resolvedCharacter, ammoCode, 1);
       modified = true;
       events.push(`You loose loaded ${weapon.ammoName ?? consumedAmmo}. ${countAmmo(resolvedCharacter, ammoCode)} remain in your quiver.`);
-      events.push(`${weapon.ammoName ?? consumedAmmo} may be recoverable after the fight.`);
     }
 
     const template = ENEMY_TEMPLATES.find((entry) => entry.id === resolvedCharacter.combat?.targetId);
@@ -2199,6 +2226,16 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       resolvedCharacter.stats.strength + resolvedCharacter.stats.agility + resolvedCharacter.stats.reflex,
       (requestedTarget ? -2 : 0) + stanceProfile.attack + balanceBonus + advantageBonus + equipment.totalAttackModifier * 3,
     );
+    if (weapon?.weaponRange === 'ranged' && consumedAmmo) {
+      resolveRangedAmmoRecovery(
+        resolvedCharacter,
+        consumedAmmo,
+        weapon.ammoName ?? consumedAmmo,
+        playerAttack.roll + playerAttack.threshold + resolvedCharacter.balance,
+        events,
+      );
+      modified = true;
+    }
 
     if (playerAttack.hit) {
       const damage = resolveAttackDamage(

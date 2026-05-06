@@ -502,11 +502,22 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   result = await command(context.accessToken, current.id, 'fire');
   assert(result.events.some((event) => event.includes('You attack with practice bow (ranged weapon')), 'Expected ranged weapon attack output.');
   assert(result.events.some((event) => event.includes('You loose loaded practice arrow')), 'Expected ranged attack to fire loaded practice arrow.');
-  assert(result.events.some((event) => event.includes('may be recoverable after the fight')), 'Expected ranged attack to create recoverable ammo.');
+  assert(
+    result.events.some(
+      (event) =>
+        event.includes('may be recovered after the fight') ||
+        event.includes('damaged and may be recovered') ||
+        event.includes('splinters beyond recovery'),
+    ),
+    'Expected ranged attack to resolve ammo recovery outcome.',
+  );
   assert(result.events.some((event) => event.includes(`${arrowsBefore} remain`)), 'Expected ranged attack to report remaining ammo.');
   assert((result.character.ammoPouch?.['itm-sting-arrow'] ?? 0) === arrowsBefore, 'Expected loaded ranged attack not to double-consume pouch ammo.');
   assert(!result.character.loadedAmmo?.['itm-practice-bow'], 'Expected ranged attack to clear loaded ammo state.');
-  assert(result.character.recoverableAmmo?.['itm-sting-arrow'] === 1, 'Expected fired arrow to become recoverable.');
+  const recoverableShotCount =
+    (result.character.recoverableAmmo?.['itm-sting-arrow'] ?? 0) +
+    (result.character.recoverableAmmo?.['damaged-itm-sting-arrow'] ?? 0);
+  assert(recoverableShotCount <= 1, 'Expected at most one fired arrow recovery record.');
   assert(!result.events.some((event) => event.includes('too far away')), 'Expected ranged weapon to attack from pole or missile range.');
   context.summary.rangedWeaponRangeChecked = true;
   context.summary.rangedAliasAmmoChecked = true;
@@ -521,10 +532,16 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
 
   const arrowsBeforeRecovery = current.ammoPouch?.['itm-sting-arrow'] ?? 0;
   result = await command(context.accessToken, current.id, 'recover arrows');
-  assert(result.events.some((event) => event.includes('You recover 1 sting arrow into your ammo pouch')), 'Expected recover arrows output.');
-  assert((result.character.ammoPouch?.['itm-sting-arrow'] ?? 0) === arrowsBeforeRecovery + 1, 'Expected recovered arrow to return to ammo pouch.');
+  assert(
+    result.events.some((event) => event.includes('You recover 1')) ||
+      result.events.some((event) => event.includes('You find no recoverable ammunition')),
+    'Expected recover arrows to report recovered or lost ammunition.',
+  );
+  assert((result.character.ammoPouch?.['itm-sting-arrow'] ?? 0) >= arrowsBeforeRecovery, 'Expected recovery not to reduce ammo pouch.');
   assert(!result.character.recoverableAmmo?.['itm-sting-arrow'], 'Expected recoverable ammo to clear after recovery.');
+  assert(!result.character.recoverableAmmo?.['damaged-itm-sting-arrow'], 'Expected damaged recoverable ammo to clear after recovery.');
   context.summary.ammoRecoveryChecked = true;
+  context.summary.ammoDamageLossChecked = true;
   current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
 
   if (current.combat?.range === 'melee') {
