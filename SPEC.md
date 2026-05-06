@@ -10,14 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Added passive `survey` and `search` room discovery commands.
-- Survey output summarizes exits, forage, shop, guild registrar, and immediate targets.
-- Web quick controls now include `survey`.
-- Static UI and API smoke verify survey discovery.
+- README command reference now documents `survey` and `search`.
+- Browser smoke clicks `survey` from the web quick controls in a forageable hunting room.
+- Browser telemetry now reports `surveyClicked`.
 
 Current next priority:
 
-- Add `survey` command coverage to README command reference and browser smoke telemetry.
+- Add a lightweight room-affordance panel in the web UI that mirrors survey results without requiring command output parsing.
 
 Core Philosophy
 
@@ -600,6 +599,19 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add `survey` command coverage to README command reference and browser smoke telemetry.
+
+Implementation Notes - 2026-05-06, Survey Browser And Docs Coverage
+
+Completed in the current Node/React prototype:
+
+- README command reference now documents `survey` and `search`.
+- Browser smoke clicks the web `survey` quick control in Brushline Forage Fork.
+- Browser smoke verifies survey header, forage summary, and target summary output.
+- Browser telemetry now reports `surveyClicked`.
+
+Next priority:
+
+- Add a lightweight room-affordance panel in the web UI that mirrors survey results without requiring command output parsing.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

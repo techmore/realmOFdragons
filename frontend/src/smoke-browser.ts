@@ -102,6 +102,11 @@ async function main(): Promise<void> {
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
 
+    await page.getByRole('button', { name: 'survey', exact: true }).click();
+    await page.locator('.terminal-pane .log').getByText('Surveying Brushline Forage Fork:').waitFor();
+    await page.locator('.terminal-pane .log').getByText('Forage: difficulty').waitFor();
+    await page.locator('.terminal-pane .log').getByText('Targets: forage wolf-cub.').waitFor();
+
     await page.getByRole('button', { name: 'scan', exact: true }).click();
     await page.locator('.terminal-pane .log').getByText('forage wolf-cub').waitFor();
     await page.locator('.terminal-pane .log').getByText('Vitality estimates how long a target can stay in the fight').waitFor();
@@ -133,9 +138,10 @@ async function main(): Promise<void> {
           suite: 'frontend:smoke-browser',
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
-          commandCount: 16,
+          commandCount: 17,
           targetDetailsClicked: true,
           verbDiscoveryClicked: true,
+          surveyClicked: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,

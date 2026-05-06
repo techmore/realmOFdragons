@@ -143,6 +143,7 @@ Core information:
 - `help`: list available commands.
 - `help scan` or `help targets`: explain target discovery and target metadata.
 - `look`: show the current room, prompts, exits, shop presence, and visible local targets.
+- `survey` or `search`: summarize room exits, forage, shop, guild registrar, and immediate targets.
 - `exits`: list current room exits.
 - `score`: show character identity, circle, stance, balance, health, room, wallet, and combat summary.
 - `skills`: show skill ranks and learning pools.
