@@ -95,6 +95,8 @@ async function main(): Promise<void> {
     await page.getByText('Visible Targets').waitFor();
     await page.getByText('Vitality estimates staying power').waitFor();
     await page.getByText('Vitality 10 · Aggression 55').waitFor();
+    await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByRole('button', { name: 'details' }).click();
+    await page.locator('.terminal-pane .log').getByText('Suggested next verb: advance forage wolf-cub.').waitFor();
     await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByRole('button', { name: 'advance' }).click();
     await page.locator('.terminal-pane .log').getByText(/You begin advancing on forage wolf-cub/).waitFor();
 
@@ -118,7 +120,7 @@ async function main(): Promise<void> {
           suite: 'frontend:smoke-browser',
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
-          commandCount: 14,
+          commandCount: 15,
         },
         null,
         2,

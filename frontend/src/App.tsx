@@ -494,6 +494,9 @@ function GameStatusPanels({
                 <span key={target.id} className="target-actions">
                   <strong>{target.name}</strong>
                   <small>Vitality {target.vitality} · Aggression {target.aggression}</small>
+                  <button type="button" onClick={() => onCommand(`target ${target.name}`)} disabled={loading || !character}>
+                    details
+                  </button>
                   <button type="button" onClick={() => onCommand(`advance ${target.name}`)} disabled={loading || !character}>
                     advance
                   </button>

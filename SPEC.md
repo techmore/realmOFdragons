@@ -393,6 +393,19 @@ Next priority:
 
 - Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
 
+Implementation Notes - 2026-05-05, Web Target Details Action
+
+Completed in the current Node/React prototype:
+
+- Added a `details` button to each visible target in the web UI.
+- The web details action sends the canonical `target <name>` command instead of duplicating target logic client-side.
+- Static UI smoke verifies the new details affordance.
+- Browser smoke clicks target details and verifies the suggested next verb before advancing.
+
+Next priority:
+
+- Add target details telemetry to the local coverage summary so reports distinguish scan visibility, structured target payloads, and target-detail command/UI coverage.
+
 Implementation Notes - 2026-05-05, Target Details Command
 
 Completed in the current Node/React prototype:

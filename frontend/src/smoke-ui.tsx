@@ -96,6 +96,7 @@ for (const expected of [
   'Visible Targets',
   'Vitality estimates staying power',
   'Vitality 12 · Aggression 55',
+  'details',
   'advance',
   'attack',
   'Character',
