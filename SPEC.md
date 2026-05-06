@@ -336,6 +336,20 @@ Next priority:
 
 - Add scan/target visibility to the web UI controls and browser smoke so players can discover enemies from both command input and quick actions.
 
+Implementation Notes - 2026-05-05, Web UI Scan Visibility
+
+Completed in the current Node/React prototype:
+
+- Added `scan` to the web quick command controls.
+- Added static UI smoke coverage for the `scan` control.
+- Expanded browser smoke to navigate from town green to the beginner hunting fork using numpad movement.
+- Browser smoke now clicks the `scan` quick command and verifies `forage wolf-cub` target visibility in the terminal log.
+- Browser smoke command count telemetry increased to 7.
+
+Next priority:
+
+- Add a first target-selection affordance in the UI: when scan output identifies local enemies, expose an easy `advance <target>` / `attack <target>` action without requiring manual typing.
+
 Implementation Notes - 2026-05-05, Enemy Visibility Commands
 
 Completed in the current Node/React prototype:

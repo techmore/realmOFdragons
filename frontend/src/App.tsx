@@ -454,7 +454,7 @@ function GameStatusPanels({
       <section className="panel">
         <h2>Controls</h2>
         <div className="action-grid">
-          {['look', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'shop', 'join guild', 'combat', 'attack', 'defend', 'flee', 'rest'].map((entry) => (
+          {['look', 'scan', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'shop', 'join guild', 'combat', 'attack', 'defend', 'flee', 'rest'].map((entry) => (
             <button type="button" key={entry} onClick={() => onCommand(entry)} disabled={loading || !character}>
               {entry}
             </button>

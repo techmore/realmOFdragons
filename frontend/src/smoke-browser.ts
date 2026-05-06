@@ -53,6 +53,41 @@ async function main(): Promise<void> {
     await page.keyboard.press('Numpad6');
     await page.getByText(/You go east/).waitFor();
 
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').focus();
+    await page.keyboard.press('Numpad4');
+    await page.getByText(/You go west/).waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('south');
+    await page.keyboard.press('Enter');
+    await page.getByText(/You go south/).waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('south');
+    await page.keyboard.press('Enter');
+    await page.getByText(/You go south/).last().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('east');
+    await page.keyboard.press('Enter');
+    await page.getByText(/You go east to Brushline Forage Fork/).waitFor();
+
+    await page.getByRole('button', { name: 'scan', exact: true }).click();
+    await page.locator('.terminal-pane .log').getByText('forage wolf-cub').waitFor();
+
     const content = await page.content();
     for (const expected of [
       characterName,
@@ -73,7 +108,7 @@ async function main(): Promise<void> {
           suite: 'frontend:smoke-browser',
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
-          commandCount: 3,
+          commandCount: 12,
         },
         null,
         2,
