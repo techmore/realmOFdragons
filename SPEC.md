@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Character creation API now rejects `guild`/`guildId` payloads; guilds must be joined in-world at a registrar.
+- Smoke coverage now asserts new characters start `commoner`/`Unaffiliated` and only gain guild identity after travel plus `join guild`.
+- Web character creation now explicitly says guilds are joined in-world after travelling to a registrar.
 - Public `/v1/races` no longer exposes prototype random-roll roles or stat modifiers during normal DragonRealms character creation.
 - Web character panels and reroll logs now show stat generation mode instead of prototype role labels.
 - The `score` command now reports race plus fixed/classic stat mode without surfacing prototype archetype labels.

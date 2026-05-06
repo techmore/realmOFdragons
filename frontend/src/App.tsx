@@ -1500,6 +1500,7 @@ function App() {
               </label>
               <button type="submit" disabled={loading}>Create Character</button>
               <p className="subtle">Creation uses DragonRealms modern fixed racial starting stats.</p>
+              <p className="subtle">Guilds are joined in-world: travel to a guild registrar, then use <code>join guild</code>.</p>
             </form>
             <div className="character-list">
               {characters.map((entry) => (

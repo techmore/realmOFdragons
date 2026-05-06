@@ -2204,9 +2204,14 @@ app.post('/v1/characters', authRequired, async (req: AuthenticatedRequest, res: 
   const name = String(req.body?.name ?? '').trim();
   const raceInput = String(req.body?.race ?? '').trim() || 'Human';
   const statMode = normalizeStatGenerationMode(req.body?.statMode);
+  const requestedGuild = req.body?.guildId ?? req.body?.guild;
 
   if (!name || name.length > 40) {
     return res.status(400).json({ error: 'A valid character name is required.' });
+  }
+
+  if (requestedGuild !== undefined) {
+    return res.status(400).json({ error: 'Guild is not selected during character creation. Travel to a guild registrar and use "join guild".' });
   }
 
   if (!isValidRace(raceInput)) {

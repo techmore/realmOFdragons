@@ -32,6 +32,8 @@ interface CharacterSummary {
   id: string;
   name: string;
   race: string;
+  guildId: string;
+  guildName: string;
   roomId: string;
   circle: number;
   stats: Record<string, number>;
@@ -161,6 +163,19 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return body as T;
 }
 
+async function requestFailure(path: string, options: RequestInit = {}): Promise<string> {
+  const response = await fetch(`${baseUrl}${path}`, {
+    ...options,
+    headers: {
+      'content-type': 'application/json',
+      ...(options.headers ?? {}),
+    },
+  });
+  const body = await response.json().catch(() => ({}));
+  assert(!response.ok, `Expected ${options.method ?? 'GET'} ${path} to fail.`);
+  return typeof body === 'object' && body && 'error' in body ? String(body.error) : JSON.stringify(body);
+}
+
 function authHeaders(accessToken: string): Record<string, string> {
   return { authorization: `Bearer ${accessToken}` };
 }
@@ -251,11 +266,20 @@ async function createContext(): Promise<SmokeContext> {
   });
   assert(login.accessToken, 'Expected login access token.');
 
+  const guildCreationError = await requestFailure('/v1/characters', {
+    method: 'POST',
+    headers: authHeaders(login.accessToken),
+    body: JSON.stringify({ name: `Guild${unique.slice(-6)}`, race: races.races[0].name, guildId: 'barbarian' }),
+  });
+  assert(guildCreationError.includes('Guild is not selected during character creation'), 'Expected guild-at-creation rejection.');
+
   const character = await request<CharacterSummary>('/v1/characters', {
     method: 'POST',
     headers: authHeaders(login.accessToken),
     body: JSON.stringify({ name: `Smoke${unique.slice(-6)}`, race: races.races[0].name }),
   });
+  assert(character.guildId === 'commoner', `Expected new character to start commoner, got ${character.guildId}.`);
+  assert(character.guildName === 'Unaffiliated', `Expected new character to start unaffiliated, got ${character.guildName}.`);
 
   return {
     accessToken: login.accessToken,
@@ -292,6 +316,8 @@ async function runIdentitySuite(context: SmokeContext): Promise<void> {
   context.summary.circleOneRacesChecked = context.races.length;
   context.summary.modernFixedStatsChecked = true;
   context.summary.fixedRaceStatsChecked = context.races.length;
+  context.summary.guildCreationRejected = true;
+  context.summary.creationStartsUnaffiliated = true;
 }
 
 async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
@@ -323,6 +349,7 @@ async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
         `Expected matrix character race ${race.name}, got ${character.race}.`,
       );
       assert(character.circle === 1, `Expected new ${race.name} character to start Circle 1, got Circle ${character.circle}.`);
+      assert(character.guildId === 'commoner', `Expected new ${race.name} character to start commoner before guild travel.`);
       assert(character.statGenerationMode === 'modern_fixed', `Expected matrix ${race.name} character to use modern_fixed stats.`);
       assert(JSON.stringify(character.stats) === JSON.stringify(race.fixedStartingStats), `Expected matrix ${race.name} stats to match fixed starting stats.`);
 
@@ -331,6 +358,7 @@ async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
       assert(joined.events.some((event) => event.includes('registered')), `Expected ${race.name} to join ${guild.name}.`);
       assert(joined.character.circle === 1, `Expected ${race.name}/${guild.name} to remain Circle 1 after joining.`);
       assert(joined.character.race === character.race, `Expected ${race.name}/${guild.name} join to preserve race.`);
+      assert(joined.character.guildId === guild.id, `Expected ${race.name} to join ${guild.id} only after travel.`);
 
       combinationsChecked += 1;
       guildIdsChecked.add(guild.id);
@@ -342,6 +370,7 @@ async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
   context.summary.raceGuildMatrixRaceCount = raceNamesChecked.size;
   context.summary.raceGuildMatrixGuildCount = guildIdsChecked.size;
   context.summary.raceGuildMatrixCircle = 1;
+  context.summary.raceGuildMatrixStartsCommoner = true;
 }
 
 async function runScriptSuite(context: SmokeContext): Promise<void> {

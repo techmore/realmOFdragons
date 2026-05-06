@@ -65,6 +65,7 @@ async function main(): Promise<void> {
 
     await page.getByRole('textbox', { name: 'Name', exact: true }).fill(characterName);
     await page.getByText('Creation uses DragonRealms modern fixed racial starting stats.').waitFor();
+    await page.getByText('Guilds are joined in-world').waitFor();
     await page.getByText('Starting stats:').waitFor();
     await page.getByRole('button', { name: 'Create Character' }).click();
     await page.getByText(new RegExp(`Created ${characterName}`)).waitFor();
@@ -78,11 +79,13 @@ async function main(): Promise<void> {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    const characterList = await apiRequest<{ characters: Array<{ id: string; name: string }> }>('/v1/characters', {
+    const characterList = await apiRequest<{ characters: Array<{ id: string; name: string; guildId: string; guildName: string }> }>('/v1/characters', {
       headers: { authorization: `Bearer ${login.accessToken}` },
     });
     const createdCharacter = characterList.characters.find((entry) => entry.name === characterName);
     assert(createdCharacter, 'Expected browser-created character in API character list.');
+    assert(createdCharacter.guildId === 'commoner', 'Expected browser-created character to start commoner.');
+    assert(createdCharacter.guildName === 'Unaffiliated', 'Expected browser-created character to start unaffiliated.');
     await apiRequest(`/v1/test/characters/${createdCharacter.id}/state`, {
       method: 'POST',
       headers: { authorization: `Bearer ${login.accessToken}` },
