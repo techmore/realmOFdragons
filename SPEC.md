@@ -10,6 +10,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- `/v1/races` now exposes modern fixed starting stats for each DragonRealms race.
+- Web character creation now states that it uses DragonRealms modern fixed racial starting stats.
+- The web race panel now shows the selected race's fixed starting stat table.
+- The web HUD and creation log now surface the selected character's stat generation mode.
 - Character creation now defaults to DragonRealms-style modern fixed racial starting stats instead of prototype random rolls.
 - Classic random racial rolling remains available only through explicit `statMode: "classic_random"` API input for future nostalgia/testing workflows.
 - Race reroll and race/guild matrix smoke now assert modern fixed stat generation.
@@ -103,7 +107,7 @@ Completed current slice:
 
 Current next priority:
 
-- Surface stat generation mode and fixed racial starting stats clearly in the web character creation/reroll UI.
+- Add backend and UI coverage for exact fixed starting stat values for all 11 DragonRealms races.
 
 Core Philosophy
 

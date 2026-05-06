@@ -284,10 +284,13 @@ function normalizeRaceInput(input: string): string {
 export const ROLL_PROFILE_VERSION = 2;
 
 export function getAllRaces(): Array<
-  Pick<RaceTemplate, 'id' | 'name' | 'statModifiers' | 'roles' | 'description' | 'minStat' | 'maxStat'>
+  Pick<RaceTemplate, 'id' | 'name' | 'statModifiers' | 'roles' | 'description' | 'minStat' | 'maxStat'> & {
+    fixedStartingStats: StatBlock;
+  }
 > {
   return RACE_DEFINITIONS.map((race) => ({
     ...race,
+    fixedStartingStats: fixedStartingStatsForRace(race.name),
   }));
 }
 

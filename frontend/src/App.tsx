@@ -135,6 +135,7 @@ type Character = {
   balance: number;
   stats: Stats;
   rollProfileVersion: number;
+  statGenerationMode?: 'modern_fixed' | 'classic_random';
   roundtimeMs: number;
 };
 
@@ -172,6 +173,7 @@ type Race = {
   minStat?: number;
   maxStat?: number;
   statModifiers?: Record<string, number>;
+  fixedStartingStats?: Stats;
   roles?: Array<{
     id: string;
     title: string;
@@ -413,6 +415,14 @@ function formatWallet(wallet?: Wallet) {
     return 'wallet unavailable';
   }
   return `${wallet.plat} plat · ${wallet.trias} trias · ${wallet.lucan} lucan · ${wallet.silk} silk`;
+}
+
+function formatStatGenerationMode(mode?: Character['statGenerationMode']): string {
+  return mode === 'classic_random' ? 'Classic random roll' : 'Modern fixed racial stats';
+}
+
+function formatStatName(statName: string): string {
+  return statName.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function findPathBetweenRooms(worldRooms: Record<string, Room>, start: string, destination: string): string[] {
@@ -915,6 +925,7 @@ function App() {
         minStat: entry.minStat,
         maxStat: entry.maxStat,
         statModifiers: entry.statModifiers,
+        fixedStartingStats: entry.fixedStartingStats,
         roles: entry.roles,
       })),
     );
@@ -1014,9 +1025,10 @@ function App() {
         body: {
           name: createName.trim(),
           race: createRace,
+          statMode: 'modern_fixed',
         },
       });
-      appendHistory(`Created ${payload.name} (${payload.raceDisplayName} / ${payload.roleTitle}).`);
+      appendHistory(`Created ${payload.name} (${payload.raceDisplayName} / ${formatStatGenerationMode(payload.statGenerationMode)}).`);
       setCreateName('Explorer');
       await hydrateCharacters(true);
       setCharacters((current) => [payload, ...current]);
@@ -1440,6 +1452,7 @@ function App() {
           </div>
           <div className="topbar-stats">
             <span>{character ? `${character.name} | ${character.guildName} | Circle ${character.circle}` : 'No character selected'}</span>
+            <span>{character ? formatStatGenerationMode(character.statGenerationMode) : 'Stats --'}</span>
             <span>{character ? `Health ${character.health.current}/${character.health.max}` : 'Health --'}</span>
             <span>{character ? `RT ${Math.max(0, Math.round(character.roundtimeMs))}ms` : 'RT --'}</span>
             <button type="button" onClick={logout} disabled={loading}>Logout</button>
@@ -1498,6 +1511,7 @@ function App() {
                 </select>
               </label>
               <button type="submit" disabled={loading}>Create Character</button>
+              <p className="subtle">Creation uses DragonRealms modern fixed racial starting stats.</p>
             </form>
             <div className="character-list">
               {characters.map((entry) => (
@@ -1515,6 +1529,14 @@ function App() {
               <section className="race-details">
                 <h3>{selectedRace.name}</h3>
                 <p className="subtle">{selectedRace.description ?? 'No description available.'}</p>
+                <p><strong>Starting stats:</strong> modern fixed DragonRealms racial table.</p>
+                {selectedRace.fixedStartingStats ? (
+                  <div className="stat-grid compact-stats">
+                    {Object.entries(selectedRace.fixedStartingStats).map(([statName, value]) => (
+                      <span key={statName}>{formatStatName(statName)}: {value}</span>
+                    ))}
+                  </div>
+                ) : null}
               </section>
             ) : null}
             <form onSubmit={rerollCharacter}>

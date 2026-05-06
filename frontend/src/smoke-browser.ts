@@ -64,8 +64,11 @@ async function main(): Promise<void> {
     await page.locator('.script-item').getByText('Browser Guild Tour (16 cmds)').waitFor();
 
     await page.getByRole('textbox', { name: 'Name', exact: true }).fill(characterName);
+    await page.getByText('Creation uses DragonRealms modern fixed racial starting stats.').waitFor();
+    await page.getByText('Starting stats:').waitFor();
     await page.getByRole('button', { name: 'Create Character' }).click();
     await page.getByText(new RegExp(`Created ${characterName}`)).waitFor();
+    await page.locator('.topbar-stats').getByText('Modern fixed racial stats').waitFor();
     await page.getByText('Room Affordances').waitFor();
     await page.getByText('Structured survey summary from room state').waitFor();
     await page.getByText('Item Details').waitFor();

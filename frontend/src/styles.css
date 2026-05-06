@@ -325,6 +325,13 @@ label {
   color: #d8ddca;
 }
 
+.compact-stats {
+  margin-top: 8px;
+  border: 1px solid #263423;
+  background: #050705;
+  padding: 7px;
+}
+
 .equip li {
   display: flex;
   justify-content: space-between;
