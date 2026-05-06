@@ -10,6 +10,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added a focused `races` API smoke suite for `/v1/races`.
+- Added `npm --prefix server run smoke:races` for direct canonical race endpoint validation.
+- Local agent telemetry now runs focused race smoke and reports canonical race count plus fixed stat table coverage.
+- Focused race smoke asserts exactly the canonical DragonRealms race IDs are exposed, every race has the 8 fixed stat fields, and private classic-random roll data stays hidden.
 - Added a focused `guilds` API smoke suite for `/v1/world/guilds`.
 - Added `npm --prefix server run smoke:guilds` for direct canonical guild endpoint validation.
 - Local agent telemetry now runs focused guild smoke and reports endpoint canonical count coverage.
@@ -143,7 +147,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add focused smoke coverage for `/v1/races` to assert the exposed race endpoint contains exactly the canonical DragonRealms races and fixed stat tables only.
+- Add focused smoke coverage that race creation rejects non-DragonRealms race names and preserves all canonical race choices at Circle 1.
 
 Core Philosophy
 

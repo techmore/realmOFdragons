@@ -22,6 +22,7 @@ const ciSteps = [
 const localSteps = [
   ...baseSteps,
   { name: 'browser-smoke', command: 'node', args: ['scripts/with-test-app.mjs', 'npm', 'run', 'smoke:browser'] },
+  { name: 'race-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:races'] },
   { name: 'guild-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:guilds'] },
   { name: 'target-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:targets'] },
   { name: 'damaged-ammo-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:damaged-ammo'] },
@@ -90,6 +91,8 @@ function markdownSummary(results, coverage) {
     lines.push(`| Browser verb discovery action | ${coverage.frontend.browserVerbDiscoveryClicked ? 'yes' : 'no'} |`);
     lines.push(`| Agent prompt current status | ${coverage.gameplay.agentPromptCurrentStatusChecked ? 'yes' : 'no'} |`);
     lines.push(`| Race selected during creation/reroll | ${coverage.gameplay.drRaceSelectionChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Focused race endpoint smoke | ${coverage.gameplay.focusedRaceEndpointSmokeChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Race endpoint hides private roll data | ${coverage.gameplay.drRaceEndpointPrivateRollDataHidden ? 'yes' : 'no'} |`);
     lines.push(`| New characters start unaffiliated | ${coverage.gameplay.drCreationStartsUnaffiliatedChecked ? 'yes' : 'no'} |`);
     lines.push(`| Guild rejected during character creation | ${coverage.gameplay.drGuildCreationRejected ? 'yes' : 'no'} |`);
     lines.push(`| Guild joined in-world only | ${coverage.gameplay.drGuildJoinedInWorldOnlyChecked ? 'yes' : 'no'} |`);
@@ -120,6 +123,8 @@ function markdownSummary(results, coverage) {
     lines.push('| Metric | Value |');
     lines.push('| --- | ---: |');
     lines.push(`| Races rolled | ${coverage.gameplay.racesRolled} |`);
+    lines.push(`| Focused race endpoint canonical count | ${coverage.gameplay.focusedRaceEndpointCanonicalCount} |`);
+    lines.push(`| Focused race endpoint fixed stat tables | ${coverage.gameplay.focusedRaceEndpointFixedStatTablesChecked} |`);
     lines.push(`| Circle 1 races checked | ${coverage.gameplay.circleOneRacesChecked} |`);
     lines.push(`| Race/guild Circle 1 combinations | ${coverage.gameplay.raceGuildMatrixChecked} |`);
     lines.push(`| DR races in matrix | ${coverage.gameplay.raceGuildMatrixRaceCount} |`);
@@ -192,6 +197,7 @@ function parseLastJsonObject(text) {
 function coverageSummary(results) {
   const byName = new Map(results.map((result) => [result.name, result]));
   const apiPayload = parseLastJsonObject(byName.get('api-smoke')?.stdoutTail ?? '') ?? {};
+  const racePayload = parseLastJsonObject(byName.get('race-smoke')?.stdoutTail ?? '') ?? {};
   const guildPayload = parseLastJsonObject(byName.get('guild-smoke')?.stdoutTail ?? '') ?? {};
   const targetPayload = parseLastJsonObject(byName.get('target-smoke')?.stdoutTail ?? '') ?? {};
   const damagedAmmoPayload = parseLastJsonObject(byName.get('damaged-ammo-smoke')?.stdoutTail ?? '') ?? {};
@@ -216,6 +222,8 @@ function coverageSummary(results) {
     durationsMs: Object.fromEntries(results.map((result) => [result.name, result.durationMs])),
     gameplay: {
       racesRolled: apiPayload.racesRolled ?? 0,
+      focusedRaceEndpointCanonicalCount: racePayload.raceEndpointCanonicalCount ?? apiPayload.raceEndpointCanonicalCount ?? 0,
+      focusedRaceEndpointFixedStatTablesChecked: racePayload.raceEndpointFixedStatTablesChecked ?? apiPayload.raceEndpointFixedStatTablesChecked ?? 0,
       circleOneRacesChecked: apiPayload.circleOneRacesChecked ?? 0,
       raceGuildMatrixChecked: apiPayload.raceGuildMatrixChecked ?? 0,
       raceGuildMatrixRaceCount: apiPayload.raceGuildMatrixRaceCount ?? 0,
@@ -258,6 +266,12 @@ function coverageSummary(results) {
       verbDiscoveryChecked: targetPayload.verbDiscoveryChecked === true,
       agentPromptCurrentStatusChecked: agentPromptPayload.currentStatusPriorityChecked === true,
       drRaceSelectionChecked: (apiPayload.racesRolled ?? 0) === 11 && (apiPayload.fixedRaceStatsChecked ?? 0) === 11,
+      focusedRaceEndpointSmokeChecked:
+        (racePayload.raceEndpointChecked ?? apiPayload.raceEndpointChecked) === true &&
+        (racePayload.raceEndpointCanonicalCount ?? apiPayload.raceEndpointCanonicalCount) === 11 &&
+        (racePayload.raceEndpointFixedStatTablesChecked ?? apiPayload.raceEndpointFixedStatTablesChecked) === 11 &&
+        (racePayload.raceEndpointOnlyCanonical ?? apiPayload.raceEndpointOnlyCanonical) === true,
+      drRaceEndpointPrivateRollDataHidden: (racePayload.raceEndpointPrivateRollDataHidden ?? apiPayload.raceEndpointPrivateRollDataHidden) === true,
       drCreationStartsUnaffiliatedChecked: apiPayload.creationStartsUnaffiliated === true,
       drGuildCreationRejected: apiPayload.guildCreationRejected === true,
       drGuildJoinedInWorldOnlyChecked: apiPayload.raceGuildMatrixStartsCommoner === true && (apiPayload.guildRoomsWalked ?? 0) === 11,
@@ -390,6 +404,8 @@ function assertCoverageShape(coverage) {
 
   if (mode === 'local') {
     expect(coverage.gameplay.focusedTargetSmokeChecked === true, 'gameplay.focusedTargetSmokeChecked');
+    expect(coverage.gameplay.focusedRaceEndpointSmokeChecked === true, 'gameplay.focusedRaceEndpointSmokeChecked');
+    expect(coverage.gameplay.drRaceEndpointPrivateRollDataHidden === true, 'gameplay.drRaceEndpointPrivateRollDataHidden');
     expect(coverage.gameplay.focusedGuildEndpointSmokeChecked === true, 'gameplay.focusedGuildEndpointSmokeChecked');
     expect(coverage.gameplay.focusedDamagedAmmoSmokeChecked === true, 'gameplay.focusedDamagedAmmoSmokeChecked');
     expect(coverage.gameplay.agentPromptCurrentStatusChecked === true, 'gameplay.agentPromptCurrentStatusChecked');

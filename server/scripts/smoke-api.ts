@@ -1,6 +1,31 @@
 type JsonObject = Record<string, unknown>;
 
-type SmokeSuite = 'all' | 'identity' | 'guilds' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
+type SmokeSuite = 'all' | 'identity' | 'races' | 'guilds' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
+
+const canonicalRaceIds = [
+  'human',
+  'elf',
+  'dwarf',
+  'elothean',
+  'gortog',
+  'halfling',
+  'skra_mur',
+  'rakash',
+  'prydaen',
+  'gnome',
+  'kaldar',
+] as const;
+
+const statNames = [
+  'strength',
+  'reflex',
+  'agility',
+  'discipline',
+  'stamina',
+  'wisdom',
+  'intelligence',
+  'charisma',
+] as const;
 
 const canonicalGuildIds = [
   'barbarian',
@@ -130,7 +155,7 @@ interface SmokeContext {
   summary: Record<string, unknown>;
 }
 
-const suites: SmokeSuite[] = ['all', 'identity', 'guilds', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'combat'];
+const suites: SmokeSuite[] = ['all', 'identity', 'races', 'guilds', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'combat'];
 const requestedSuite = (process.argv[2] ?? 'all') as SmokeSuite;
 const baseUrl = (process.env.DR_API_BASE_URL ?? 'http://localhost:4000').replace(/\/+$/, '');
 const password = 'smoke-password-01';
@@ -359,6 +384,35 @@ async function runIdentitySuite(context: SmokeContext): Promise<void> {
   });
   context.character = current;
   context.summary.storedRaceMetadataApiMigrationChecked = true;
+}
+
+async function runRaceEndpointSuite(context: SmokeContext): Promise<void> {
+  const ids = context.races.map((race) => race.id).sort();
+  const canonicalIds = [...canonicalRaceIds].sort();
+
+  assert(context.races.length === canonicalRaceIds.length, `Expected exactly ${canonicalRaceIds.length} canonical DragonRealms races, got ${context.races.length}.`);
+  assert(JSON.stringify(ids) === JSON.stringify(canonicalIds), `Expected only canonical DragonRealms race ids, got ${ids.join(', ')}.`);
+
+  for (const race of context.races) {
+    assert(canonicalRaceIds.includes(race.id as typeof canonicalRaceIds[number]), `Expected ${race.id} to be canonical.`);
+    assert(typeof race.name === 'string' && race.name.trim().length > 0, `Expected race ${race.id} to have a name.`);
+    assert(race.roles === undefined, `Expected race ${race.id} to omit private classic-random roles.`);
+    assert(race.statModifiers === undefined, `Expected race ${race.id} to omit private stat modifiers.`);
+
+    const stats = race.fixedStartingStats;
+    assert(stats && typeof stats === 'object', `Expected race ${race.id} to expose fixed starting stats.`);
+    const statKeys = Object.keys(stats).sort();
+    assert(JSON.stringify(statKeys) === JSON.stringify([...statNames].sort()), `Expected race ${race.id} fixed stats to include only canonical DR stats.`);
+    for (const statName of statNames) {
+      assert(Number.isInteger(stats[statName]) && stats[statName] > 0, `Expected race ${race.id} ${statName} fixed stat to be a positive integer.`);
+    }
+  }
+
+  context.summary.raceEndpointChecked = true;
+  context.summary.raceEndpointCanonicalCount = context.races.length;
+  context.summary.raceEndpointFixedStatTablesChecked = context.races.length;
+  context.summary.raceEndpointPrivateRollDataHidden = true;
+  context.summary.raceEndpointOnlyCanonical = true;
 }
 
 async function runGuildEndpointSuite(context: SmokeContext): Promise<void> {
@@ -918,6 +972,7 @@ async function runDamagedAmmoSuite(context: SmokeContext): Promise<void> {
 
 async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void> {
   if (suite === 'identity') await runIdentitySuite(context);
+  if (suite === 'races') await runRaceEndpointSuite(context);
   if (suite === 'guilds') await runGuildEndpointSuite(context);
   if (suite === 'race-guild-matrix') await runRaceGuildMatrixSuite(context);
   if (suite === 'scripts') await runScriptSuite(context);
@@ -928,6 +983,7 @@ async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void>
   if (suite === 'combat') await runCombatSuite(context);
   if (suite === 'all') {
     await runIdentitySuite(context);
+    await runRaceEndpointSuite(context);
     await runGuildEndpointSuite(context);
     await runRaceGuildMatrixSuite(context);
     await runScriptSuite(context);
