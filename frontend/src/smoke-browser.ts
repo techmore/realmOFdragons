@@ -103,17 +103,17 @@ async function main(): Promise<void> {
     await page.keyboard.press('Enter');
     await page.getByText(/You go east to Marksman Way/).waitFor();
 
-    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 1200');
     await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You wait for 1200ms/).last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('north');
     await page.keyboard.press('Enter');
     await page.getByText(/You go north to Marksman Sheds/).waitFor();
 
-    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 1200');
     await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+    await page.locator('.terminal-pane .log').getByText(/You wait for 1200ms/).last().waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('shop buy itm-sting-arrow');
     await page.keyboard.press('Enter');
@@ -130,6 +130,11 @@ async function main(): Promise<void> {
 
     await page.locator('.ammo-pouch-list li').filter({ hasText: 'itm-sting-arrow x5' }).getByRole('button', { name: 'sell one' }).click();
     await page.locator('.terminal-pane .log').getByText(/You sell one practice arrow from your ammo pouch/).waitFor();
+    await page
+      .locator('.ammo-pouch-list li')
+      .filter({ hasText: 'itm-sting-arrow x4' })
+      .getByText('Marksman Supply Stand buys practice arrow from your ammo pouch.')
+      .waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -162,6 +167,17 @@ async function main(): Promise<void> {
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
+    await page
+      .locator('.ammo-pouch-list li')
+      .filter({ hasText: 'itm-sting-arrow x4' })
+      .getByText('Selling ammo requires a local shop.')
+      .waitFor();
+    const ammoSellButtonDisabledOutsideShop = await page
+      .locator('.ammo-pouch-list li')
+      .filter({ hasText: 'itm-sting-arrow x4' })
+      .getByRole('button', { name: 'sell one' })
+      .isDisabled();
+    assert(ammoSellButtonDisabledOutsideShop, 'Expected ammo pouch sell button to be disabled outside shops.');
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('look');
     await page.keyboard.press('Enter');
@@ -213,25 +229,14 @@ async function main(): Promise<void> {
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
 
-    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('south');
+    await apiRequest(`/v1/test/characters/${createdCharacter.id}/state`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${login.accessToken}` },
+      body: JSON.stringify({ roomId: 'crossing-RV02-002' }),
+    });
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('look');
     await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You go south to South Gate Road/).last().waitFor();
-
-    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
-    await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
-
-    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('south');
-    await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You go south to South Gate Trailhead/).last().waitFor();
-
-    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 1200');
-    await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You wait for 1200ms/).last().waitFor();
-
-    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('east');
-    await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText(/You go east to Brushline Forage Fork/).last().waitFor();
+    await page.locator('.terminal-pane .log').getByText('Scrubland edges and low brush.').last().waitFor();
     await page.getByText('Forage available').waitFor();
     await page.getByText(/difficulty 1: field herb bundle/).waitFor();
     await page.locator('.affordance-row').filter({ hasText: 'Targets visible' }).getByText('forage wolf-cub').waitFor();
@@ -287,6 +292,8 @@ async function main(): Promise<void> {
           disabledSellHintVisible: true,
           shopAwareSellHintVisible: true,
           ammoPouchSellClicked: true,
+          ammoPouchRemainingVisible: true,
+          ammoPouchDisabledHintVisible: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,

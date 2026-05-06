@@ -44,10 +44,12 @@ Completed current slice:
 - Browser telemetry now verifies the shop-aware damaged salvage hint before selling recovered broken ammunition.
 - Ammo pouch rows now expose shop-aware `sell one` buttons for stacked ammunition when the local shop stocks the ammo.
 - Browser smoke buys a practice-arrow bundle and sells one shot from the ammo pouch through the UI.
+- Browser smoke now verifies the visible ammo pouch count decreases after a UI sale.
+- Static and browser smoke now verify ammo pouch sale controls explain and disable sales outside shop rooms.
 
 Current next priority:
 
-- Add richer ammo-pouch state feedback after UI sales, such as visible remaining-count assertions and disabled sale hints when no matching shop is present.
+- Add richer ammunition item presentation in the ammo pouch, such as displaying catalog names, bundle size, and estimated single-shot resale value.
 
 Core Philosophy
 

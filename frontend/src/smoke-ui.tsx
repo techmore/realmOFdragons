@@ -247,7 +247,9 @@ for (const expected of [
 
 for (const expected of [
   'Selling requires a local shop. Travel to a shop room before selling carried items.',
+  'Selling ammo requires a local shop.',
   'title="Selling requires a local shop."',
+  'title="Selling ammo requires a local shop."',
 ]) {
   assertIncludes(noShopMarkup, expected);
 }
