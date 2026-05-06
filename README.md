@@ -34,7 +34,7 @@ Run the full local agent check:
 npm run agent:check
 ```
 
-This runs build, unit tests, static UI smoke, browser smoke, focused target smoke, full API smoke, and git status telemetry.
+This runs build, unit tests, static UI smoke, browser smoke, focused target smoke, full API smoke, agent prompt smoke, and git status telemetry.
 
 Run the CI-shaped check:
 
@@ -72,6 +72,14 @@ Static UI smoke does not need a server:
 npm run smoke:ui
 ```
 
+Agent prompt smoke validates autonomous continuation prompt generation:
+
+```sh
+npm run smoke:agent-prompt
+```
+
+This verifies that `npm run agent:prompt` reads the authoritative `Current Status` priority in `SPEC.md` instead of stale historical `Next priority` entries.
+
 ## Telemetry artifacts
 
 `npm run agent:check` and `npm run ci:check` write ignored telemetry files under `artifacts/telemetry`.
@@ -81,7 +89,7 @@ Primary artifacts:
 - `summary.json`: complete step results with command lines, exit codes, durations, and output tails.
 - `summary.md`: human-readable check report with step status, gameplay coverage booleans, and gameplay counts.
 - `coverage-summary.json`: compact machine-readable coverage summary for agents and trend tooling.
-- `<step>.json`: per-step telemetry for build, tests, smokes, and git status.
+- `<step>.json`: per-step telemetry for build, tests, smokes, prompt generation, and git status.
 
 Coverage fields currently distinguish broad combat coverage from target-specific coverage:
 
@@ -89,9 +97,13 @@ Coverage fields currently distinguish broad combat coverage from target-specific
 - `gameplay.structuredTargetsChecked`
 - `gameplay.targetDetailsChecked`
 - `gameplay.focusedTargetSmokeChecked`
+- `gameplay.agentPromptCurrentStatusChecked`
+- `frontend.staticCommandDiscoveryChecked`
+- `frontend.browserCommandDiscoveryVisible`
 - `frontend.browserTargetDetailsClicked`
+- `frontend.browserVerbDiscoveryClicked`
 
-Use these fields when reviewing whether a report proves target discovery, target metadata, typed target details, and web target-detail affordances all ran.
+Use these fields when reviewing whether a report proves target discovery, target metadata, typed target details, command discovery, prompt generation, and web target-detail affordances all ran.
 
 ## Current command reference
 

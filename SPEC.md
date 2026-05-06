@@ -10,13 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Added an authoritative `Current Status` block to `SPEC.md`.
-- Updated agent prompt generation to prefer the `Current Status` priority over historical `Next priority` entries.
-- Added local prompt smoke coverage for current-status priority generation.
+- Added `npm run smoke:agent-prompt` documentation to `README.md`.
+- Documented that `agent:check` includes agent prompt smoke.
+- Documented prompt-generation telemetry fields.
 
 Current next priority:
 
-- Add command-line documentation for the new `smoke:agent-prompt` script and the `agent-prompt-smoke` telemetry row.
+- Add a small UI affordance or README note for saved scripts/macros so players can discover the existing scripting system without digging through implementation details.
 
 Core Philosophy
 
@@ -433,6 +433,19 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Add command-line documentation for the new `smoke:agent-prompt` script and the `agent-prompt-smoke` telemetry row.
+
+Implementation Notes - 2026-05-06, Agent Prompt Smoke Documentation
+
+Completed in the current Node/React prototype:
+
+- README now documents `npm run smoke:agent-prompt`.
+- README now explains that agent prompt smoke validates `SPEC.md` `Current Status` priority selection.
+- README now states that `agent:check` includes agent prompt smoke.
+- README telemetry coverage field list now includes `gameplay.agentPromptCurrentStatusChecked`, static/browser command discovery, and browser verb discovery fields.
+
+Next priority:
+
+- Add a small UI affordance or README note for saved scripts/macros so players can discover the existing scripting system without digging through implementation details.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 
