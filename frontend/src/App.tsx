@@ -64,6 +64,7 @@ type Room = {
   description: string;
   prompts: string[];
   exits: Exit[];
+  guild?: string;
   shop?: RoomShop;
   forage?: RoomForage;
 };
@@ -432,6 +433,38 @@ function GameStatusPanels({
   loading = false,
   onCommand = () => undefined,
 }: GameStatusPanelsProps) {
+  const affordances = room
+    ? [
+        {
+          label: 'Exits mapped',
+          detail: room.exits.length ? room.exits.map((exit) => exit.direction).join(', ') : 'none',
+          command: room.exits.length ? 'exits' : undefined,
+        },
+        {
+          label: 'Forage available',
+          detail: room.forage?.items.length
+            ? `difficulty ${room.forage.difficulty}: ${room.forage.items.map((item) => item.name).join(', ')}`
+            : 'nothing obvious',
+          command: room.forage?.items.length ? 'forage' : undefined,
+        },
+        {
+          label: 'Shop service',
+          detail: room.shop ? `${room.shop.name} (${room.shop.items.length} items)` : 'none',
+          command: room.shop ? 'shop' : undefined,
+        },
+        {
+          label: 'Guild registrar',
+          detail: room.guild ?? 'none',
+          command: room.guild ? 'join guild' : undefined,
+        },
+        {
+          label: 'Targets visible',
+          detail: localTargets.length ? localTargets.map((target) => target.name).join(', ') : 'none',
+          command: localTargets.length ? 'scan' : undefined,
+        },
+      ]
+    : [];
+
   return (
     <>
       <section className="panel room">
@@ -441,6 +474,28 @@ function GameStatusPanels({
             <p>{room.description}</p>
             <div className="prompts">
               {room.prompts.map((prompt) => <p key={prompt}>{prompt}</p>)}
+            </div>
+            <div className="affordance-panel">
+              <h3>Room Affordances</h3>
+              <p className="subtle">Structured survey summary from room state. No terminal parsing required.</p>
+              <div className="affordance-list">
+                {affordances.map((entry) => {
+                  const command = entry.command;
+                  return (
+                    <div className="affordance-row" key={entry.label}>
+                      <span>
+                        <strong>{entry.label}</strong>
+                        <small>{entry.detail}</small>
+                      </span>
+                      {command ? (
+                        <button type="button" onClick={() => onCommand(command)} disabled={loading || !character}>
+                          {command}
+                        </button>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             {room.forage?.items.length ? (
               <div className="forage-panel">

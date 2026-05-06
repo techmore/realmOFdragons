@@ -50,6 +50,8 @@ async function main(): Promise<void> {
     await page.getByRole('textbox', { name: 'Name', exact: true }).fill(characterName);
     await page.getByRole('button', { name: 'Create Character' }).click();
     await page.getByText(new RegExp(`Created ${characterName}`)).waitFor();
+    await page.getByText('Room Affordances').waitFor();
+    await page.getByText('Structured survey summary from room state').waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('look');
     await page.keyboard.press('Enter');
@@ -97,6 +99,9 @@ async function main(): Promise<void> {
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('east');
     await page.keyboard.press('Enter');
     await page.getByText(/You go east to Brushline Forage Fork/).waitFor();
+    await page.getByText('Forage available').waitFor();
+    await page.getByText(/difficulty 1: field herb bundle/).waitFor();
+    await page.locator('.affordance-row').filter({ hasText: 'Targets visible' }).getByText('forage wolf-cub').waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 900');
     await page.keyboard.press('Enter');
@@ -107,7 +112,7 @@ async function main(): Promise<void> {
     await page.locator('.terminal-pane .log').getByText('Forage: difficulty').waitFor();
     await page.locator('.terminal-pane .log').getByText('Targets: forage wolf-cub.').waitFor();
 
-    await page.getByRole('button', { name: 'scan', exact: true }).click();
+    await page.locator('.panel').filter({ hasText: 'Controls' }).getByRole('button', { name: 'scan', exact: true }).click();
     await page.locator('.terminal-pane .log').getByText('forage wolf-cub').waitFor();
     await page.locator('.terminal-pane .log').getByText('Vitality estimates how long a target can stay in the fight').waitFor();
     await page.getByText('Visible Targets').waitFor();
@@ -142,6 +147,7 @@ async function main(): Promise<void> {
           targetDetailsClicked: true,
           verbDiscoveryClicked: true,
           surveyClicked: true,
+          roomAffordancePanelVisible: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,

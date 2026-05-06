@@ -13,6 +13,7 @@ const room: Room = {
   title: 'Crossing Town Green',
   description: 'A broad square with clean-room test fixtures.',
   prompts: ['You see a fountain.', 'A guard watches the road.'],
+  guild: 'fighter',
   exits: [
     { direction: 'north', destination: 'crossing-IN02-001', details: 'Toward inns.' },
     { direction: 'east', destination: 'crossing-MA01-001', details: 'Toward training.' },
@@ -85,6 +86,15 @@ const markup = renderToStaticMarkup(
 
 for (const expected of [
   'Room',
+  'Room Affordances',
+  'Structured survey summary from room state',
+  'Exits mapped',
+  'Forage available',
+  'Shop service',
+  'Guild registrar',
+  'Targets visible',
+  'difficulty 1: field herb bundle',
+  'fighter',
   'Exits',
   'north',
   'east',

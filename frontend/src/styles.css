@@ -237,6 +237,7 @@ label {
 .prompts,
 .hands,
 .inventory,
+.affordance-panel,
 .race-details,
 .script-item {
   border-top: 1px dotted #46543f;
@@ -250,6 +251,34 @@ label {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   gap: 6px;
+}
+
+.affordance-list {
+  display: grid;
+  gap: 6px;
+}
+
+.affordance-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid #263423;
+  background: #050705;
+  padding: 7px;
+}
+
+.affordance-row span {
+  display: grid;
+  gap: 3px;
+}
+
+.affordance-row strong {
+  color: #d7c06a;
+}
+
+.affordance-row small {
+  color: #9baa91;
 }
 
 .dpad-grid {

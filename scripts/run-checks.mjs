@@ -67,6 +67,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Verb discovery command | ${coverage.gameplay.verbDiscoveryChecked ? 'yes' : 'no'} |`);
     lines.push(`| Static command discovery note | ${coverage.frontend.staticCommandDiscoveryChecked ? 'yes' : 'no'} |`);
     lines.push(`| Browser command discovery note | ${coverage.frontend.browserCommandDiscoveryVisible ? 'yes' : 'no'} |`);
+    lines.push(`| Browser room affordance panel | ${coverage.frontend.browserRoomAffordancePanelVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser survey action | ${coverage.frontend.browserSurveyClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser script discovery note | ${coverage.frontend.browserScriptDiscoveryVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser script preset save | ${coverage.frontend.browserScriptPresetSaved ? 'yes' : 'no'} |`);
@@ -211,6 +212,7 @@ function coverageSummary(results) {
       browserAccountCreated: Boolean(browserPayload.account),
       browserCommandCount: browserPayload.commandCount ?? 0,
       browserSurveyClicked: browserPayload.surveyClicked === true,
+      browserRoomAffordancePanelVisible: browserPayload.roomAffordancePanelVisible === true,
       browserTargetDetailsClicked: browserPayload.targetDetailsClicked === true,
       browserVerbDiscoveryClicked: browserPayload.verbDiscoveryClicked === true,
       browserCommandDiscoveryVisible: browserPayload.commandDiscoveryVisible === true,

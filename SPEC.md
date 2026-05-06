@@ -10,13 +10,13 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- README command reference now documents `survey` and `search`.
-- Browser smoke clicks `survey` from the web quick controls in a forageable hunting room.
-- Browser telemetry now reports `surveyClicked`.
+- Web UI now renders a structured Room Affordances panel from room/target state.
+- Room Affordances summarizes exits, forage, shop service, guild registrar, and visible targets without parsing terminal command output.
+- Static and browser smoke cover the affordance panel, including forage and visible-target metadata.
 
 Current next priority:
 
-- Add a lightweight room-affordance panel in the web UI that mirrors survey results without requiring command output parsing.
+- Add a first lightweight item detail/appraisal UI flow for inventory items and shop goods, starting with structured item metadata instead of raw item ids.
 
 Core Philosophy
 
