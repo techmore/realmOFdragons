@@ -17,6 +17,10 @@ const room: Room = {
     { direction: 'north', destination: 'crossing-IN02-001', details: 'Toward inns.' },
     { direction: 'east', destination: 'crossing-MA01-001', details: 'Toward training.' },
   ],
+  forage: {
+    difficulty: 1,
+    items: [{ code: 'foraged-fieldherb', name: 'field herb bundle' }],
+  },
   shop: {
     code: 'test-shop',
     name: 'Test Gear Stand',
@@ -87,6 +91,9 @@ for (const expected of [
   'Test Gear Stand',
   'buy itm-test-blade',
   'Controls',
+  'Forage',
+  'Difficulty 1',
+  'field herb bundle',
   'New here?',
   'help scan',
   'target &lt;name&gt;',

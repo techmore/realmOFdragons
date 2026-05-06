@@ -49,6 +49,14 @@ type RoomShop = {
   items: RoomShopItem[];
 };
 
+type RoomForage = {
+  difficulty: number;
+  items: Array<{
+    code: string;
+    name: string;
+  }>;
+};
+
 type Room = {
   id: string;
   code: RoomCode;
@@ -57,6 +65,7 @@ type Room = {
   prompts: string[];
   exits: Exit[];
   shop?: RoomShop;
+  forage?: RoomForage;
 };
 
 type CombatState = {
@@ -433,6 +442,12 @@ function GameStatusPanels({
             <div className="prompts">
               {room.prompts.map((prompt) => <p key={prompt}>{prompt}</p>)}
             </div>
+            {room.forage?.items.length ? (
+              <div className="forage-panel">
+                <h3>Forage</h3>
+                <p className="subtle">Difficulty {room.forage.difficulty}. Try <code>forage</code> to search for {room.forage.items.map((item) => item.name).join(', ')}.</p>
+              </div>
+            ) : null}
             <h3>Exits</h3>
             <div className="exit-list">
               {room.exits.map((exit) => (

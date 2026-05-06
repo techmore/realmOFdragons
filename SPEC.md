@@ -10,13 +10,14 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Forage results now live in room metadata in `server/src/world.ts`.
-- Outdoor Crossing rooms define forage difficulty and found item tables.
-- The `forage` command now reads room forage metadata instead of hardcoded room IDs.
+- `look` now reports forage availability, difficulty, and possible finds for forageable rooms.
+- Room payloads expose forage metadata to the web UI.
+- The web Room panel now shows a Forage section with difficulty and possible finds.
+- Static UI and API smoke verify forage discovery.
 
 Current next priority:
 
-- Expose forage availability in `look` or room payloads so players can discover forageable rooms without trial-and-error.
+- Add a dedicated `survey` or `search` discovery command that summarizes room affordances: exits, forage, shop, targets, and guild registrar.
 
 Core Philosophy
 
@@ -571,6 +572,20 @@ Completed in the current Node/React prototype:
 Next priority:
 
 - Expose forage availability in `look` or room payloads so players can discover forageable rooms without trial-and-error.
+
+Implementation Notes - 2026-05-06, Forage Discovery In Room Output
+
+Completed in the current Node/React prototype:
+
+- `look` now reports forage availability, difficulty, and possible finds in forageable rooms.
+- Room payloads expose `forage` metadata to clients.
+- The web Room panel now renders a Forage section with difficulty and possible finds.
+- Static UI smoke verifies the Forage panel.
+- API smoke verifies `look` forage output and room forage metadata.
+
+Next priority:
+
+- Add a dedicated `survey` or `search` discovery command that summarizes room affordances: exits, forage, shop, targets, and guild registrar.
 
 Implementation Notes - 2026-05-06, Command Discovery Telemetry
 

@@ -359,6 +359,8 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   assert(result.events.some((event) => event.includes('Suggested next verb: advance forage wolf-cub')), 'Expected target advance suggestion.');
 
   result = await command(context.accessToken, current.id, 'look');
+  assert(result.events.some((event) => event.includes('Forageable: difficulty')), 'Expected look to show forage availability.');
+  assert(result.room.forage?.items.some((item) => item.code.startsWith('foraged-')), 'Expected room forage metadata.');
   assert(result.events.some((event) => event.includes('forage wolf-cub')), 'Expected hunting room look to list forage wolf-cub.');
   assert(result.targets.some((target) => target.name === 'forage wolf-cub'), 'Expected look response target forage wolf-cub.');
 
