@@ -81,6 +81,30 @@ const markup = renderToStaticMarkup(
     selectedCharacter={character}
     skillEntries={Object.entries(character.skills)}
     localTargets={[{ id: 'rv-wolf-cub', name: 'forage wolf-cub', vitality: 12, aggression: 55 }]}
+    itemDetails={[
+      {
+        code: 'itm-test-blade',
+        name: 'test blade',
+        category: 'weapon',
+        description: 'A static smoke blade.',
+        value: 3,
+        currency: 'trias',
+        source: 'shop',
+        carried: true,
+        shopAvailable: true,
+      },
+      {
+        code: 'forage wolf-cub fang',
+        name: 'forage wolf-cub fang',
+        category: 'trophy',
+        description: 'A beginner hunting trophy.',
+        value: 1,
+        currency: 'trias',
+        source: 'loot',
+        carried: true,
+        shopAvailable: false,
+      },
+    ]}
   />,
 );
 
@@ -128,6 +152,11 @@ for (const expected of [
   'Right: itm-test-blade',
   'Left: empty',
   'Inventory',
+  'Item Details',
+  'test blade',
+  'itm-test-blade | weapon | 3 trias',
+  'A static smoke blade.',
+  'forage wolf-cub fang | trophy | 1 trias',
   'forage wolf-cub fang',
   'Combat',
   'forage wolf-cub: 4/12',

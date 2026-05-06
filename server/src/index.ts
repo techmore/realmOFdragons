@@ -78,6 +78,7 @@ interface CommandResult {
   room: Room;
   events: string[];
   targets: RoomTarget[];
+  itemDetails: ItemDetail[];
 }
 
 type RoomTarget = {
@@ -85,6 +86,18 @@ type RoomTarget = {
   name: string;
   vitality: number;
   aggression: number;
+};
+
+type ItemDetail = {
+  code: string;
+  name: string;
+  category: string;
+  description: string;
+  value: number;
+  currency: keyof CharacterRecord['wallet'];
+  source: 'starter' | 'shop' | 'forage' | 'loot' | 'unknown';
+  carried: boolean;
+  shopAvailable: boolean;
 };
 
 type SocketState = {
@@ -266,6 +279,36 @@ const ENEMY_TEMPLATES: EnemyTemplate[] = [
     aggression: 58,
   },
 ];
+
+const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | 'shopAvailable'>> = {
+  'leather backpack': {
+    code: 'leather backpack',
+    name: 'leather backpack',
+    category: 'container',
+    description: 'A plain leather pack issued to new adventurers.',
+    value: 1,
+    currency: 'trias',
+    source: 'starter',
+  },
+  'repair cloth': {
+    code: 'repair cloth',
+    name: 'repair cloth',
+    category: 'utility',
+    description: 'A square of sturdy cloth useful for wiping down beginner gear.',
+    value: 1,
+    currency: 'trias',
+    source: 'starter',
+  },
+  'training sword': {
+    code: 'training sword',
+    name: 'training sword',
+    category: 'weapon',
+    description: 'A dull-edged practice blade balanced for new combat drills.',
+    value: 2,
+    currency: 'trias',
+    source: 'starter',
+  },
+};
 
 const app = express();
 const server = createServer(app);
@@ -831,7 +874,88 @@ function buildCommandResult(character: CharacterRecord, room: Room, events: stri
     room,
     events,
     targets: buildRoomTargets(character.roomId),
+    itemDetails: buildItemDetails(character, room),
   };
+}
+
+function inferItemCategory(code: string, name: string): string {
+  const text = `${code} ${name}`.toLowerCase();
+  if (text.includes('bow') || text.includes('arrow')) return 'ranged';
+  if (text.includes('knife') || text.includes('mace') || text.includes('sword') || text.includes('scraper')) return 'weapon';
+  if (text.includes('glove') || text.includes('salve')) return 'armor';
+  if (text.includes('herb') || text.includes('bark') || text.includes('root') || text.includes('grass')) return 'forage';
+  if (text.includes('rope') || text.includes('snare')) return 'utility';
+  if (text.includes('ration')) return 'provision';
+  if (text.includes('fang')) return 'trophy';
+  return 'gear';
+}
+
+function displayNameFromCode(code: string): string {
+  return code
+    .replace(/^itm-/, '')
+    .replace(/^foraged-/, '')
+    .replace(/-/g, ' ')
+    .trim();
+}
+
+function findShopItem(code: string) {
+  const lowered = code.toLowerCase();
+  for (const room of Object.values(worldRooms)) {
+    const item = room.shop?.items.find((entry) => entry.code.toLowerCase() === lowered || entry.name.toLowerCase() === lowered);
+    if (item) return item;
+  }
+  return undefined;
+}
+
+function findForageItem(code: string) {
+  const lowered = code.toLowerCase();
+  for (const room of Object.values(worldRooms)) {
+    const item = room.forage?.items.find((entry) => entry.code.toLowerCase() === lowered || entry.name.toLowerCase() === lowered);
+    if (item) return { ...item, difficulty: room.forage?.difficulty ?? 1 };
+  }
+  return undefined;
+}
+
+function resolveItemDetail(code: string, room: Room, character: CharacterRecord): ItemDetail {
+  const starter = STARTER_ITEM_DETAILS[code.toLowerCase()];
+  const shopItem = findShopItem(code);
+  const forageItem = findForageItem(code);
+  const name = starter?.name ?? shopItem?.name ?? forageItem?.name ?? displayNameFromCode(code);
+  const category = starter?.category ?? inferItemCategory(code, name);
+  const source = starter?.source ?? (shopItem ? 'shop' : forageItem ? 'forage' : code.toLowerCase().includes('fang') ? 'loot' : 'unknown');
+  const value = starter?.value ?? shopItem?.price ?? Math.max(1, forageItem?.difficulty ?? 1);
+  const currency = starter?.currency ?? shopItem?.currency ?? 'trias';
+
+  return {
+    code,
+    name,
+    category,
+    description:
+      starter?.description ??
+      (source === 'shop'
+        ? `${name} is cataloged shop gear suitable for early Crossing play.`
+        : source === 'forage'
+          ? `${name} is a simple foraged material found near the Crossing.`
+          : source === 'loot'
+            ? `${name} is a beginner hunting trophy.`
+            : `${name} has not been fully cataloged yet.`),
+    value,
+    currency,
+    source,
+    carried: character.inventory.includes(code) || character.hands.left === code || character.hands.right === code,
+    shopAvailable: Boolean(room.shop?.items.some((entry) => entry.code === code)),
+  };
+}
+
+function buildItemDetails(character: CharacterRecord, room: Room): ItemDetail[] {
+  const details = new Map<string, ItemDetail>();
+  for (const itemCode of [...character.inventory, character.hands.left, character.hands.right].filter(Boolean) as string[]) {
+    details.set(itemCode, resolveItemDetail(itemCode, room, character));
+  }
+  for (const item of room.shop?.items ?? []) {
+    details.set(item.code, resolveItemDetail(item.code, room, character));
+  }
+  return [...details.values()].sort((left, right) => left.name.localeCompare(right.name));
 }
 
 function buildEnemyScanEvents(roomId: RoomId): string[] {
@@ -877,12 +1001,38 @@ function buildTargetDetailEvents(character: CharacterRecord, requestedTarget: st
   ];
 }
 
+function findItemDetailForRequest(character: CharacterRecord, room: Room, requestedItem: string): ItemDetail | undefined {
+  const normalized = requestedItem.toLowerCase().trim();
+  if (!normalized) return undefined;
+  return buildItemDetails(character, room).find((item) => {
+    const code = item.code.toLowerCase();
+    const name = item.name.toLowerCase();
+    return code === normalized || name === normalized || code.replace(/\s+/g, '-') === normalized || name.replace(/\s+/g, '-') === normalized;
+  });
+}
+
+function buildItemDetailEvents(character: CharacterRecord, room: Room, requestedItem: string): string[] {
+  const item = findItemDetailForRequest(character, room, requestedItem);
+  if (!item) {
+    return [`You cannot find an item matching "${requestedItem}". Use inventory or shop to list known items.`];
+  }
+  return [
+    `Item: ${item.name}`,
+    `Code: ${item.code}.`,
+    `Category: ${item.category}. Source: ${item.source}.`,
+    `Value: ${item.value} ${item.currency}.`,
+    `Carried: ${item.carried ? 'yes' : 'no'}. Shop available here: ${item.shopAvailable ? 'yes' : 'no'}.`,
+    item.description,
+  ];
+}
+
 function buildVerbEvents(): string[] {
   return [
     'Verb groups:',
     'Info: help, help scan, verb, look, survey, search, exits, score, skills, inventory, balance, range, combat.',
     'Movement: north, south, east, west, n, s, e, w, go <direction>, enter, exit, up, down, ne, nw, se, sw.',
     'Targets: scan, target, target <name>, appraise <target>.',
+    'Items: inventory, appraise <item>, shop, shop buy <code>, shop sell <code>.',
     'Survival: forage, inventory, train survival.',
     'Combat: stance, stance balanced, stance offensive, stance defensive, stance evasive, advance <target>, retreat, attack <target>, circle, jab, bash, defend, flee, wait <ms>, rest.',
     'Progression: train, train <skill>, circle, join guild.',
@@ -1215,7 +1365,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
 
   if (command === 'help') {
     events.push(
-      'Commands: look, survey, search, scan, forage, help scan, verb, rest, inventory, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
+      'Commands: look, survey, search, scan, forage, help scan, verb, rest, inventory, appraise <item|target>, score, skills, circle, join guild, train [skill], stance [balanced|offensive|defensive|evasive], balance, range, advance, retreat, jab, bash, exits, shop, shop buy <code>, shop sell <code>, combat, attack [target], defend, flee, wait <ms>, go <direction>, <n/e/s/w>',
     );
     events.push(`Your wallets: ${formatWallet(resolvedCharacter.wallet)}.`);
     return buildCommandResult(resolvedCharacter, room, events);
@@ -1351,7 +1501,16 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       : command.startsWith('appraise ')
         ? command.slice(9).trim()
         : '';
-    events.push(...buildTargetDetailEvents(resolvedCharacter, requestedTarget));
+    if (command.startsWith('appraise ')) {
+      const itemEvents = buildItemDetailEvents(resolvedCharacter, room, requestedTarget);
+      if (!itemEvents[0]?.startsWith('You cannot find an item')) {
+        events.push(...itemEvents);
+      } else {
+        events.push(...buildTargetDetailEvents(resolvedCharacter, requestedTarget));
+      }
+    } else {
+      events.push(...buildTargetDetailEvents(resolvedCharacter, requestedTarget));
+    }
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
@@ -2134,6 +2293,7 @@ app.post('/v1/scripts/:scriptId/run', authRequired, async (req: AuthenticatedReq
     character: sanitizeCharacter(finalCharacter),
     room: finalRoom,
     targets: buildRoomTargets(finalCharacter.roomId),
+    itemDetails: buildItemDetails(finalCharacter, finalRoom),
   });
 });
 
@@ -2152,6 +2312,7 @@ app.get('/v1/characters/:characterId/state', authRequired, async (req: Authentic
     character: sanitizeCharacter(resolved.character),
     room,
     targets: buildRoomTargets(resolved.character.roomId),
+    itemDetails: buildItemDetails(resolved.character, room),
   });
 });
 
@@ -2192,6 +2353,7 @@ app.post('/v1/test/characters/:characterId/state', authRequired, async (req: Aut
     character: sanitizeCharacter(resolved),
     room,
     targets: buildRoomTargets(resolved.roomId),
+    itemDetails: buildItemDetails(resolved, room),
   });
 });
 

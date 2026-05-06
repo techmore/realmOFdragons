@@ -10,13 +10,14 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Web UI now renders a structured Room Affordances panel from room/target state.
-- Room Affordances summarizes exits, forage, shop service, guild registrar, and visible targets without parsing terminal command output.
-- Static and browser smoke cover the affordance panel, including forage and visible-target metadata.
+- Command, character-state, script-run, and fixture-state responses now include structured `itemDetails`.
+- `appraise <item>` resolves starter, shop, forage, and simple loot metadata before falling back to target appraisal.
+- Web UI now renders item detail cards and inventory appraisal actions.
+- API, static UI, and browser smoke cover structured item details and item appraisal.
 
 Current next priority:
 
-- Add a first lightweight item detail/appraisal UI flow for inventory items and shop goods, starting with structured item metadata instead of raw item ids.
+- Add simple hands/equipment verbs (`hold`, `stow`, `wear/remove` starter scope) so item details become actionable beyond shop buy/sell.
 
 Core Philosophy
 

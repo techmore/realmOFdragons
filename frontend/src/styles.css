@@ -258,6 +258,27 @@ label {
   gap: 6px;
 }
 
+.item-detail-list {
+  display: grid;
+  gap: 7px;
+}
+
+.item-detail {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #263423;
+  background: #050705;
+  padding: 7px;
+}
+
+.item-detail strong {
+  color: #d7c06a;
+}
+
+.item-detail small {
+  color: #9baa91;
+}
+
 .affordance-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

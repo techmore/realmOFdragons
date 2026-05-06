@@ -30,6 +30,18 @@ type RoomShopItem = {
   currency: string;
 };
 
+type ItemDetail = {
+  code: string;
+  name: string;
+  category: string;
+  description: string;
+  value: number;
+  currency: string;
+  source: string;
+  carried: boolean;
+  shopAvailable: boolean;
+};
+
 type Wallet = {
   plat: number;
   trias: number;
@@ -115,6 +127,7 @@ type CommandResult = {
   room: Room;
   events: string[];
   targets: RoomTarget[];
+  itemDetails: ItemDetail[];
 };
 
 type RoomTarget = {
@@ -174,6 +187,7 @@ type ScriptRunResponse = {
   character: Character;
   room: Room;
   targets?: RoomTarget[];
+  itemDetails?: ItemDetail[];
 };
 
 type ScriptPreset = {
@@ -218,6 +232,7 @@ type GameStatusPanelsProps = {
   selectedCharacter: Character | null;
   skillEntries: Array<[string, CharacterSkill]>;
   localTargets?: RoomTarget[];
+  itemDetails?: ItemDetail[];
   loading?: boolean;
   onCommand?: (command: string) => void;
 };
@@ -430,6 +445,7 @@ function GameStatusPanels({
   selectedCharacter,
   skillEntries,
   localTargets = [],
+  itemDetails = [],
   loading = false,
   onCommand = () => undefined,
 }: GameStatusPanelsProps) {
@@ -615,7 +631,10 @@ function GameStatusPanels({
         <ul>
           {(character?.inventory ?? []).map((item, index) => (
             <li key={`${item}-${index}`}>
-              <span>{item}</span>
+              <span>{itemDetails.find((entry) => entry.code === item)?.name ?? item}</span>
+              <button type="button" onClick={() => onCommand(`appraise ${item}`)} disabled={loading || !character}>
+                appraise
+              </button>
               <button
                 type="button"
                 onClick={() => onCommand(`shop sell ${item}`)}
@@ -626,6 +645,30 @@ function GameStatusPanels({
             </li>
           ))}
         </ul>
+        {itemDetails.length ? (
+          <>
+            <h3>Item Details</h3>
+            <div className="item-detail-list">
+              {itemDetails.map((item) => (
+                <section className="item-detail" key={item.code}>
+                  <strong>{item.name}</strong>
+                  <small>{item.code} | {item.category} | {item.value} {item.currency}</small>
+                  <p className="subtle">{item.description}</p>
+                  <div className="action-grid">
+                    <button type="button" onClick={() => onCommand(`appraise ${item.code}`)} disabled={loading || !character}>
+                      appraise
+                    </button>
+                    {item.shopAvailable ? (
+                      <button type="button" onClick={() => onCommand(`shop buy ${item.code}`)} disabled={loading || !character}>
+                        buy
+                      </button>
+                    ) : null}
+                  </div>
+                </section>
+              ))}
+            </div>
+          </>
+        ) : null}
         {character?.combat ? (
           <>
             <h3>Combat</h3>
@@ -674,6 +717,7 @@ function App() {
     'Register/login, create/select a character, then use numpad or command input.',
   ]);
   const [localTargets, setLocalTargets] = useState<RoomTarget[]>([]);
+  const [itemDetails, setItemDetails] = useState<ItemDetail[]>([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const logRef = useRef<HTMLDivElement | null>(null);
@@ -762,13 +806,14 @@ function App() {
   };
 
   const hydrateCharacterState = async (characterId: string) => {
-    const data = await request<{ character: Character; room: Room; targets: RoomTarget[] }>(`/characters/${characterId}/state`, {
+    const data = await request<{ character: Character; room: Room; targets: RoomTarget[]; itemDetails: ItemDetail[] }>(`/characters/${characterId}/state`, {
       token: accessToken,
     });
     setSelectedCharacterId(characterId);
     setCharacter(data.character);
     setRoom(data.room);
     setLocalTargets(data.targets);
+    setItemDetails(data.itemDetails ?? []);
     appendHistory(`Loaded ${data.character.name} in ${data.room.title}.`);
   };
 
@@ -871,6 +916,7 @@ function App() {
     setRoom(result.room);
     setCharacters((current) => current.map((entry) => (entry.id === result.character.id ? result.character : entry)));
     setLocalTargets(result.targets);
+    setItemDetails(result.itemDetails ?? []);
     for (const event of result.events) {
       appendHistory(event);
     }
@@ -1034,6 +1080,7 @@ function App() {
       setCharacter(result.character);
       setRoom(result.room);
       setLocalTargets(result.targets ?? []);
+      setItemDetails(result.itemDetails ?? []);
       setCharacters((current) =>
         current.map((entry) => (entry.id === result.character.id ? result.character : entry)),
       );
@@ -1282,6 +1329,7 @@ function App() {
               selectedCharacter={selectedCharacter}
               skillEntries={skillEntries}
               localTargets={localTargets}
+              itemDetails={itemDetails}
               loading={loading}
               onCommand={(entry) => void runCommand(entry)}
             />
@@ -1408,4 +1456,4 @@ function App() {
 }
 
 export { App, GameStatusPanels };
-export type { Character, CharacterSkill, Room };
+export type { Character, CharacterSkill, ItemDetail, Room };

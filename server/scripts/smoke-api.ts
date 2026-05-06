@@ -32,6 +32,17 @@ interface CommandResult {
   events: string[];
   character: CharacterSummary;
   targets: RoomTarget[];
+  itemDetails: ItemDetail[];
+}
+
+interface ItemDetail {
+  code: string;
+  name: string;
+  category: string;
+  value: number;
+  currency: string;
+  carried: boolean;
+  shopAvailable: boolean;
 }
 
 interface RoomTarget {
@@ -307,15 +318,22 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
     current = await walkTo(context.accessToken, current, shopRoom.roomId);
     const shop = await command(context.accessToken, current.id, 'shop');
     assert(shop.events.some((event) => event.includes(shopRoom.shop.name)), `Expected shop listing for ${shopRoom.shop.name}`);
+    assert(shop.itemDetails.some((item) => item.shopAvailable), `Expected structured shop item details for ${shopRoom.shop.name}`);
     current = shop.character;
 
     if (!testedShopEconomy && shopRoom.shop.items.length > 0) {
       const item = shopRoom.shop.items[0];
+      assert(shop.itemDetails.some((detail) => detail.code === item.code), `Expected item details to include ${item.code}`);
       current = (await command(context.accessToken, current.id, 'wait 900')).character;
       const inventoryBefore = current.inventory.length;
       const bought = await command(context.accessToken, current.id, `shop buy ${item.code}`);
       assert(bought.events.some((event) => event.includes(`You buy ${item.name}`)), `Expected buy output for ${item.name}`);
       assert(bought.character.inventory.length === inventoryBefore + 1, `Expected inventory to gain ${item.code}`);
+      assert(bought.itemDetails.some((detail) => detail.code === item.code && detail.carried), `Expected bought item details to mark ${item.code} carried`);
+
+      const appraisal = await command(context.accessToken, bought.character.id, `appraise ${item.code}`);
+      assert(appraisal.events.some((event) => event.includes(`Item: ${item.name}`)), `Expected item appraisal for ${item.name}`);
+      assert(appraisal.events.some((event) => event.includes('Category:')), `Expected item appraisal category for ${item.name}`);
 
       await command(context.accessToken, bought.character.id, 'wait 450');
 
@@ -331,6 +349,7 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
   context.character = current;
   context.summary.shopRoomsWalked = shops.shops.length;
   context.summary.shopEconomyChecked = true;
+  context.summary.itemDetailsChecked = true;
 }
 
 async function runCombatSuite(context: SmokeContext): Promise<void> {

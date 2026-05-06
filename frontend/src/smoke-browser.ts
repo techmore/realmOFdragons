@@ -52,10 +52,17 @@ async function main(): Promise<void> {
     await page.getByText(new RegExp(`Created ${characterName}`)).waitFor();
     await page.getByText('Room Affordances').waitFor();
     await page.getByText('Structured survey summary from room state').waitFor();
+    await page.getByText('Item Details').waitFor();
+    await page.getByText('training sword | weapon | 2 trias').waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('look');
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText('A broad square with the fountain').waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('appraise training sword');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText('Item: training sword').waitFor();
+    await page.locator('.terminal-pane .log').getByText('Category: weapon. Source: starter.').waitFor();
 
     await page.getByRole('button', { name: 'range', exact: true }).click();
     await page.getByText('You are not engaged with a target.').waitFor();
@@ -143,11 +150,12 @@ async function main(): Promise<void> {
           suite: 'frontend:smoke-browser',
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
-          commandCount: 17,
+          commandCount: 18,
           targetDetailsClicked: true,
           verbDiscoveryClicked: true,
           surveyClicked: true,
           roomAffordancePanelVisible: true,
+          itemDetailsVisible: true,
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,

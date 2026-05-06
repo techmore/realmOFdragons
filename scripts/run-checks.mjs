@@ -76,6 +76,8 @@ function markdownSummary(results, coverage) {
     lines.push(`| Agent prompt current status | ${coverage.gameplay.agentPromptCurrentStatusChecked ? 'yes' : 'no'} |`);
     lines.push(`| Script create/run/delete lifecycle | ${coverage.gameplay.scriptLifecycleChecked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Structured item details | ${coverage.gameplay.itemDetailsChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Browser item detail panel | ${coverage.frontend.browserItemDetailsVisible ? 'yes' : 'no'} |`);
     lines.push('');
     lines.push('## Gameplay Counts');
     lines.push('');
@@ -180,6 +182,7 @@ function coverageSummary(results) {
         (scriptPayload.scriptRunChecked ?? apiPayload.scriptRunChecked) === true &&
         (scriptPayload.scriptDeletedChecked ?? apiPayload.scriptDeletedChecked) === true,
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
+      itemDetailsChecked: apiPayload.itemDetailsChecked === true,
       combatChecked: apiPayload.combatChecked === true,
       surveyChecked: apiPayload.surveyChecked === true,
       forageChecked: apiPayload.forageChecked === true,
@@ -213,6 +216,7 @@ function coverageSummary(results) {
       browserCommandCount: browserPayload.commandCount ?? 0,
       browserSurveyClicked: browserPayload.surveyClicked === true,
       browserRoomAffordancePanelVisible: browserPayload.roomAffordancePanelVisible === true,
+      browserItemDetailsVisible: browserPayload.itemDetailsVisible === true,
       browserTargetDetailsClicked: browserPayload.targetDetailsClicked === true,
       browserVerbDiscoveryClicked: browserPayload.verbDiscoveryClicked === true,
       browserCommandDiscoveryVisible: browserPayload.commandDiscoveryVisible === true,
@@ -246,6 +250,7 @@ function assertCoverageShape(coverage) {
   expect(coverage.scripts.steps > 0, 'scripts.steps');
   expect(coverage.gameplay.combatChecked === true, 'gameplay.combatChecked');
   expect(coverage.gameplay.shopEconomyChecked === true, 'gameplay.shopEconomyChecked');
+  expect(coverage.gameplay.itemDetailsChecked === true, 'gameplay.itemDetailsChecked');
   expect(coverage.gameplay.scriptLifecycleChecked === true, 'gameplay.scriptLifecycleChecked');
 
   if (mode === 'local') {
