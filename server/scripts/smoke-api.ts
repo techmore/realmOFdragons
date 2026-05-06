@@ -1,6 +1,6 @@
 type JsonObject = Record<string, unknown>;
 
-type SmokeSuite = 'all' | 'identity' | 'scripts' | 'progression' | 'economy' | 'targets' | 'combat';
+type SmokeSuite = 'all' | 'identity' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
 
 interface AuthTokens {
   accessToken: string;
@@ -105,7 +105,7 @@ interface SmokeContext {
   summary: Record<string, unknown>;
 }
 
-const suites: SmokeSuite[] = ['all', 'identity', 'scripts', 'progression', 'economy', 'targets', 'combat'];
+const suites: SmokeSuite[] = ['all', 'identity', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'combat'];
 const requestedSuite = (process.argv[2] ?? 'all') as SmokeSuite;
 const baseUrl = (process.env.DR_API_BASE_URL ?? 'http://localhost:4000').replace(/\/+$/, '');
 const password = 'smoke-password-01';
@@ -706,11 +706,42 @@ async function runTargetSuite(context: SmokeContext): Promise<void> {
   context.summary.verbDiscoveryChecked = true;
 }
 
+async function runDamagedAmmoSuite(context: SmokeContext): Promise<void> {
+  let current = await walkTo(context.accessToken, context.character, 'crossing-MA01-002');
+  current = (await command(context.accessToken, current.id, 'wait 900')).character;
+
+  const seeded = await request<CommandResult>(`/v1/test/characters/${current.id}/state`, {
+    method: 'POST',
+    headers: authHeaders(context.accessToken),
+    body: JSON.stringify({ inventoryAppend: ['damaged-itm-sting-arrow'] }),
+  });
+  current = seeded.character;
+
+  let result = await command(context.accessToken, current.id, 'appraise damaged-itm-sting-arrow');
+  assert(result.events.some((event) => event.includes('Item: damaged practice arrow')), 'Expected focused damaged ammo appraisal name.');
+  assert(result.events.some((event) => event.includes('Category: salvage')), 'Expected focused damaged ammo salvage category.');
+  assert(result.events.some((event) => event.includes('broken ranged ammunition')), 'Expected focused damaged ammo broken description.');
+  assert(
+    result.itemDetails.some((item) => item.code === 'damaged-itm-sting-arrow' && item.category === 'salvage' && item.carried),
+    'Expected focused damaged ammo structured item details.',
+  );
+
+  result = await command(context.accessToken, result.character.id, 'shop sell damaged-itm-sting-arrow');
+  assert(result.events.some((event) => event.includes('You sell damaged practice arrow')), 'Expected focused damaged ammo sell output.');
+  assert(!result.character.inventory.includes('damaged-itm-sting-arrow'), 'Expected focused damaged ammo removed after sale.');
+
+  context.character = result.character;
+  context.summary.finalRoom = result.character.roomId;
+  context.summary.damagedAmmoEconomyChecked = true;
+  context.summary.damagedAmmoFocusedChecked = true;
+}
+
 async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void> {
   if (suite === 'identity') await runIdentitySuite(context);
   if (suite === 'scripts') await runScriptSuite(context);
   if (suite === 'progression') await runProgressionSuite(context);
   if (suite === 'economy') await runEconomySuite(context);
+  if (suite === 'damaged-ammo') await runDamagedAmmoSuite(context);
   if (suite === 'targets') await runTargetSuite(context);
   if (suite === 'combat') await runCombatSuite(context);
   if (suite === 'all') {

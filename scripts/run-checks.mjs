@@ -23,6 +23,7 @@ const localSteps = [
   ...baseSteps,
   { name: 'browser-smoke', command: 'node', args: ['scripts/with-test-app.mjs', 'npm', 'run', 'smoke:browser'] },
   { name: 'target-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:targets'] },
+  { name: 'damaged-ammo-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:damaged-ammo'] },
   { name: 'script-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:scripts'] },
   { name: 'api-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', 'run', 'smoke:api'] },
   { name: 'agent-prompt-smoke', command: 'npm', args: ['run', 'smoke:agent-prompt'] },
@@ -78,6 +79,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
     lines.push(`| Ammo stack resale | ${coverage.gameplay.ammoSellChecked ? 'yes' : 'no'} |`);
     lines.push(`| Damaged ammo economy | ${coverage.gameplay.damagedAmmoEconomyChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Focused damaged ammo smoke | ${coverage.gameplay.focusedDamagedAmmoSmokeChecked ? 'yes' : 'no'} |`);
     lines.push(`| Structured item details | ${coverage.gameplay.itemDetailsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Starter equipment verbs | ${coverage.gameplay.equipmentChecked ? 'yes' : 'no'} |`);
     lines.push(`| Structured equipment slots | ${coverage.gameplay.equipmentSlotsChecked ? 'yes' : 'no'} |`);
@@ -161,6 +163,7 @@ function coverageSummary(results) {
   const byName = new Map(results.map((result) => [result.name, result]));
   const apiPayload = parseLastJsonObject(byName.get('api-smoke')?.stdoutTail ?? '') ?? {};
   const targetPayload = parseLastJsonObject(byName.get('target-smoke')?.stdoutTail ?? '') ?? {};
+  const damagedAmmoPayload = parseLastJsonObject(byName.get('damaged-ammo-smoke')?.stdoutTail ?? '') ?? {};
   const scriptPayload = parseLastJsonObject(byName.get('script-smoke')?.stdoutTail ?? '') ?? {};
   const browserPayload = parseLastJsonObject(byName.get('browser-smoke')?.stdoutTail ?? '') ?? {};
   const agentPromptPayload = parseLastJsonObject(byName.get('agent-prompt-smoke')?.stdoutTail ?? '') ?? {};
@@ -195,6 +198,7 @@ function coverageSummary(results) {
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
       ammoSellChecked: apiPayload.ammoSellChecked === true,
       damagedAmmoEconomyChecked: apiPayload.damagedAmmoEconomyChecked === true,
+      focusedDamagedAmmoSmokeChecked: damagedAmmoPayload.damagedAmmoFocusedChecked === true,
       itemDetailsChecked: apiPayload.itemDetailsChecked === true,
       equipmentChecked: apiPayload.equipmentChecked === true,
       equipmentSlotsChecked: apiPayload.equipmentSlotsChecked === true,
@@ -288,6 +292,7 @@ function assertCoverageShape(coverage) {
 
   if (mode === 'local') {
     expect(coverage.gameplay.focusedTargetSmokeChecked === true, 'gameplay.focusedTargetSmokeChecked');
+    expect(coverage.gameplay.focusedDamagedAmmoSmokeChecked === true, 'gameplay.focusedDamagedAmmoSmokeChecked');
     expect(coverage.gameplay.agentPromptCurrentStatusChecked === true, 'gameplay.agentPromptCurrentStatusChecked');
   }
 

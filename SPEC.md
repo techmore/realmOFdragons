@@ -32,10 +32,12 @@ Completed current slice:
 - Damaged recovered arrows now appraise as salvage with broken-ammunition descriptions.
 - Shops that stock the matching intact ammunition can buy damaged arrows for scrap value.
 - Economy smoke telemetry now tracks damaged ammo appraisal and resale coverage.
+- Added focused `smoke:damaged-ammo` coverage for damaged ammo item details and resale.
+- Local agent telemetry now runs the focused damaged-ammo smoke before the full API smoke.
 
 Current next priority:
 
-- Add focused damaged-ammo smoke suite or browser UI coverage for damaged recovered ammunition in item details.
+- Add browser UI coverage for damaged recovered ammunition in the item details panel.
 
 Core Philosophy
 
