@@ -72,6 +72,7 @@ import {
   removeWornInventoryItem,
   resolveRangedAmmoRecovery,
   stowHeldItem,
+  validateAttackRange,
   wearCarriedItem,
   resolveItemDetail,
   type ItemDetail,
@@ -1707,14 +1708,9 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     }
 
     const attackRange = normalizeRange(resolvedCharacter.combat.range);
-    const validRanges = weapon?.validAttackRanges ?? ['melee'];
-    if (!validRanges.includes(attackRange)) {
-      if (weapon?.weaponRange === 'ranged' && attackRange === 'melee') {
-        events.push(`You are too close to use ${weapon.name}. Retreat to pole or missile range first.`);
-      } else {
-        events.push(`You are too far away to strike. Current range: ${formatRange(attackRange)}.`);
-        events.push('Advance to melee range first.');
-      }
+    const rangeValidation = validateAttackRange(weapon, attackRange);
+    if (!rangeValidation.success) {
+      events.push(...rangeValidation.events);
       await persist();
       return buildCommandResult(resolvedCharacter, room, events);
     }

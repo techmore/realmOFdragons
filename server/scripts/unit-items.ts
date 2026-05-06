@@ -35,6 +35,7 @@ import {
   resolveItemDetail,
   resolveRangedAmmoRecovery,
   stowHeldItem,
+  validateAttackRange,
   wearCarriedItem,
 } from '../src/items.js';
 import { worldRooms } from '../src/world.js';
@@ -217,6 +218,19 @@ const unloadedFireUnit = character({ hands: { left: null, right: 'itm-practice-b
 assert.deepEqual(prepareRangedFire(unloadedFireUnit, findHeldWeapon(unloadedFireUnit, marksmanRoom)).events, ['practice bow is not loaded. Use reload before fire or shoot.']);
 const emptyFireUnit = character({ hands: { left: null, right: 'itm-practice-bow' }, loadedAmmo: {}, ammoPouch: {}, inventory: [] });
 assert.deepEqual(prepareRangedFire(emptyFireUnit, findHeldWeapon(emptyFireUnit, marksmanRoom)).events, ['Your quiver is empty: you need practice arrow (itm-sting-arrow) to use practice bow.']);
+assert.deepEqual(validateAttackRange(heldWeapon, 'missile'), { success: true, events: [] });
+assert.deepEqual(validateAttackRange(heldWeapon, 'melee'), {
+  success: false,
+  events: ['You are too close to use practice bow. Retreat to pole or missile range first.'],
+});
+assert.deepEqual(validateAttackRange(starterSword, 'missile'), {
+  success: false,
+  events: ['You are too far away to strike. Current range: missile range.', 'Advance to melee range first.'],
+});
+assert.deepEqual(validateAttackRange(undefined, 'pole'), {
+  success: false,
+  events: ['You are too far away to strike. Current range: pole range.', 'Advance to melee range first.'],
+});
 const noWeaponReload = reloadRangedWeapon(character({ hands: { left: null, right: 'training sword' } }), marksmanRoom);
 assert.equal(noWeaponReload.success, false);
 assert.deepEqual(noWeaponReload.events, ['You need a ranged weapon in hand to reload.']);

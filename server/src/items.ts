@@ -1,6 +1,6 @@
 import type { CharacterRecord, EquipmentSlot, EquipmentSlots } from './storage.js';
 import { type Room, type RoomShopItem, worldRooms } from './world.js';
-import type { CombatRangeName } from './combat.js';
+import { formatRange, type CombatRangeName } from './combat.js';
 import { isDamagedAmmoCode, originalAmmoCodeFromDamaged } from './economy.js';
 
 export type ItemDetail = {
@@ -414,6 +414,17 @@ export function prepareRangedFire(character: CharacterRecord, weapon: ItemDetail
     consumedAmmo: ammoCode,
     events: [`You loose loaded ${weapon.ammoName ?? ammoCode}. ${countAmmo(character, ammoCode)} remain in your quiver.`],
   };
+}
+
+export function validateAttackRange(weapon: ItemDetail | undefined, attackRange: CombatRangeName): ItemMutationResult {
+  const validRanges = weapon?.validAttackRanges ?? ['melee'];
+  if (validRanges.includes(attackRange)) {
+    return itemMutation(true, []);
+  }
+  if (weapon?.weaponRange === 'ranged' && attackRange === 'melee') {
+    return itemMutation(false, [`You are too close to use ${weapon.name}. Retreat to pole or missile range first.`]);
+  }
+  return itemMutation(false, [`You are too far away to strike. Current range: ${formatRange(attackRange)}.`, 'Advance to melee range first.']);
 }
 
 export function buildEquipmentSummary(character: CharacterRecord, room?: Room, rooms: Record<string, Room> = worldRooms): EquipmentSummary {
