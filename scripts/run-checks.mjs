@@ -72,6 +72,10 @@ function markdownSummary(results, coverage) {
     lines.push(`| Browser survey action | ${coverage.frontend.browserSurveyClicked ? 'yes' : 'no'} |`);
     lines.push(`| Browser script discovery note | ${coverage.frontend.browserScriptDiscoveryVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser script preset save | ${coverage.frontend.browserScriptPresetSaved ? 'yes' : 'no'} |`);
+    lines.push(`| Static legacy race stat mode | ${coverage.frontend.staticLegacyRaceStatModeChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Static prototype race role labels hidden | ${coverage.frontend.staticPrototypeRaceRoleLabelsHidden ? 'yes' : 'no'} |`);
+    lines.push(`| Browser legacy race stat mode | ${coverage.frontend.browserLegacyRaceStatModeVisible ? 'yes' : 'no'} |`);
+    lines.push(`| Browser prototype race role labels hidden | ${coverage.frontend.browserPrototypeRaceRoleLabelsHidden ? 'yes' : 'no'} |`);
     lines.push(`| Browser damaged ammo item details | ${coverage.frontend.browserDamagedAmmoItemDetailsVisible ? 'yes' : 'no'} |`);
     lines.push(`| Browser damaged ammo inventory sale | ${coverage.frontend.browserDamagedAmmoSoldFromInventory ? 'yes' : 'no'} |`);
     lines.push(`| Browser disabled sell hint | ${coverage.frontend.browserDisabledSellHintVisible ? 'yes' : 'no'} |`);
@@ -247,6 +251,8 @@ function coverageSummary(results) {
       staticUiSmoke: byName.get('frontend-ui-smoke')?.exitCode === 0,
       staticCommandDiscoveryChecked: byName.get('frontend-ui-smoke')?.exitCode === 0,
       staticShopEconomyHelperCasesChecked: staticUiPayload.shopEconomyHelperCasesChecked === true,
+      staticLegacyRaceStatModeChecked: staticUiPayload.legacyRaceStatModeChecked === true,
+      staticPrototypeRaceRoleLabelsHidden: staticUiPayload.prototypeRaceRoleLabelsHidden === true,
       browserSmoke: byName.has('browser-smoke') ? byName.get('browser-smoke')?.exitCode === 0 : null,
       browser: browserPayload.browser ?? null,
       browserAccountCreated: Boolean(browserPayload.account),
@@ -268,6 +274,8 @@ function coverageSummary(results) {
       browserCommandDiscoveryVisible: browserPayload.commandDiscoveryVisible === true,
       browserScriptDiscoveryVisible: browserPayload.scriptDiscoveryVisible === true,
       browserScriptPresetSaved: browserPayload.scriptPresetSaved === true,
+      browserLegacyRaceStatModeVisible: browserPayload.legacyRaceStatModeVisible === true,
+      browserPrototypeRaceRoleLabelsHidden: browserPayload.prototypeRaceRoleLabelsHidden === true,
     },
     unitSuites: unitPayloads.map((payload) => payload.suite),
   };
@@ -287,8 +295,12 @@ function assertCoverageShape(coverage) {
 
   expect(coverage.frontend.staticUiSmoke === true, 'frontend.staticUiSmoke');
   expect(coverage.frontend.staticShopEconomyHelperCasesChecked === true, 'frontend.staticShopEconomyHelperCasesChecked');
+  expect(coverage.frontend.staticLegacyRaceStatModeChecked === true, 'frontend.staticLegacyRaceStatModeChecked');
+  expect(coverage.frontend.staticPrototypeRaceRoleLabelsHidden === true, 'frontend.staticPrototypeRaceRoleLabelsHidden');
   expect(coverage.frontend.browserSmoke === true, 'frontend.browserSmoke');
   expect(coverage.frontend.browserScriptPresetSaved === true, 'frontend.browserScriptPresetSaved');
+  expect(coverage.frontend.browserLegacyRaceStatModeVisible === true, 'frontend.browserLegacyRaceStatModeVisible');
+  expect(coverage.frontend.browserPrototypeRaceRoleLabelsHidden === true, 'frontend.browserPrototypeRaceRoleLabelsHidden');
   expect(coverage.frontend.browserDamagedAmmoItemDetailsVisible === true, 'frontend.browserDamagedAmmoItemDetailsVisible');
   expect(coverage.frontend.browserDamagedAmmoSoldFromInventory === true, 'frontend.browserDamagedAmmoSoldFromInventory');
   expect(coverage.frontend.browserDisabledSellHintVisible === true, 'frontend.browserDisabledSellHintVisible');

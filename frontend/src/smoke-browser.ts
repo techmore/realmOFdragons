@@ -91,6 +91,20 @@ async function main(): Promise<void> {
       headers: { authorization: `Bearer ${login.accessToken}` },
       body: JSON.stringify({ inventoryAppend: ['damaged-itm-sting-arrow'] }),
     });
+    await apiRequest(`/v1/test/characters/${createdCharacter.id}/state`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${login.accessToken}` },
+      body: JSON.stringify({ legacyRaceMetadata: 'classic' }),
+    });
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('score');
+    await page.keyboard.press('Enter');
+    await page.locator('.topbar-stats').getByText('Classic random roll').waitFor();
+    await page.locator('.equip').getByText(new RegExp(`${characterName} \\| Human \\| Classic random roll`)).waitFor();
+    await page.locator('.terminal-pane .log').getByText('classic random roll').waitFor();
+    const legacyContent = await page.content();
+    assert(!legacyContent.includes('Berserker'), 'Expected browser UI to hide legacy Berserker role label.');
+    assert(!legacyContent.includes('Frontline'), 'Expected browser UI to hide legacy Frontline role label.');
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('inventory');
     await page.keyboard.press('Enter');
@@ -292,7 +306,9 @@ async function main(): Promise<void> {
           suite: 'frontend:smoke-browser',
           account: email,
           browser: chromePath ? 'system-chrome' : 'playwright-chromium',
-          commandCount: 29,
+          commandCount: 30,
+          legacyRaceStatModeVisible: true,
+          prototypeRaceRoleLabelsHidden: true,
           targetDetailsClicked: true,
           verbDiscoveryClicked: true,
           surveyClicked: true,

@@ -7,6 +7,12 @@ function assertIncludes(markup: string, expected: string): void {
   }
 }
 
+function assertNotIncludes(markup: string, forbidden: string): void {
+  if (markup.includes(forbidden)) {
+    throw new Error(`Expected UI markup to omit: ${forbidden}`);
+  }
+}
+
 function assertEqual(actual: unknown, expected: unknown, label: string): void {
   if (actual !== expected) {
     throw new Error(`Expected ${label} to be ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
@@ -200,6 +206,24 @@ const noShopMarkup = renderToStaticMarkup(
   />,
 );
 
+const legacyNormalizedCharacter: Character = {
+  ...character,
+  role: 'berserker',
+  roleTitle: 'Berserker',
+  statGenerationMode: 'classic_random',
+};
+
+const legacyNormalizedMarkup = renderToStaticMarkup(
+  <GameStatusPanels
+    character={legacyNormalizedCharacter}
+    room={room}
+    selectedCharacter={legacyNormalizedCharacter}
+    skillEntries={Object.entries(legacyNormalizedCharacter.skills)}
+    localTargets={[]}
+    itemDetails={[]}
+  />,
+);
+
 for (const expected of [
   'Room',
   'Room Affordances',
@@ -291,6 +315,10 @@ for (const expected of [
   assertIncludes(noShopMarkup, expected);
 }
 
+assertIncludes(legacyNormalizedMarkup, 'UiScout | Human | Classic random roll');
+assertNotIncludes(legacyNormalizedMarkup, 'Berserker');
+assertNotIncludes(legacyNormalizedMarkup, 'Frontline');
+
 const stockedCarried = shopSalePresentation('itm-test-blade', room, testBladeDetail, 'carried');
 assertEqual(stockedCarried.resaleEstimate, 2, 'stocked carried resale estimate');
 assertEqual(stockedCarried.sellHint, 'Test Gear Stand stocks this item and can buy it for about 2 trias.', 'stocked carried sale hint');
@@ -317,6 +345,8 @@ console.log(
       ok: true,
       suite: 'frontend:smoke-ui',
       shopEconomyHelperCasesChecked: true,
+      legacyRaceStatModeChecked: true,
+      prototypeRaceRoleLabelsHidden: true,
     },
     null,
     2,

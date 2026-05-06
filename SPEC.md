@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Static UI smoke now renders a legacy classic-random character fixture and verifies the web character panel shows stat mode without old prototype role labels.
+- Browser smoke now seeds legacy race-roll metadata through the test fixture endpoint, refreshes the live UI through `score`, and verifies `Classic random roll` is visible without `Berserker`/`Frontline`.
+- Local telemetry now reports static and browser coverage for legacy race stat mode visibility and hidden prototype race role labels.
 - Test fixtures now support controlled legacy race-roll metadata seeding for API smoke coverage.
 - API smoke now verifies legacy modern stored metadata normalizes to `modern_fixed` / `Modern fixed racial start` through `/v1/test/characters/:id/state`.
 - API smoke now verifies explicit legacy classic-random stored metadata keeps classic mode while hiding old prototype role labels from API-visible score output.
@@ -130,7 +133,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add browser/static smoke coverage that legacy-normalized characters show stat mode without prototype role labels in the web UI.
+- Add focused agent telemetry rows for DragonRealms race/guild creation rules: race selected during creation, guild joined in-world only, and all 121 race/guild Circle 1 combinations.
 
 Core Philosophy
 
