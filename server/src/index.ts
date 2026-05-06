@@ -56,6 +56,7 @@ import {
   normalizeRange,
   normalizeStance,
   buildPostAttackStatusEvents,
+  buildCombatStatusEvents,
   buildRoomTargetsFromTemplates,
   buildTargetDetailEvents as buildCombatTargetDetailEvents,
   buildTargetScanEvents,
@@ -935,26 +936,8 @@ function buildCharacterCombat(character: CharacterRecord, requestedTarget?: stri
 }
 
 function buildCombatEvents(character: CharacterRecord): string[] {
-  if (!character.combat) {
-    const equipment = buildEquipmentSummary(character);
-    return [
-      'You are not in combat.',
-      `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
-      `Equipment: ${formatEquipmentModifiers(equipment)}.`,
-      `Weapon: ${findHeldWeapon(character)?.name ?? 'unarmed'} (${findHeldWeapon(character)?.weaponRange ?? 'melee'}).`,
-    ];
-  }
   const equipment = buildEquipmentSummary(character);
-  return [
-    `Combat target: ${character.combat.targetName}`,
-    `Target HP: ${character.combat.targetHp}/${character.combat.targetMaxHp}`,
-    `Range: ${formatRange(normalizeRange(character.combat.range))}`,
-    `Position: ${formatAdvantage(character.combat.advantage)}`,
-    `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
-    `Equipment: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`,
-    `Weapon: ${findHeldWeapon(character)?.name ?? 'unarmed'} (${findHeldWeapon(character)?.weaponRange ?? 'melee'}).`,
-    `Ready in: ${Math.max(0, character.roundtimeMs)}ms`,
-  ];
+  return buildCombatStatusEvents(character, equipment, formatEquipmentModifiers(equipment), findHeldWeapon(character));
 }
 
 function evaluateToHit(stat: number, bonus: number) {

@@ -114,6 +114,58 @@ export type CombatTargetSnapshot = {
   range: CombatRangeName;
 };
 
+export type CombatStatusCharacter = {
+  stance: unknown;
+  balance: unknown;
+  roundtimeMs?: unknown;
+  combat?: {
+    targetName: string;
+    targetHp: number;
+    targetMaxHp: number;
+    range: unknown;
+    advantage: unknown;
+  } | null;
+};
+
+export type CombatStatusEquipment = {
+  totalArmor: number;
+  totalEvasionPenalty: number;
+  totalAttackModifier: number;
+};
+
+export type CombatStatusWeapon = {
+  name: string;
+  weaponRange?: string;
+} | undefined;
+
+export function buildCombatStatusEvents(
+  character: CombatStatusCharacter,
+  equipment: CombatStatusEquipment,
+  equipmentLabel: string,
+  weapon: CombatStatusWeapon,
+): string[] {
+  const weaponLabel = `${weapon?.name ?? 'unarmed'} (${weapon?.weaponRange ?? 'melee'})`;
+  if (!character.combat) {
+    return [
+      'You are not in combat.',
+      `Stance: ${STANCE_PROFILES[normalizeStance(character.stance)].label}. Balance: ${formatBalance(character.balance)}.`,
+      `Equipment: ${equipmentLabel}.`,
+      `Weapon: ${weaponLabel}.`,
+    ];
+  }
+
+  return [
+    `Combat target: ${character.combat.targetName}`,
+    `Target HP: ${character.combat.targetHp}/${character.combat.targetMaxHp}`,
+    `Range: ${formatRange(normalizeRange(character.combat.range))}`,
+    `Position: ${formatAdvantage(normalizeAdvantage(character.combat.advantage))}`,
+    `Stance: ${STANCE_PROFILES[normalizeStance(character.stance)].label}. Balance: ${formatBalance(character.balance)}.`,
+    `Equipment: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`,
+    `Weapon: ${weaponLabel}.`,
+    `Ready in: ${Math.max(0, Math.floor(Number(character.roundtimeMs) || 0))}ms`,
+  ];
+}
+
 export function buildRoomTargetsFromTemplates(targets: CombatTargetTemplate[]): RoomTarget[] {
   return targets.map((target) => ({
     id: target.id,

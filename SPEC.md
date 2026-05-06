@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted combat status command formatting into pure combat helpers with unit coverage for idle equipment/stance summaries, normalized fallback values, and engaged target status output.
+- The Express `combat` command now delegates combat status text to combat-owned formatting while passing equipment summaries and held weapon state from the item module.
 - Extracted target detail/appraisal formatting into pure combat helpers with unit coverage for missing target prompts, unseen targets, unengaged targets, engaged ranged targets, and engaged melee targets.
 - The Express `target`/target-appraisal path now delegates combat target detail text to combat-owned formatting while retaining route-local room enemy lookup.
 - Extracted room target listing and scan event formatting into pure combat helpers with unit coverage for empty rooms, multiple targets, and API target summaries.
@@ -199,7 +201,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract combat status command formatting into combat helpers with unit coverage.
+- Extract combat range command formatting into combat helpers with unit coverage.
 
 Core Philosophy
 

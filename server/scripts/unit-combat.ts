@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {
   STANCE_PROFILES,
   applyBalanceChange,
+  buildCombatStatusEvents,
   buildPostAttackStatusEvents,
   buildRoomTargetsFromTemplates,
   buildTargetDetailEvents,
@@ -98,6 +99,54 @@ assert.deepEqual(buildTargetVanishedEvents(), ['Your target vanished from the wo
 assert.deepEqual(buildPostAttackStatusEvents(1, 3), ['Position: you have the edge.', 'Balance: very balanced.']);
 assert.equal(resolveAttackCooldownMs(59), 650);
 assert.equal(resolveAttackCooldownMs(60), 900);
+assert.deepEqual(buildCombatStatusEvents(
+  { stance: 'offensive', balance: 3 },
+  { totalArmor: 1, totalEvasionPenalty: -1, totalAttackModifier: 2 },
+  'armor +1, evasion penalty -1, attack modifier +2',
+  { name: 'short sword', weaponRange: 'melee' },
+), [
+  'You are not in combat.',
+  'Stance: offensive stance. Balance: very balanced.',
+  'Equipment: armor +1, evasion penalty -1, attack modifier +2.',
+  'Weapon: short sword (melee).',
+]);
+assert.deepEqual(buildCombatStatusEvents(
+  { stance: 'bad-stance', balance: 99 },
+  { totalArmor: 0, totalEvasionPenalty: 0, totalAttackModifier: 0 },
+  'armor +0, evasion penalty +0, attack modifier +0',
+  undefined,
+), [
+  'You are not in combat.',
+  'Stance: balanced stance. Balance: incredibly balanced.',
+  'Equipment: armor +0, evasion penalty +0, attack modifier +0.',
+  'Weapon: unarmed (melee).',
+]);
+assert.deepEqual(buildCombatStatusEvents(
+  {
+    stance: 'balanced',
+    balance: 2,
+    roundtimeMs: 450,
+    combat: {
+      targetName: 'test rat',
+      targetHp: 4,
+      targetMaxHp: 8,
+      range: 'pole',
+      advantage: 1,
+    },
+  },
+  { totalArmor: 1, totalEvasionPenalty: -1, totalAttackModifier: 2 },
+  'unused idle equipment label',
+  { name: 'practice bow', weaponRange: 'missile' },
+), [
+  'Combat target: test rat',
+  'Target HP: 4/8',
+  'Range: pole range',
+  'Position: you have the edge',
+  'Stance: balanced stance. Balance: solidly balanced.',
+  'Equipment: armor 1, evasion penalty -1, attack modifier 2.',
+  'Weapon: practice bow (missile).',
+  'Ready in: 450ms',
+]);
 
 const targetTemplates = [
   { id: 'test-rat', name: 'test rat', maxHp: 8, aggression: 30 },
@@ -145,4 +194,4 @@ assert.equal(buildTargetDetailEvents(targetTemplates[0], 'test rat', {
   range: 'melee',
 })[4], 'Suggested next verb: attack test rat.');
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true }, null, 2));
+console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true, combatStatusChecked: true }, null, 2));
