@@ -469,6 +469,18 @@ Next priority:
 
 - Add a lightweight command reference to `README.md` for the current in-game verbs, especially target discovery, movement, inventory, shops, progression, and beginner combat.
 
+Implementation Notes - 2026-05-05, README Command Reference
+
+Completed in the current Node/React prototype:
+
+- Added a current command reference to `README.md`.
+- Documented information commands, movement, target discovery, target inspection, beginner combat, progression, and shops/economy.
+- Clarified that web UI numpad and D-pad controls send the same movement verbs.
+
+Next priority:
+
+- Add a server-side `verb` command that returns grouped command hints matching the README command reference, so players can discover verbs in-game instead of relying on documentation.
+
 Implementation Notes - 2026-05-05, Target Details Command
 
 Completed in the current Node/React prototype:
