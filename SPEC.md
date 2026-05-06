@@ -10,14 +10,15 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Added starter equipment verbs: `hold <item> [left|right]`, `stow <item|left|right>`, `wear <item>`, and `remove <item>`.
-- Character state now persists a lightweight `worn` item list alongside hands and inventory.
-- Inventory output and web UI show worn items.
-- API and browser smoke cover wearing/removing starter gear and holding/stowing starter inventory.
+- Character state now exposes structured equipment slots in addition to legacy worn-item lists.
+- Item metadata includes slot, armor, evasion penalty, and attack modifier fields.
+- `wear` now enforces slot/category constraints and blocks occupied slots.
+- Combat/status output summarizes equipment armor, evasion penalty, and attack modifier.
+- API, static UI, and browser smoke cover equipment slots and item combat modifiers.
 
 Current next priority:
 
-- Add structured equipment slots and beginner armor/weapon constraints so worn gear has explicit location and combat/evasion tradeoffs.
+- Add beginner weapon handling constraints and attack verb integration so held weapons affect accuracy/damage more explicitly.
 
 Core Philosophy
 

@@ -12,7 +12,7 @@ import {
   guilds,
   worldRooms,
 } from './world.js';
-import { FileStorage, LoginSession, AccountRecord, CharacterRecord, ScriptRecord } from './storage.js';
+import { FileStorage, LoginSession, AccountRecord, CharacterRecord, ScriptRecord, type EquipmentSlot, type EquipmentSlots } from './storage.js';
 import {
   getAllRaces,
   isValidRace,
@@ -67,6 +67,7 @@ interface CommandResult {
   | 'hands'
   | 'inventory'
   | 'worn'
+  | 'equipment'
   | 'roundtimeMs'
   | 'combat'
   | 'stance'
@@ -97,8 +98,19 @@ type ItemDetail = {
   value: number;
   currency: keyof CharacterRecord['wallet'];
   source: 'starter' | 'shop' | 'forage' | 'loot' | 'unknown';
+  slot?: EquipmentSlot;
+  armor: number;
+  evasionPenalty: number;
+  attackModifier: number;
   carried: boolean;
   shopAvailable: boolean;
+};
+
+type EquipmentSummary = {
+  slots: EquipmentSlots;
+  totalArmor: number;
+  totalEvasionPenalty: number;
+  totalAttackModifier: number;
 };
 
 type SocketState = {
@@ -290,6 +302,10 @@ const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | 'shopAva
     value: 1,
     currency: 'trias',
     source: 'starter',
+    slot: 'back',
+    armor: 0,
+    evasionPenalty: 0,
+    attackModifier: 0,
   },
   'repair cloth': {
     code: 'repair cloth',
@@ -299,6 +315,10 @@ const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | 'shopAva
     value: 1,
     currency: 'trias',
     source: 'starter',
+    slot: 'belt',
+    armor: 0,
+    evasionPenalty: 0,
+    attackModifier: 0,
   },
   'training sword': {
     code: 'training sword',
@@ -308,6 +328,9 @@ const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | 'shopAva
     value: 2,
     currency: 'trias',
     source: 'starter',
+    armor: 0,
+    evasionPenalty: 0,
+    attackModifier: 1,
   },
 };
 
@@ -344,6 +367,7 @@ function sanitizeCharacter(character: CharacterRecord): CommandResult['character
     hands: character.hands,
     inventory: character.inventory,
     worn: character.worn ?? [],
+    equipment: character.equipment ?? {},
     wallet: character.wallet,
     stats: character.stats,
     rollProfileVersion: character.rollProfileVersion,
@@ -394,6 +418,50 @@ function spendFunds(wallet: CharacterRecord['wallet'], currency: keyof Character
 
 function earnFunds(wallet: CharacterRecord['wallet'], currency: keyof CharacterRecord['wallet'], amount: number) {
   wallet[currency] = Math.max(0, wallet[currency] + Math.max(0, Math.floor(amount)));
+}
+
+function inferEquipmentStats(code: string, name: string, category: string): Pick<ItemDetail, 'slot' | 'armor' | 'evasionPenalty' | 'attackModifier'> {
+  const text = `${code} ${name}`.toLowerCase();
+  if (category === 'weapon' || category === 'ranged') {
+    return { armor: 0, evasionPenalty: 0, attackModifier: text.includes('training') ? 1 : 2 };
+  }
+  if (text.includes('glove')) {
+    return { slot: 'hands', armor: 1, evasionPenalty: 1, attackModifier: 0 };
+  }
+  if (category === 'armor') {
+    return { slot: 'body', armor: 1, evasionPenalty: 1, attackModifier: 0 };
+  }
+  if (category === 'container') {
+    return { slot: 'back', armor: 0, evasionPenalty: 0, attackModifier: 0 };
+  }
+  if (category === 'utility') {
+    return { slot: 'belt', armor: 0, evasionPenalty: 0, attackModifier: 0 };
+  }
+  return { armor: 0, evasionPenalty: 0, attackModifier: 0 };
+}
+
+function buildEquipmentSummary(character: CharacterRecord, room?: Room): EquipmentSummary {
+  const slots = character.equipment ?? {};
+  const summary: EquipmentSummary = {
+    slots,
+    totalArmor: 0,
+    totalEvasionPenalty: 0,
+    totalAttackModifier: 0,
+  };
+  const detailRoom = room ?? worldRooms[character.roomId] ?? worldRooms['crossing-TG01-001'];
+  for (const itemCode of Object.values(slots)) {
+    if (!itemCode) continue;
+    const detail = resolveItemDetail(itemCode, detailRoom, character);
+    summary.totalArmor += detail.armor;
+    summary.totalEvasionPenalty += detail.evasionPenalty;
+    summary.totalAttackModifier += detail.attackModifier;
+  }
+  for (const itemCode of [character.hands.left, character.hands.right]) {
+    if (!itemCode) continue;
+    const detail = resolveItemDetail(itemCode, detailRoom, character);
+    summary.totalAttackModifier += detail.attackModifier;
+  }
+  return summary;
 }
 
 function applyRollToCharacter(character: CharacterRecord, characterRoll: RaceRollResult) {
@@ -564,15 +632,16 @@ function applyMeleeRetaliation(character: CharacterRecord, template: EnemyTempla
   if (!character.combat) return false;
   const stanceProfile = STANCE_PROFILES[character.stance];
   const balanceBonus = (character.balance - 2) * 5;
+  const equipment = buildEquipmentSummary(character);
   const retaliation = evaluateToHit(
     template.attack * 8,
-    -Math.floor((character.stats.discipline + character.stats.wisdom) / 5) - stanceProfile.defense - balanceBonus,
+    -Math.floor((character.stats.discipline + character.stats.wisdom) / 5) - stanceProfile.defense - balanceBonus + equipment.totalEvasionPenalty * 4,
   );
   if (retaliation.hit) {
     const rawDamage = randomInt(template.damageMin, template.damageMax + 1);
     const defended = character.combat.defendUntil > now;
     const stanceMitigation = character.stance === 'defensive' ? 1 : character.stance === 'evasive' ? 2 : 0;
-    const damage = Math.max(0, rawDamage - (defended ? 2 : 0) - stanceMitigation);
+    const damage = Math.max(0, rawDamage - (defended ? 2 : 0) - stanceMitigation - equipment.totalArmor);
     events.push(`${character.combat.targetName} attacks for ${damage}.`);
     character.health.current = Math.max(0, character.health.current - damage);
     grantSkillPool(character, 'evasion', defended ? 2 : 1, events);
@@ -630,15 +699,16 @@ function resolvePlayerManeuver(
   const balanceBonus = (character.balance - 2) * 5;
   const advantageBonus = normalizeAdvantage(character.combat.advantage) * 7;
   const maneuverBonus = maneuver === 'jab' ? 8 : -4;
+  const equipment = buildEquipmentSummary(character);
   const playerAttack = evaluateToHit(
     character.stats.strength + character.stats.agility + character.stats.reflex,
-    stanceProfile.attack + balanceBonus + advantageBonus + maneuverBonus,
+    stanceProfile.attack + balanceBonus + advantageBonus + maneuverBonus + equipment.totalAttackModifier * 3,
   );
 
   if (playerAttack.hit) {
     const damage = resolveAttackDamage(
       character.stats.strength,
-      character.stats.discipline + stanceProfile.damage + (maneuver === 'bash' ? 3 : -1),
+      character.stats.discipline + stanceProfile.damage + equipment.totalAttackModifier + (maneuver === 'bash' ? 3 : -1),
       template.damageMin,
       template.damageMax,
     );
@@ -673,6 +743,19 @@ function ensureCharacterShape(character: CharacterRecord): { character: Characte
   if (!Array.isArray(character.worn)) {
     character.worn = [];
     changed = true;
+  }
+  if (!character.equipment || typeof character.equipment !== 'object') {
+    character.equipment = {};
+    changed = true;
+  }
+  for (const itemCode of character.worn) {
+    if (Object.values(character.equipment).includes(itemCode)) continue;
+    const room = worldRooms[character.roomId] ?? worldRooms['crossing-TG01-001'];
+    const slot = resolveItemDetail(itemCode, room, character).slot;
+    if (slot && !character.equipment[slot]) {
+      character.equipment[slot] = itemCode;
+      changed = true;
+    }
   }
   if (
     character.health &&
@@ -758,6 +841,7 @@ async function createRolledCharacter(accountId: string, name: string, raceInput:
     createdAt: new Date().toISOString(),
     inventory: ['leather backpack', 'repair cloth'],
     worn: [],
+    equipment: {},
     hands: { left: null, right: 'training sword' },
     actionCooldownUntil: undefined,
     combat: undefined,
@@ -949,6 +1033,7 @@ function resolveItemDetail(code: string, room: Room, character: CharacterRecord)
     value,
     currency,
     source,
+    ...inferEquipmentStats(code, name, category),
     carried: character.inventory.includes(code) || (character.worn ?? []).includes(code) || character.hands.left === code || character.hands.right === code,
     shopAvailable: Boolean(room.shop?.items.some((entry) => entry.code === code)),
   };
@@ -1027,6 +1112,7 @@ function buildItemDetailEvents(character: CharacterRecord, room: Room, requested
     `Item: ${item.name}`,
     `Code: ${item.code}.`,
     `Category: ${item.category}. Source: ${item.source}.`,
+    `Slot: ${item.slot ?? 'held/carried only'}. Armor ${item.armor}. Evasion penalty ${item.evasionPenalty}. Attack modifier ${item.attackModifier}.`,
     `Value: ${item.value} ${item.currency}.`,
     `Carried: ${item.carried ? 'yes' : 'no'}. Shop available here: ${item.shopAvailable ? 'yes' : 'no'}.`,
     item.description,
@@ -1113,8 +1199,14 @@ function wearItem(character: CharacterRecord, room: Room, requestedItem: string,
     return false;
   }
   const detail = resolveItemDetail(itemCode, room, character);
-  if (!['armor', 'container', 'utility'].includes(detail.category)) {
+  if (!detail.slot || !['armor', 'container', 'utility'].includes(detail.category)) {
     events.push(`${detail.name} is not something you can wear yet.`);
+    return false;
+  }
+  character.equipment = character.equipment ?? {};
+  if (character.equipment[detail.slot]) {
+    const current = resolveItemDetail(character.equipment[detail.slot]!, room, character);
+    events.push(`Your ${detail.slot} slot is already occupied by ${current.name}.`);
     return false;
   }
   if (inventoryIndex >= 0) {
@@ -1126,7 +1218,8 @@ function wearItem(character: CharacterRecord, room: Room, requestedItem: string,
   if (!character.worn.includes(itemCode)) {
     character.worn.push(itemCode);
   }
-  events.push(`You wear ${detail.name}.`);
+  character.equipment[detail.slot] = itemCode;
+  events.push(`You wear ${detail.name} on your ${detail.slot} slot.`);
   return true;
 }
 
@@ -1137,6 +1230,12 @@ function removeWornItem(character: CharacterRecord, room: Room, requestedItem: s
     return false;
   }
   const [itemCode] = character.worn!.splice(wornIndex, 1);
+  character.equipment = character.equipment ?? {};
+  for (const [slot, equippedCode] of Object.entries(character.equipment)) {
+    if (equippedCode === itemCode) {
+      delete character.equipment[slot as EquipmentSlot];
+    }
+  }
   character.inventory.push(itemCode);
   const detail = resolveItemDetail(itemCode, room, character);
   events.push(`You remove ${detail.name} and place it in your inventory.`);
@@ -1250,17 +1349,21 @@ function findPathToRoom(startRoomId: RoomId, destinationRoomId: RoomId): string[
 
 function buildCombatEvents(character: CharacterRecord): string[] {
   if (!character.combat) {
+    const equipment = buildEquipmentSummary(character);
     return [
       'You are not in combat.',
       `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
+      `Equipment: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`,
     ];
   }
+  const equipment = buildEquipmentSummary(character);
   return [
     `Combat target: ${character.combat.targetName}`,
     `Target HP: ${character.combat.targetHp}/${character.combat.targetMaxHp}`,
     `Range: ${formatRange(normalizeRange(character.combat.range))}`,
     `Position: ${formatAdvantage(character.combat.advantage)}`,
     `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
+    `Equipment: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`,
     `Ready in: ${Math.max(0, character.roundtimeMs)}ms`,
   ];
 }
@@ -1901,9 +2004,11 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'inventory' || command === 'inv') {
+    const equipment = buildEquipmentSummary(resolvedCharacter, room);
     events.push(`You are carrying ${resolvedCharacter.inventory.length} item(s).`);
     events.push(...resolvedCharacter.inventory.map((item) => ` - ${item}`));
-    events.push(`Worn: ${(resolvedCharacter.worn ?? []).join(', ') || 'nothing'}.`);
+    events.push(`Equipment slots: ${Object.entries(equipment.slots).map(([slot, item]) => `${slot}: ${item}`).join(', ') || 'none'}.`);
+    events.push(`Equipment modifiers: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`);
     return buildCommandResult(resolvedCharacter, room, events);
   }
 

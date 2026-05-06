@@ -66,8 +66,9 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wear leather backpack');
     await page.keyboard.press('Enter');
-    await page.locator('.terminal-pane .log').getByText('You wear leather backpack.').waitFor();
+    await page.locator('.terminal-pane .log').getByText('You wear leather backpack on your back slot.').waitFor();
     await page.locator('.equip').getByRole('paragraph').filter({ hasText: /^leather backpack$/ }).waitFor();
+    await page.locator('.equip').getByText('back: leather backpack').waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 350');
     await page.keyboard.press('Enter');

@@ -78,6 +78,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
     lines.push(`| Structured item details | ${coverage.gameplay.itemDetailsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Starter equipment verbs | ${coverage.gameplay.equipmentChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Structured equipment slots | ${coverage.gameplay.equipmentSlotsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Browser item detail panel | ${coverage.frontend.browserItemDetailsVisible ? 'yes' : 'no'} |`);
     lines.push('');
     lines.push('## Gameplay Counts');
@@ -185,6 +186,7 @@ function coverageSummary(results) {
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
       itemDetailsChecked: apiPayload.itemDetailsChecked === true,
       equipmentChecked: apiPayload.equipmentChecked === true,
+      equipmentSlotsChecked: apiPayload.equipmentSlotsChecked === true,
       combatChecked: apiPayload.combatChecked === true,
       surveyChecked: apiPayload.surveyChecked === true,
       forageChecked: apiPayload.forageChecked === true,
@@ -254,6 +256,7 @@ function assertCoverageShape(coverage) {
   expect(coverage.gameplay.shopEconomyChecked === true, 'gameplay.shopEconomyChecked');
   expect(coverage.gameplay.itemDetailsChecked === true, 'gameplay.itemDetailsChecked');
   expect(coverage.gameplay.equipmentChecked === true, 'gameplay.equipmentChecked');
+  expect(coverage.gameplay.equipmentSlotsChecked === true, 'gameplay.equipmentSlotsChecked');
   expect(coverage.gameplay.scriptLifecycleChecked === true, 'gameplay.scriptLifecycleChecked');
 
   if (mode === 'local') {

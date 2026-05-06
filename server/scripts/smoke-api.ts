@@ -19,6 +19,7 @@ interface CharacterSummary {
   circle: number;
   inventory: string[];
   worn?: string[];
+  equipment?: Record<string, string>;
   hands: {
     left: string | null;
     right: string | null;
@@ -46,6 +47,10 @@ interface ItemDetail {
   category: string;
   value: number;
   currency: string;
+  slot?: string;
+  armor: number;
+  evasionPenalty: number;
+  attackModifier: number;
   carried: boolean;
   shopAvailable: boolean;
 }
@@ -318,13 +323,18 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
 
   let current = context.character;
   let equipment = await command(context.accessToken, current.id, 'wear leather backpack');
-  assert(equipment.events.some((event) => event.includes('You wear leather backpack')), 'Expected wear leather backpack output.');
+  assert(equipment.events.some((event) => event.includes('You wear leather backpack on your back slot')), 'Expected wear leather backpack output.');
   assert(equipment.character.worn?.includes('leather backpack'), 'Expected worn leather backpack.');
+  assert(equipment.character.equipment?.back === 'leather backpack', 'Expected leather backpack in back equipment slot.');
   current = (await command(context.accessToken, equipment.character.id, 'wait 350')).character;
+
+  equipment = await command(context.accessToken, current.id, 'combat');
+  assert(equipment.events.some((event) => event.includes('Equipment: armor 0, evasion penalty 0, attack modifier 1')), 'Expected equipment combat modifier summary.');
 
   equipment = await command(context.accessToken, current.id, 'remove leather backpack');
   assert(equipment.events.some((event) => event.includes('You remove leather backpack')), 'Expected remove leather backpack output.');
   assert(equipment.character.inventory.includes('leather backpack'), 'Expected leather backpack returned to inventory.');
+  assert(!equipment.character.equipment?.back, 'Expected back equipment slot to clear.');
   current = (await command(context.accessToken, equipment.character.id, 'wait 350')).character;
 
   equipment = await command(context.accessToken, current.id, 'hold repair cloth left');
@@ -355,10 +365,12 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
       assert(bought.events.some((event) => event.includes(`You buy ${item.name}`)), `Expected buy output for ${item.name}`);
       assert(bought.character.inventory.length === inventoryBefore + 1, `Expected inventory to gain ${item.code}`);
       assert(bought.itemDetails.some((detail) => detail.code === item.code && detail.carried), `Expected bought item details to mark ${item.code} carried`);
+      assert(bought.itemDetails.every((detail) => typeof detail.armor === 'number' && typeof detail.evasionPenalty === 'number'), 'Expected structured item combat modifiers.');
 
       const appraisal = await command(context.accessToken, bought.character.id, `appraise ${item.code}`);
       assert(appraisal.events.some((event) => event.includes(`Item: ${item.name}`)), `Expected item appraisal for ${item.name}`);
       assert(appraisal.events.some((event) => event.includes('Category:')), `Expected item appraisal category for ${item.name}`);
+      assert(appraisal.events.some((event) => event.includes('Slot:')), `Expected item appraisal slot/modifier line for ${item.name}`);
 
       await command(context.accessToken, bought.character.id, 'wait 450');
 
@@ -376,6 +388,7 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
   context.summary.shopEconomyChecked = true;
   context.summary.itemDetailsChecked = true;
   context.summary.equipmentChecked = true;
+  context.summary.equipmentSlotsChecked = true;
 }
 
 async function runCombatSuite(context: SmokeContext): Promise<void> {

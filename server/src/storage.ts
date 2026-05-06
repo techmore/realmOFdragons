@@ -20,6 +20,9 @@ interface CombatState {
 
 export type CombatStance = 'balanced' | 'offensive' | 'defensive' | 'evasive';
 export type BalanceLevel = 0 | 1 | 2 | 3 | 4;
+export type EquipmentSlot = 'back' | 'hands' | 'body' | 'belt' | 'head' | 'feet';
+
+export type EquipmentSlots = Partial<Record<EquipmentSlot, string>>;
 
 interface HealthState {
   current: number;
@@ -67,6 +70,7 @@ export interface CharacterRecord {
   createdAt: string;
   inventory: string[];
   worn?: string[];
+  equipment?: EquipmentSlots;
   hands: {
     left: string | null;
     right: string | null;

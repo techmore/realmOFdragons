@@ -38,6 +38,10 @@ type ItemDetail = {
   value: number;
   currency: string;
   source: string;
+  slot?: string;
+  armor: number;
+  evasionPenalty: number;
+  attackModifier: number;
   carried: boolean;
   shopAvailable: boolean;
 };
@@ -114,6 +118,7 @@ type Character = {
   };
   inventory: string[];
   worn?: string[];
+  equipment?: Record<string, string>;
   wallet: Wallet;
   combat?: CombatState;
   stance: 'balanced' | 'offensive' | 'defensive' | 'evasive';
@@ -624,6 +629,16 @@ function GameStatusPanels({
         <p>Left: {character?.hands.left ?? 'empty'}</p>
         <h3>Worn</h3>
         <p>{character?.worn?.length ? character.worn.join(', ') : 'nothing'}</p>
+        <h3>Equipment Slots</h3>
+        <div className="stat-grid">
+          {Object.entries(character?.equipment ?? {}).length ? (
+            Object.entries(character?.equipment ?? {}).map(([slot, item]) => (
+              <span key={slot}>{slot}: {item}</span>
+            ))
+          ) : (
+            <span>none</span>
+          )}
+        </div>
         <h3>Skills</h3>
         <ul>
           {skillEntries.map(([id, skill]) => (
@@ -656,11 +671,17 @@ function GameStatusPanels({
                 <section className="item-detail" key={item.code}>
                   <strong>{item.name}</strong>
                   <small>{item.code} | {item.category} | {item.value} {item.currency}</small>
+                  <small>slot {item.slot ?? 'held/carried'} | armor {item.armor} | evasion penalty {item.evasionPenalty} | attack {item.attackModifier}</small>
                   <p className="subtle">{item.description}</p>
                   <div className="action-grid">
                     <button type="button" onClick={() => onCommand(`appraise ${item.code}`)} disabled={loading || !character}>
                       appraise
                     </button>
+                    {item.slot ? (
+                      <button type="button" onClick={() => onCommand(`wear ${item.code}`)} disabled={loading || !character || item.carried === false}>
+                        wear
+                      </button>
+                    ) : null}
                     {item.shopAvailable ? (
                       <button type="button" onClick={() => onCommand(`shop buy ${item.code}`)} disabled={loading || !character}>
                         buy
