@@ -106,6 +106,14 @@ export type RoomTarget = {
   aggression: number;
 };
 
+export type CombatTargetSnapshot = {
+  targetId: string;
+  targetName: string;
+  targetHp: number;
+  targetMaxHp: number;
+  range: CombatRangeName;
+};
+
 export function buildRoomTargetsFromTemplates(targets: CombatTargetTemplate[]): RoomTarget[] {
   return targets.map((target) => ({
     id: target.id,
@@ -124,6 +132,33 @@ export function buildTargetScanEvents(targets: CombatTargetTemplate[]): string[]
     'You scan the area and notice:',
     'Vitality estimates how long a target can stay in the fight; aggression estimates how quickly it presses or attacks.',
     ...targets.map((target) => ` - ${target.name} (${target.maxHp} vitality, aggression ${target.aggression})`),
+  ];
+}
+
+export function buildTargetDetailEvents(target: CombatTargetTemplate | undefined, requestedTarget: string, combat?: CombatTargetSnapshot): string[] {
+  const targetName = requestedTarget || combat?.targetName || '';
+  if (!target) {
+    if (targetName) {
+      return [`You do not see ${targetName} here. Use scan to list immediate targets.`];
+    }
+    return ['Target what? Use target <name> or appraise <target>.'];
+  }
+
+  const isEngagedTarget = combat?.targetId === target.id;
+  const range = isEngagedTarget ? formatRange(normalizeRange(combat.range)) : 'not yet engaged';
+  const vitality = isEngagedTarget ? `${combat.targetHp}/${combat.targetMaxHp}` : `${target.maxHp} baseline`;
+  const suggestedVerb = isEngagedTarget
+    ? normalizeRange(combat.range) === 'melee'
+      ? `attack ${target.name}`
+      : 'advance'
+    : `advance ${target.name}`;
+
+  return [
+    `Target: ${target.name}`,
+    `Vitality: ${vitality}.`,
+    `Aggression: ${target.aggression}.`,
+    `Range: ${range}.`,
+    `Suggested next verb: ${suggestedVerb}.`,
   ];
 }
 

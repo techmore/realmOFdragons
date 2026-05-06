@@ -57,6 +57,7 @@ import {
   normalizeStance,
   buildPostAttackStatusEvents,
   buildRoomTargetsFromTemplates,
+  buildTargetDetailEvents as buildCombatTargetDetailEvents,
   buildTargetScanEvents,
   buildTargetVanishedEvents,
   resolveAttackCooldownMs,
@@ -895,30 +896,7 @@ function buildTargetDetailEvents(character: CharacterRecord, requestedTarget: st
   const combat = character.combat;
   const targetName = requestedTarget || combat?.targetName || '';
   const template = targetName ? findRoomEnemyByName(character.roomId, targetName) : undefined;
-
-  if (!template) {
-    if (targetName) {
-      return [`You do not see ${targetName} here. Use scan to list immediate targets.`];
-    }
-    return ['Target what? Use target <name> or appraise <target>.'];
-  }
-
-  const isEngagedTarget = combat?.targetId === template.id;
-  const range = isEngagedTarget ? formatRange(normalizeRange(combat.range)) : 'not yet engaged';
-  const vitality = isEngagedTarget ? `${combat.targetHp}/${combat.targetMaxHp}` : `${template.maxHp} baseline`;
-  const suggestedVerb = isEngagedTarget
-    ? normalizeRange(combat.range) === 'melee'
-      ? `attack ${template.name}`
-      : 'advance'
-    : `advance ${template.name}`;
-
-  return [
-    `Target: ${template.name}`,
-    `Vitality: ${vitality}.`,
-    `Aggression: ${template.aggression}.`,
-    `Range: ${range}.`,
-    `Suggested next verb: ${suggestedVerb}.`,
-  ];
+  return buildCombatTargetDetailEvents(template, targetName, combat);
 }
 
 function buildVerbEvents(): string[] {

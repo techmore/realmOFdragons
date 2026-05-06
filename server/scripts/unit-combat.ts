@@ -4,6 +4,7 @@ import {
   applyBalanceChange,
   buildPostAttackStatusEvents,
   buildRoomTargetsFromTemplates,
+  buildTargetDetailEvents,
   buildTargetScanEvents,
   buildTargetVanishedEvents,
   formatAdvantage,
@@ -114,4 +115,34 @@ assert.deepEqual(buildTargetScanEvents(targetTemplates), [
   ' - test goblin (12 vitality, aggression 55)',
 ]);
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true }, null, 2));
+assert.deepEqual(buildTargetDetailEvents(undefined, '', undefined), ['Target what? Use target <name> or appraise <target>.']);
+assert.deepEqual(buildTargetDetailEvents(undefined, 'missing rat', undefined), ['You do not see missing rat here. Use scan to list immediate targets.']);
+assert.deepEqual(buildTargetDetailEvents(targetTemplates[0], 'test rat', undefined), [
+  'Target: test rat',
+  'Vitality: 8 baseline.',
+  'Aggression: 30.',
+  'Range: not yet engaged.',
+  'Suggested next verb: advance test rat.',
+]);
+assert.deepEqual(buildTargetDetailEvents(targetTemplates[0], 'test rat', {
+  targetId: 'test-rat',
+  targetName: 'test rat',
+  targetHp: 5,
+  targetMaxHp: 8,
+  range: 'pole',
+}), [
+  'Target: test rat',
+  'Vitality: 5/8.',
+  'Aggression: 30.',
+  'Range: pole range.',
+  'Suggested next verb: advance.',
+]);
+assert.equal(buildTargetDetailEvents(targetTemplates[0], 'test rat', {
+  targetId: 'test-rat',
+  targetName: 'test rat',
+  targetHp: 5,
+  targetMaxHp: 8,
+  range: 'melee',
+})[4], 'Suggested next verb: attack test rat.');
+
+console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true }, null, 2));

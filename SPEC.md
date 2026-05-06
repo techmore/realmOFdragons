@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted target detail/appraisal formatting into pure combat helpers with unit coverage for missing target prompts, unseen targets, unengaged targets, engaged ranged targets, and engaged melee targets.
+- The Express `target`/target-appraisal path now delegates combat target detail text to combat-owned formatting while retaining route-local room enemy lookup.
 - Extracted room target listing and scan event formatting into pure combat helpers with unit coverage for empty rooms, multiple targets, and API target summaries.
 - The Express room target payloads and `scan` output now use combat-owned target mapping and scan formatting while retaining route-local enemy lookup.
 - Extracted room look formatting into pure world helpers with unit coverage for sparse rooms and forage/target-enhanced rooms.
@@ -197,7 +199,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract target detail/appraisal formatting into combat helpers with unit coverage.
+- Extract combat status command formatting into combat helpers with unit coverage.
 
 Core Philosophy
 
