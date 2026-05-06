@@ -51,6 +51,9 @@ interface ItemDetail {
   armor: number;
   evasionPenalty: number;
   attackModifier: number;
+  weaponRange?: string;
+  validAttackRanges?: string[];
+  trainingSkill?: string;
   carried: boolean;
   shopAvailable: boolean;
 }
@@ -392,10 +395,25 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
 }
 
 async function runCombatSuite(context: SmokeContext): Promise<void> {
-  let current = await walkTo(context.accessToken, context.character, 'crossing-RV02-002');
+  let current = await walkTo(context.accessToken, context.character, 'crossing-MA01-002');
+  current = (await command(context.accessToken, current.id, 'wait 900')).character;
+  let result = await command(context.accessToken, current.id, 'shop buy itm-practice-bow');
+  assert(result.events.some((event) => event.includes('You buy practice bow')), 'Expected to buy practice bow.');
+  assert(result.itemDetails.some((item) => item.code === 'itm-practice-bow' && item.weaponRange === 'ranged'), 'Expected practice bow ranged metadata.');
+  current = (await command(context.accessToken, result.character.id, 'wait 450')).character;
+
+  result = await command(context.accessToken, current.id, 'stow right');
+  assert(result.events.some((event) => event.includes('You stow training sword')), 'Expected to stow starter sword.');
+  current = (await command(context.accessToken, result.character.id, 'wait 300')).character;
+
+  result = await command(context.accessToken, current.id, 'wield itm-practice-bow right');
+  assert(result.events.some((event) => event.includes('You hold practice bow in your right hand')), 'Expected to wield practice bow.');
+  current = (await command(context.accessToken, result.character.id, 'wait 300')).character;
+
+  current = await walkTo(context.accessToken, current, 'crossing-RV02-002');
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
 
-  let result = await command(context.accessToken, current.id, 'forage');
+  result = await command(context.accessToken, current.id, 'forage');
   assert(result.events.some((event) => event.includes('You forage carefully')), 'Expected forage output in outskirts.');
   assert(result.character.inventory.some((item) => item.startsWith('foraged-')), 'Expected forage to add an inventory item.');
   current = result.character;
@@ -441,9 +459,30 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   current = await walkTo(context.accessToken, result.character, 'crossing-RV02-002');
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
 
-  result = await command(context.accessToken, current.id, 'advance');
-  assert(result.character.combat?.range, 'Expected combat to start after advance.');
-  current = result.character;
+  result = await command(context.accessToken, current.id, 'attack');
+  assert(result.events.some((event) => event.includes('You attack with practice bow (ranged weapon')), 'Expected ranged weapon attack output.');
+  assert(!result.events.some((event) => event.includes('too far away')), 'Expected ranged weapon to attack from pole or missile range.');
+  context.summary.rangedWeaponRangeChecked = true;
+  current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
+
+  if (current.combat?.range === 'melee') {
+    result = await command(context.accessToken, current.id, 'retreat');
+    current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
+  }
+
+  result = await command(context.accessToken, current.id, 'stow right');
+  assert(result.events.some((event) => event.includes('You stow practice bow')), 'Expected to stow practice bow.');
+  current = (await command(context.accessToken, result.character.id, 'wait 300')).character;
+
+  result = await command(context.accessToken, current.id, 'wield training sword right');
+  assert(result.events.some((event) => event.includes('You hold training sword')), 'Expected to wield training sword again.');
+  current = (await command(context.accessToken, result.character.id, 'wait 300')).character;
+
+  if (!current.combat) {
+    result = await command(context.accessToken, current.id, 'advance');
+    assert(result.character.combat?.range, 'Expected combat to restart after ranged attack path.');
+    current = result.character;
+  }
 
   result = await command(context.accessToken, current.id, 'range');
   assert(result.events.some((event) => event.includes('You are at')), 'Expected range command output.');

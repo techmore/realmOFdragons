@@ -42,6 +42,9 @@ type ItemDetail = {
   armor: number;
   evasionPenalty: number;
   attackModifier: number;
+  weaponRange?: string;
+  validAttackRanges?: string[];
+  trainingSkill?: string;
   carried: boolean;
   shopAvailable: boolean;
 };
@@ -672,6 +675,7 @@ function GameStatusPanels({
                   <strong>{item.name}</strong>
                   <small>{item.code} | {item.category} | {item.value} {item.currency}</small>
                   <small>slot {item.slot ?? 'held/carried'} | armor {item.armor} | evasion penalty {item.evasionPenalty} | attack {item.attackModifier}</small>
+                  <small>weapon {item.weaponRange ?? 'none'} | ranges {item.validAttackRanges?.join(', ') ?? 'none'} | trains {item.trainingSkill ?? 'none'}</small>
                   <p className="subtle">{item.description}</p>
                   <div className="action-grid">
                     <button type="button" onClick={() => onCommand(`appraise ${item.code}`)} disabled={loading || !character}>

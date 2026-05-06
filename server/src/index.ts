@@ -102,6 +102,9 @@ type ItemDetail = {
   armor: number;
   evasionPenalty: number;
   attackModifier: number;
+  weaponRange?: 'melee' | 'ranged';
+  validAttackRanges?: CombatRangeName[];
+  trainingSkill?: string;
   carried: boolean;
   shopAvailable: boolean;
 };
@@ -168,6 +171,7 @@ const STARTING_WALLET = Object.freeze({
 
 const STARTER_SKILLS = [
   ['melee', 'Melee'],
+  ['missile', 'Missile'],
   ['evasion', 'Evasion'],
   ['athletics', 'Athletics'],
   ['survival', 'Survival'],
@@ -331,6 +335,9 @@ const STARTER_ITEM_DETAILS: Record<string, Omit<ItemDetail, 'carried' | 'shopAva
     armor: 0,
     evasionPenalty: 0,
     attackModifier: 1,
+    weaponRange: 'melee',
+    validAttackRanges: ['melee'],
+    trainingSkill: 'melee',
   },
 };
 
@@ -438,6 +445,17 @@ function inferEquipmentStats(code: string, name: string, category: string): Pick
     return { slot: 'belt', armor: 0, evasionPenalty: 0, attackModifier: 0 };
   }
   return { armor: 0, evasionPenalty: 0, attackModifier: 0 };
+}
+
+function inferWeaponProfile(code: string, name: string, category: string): Pick<ItemDetail, 'weaponRange' | 'validAttackRanges' | 'trainingSkill'> {
+  const text = `${code} ${name}`.toLowerCase();
+  if (category === 'ranged' || text.includes('bow') || text.includes('arrow')) {
+    return { weaponRange: 'ranged', validAttackRanges: ['missile', 'pole'], trainingSkill: 'missile' };
+  }
+  if (category === 'weapon') {
+    return { weaponRange: 'melee', validAttackRanges: ['melee'], trainingSkill: 'melee' };
+  }
+  return {};
 }
 
 function buildEquipmentSummary(character: CharacterRecord, room?: Room): EquipmentSummary {
@@ -1044,6 +1062,7 @@ function resolveItemDetail(code: string, room: Room, character: CharacterRecord)
     currency,
     source,
     ...inferEquipmentStats(code, name, category),
+    ...inferWeaponProfile(code, name, category),
     carried: character.inventory.includes(code) || (character.worn ?? []).includes(code) || character.hands.left === code || character.hands.right === code,
     shopAvailable: Boolean(room.shop?.items.some((entry) => entry.code === code)),
   };
@@ -1123,6 +1142,7 @@ function buildItemDetailEvents(character: CharacterRecord, room: Room, requested
     `Code: ${item.code}.`,
     `Category: ${item.category}. Source: ${item.source}.`,
     `Slot: ${item.slot ?? 'held/carried only'}. Armor ${item.armor}. Evasion penalty ${item.evasionPenalty}. Attack modifier ${item.attackModifier}.`,
+    `Weapon range: ${item.weaponRange ?? 'none'}. Valid attack ranges: ${item.validAttackRanges?.join(', ') ?? 'none'}. Training skill: ${item.trainingSkill ?? 'none'}.`,
     `Value: ${item.value} ${item.currency}.`,
     `Carried: ${item.carried ? 'yes' : 'no'}. Shop available here: ${item.shopAvailable ? 'yes' : 'no'}.`,
     item.description,
@@ -1364,7 +1384,7 @@ function buildCombatEvents(character: CharacterRecord): string[] {
       'You are not in combat.',
       `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
       `Equipment: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`,
-      `Weapon: ${findHeldWeapon(character)?.name ?? 'unarmed'}.`,
+      `Weapon: ${findHeldWeapon(character)?.name ?? 'unarmed'} (${findHeldWeapon(character)?.weaponRange ?? 'melee'}).`,
     ];
   }
   const equipment = buildEquipmentSummary(character);
@@ -1375,7 +1395,7 @@ function buildCombatEvents(character: CharacterRecord): string[] {
     `Position: ${formatAdvantage(character.combat.advantage)}`,
     `Stance: ${STANCE_PROFILES[character.stance].label}. Balance: ${formatBalance(character.balance)}.`,
     `Equipment: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`,
-    `Weapon: ${findHeldWeapon(character)?.name ?? 'unarmed'}.`,
+    `Weapon: ${findHeldWeapon(character)?.name ?? 'unarmed'} (${findHeldWeapon(character)?.weaponRange ?? 'melee'}).`,
     `Ready in: ${Math.max(0, character.roundtimeMs)}ms`,
   ];
 }
@@ -1889,15 +1909,20 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     const equipment = buildEquipmentSummary(resolvedCharacter, room);
     const weapon = findHeldWeapon(resolvedCharacter, room);
     if (weapon) {
-      events.push(`You attack with ${weapon.name} (attack modifier ${weapon.attackModifier}).`);
+      events.push(`You attack with ${weapon.name} (${weapon.weaponRange ?? 'melee'} weapon, attack modifier ${weapon.attackModifier}).`);
     } else {
       events.push('You attack unarmed; wield a weapon for better accuracy and damage.');
     }
 
     const attackRange = normalizeRange(resolvedCharacter.combat.range);
-    if (attackRange !== 'melee') {
-      events.push(`You are too far away to strike. Current range: ${formatRange(attackRange)}.`);
-      events.push('Advance to melee range first.');
+    const validRanges = weapon?.validAttackRanges ?? ['melee'];
+    if (!validRanges.includes(attackRange)) {
+      if (weapon?.weaponRange === 'ranged' && attackRange === 'melee') {
+        events.push(`You are too close to use ${weapon.name}. Retreat to pole or missile range first.`);
+      } else {
+        events.push(`You are too far away to strike. Current range: ${formatRange(attackRange)}.`);
+        events.push('Advance to melee range first.');
+      }
       await persist();
       return buildCommandResult(resolvedCharacter, room, events);
     }
@@ -1943,7 +1968,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
       if (target.targetHp <= 0) {
         events.push(`${target.targetName} collapses.`);
         resolvedCharacter.inventory.push(`${target.targetName} fang`);
-        grantSkillPool(resolvedCharacter, 'melee', 4, events);
+        grantSkillPool(resolvedCharacter, weapon?.trainingSkill ?? 'melee', 4, events);
         grantSkillPool(resolvedCharacter, 'survival', 2, events);
         clearCombat(resolvedCharacter);
         setActionCooldown(resolvedCharacter, 700);

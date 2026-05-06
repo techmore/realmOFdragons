@@ -80,6 +80,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Starter equipment verbs | ${coverage.gameplay.equipmentChecked ? 'yes' : 'no'} |`);
     lines.push(`| Structured equipment slots | ${coverage.gameplay.equipmentSlotsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Weapon-aware attack output | ${coverage.gameplay.weaponAttackChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Ranged weapon range gating | ${coverage.gameplay.rangedWeaponRangeChecked ? 'yes' : 'no'} |`);
     lines.push(`| Browser item detail panel | ${coverage.frontend.browserItemDetailsVisible ? 'yes' : 'no'} |`);
     lines.push('');
     lines.push('## Gameplay Counts');
@@ -189,6 +190,7 @@ function coverageSummary(results) {
       equipmentChecked: apiPayload.equipmentChecked === true,
       equipmentSlotsChecked: apiPayload.equipmentSlotsChecked === true,
       weaponAttackChecked: apiPayload.weaponAttackChecked === true,
+      rangedWeaponRangeChecked: apiPayload.rangedWeaponRangeChecked === true,
       combatChecked: apiPayload.combatChecked === true,
       surveyChecked: apiPayload.surveyChecked === true,
       forageChecked: apiPayload.forageChecked === true,
@@ -260,6 +262,7 @@ function assertCoverageShape(coverage) {
   expect(coverage.gameplay.equipmentChecked === true, 'gameplay.equipmentChecked');
   expect(coverage.gameplay.equipmentSlotsChecked === true, 'gameplay.equipmentSlotsChecked');
   expect(coverage.gameplay.weaponAttackChecked === true, 'gameplay.weaponAttackChecked');
+  expect(coverage.gameplay.rangedWeaponRangeChecked === true, 'gameplay.rangedWeaponRangeChecked');
   expect(coverage.gameplay.scriptLifecycleChecked === true, 'gameplay.scriptLifecycleChecked');
 
   if (mode === 'local') {

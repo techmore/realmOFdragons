@@ -10,15 +10,15 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Added `wield <item> [left|right]` as a weapon-constrained hold alias.
-- Combat status now reports the active held weapon.
-- Basic `attack` output identifies the held weapon or warns when attacking unarmed.
-- Basic `attack` now applies held/equipment attack modifiers to accuracy and damage calculations.
-- API smoke covers weapon-aware attack output; static UI smoke covers the `wield training sword` action.
+- Item metadata now distinguishes melee and ranged weapons with valid attack ranges and training skill hints.
+- Ranged weapons can attack from missile/pole range; melee and unarmed attacks remain melee-only.
+- Ranged weapons are blocked at melee range with a retreat hint.
+- Frontend item cards show weapon range, valid ranges, and training skill.
+- API smoke buys/wields a practice bow and verifies ranged attack range behavior.
 
 Current next priority:
 
-- Add beginner weapon type/range distinctions so ranged gear, melee gear, and unarmed attacks have different valid ranges and training outputs.
+- Add explicit ranged command aliases (`fire`, `shoot`) and beginner ammo handling for practice arrows.
 
 Core Philosophy
 
