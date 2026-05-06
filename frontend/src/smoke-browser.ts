@@ -44,7 +44,7 @@ async function main(): Promise<void> {
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('look');
     await page.keyboard.press('Enter');
-    await page.getByText('A broad square with the fountain').waitFor();
+    await page.locator('.terminal-pane .log').getByText('A broad square with the fountain').waitFor();
 
     await page.getByRole('button', { name: 'range', exact: true }).click();
     await page.getByText('You are not engaged with a target.').waitFor();
