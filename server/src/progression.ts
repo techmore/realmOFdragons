@@ -89,6 +89,12 @@ export interface SkillPoolGainResult {
   events: string[];
 }
 
+export interface ScoreSummaryDisplay {
+  wallet: string;
+  stanceLabel: string;
+  balanceLabel: string;
+}
+
 export function totalSkillRanks(character: Pick<CharacterRecord, 'skills'>): number {
   return Object.values(character.skills).reduce((sum, skill) => sum + skill.rank, 0);
 }
@@ -216,6 +222,39 @@ export function buildCircleStatus(character: Pick<CharacterRecord, 'name' | 'cir
     `${character.name} is Circle ${character.circle} in ${character.guildName}.`,
     `Next Circle ${requirement.nextCircle}: total skill ranks ${totalSkillRanks(character)}/${requirement.totalRanks}.`,
     `${primarySkill?.name ?? 'Primary skill'} rank ${primarySkill?.rank ?? 0}/${requirement.primaryRank}.`,
+  ];
+}
+
+export function buildSkillSummaryEvents(character: Pick<CharacterRecord, 'skills'>): string[] {
+  return Object.entries(character.skills).map(
+    ([id, skill]) => `${id}: ${skill.name} rank ${skill.rank}, pool ${skill.pool}`,
+  );
+}
+
+export function buildScoreSummaryEvents(
+  character: Pick<
+    CharacterRecord,
+    | 'name'
+    | 'raceDisplayName'
+    | 'statGenerationMode'
+    | 'guildName'
+    | 'circle'
+    | 'health'
+    | 'roomId'
+    | 'roundtimeMs'
+    | 'stats'
+  >,
+  display: ScoreSummaryDisplay,
+): string[] {
+  return [
+    `You are ${character.name}, race ${character.raceDisplayName}.`,
+    `Stats: ${character.statGenerationMode === 'classic_random' ? 'classic random roll' : 'modern fixed racial start'}.`,
+    `Guild: ${character.guildName}. Circle ${character.circle}.`,
+    `Wallet: ${display.wallet}.`,
+    `Health ${character.health.current}/${character.health.max}.`,
+    `Stance: ${display.stanceLabel}. Balance: ${display.balanceLabel}.`,
+    `Current room ${character.roomId} | roundtime ${character.roundtimeMs}ms.`,
+    `Strength ${character.stats.strength}, Reflex ${character.stats.reflex}, Agility ${character.stats.agility}, Discipline ${character.stats.discipline}, Stamina ${character.stats.stamina}, Wisdom ${character.stats.wisdom}, Intelligence ${character.stats.intelligence}, Charisma ${character.stats.charisma}`,
   ];
 }
 

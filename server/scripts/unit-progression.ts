@@ -6,6 +6,8 @@ import {
   applySkillPoolGain,
   buildCircleStatus,
   buildGuildRegistrarDisplay,
+  buildScoreSummaryEvents,
+  buildSkillSummaryEvents,
   buildStarterSkills,
   canCircle,
   ensureProgressionShape,
@@ -225,6 +227,35 @@ assert.deepEqual(buildCircleStatus(circleReady), [
   'Melee rank 4/4.',
 ]);
 
+assert.deepEqual(buildSkillSummaryEvents(circleReady), [
+  'melee: Melee rank 4, pool 0',
+  'athletics: Athletics rank 2, pool 0',
+]);
+
+assert.deepEqual(
+  buildScoreSummaryEvents(circleReady, {
+    wallet: '0 plat, 0 trias, 0 lucan, 0 silk',
+    stanceLabel: 'Balanced',
+    balanceLabel: 'steady',
+  }),
+  [
+    'You are Unit, race Human.',
+    'Stats: modern fixed racial start.',
+    'Guild: Barbarian Guild. Circle 1.',
+    'Wallet: 0 plat, 0 trias, 0 lucan, 0 silk.',
+    'Health 40/40.',
+    'Stance: Balanced. Balance: steady.',
+    'Current room crossing-TG01-001 | roundtime 0ms.',
+    'Strength 10, Reflex 10, Agility 10, Discipline 10, Stamina 10, Wisdom 10, Intelligence 10, Charisma 10',
+  ],
+);
+
+assert.equal(buildScoreSummaryEvents(character({ statGenerationMode: 'classic_random' }), {
+  wallet: '1 plat',
+  stanceLabel: 'Evasive',
+  balanceLabel: 'excellent',
+})[1], 'Stats: classic random roll.');
+
 assert.deepEqual(resolveCircleAdvancement(character()), {
   advanced: false,
   circle: 1,
@@ -381,6 +412,8 @@ console.log(
       circleAdvancementChecked: true,
       guildJoinDecisionChecked: true,
       guildRegistrarDisplayChecked: true,
+      scoreSummaryChecked: true,
+      skillSummaryChecked: true,
       trainingDecisionChecked: true,
       skillPoolGainChecked: true,
       progressionShapeChecked: true,

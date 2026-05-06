@@ -28,6 +28,8 @@ import {
   applySkillPoolGain,
   buildCircleStatus,
   buildGuildRegistrarDisplay,
+  buildScoreSummaryEvents,
+  buildSkillSummaryEvents,
   buildStarterSkills,
   ensureProgressionShape,
   nextCircleRequirement,
@@ -1308,11 +1310,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'skills') {
-    events.push(
-      ...Object.entries(resolvedCharacter.skills).map(
-        ([id, skill]) => `${id}: ${skill.name} rank ${skill.rank}, pool ${skill.pool}`,
-      ),
-    );
+    events.push(...buildSkillSummaryEvents(resolvedCharacter));
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
@@ -1834,15 +1832,12 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'score') {
-    events.push(`You are ${resolvedCharacter.name}, race ${resolvedCharacter.raceDisplayName}.`);
-    events.push(`Stats: ${resolvedCharacter.statGenerationMode === 'classic_random' ? 'classic random roll' : 'modern fixed racial start'}.`);
-    events.push(`Guild: ${resolvedCharacter.guildName}. Circle ${resolvedCharacter.circle}.`);
-    events.push(`Wallet: ${formatWallet(resolvedCharacter.wallet)}.`);
-    events.push(`Health ${resolvedCharacter.health.current}/${resolvedCharacter.health.max}.`);
-    events.push(`Stance: ${STANCE_PROFILES[resolvedCharacter.stance].label}. Balance: ${formatBalance(resolvedCharacter.balance)}.`);
-    events.push(`Current room ${resolvedCharacter.roomId} | roundtime ${resolvedCharacter.roundtimeMs}ms.`);
     events.push(
-      `Strength ${resolvedCharacter.stats.strength}, Reflex ${resolvedCharacter.stats.reflex}, Agility ${resolvedCharacter.stats.agility}, Discipline ${resolvedCharacter.stats.discipline}, Stamina ${resolvedCharacter.stats.stamina}, Wisdom ${resolvedCharacter.stats.wisdom}, Intelligence ${resolvedCharacter.stats.intelligence}, Charisma ${resolvedCharacter.stats.charisma}`,
+      ...buildScoreSummaryEvents(resolvedCharacter, {
+        wallet: formatWallet(resolvedCharacter.wallet),
+        stanceLabel: STANCE_PROFILES[resolvedCharacter.stance].label,
+        balanceLabel: formatBalance(resolvedCharacter.balance),
+      }),
     );
     return buildCommandResult(resolvedCharacter, room, events);
   }

@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted `score` and `skills` command summary formatting into pure progression helpers with unit coverage for skill rows, modern fixed stat mode, and classic random stat mode labels.
+- The Express command handler now delegates score/skills event construction to progression while passing in preformatted wallet, stance, and balance labels.
 - Extracted guild registrar display labels into pure progression helpers with unit coverage for no registrar, canonical guild labels, and unknown fallback labels.
 - `survey` now renders guild registrar text from progression-owned formatting instead of resolving guild display names inline in the Express command module.
 - Extracted guild join/no-registrar decision and guild identity output into pure progression helpers with unit coverage for empty rooms, canonical DR guilds, legacy tutorial guilds, and unknown fallback labels.
@@ -177,7 +179,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract score and skills command summary formatting into pure progression helpers with unit coverage.
+- Extract roll profile command formatting into race/progression helpers with unit coverage.
 
 Core Philosophy
 
