@@ -69,6 +69,7 @@ export interface CharacterRecord {
   rollProfileVersion: number;
   createdAt: string;
   inventory: string[];
+  ammoPouch?: Record<string, number>;
   worn?: string[];
   equipment?: EquipmentSlots;
   hands: {

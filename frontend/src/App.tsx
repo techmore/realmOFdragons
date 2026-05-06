@@ -47,6 +47,8 @@ type ItemDetail = {
   trainingSkill?: string;
   ammoCode?: string;
   ammoName?: string;
+  bundleSize?: number;
+  quantity?: number;
   carried: boolean;
   shopAvailable: boolean;
 };
@@ -122,6 +124,7 @@ type Character = {
     right: string | null;
   };
   inventory: string[];
+  ammoPouch?: Record<string, number>;
   worn?: string[];
   equipment?: Record<string, string>;
   wallet: Wallet;
@@ -651,6 +654,8 @@ function GameStatusPanels({
           ))}
         </ul>
         <h3>Inventory</h3>
+        <h3>Ammo</h3>
+        <p>{Object.entries(character?.ammoPouch ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none'}</p>
         <ul>
           {(character?.inventory ?? []).map((item, index) => (
             <li key={`${item}-${index}`}>
@@ -679,6 +684,7 @@ function GameStatusPanels({
                   <small>slot {item.slot ?? 'held/carried'} | armor {item.armor} | evasion penalty {item.evasionPenalty} | attack {item.attackModifier}</small>
                   <small>weapon {item.weaponRange ?? 'none'} | ranges {item.validAttackRanges?.join(', ') ?? 'none'} | trains {item.trainingSkill ?? 'none'}</small>
                   <small>ammo {item.ammoName ? `${item.ammoName} (${item.ammoCode})` : 'none'}</small>
+                  <small>quantity {item.quantity ?? 1} | bundle {item.bundleSize ?? 1}</small>
                   <p className="subtle">{item.description}</p>
                   <div className="action-grid">
                     <button type="button" onClick={() => onCommand(`appraise ${item.code}`)} disabled={loading || !character}>

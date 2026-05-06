@@ -10,15 +10,15 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
-- Added `fire` and `shoot` as ranged attack aliases.
-- Ranged weapons now declare required ammo metadata.
-- Practice arrows are categorized as ammo rather than ranged weapons.
-- Ranged attacks consume one practice arrow after passing range/cooldown checks.
-- API smoke buys practice arrows, fires a practice bow, and verifies ammo consumption telemetry.
+- Added an `ammoPouch` quantity map to character state for stacked ammunition.
+- Practice arrow shop purchases now add bundled ammo counts instead of one inventory row per shot.
+- Ammo item metadata exposes quantity and bundle size.
+- Inventory and web UI now show ammo counts separately from regular inventory.
+- Ranged attacks consume from the ammo pouch first and report remaining ammo.
 
 Current next priority:
 
-- Add quiver/bundle handling for ammunition so arrows can be carried, counted, and bought in useful stacks instead of one inventory row per shot.
+- Add reload/quiver verbs and UI actions for ranged readiness, including `ammo`, `reload`, and empty-quiver messaging.
 
 Core Philosophy
 

@@ -66,6 +66,7 @@ interface CommandResult {
   | 'health'
   | 'hands'
   | 'inventory'
+  | 'ammoPouch'
   | 'worn'
   | 'equipment'
   | 'roundtimeMs'
@@ -107,6 +108,8 @@ type ItemDetail = {
   trainingSkill?: string;
   ammoCode?: string;
   ammoName?: string;
+  bundleSize?: number;
+  quantity?: number;
   carried: boolean;
   shopAvailable: boolean;
 };
@@ -375,6 +378,7 @@ function sanitizeCharacter(character: CharacterRecord): CommandResult['character
     health: character.health,
     hands: character.hands,
     inventory: character.inventory,
+    ammoPouch: character.ammoPouch ?? {},
     worn: character.worn ?? [],
     equipment: character.equipment ?? {},
     wallet: character.wallet,
@@ -427,6 +431,48 @@ function spendFunds(wallet: CharacterRecord['wallet'], currency: keyof Character
 
 function earnFunds(wallet: CharacterRecord['wallet'], currency: keyof CharacterRecord['wallet'], amount: number) {
   wallet[currency] = Math.max(0, wallet[currency] + Math.max(0, Math.floor(amount)));
+}
+
+function normalizeAmmoPouch(character: CharacterRecord): boolean {
+  let changed = false;
+  if (!character.ammoPouch || typeof character.ammoPouch !== 'object') {
+    character.ammoPouch = {};
+    changed = true;
+  }
+  for (const [code, rawCount] of Object.entries(character.ammoPouch)) {
+    const count = Math.max(0, Math.floor(Number(rawCount) || 0));
+    if (count <= 0) {
+      delete character.ammoPouch[code];
+      changed = true;
+    } else if (count !== rawCount) {
+      character.ammoPouch[code] = count;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+function addAmmo(character: CharacterRecord, code: string, count: number) {
+  character.ammoPouch = character.ammoPouch ?? {};
+  character.ammoPouch[code] = Math.max(0, Math.floor(character.ammoPouch[code] ?? 0)) + Math.max(0, Math.floor(count));
+}
+
+function countAmmo(character: CharacterRecord, code: string) {
+  return Math.max(0, Math.floor(character.ammoPouch?.[code] ?? 0)) + character.inventory.filter((item) => item === code).length;
+}
+
+function consumeAmmo(character: CharacterRecord, code: string): boolean {
+  if ((character.ammoPouch?.[code] ?? 0) > 0) {
+    character.ammoPouch![code] -= 1;
+    if (character.ammoPouch![code] <= 0) delete character.ammoPouch![code];
+    return true;
+  }
+  const inventoryIndex = character.inventory.findIndex((item) => item === code);
+  if (inventoryIndex >= 0) {
+    character.inventory.splice(inventoryIndex, 1);
+    return true;
+  }
+  return false;
 }
 
 function inferEquipmentStats(code: string, name: string, category: string): Pick<ItemDetail, 'slot' | 'armor' | 'evasionPenalty' | 'attackModifier'> {
@@ -784,6 +830,9 @@ function ensureCharacterShape(character: CharacterRecord): { character: Characte
     character.equipment = {};
     changed = true;
   }
+  if (normalizeAmmoPouch(character)) {
+    changed = true;
+  }
   for (const itemCode of character.worn) {
     if (Object.values(character.equipment).includes(itemCode)) continue;
     const room = worldRooms[character.roomId] ?? worldRooms['crossing-TG01-001'];
@@ -876,6 +925,7 @@ async function createRolledCharacter(accountId: string, name: string, raceInput:
     rollProfileVersion: roll.rollProfileVersion,
     createdAt: new Date().toISOString(),
     inventory: ['leather backpack', 'repair cloth'],
+    ammoPouch: {},
     worn: [],
     equipment: {},
     hands: { left: null, right: 'training sword' },
@@ -1072,7 +1122,9 @@ function resolveItemDetail(code: string, room: Room, character: CharacterRecord)
     source,
     ...inferEquipmentStats(code, name, category),
     ...inferWeaponProfile(code, name, category),
-    carried: character.inventory.includes(code) || (character.worn ?? []).includes(code) || character.hands.left === code || character.hands.right === code,
+    bundleSize: category === 'ammo' ? 5 : undefined,
+    quantity: category === 'ammo' ? countAmmo(character, code) : undefined,
+    carried: character.inventory.includes(code) || (character.worn ?? []).includes(code) || character.hands.left === code || character.hands.right === code || countAmmo(character, code) > 0,
     shopAvailable: Boolean(room.shop?.items.some((entry) => entry.code === code)),
   };
 }
@@ -1080,6 +1132,9 @@ function resolveItemDetail(code: string, room: Room, character: CharacterRecord)
 function buildItemDetails(character: CharacterRecord, room: Room): ItemDetail[] {
   const details = new Map<string, ItemDetail>();
   for (const itemCode of [...character.inventory, ...(character.worn ?? []), character.hands.left, character.hands.right].filter(Boolean) as string[]) {
+    details.set(itemCode, resolveItemDetail(itemCode, room, character));
+  }
+  for (const itemCode of Object.keys(character.ammoPouch ?? {})) {
     details.set(itemCode, resolveItemDetail(itemCode, room, character));
   }
   for (const item of room.shop?.items ?? []) {
@@ -1153,6 +1208,7 @@ function buildItemDetailEvents(character: CharacterRecord, room: Room, requested
     `Slot: ${item.slot ?? 'held/carried only'}. Armor ${item.armor}. Evasion penalty ${item.evasionPenalty}. Attack modifier ${item.attackModifier}.`,
     `Weapon range: ${item.weaponRange ?? 'none'}. Valid attack ranges: ${item.validAttackRanges?.join(', ') ?? 'none'}. Training skill: ${item.trainingSkill ?? 'none'}.`,
     `Ammo: ${item.ammoCode ? `${item.ammoName} (${item.ammoCode})` : 'none'}.`,
+    `Quantity: ${item.quantity ?? 1}. Bundle size: ${item.bundleSize ?? 1}.`,
     `Value: ${item.value} ${item.currency}.`,
     `Carried: ${item.carried ? 'yes' : 'no'}. Shop available here: ${item.shopAvailable ? 'yes' : 'no'}.`,
     item.description,
@@ -1961,15 +2017,15 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     let consumedAmmo: string | undefined;
     if (weapon?.weaponRange === 'ranged') {
       const ammoCode = weapon.ammoCode ?? 'itm-sting-arrow';
-      const ammoIndex = resolvedCharacter.inventory.findIndex((item) => item === ammoCode);
-      if (ammoIndex < 0) {
+      if (countAmmo(resolvedCharacter, ammoCode) <= 0) {
         events.push(`You need ${weapon.ammoName ?? 'practice arrow'} (${ammoCode}) to use ${weapon.name}.`);
         await persist();
         return buildCommandResult(resolvedCharacter, room, events);
       }
-      consumedAmmo = resolvedCharacter.inventory.splice(ammoIndex, 1)[0];
+      consumeAmmo(resolvedCharacter, ammoCode);
+      consumedAmmo = ammoCode;
       modified = true;
-      events.push(`You loose ${weapon.ammoName ?? consumedAmmo}.`);
+      events.push(`You loose ${weapon.ammoName ?? consumedAmmo}. ${countAmmo(resolvedCharacter, ammoCode)} remain.`);
     }
 
     const template = ENEMY_TEMPLATES.find((entry) => entry.id === resolvedCharacter.combat?.targetId);
@@ -2088,6 +2144,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     const equipment = buildEquipmentSummary(resolvedCharacter, room);
     events.push(`You are carrying ${resolvedCharacter.inventory.length} item(s).`);
     events.push(...resolvedCharacter.inventory.map((item) => ` - ${item}`));
+    events.push(`Ammo: ${Object.entries(resolvedCharacter.ammoPouch ?? {}).map(([code, count]) => `${code} x${count}`).join(', ') || 'none'}.`);
     events.push(`Equipment slots: ${Object.entries(equipment.slots).map(([slot, item]) => `${slot}: ${item}`).join(', ') || 'none'}.`);
     events.push(`Equipment modifiers: armor ${equipment.totalArmor}, evasion penalty ${equipment.totalEvasionPenalty}, attack modifier ${equipment.totalAttackModifier}.`);
     return buildCommandResult(resolvedCharacter, room, events);
@@ -2188,11 +2245,16 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
         events.push(`You cannot afford ${item.name}: ${item.price} ${item.currency} required.`);
       } else {
         spendFunds(resolvedCharacter.wallet, item.currency, item.price);
-        resolvedCharacter.inventory.push(item.code);
+        const itemDetail = resolveItemDetail(item.code, room, resolvedCharacter);
+        if (itemDetail.category === 'ammo') {
+          addAmmo(resolvedCharacter, item.code, itemDetail.bundleSize ?? 5);
+        } else {
+          resolvedCharacter.inventory.push(item.code);
+        }
         grantSkillPool(resolvedCharacter, 'trading', 1, events);
         modified = true;
         setActionCooldown(resolvedCharacter, 450);
-        events.push(`You buy ${item.name} for ${item.price} ${item.currency}.`);
+        events.push(`You buy ${item.name} for ${item.price} ${item.currency}${itemDetail.category === 'ammo' ? ` (${itemDetail.bundleSize ?? 5} bundled).` : '.'}`);
         events.push(`Wallet: ${formatWallet(resolvedCharacter.wallet)}.`);
       }
     }

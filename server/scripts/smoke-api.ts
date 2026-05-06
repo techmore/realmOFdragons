@@ -18,6 +18,7 @@ interface CharacterSummary {
   roomId: string;
   circle: number;
   inventory: string[];
+  ammoPouch?: Record<string, number>;
   worn?: string[];
   equipment?: Record<string, string>;
   hands: {
@@ -54,6 +55,10 @@ interface ItemDetail {
   weaponRange?: string;
   validAttackRanges?: string[];
   trainingSkill?: string;
+  ammoCode?: string;
+  ammoName?: string;
+  bundleSize?: number;
+  quantity?: number;
   carried: boolean;
   shopAvailable: boolean;
 }
@@ -404,7 +409,9 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
 
   result = await command(context.accessToken, current.id, 'shop buy itm-sting-arrow');
   assert(result.events.some((event) => event.includes('You buy practice arrow')), 'Expected to buy practice arrow.');
-  assert(result.itemDetails.some((item) => item.code === 'itm-sting-arrow' && item.category === 'ammo'), 'Expected practice arrow ammo metadata.');
+  assert(result.events.some((event) => event.includes('(5 bundled)')), 'Expected practice arrow bundle buy output.');
+  assert(result.character.ammoPouch?.['itm-sting-arrow'] === 5, 'Expected practice arrows to enter ammo pouch as a stack.');
+  assert(result.itemDetails.some((item) => item.code === 'itm-sting-arrow' && item.category === 'ammo' && item.quantity === 5), 'Expected practice arrow ammo quantity metadata.');
   current = (await command(context.accessToken, result.character.id, 'wait 450')).character;
 
   result = await command(context.accessToken, current.id, 'stow right');
@@ -464,14 +471,16 @@ async function runCombatSuite(context: SmokeContext): Promise<void> {
   current = await walkTo(context.accessToken, result.character, 'crossing-RV02-002');
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
 
-  const arrowsBefore = current.inventory.filter((item) => item === 'itm-sting-arrow').length;
+  const arrowsBefore = current.ammoPouch?.['itm-sting-arrow'] ?? 0;
   result = await command(context.accessToken, current.id, 'fire');
   assert(result.events.some((event) => event.includes('You attack with practice bow (ranged weapon')), 'Expected ranged weapon attack output.');
   assert(result.events.some((event) => event.includes('You loose practice arrow')), 'Expected ranged attack to consume practice arrow.');
-  assert(result.character.inventory.filter((item) => item === 'itm-sting-arrow').length === arrowsBefore - 1, 'Expected practice arrow inventory count to decrease.');
+  assert(result.events.some((event) => event.includes('4 remain')), 'Expected ranged attack to report remaining ammo.');
+  assert((result.character.ammoPouch?.['itm-sting-arrow'] ?? 0) === arrowsBefore - 1, 'Expected practice arrow pouch count to decrease.');
   assert(!result.events.some((event) => event.includes('too far away')), 'Expected ranged weapon to attack from pole or missile range.');
   context.summary.rangedWeaponRangeChecked = true;
   context.summary.rangedAliasAmmoChecked = true;
+  context.summary.ammoBundleChecked = true;
   current = (await command(context.accessToken, result.character.id, 'wait 900')).character;
 
   if (current.combat?.range === 'melee') {
