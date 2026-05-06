@@ -52,10 +52,11 @@ Completed current slice:
 - Inventory and ammo pouch sell hints now show consistent estimated resale text from one pricing model.
 - Static frontend smoke now exercises shop/economy helper edge cases directly: stocked carried goods, damaged salvage, ammo pouch resale, unknown ammo, and no-shop rooms.
 - Coverage shape validation now requires the static shop/economy helper cases to pass.
+- Added `ARCHITECTURE.md` documenting the current Node/React prototype constraints, the portable game-core boundary, REST/WebSocket split, Postgres direction, and conditions for a future Go server.
 
 Current next priority:
 
-- Add architecture notes for the intended portable game-core boundary before deeper backend refactors, covering current Node prototype constraints and a possible future Go server.
+- Extract the next backend command mechanic out of Express route handling into a pure module with focused unit coverage, starting with shop/economy sale presentation or ammo pouch sale rules.
 
 Core Philosophy
 

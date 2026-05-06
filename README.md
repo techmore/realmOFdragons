@@ -2,6 +2,8 @@
 
 Clean-room DragonRealms-inspired MUD prototype with a Node/Express API, React web client, file-backed prototype persistence, command smoke coverage, and local telemetry reports.
 
+For runtime and long-term stack direction, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Run the app
 
 Install dependencies once:
