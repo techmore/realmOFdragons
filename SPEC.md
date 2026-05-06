@@ -374,4 +374,4 @@ Completed in the current Node/React prototype:
 
 Next priority:
 
-- Add first gameplay content expansion beyond Crossing smoke coverage: additional beginner hunting rooms, enemy templates, and shop inventory variety while keeping all tests deterministic.
+- Add command visibility for available local enemies, starting with a `scan` or enhanced `look` output that lists beginner-safe targets in hunting rooms.
