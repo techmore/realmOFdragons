@@ -318,6 +318,24 @@ Next priority:
 
 - Add first gameplay content expansion beyond Crossing smoke coverage: additional beginner hunting rooms, enemy templates, and shop inventory variety while keeping all tests deterministic.
 
+Implementation Notes - 2026-05-05, Beginner Hunting Content Expansion
+
+Completed in the current Node/React prototype:
+
+- Added two new Crossing outskirts hunting rooms:
+  `crossing-RV02-004` Muddy Beetle Bend
+  `crossing-RV02-005` Low Ridge Rabbit Run
+- Added deterministic exits connecting the new rooms to the existing beginner hunting loop.
+- Added two new beginner enemy templates:
+  muddy shell beetle
+  ridge hare
+- Added two new small shop inventories for foraging/survival flavor.
+- Existing API smoke path-walking now covers the new shop rooms automatically through `/v1/world/shops`.
+
+Next priority:
+
+- Add command visibility for available local enemies, starting with a `scan` or enhanced `look` output that lists beginner-safe targets in hunting rooms.
+
 Implementation Notes - 2026-05-05, Telemetry Coverage Summary
 
 Completed in the current Node/React prototype:

@@ -237,6 +237,26 @@ const ENEMY_TEMPLATES: EnemyTemplate[] = [
     damageMax: 4,
     aggression: 62,
   },
+  {
+    id: 'rv-mud-beetle',
+    roomId: 'crossing-RV02-004',
+    name: 'muddy shell beetle',
+    maxHp: 14,
+    attack: 5,
+    damageMin: 1,
+    damageMax: 3,
+    aggression: 48,
+  },
+  {
+    id: 'rv-ridge-hare',
+    roomId: 'crossing-RV02-005',
+    name: 'ridge hare',
+    maxHp: 11,
+    attack: 7,
+    damageMin: 1,
+    damageMax: 4,
+    aggression: 58,
+  },
 ];
 
 const app = express();

@@ -132,6 +132,7 @@ export const worldRooms: Record<RoomId, Room> = {
     exits: [
       { direction: "west", destination: "crossing-RV02-001", details: "Return toward the trailhead." },
       { direction: "south", destination: "crossing-RV02-003", details: "A narrow game path." },
+      { direction: "east", destination: "crossing-RV02-004", details: "A muddy bend near beetle stones." },
     ],
   },
   "crossing-RV02-003": {
@@ -143,6 +144,7 @@ export const worldRooms: Record<RoomId, Room> = {
     prompts: ["A training dummy stands farther in the distance."],
     exits: [
       { direction: "north", destination: "crossing-RV02-002", details: "Backtrack the path." },
+      { direction: "south", destination: "crossing-RV02-005", details: "Toward a quiet low ridge." },
     ],
     shop: {
       code: "crossing-outskirts-general",
@@ -150,6 +152,44 @@ export const worldRooms: Record<RoomId, Room> = {
       items: [
         { code: "itm-branch-knife", name: "branch knife", price: 3, currency: "trias" },
         { code: "itm-rope-coil", name: "hemp rope (25')", price: 6, currency: "trias" },
+      ],
+    },
+  },
+  "crossing-RV02-004": {
+    id: "crossing-RV02-004",
+    code: { town: "crossing", square: "RV02", zone: "crossing-hunting" },
+    title: "Muddy Beetle Bend",
+    description:
+      "Wet stones and root tangles mark a shallow bend where small shell-backed vermin pick through the mud.",
+    prompts: ["A few cracked husks sit beside the trail."],
+    exits: [
+      { direction: "west", destination: "crossing-RV02-002", details: "Return to the brushline fork." },
+    ],
+    shop: {
+      code: "crossing-beetle-forager",
+      name: "Muddy Bend Forager Cache",
+      items: [
+        { code: "itm-mud-salve", name: "mud salve", price: 4, currency: "trias" },
+        { code: "itm-shell-scraper", name: "shell scraper", price: 5, currency: "trias" },
+      ],
+    },
+  },
+  "crossing-RV02-005": {
+    id: "crossing-RV02-005",
+    code: { town: "crossing", square: "RV02", zone: "crossing-hunting" },
+    title: "Low Ridge Rabbit Run",
+    description:
+      "A low grassy ridge overlooks the outer brush. Small tracks cut between the stones and vanish under thorny cover.",
+    prompts: ["Loose pebbles shift underfoot whenever the wind picks up."],
+    exits: [
+      { direction: "north", destination: "crossing-RV02-003", details: "Back toward the willow tract." },
+    ],
+    shop: {
+      code: "crossing-ridge-snare-kit",
+      name: "Ridge Snare Kit",
+      items: [
+        { code: "itm-twine-snare", name: "twine snare", price: 3, currency: "trias" },
+        { code: "itm-field-ration", name: "field ration", price: 2, currency: "trias" },
       ],
     },
   },
