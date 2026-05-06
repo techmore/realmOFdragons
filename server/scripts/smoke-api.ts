@@ -2,6 +2,20 @@ type JsonObject = Record<string, unknown>;
 
 type SmokeSuite = 'all' | 'identity' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
 
+const canonicalGuildIds = [
+  'barbarian',
+  'bard',
+  'cleric',
+  'empath',
+  'moon_mage',
+  'necromancer',
+  'paladin',
+  'ranger',
+  'thief',
+  'trader',
+  'warrior_mage',
+] as const;
+
 interface AuthTokens {
   accessToken: string;
 }
@@ -258,10 +272,12 @@ async function runIdentitySuite(context: SmokeContext): Promise<void> {
       current.race === race.id || current.race.toLowerCase() === race.name.toLowerCase(),
       `Expected reroll race ${race.name}, got ${current.race}`,
     );
+    assert(current.circle === 1, `Expected ${race.name} reroll to remain Circle 1, got Circle ${current.circle}.`);
   }
 
   context.character = current;
   context.summary.racesRolled = context.races.length;
+  context.summary.circleOneRacesChecked = context.races.length;
 }
 
 async function runScriptSuite(context: SmokeContext): Promise<void> {
@@ -309,21 +325,31 @@ async function runScriptSuite(context: SmokeContext): Promise<void> {
 async function runProgressionSuite(context: SmokeContext): Promise<void> {
   const guilds = await request<{ guilds: GuildSummary[] }>('/v1/world/guilds');
   assert(guilds.guilds.length >= 1, 'Expected at least one guild room.');
+  const canonicalGuilds = canonicalGuildIds.map((guildId) => {
+    const guild = guilds.guilds.find((entry) => entry.id === guildId);
+    assert(guild, `Expected canonical DragonRealms-style guild ${guildId} to be present.`);
+    return guild;
+  });
+  const extraGuilds = guilds.guilds.filter((guild) => !canonicalGuildIds.includes(guild.id as typeof canonicalGuildIds[number]));
 
   let current = context.character;
-  for (const guild of guilds.guilds) {
+  for (const guild of canonicalGuilds) {
     current = await walkTo(context.accessToken, current, guild.roomId);
     const joined = await command(context.accessToken, current.id, 'join guild');
     assert(joined.events.some((event) => event.includes('registered')), `Expected to join ${guild.name}.`);
     current = joined.character;
+    assert(current.circle === 1, `Expected ${guild.name} join to keep character at Circle 1 before training.`);
   }
 
-  current = await walkTo(context.accessToken, current, guilds.guilds[0].roomId);
+  current = await walkTo(context.accessToken, current, canonicalGuilds[0].roomId);
   current = (await command(context.accessToken, current.id, 'join guild')).character;
   current = await advanceToCircle(context.accessToken, current, 10);
 
   context.character = current;
-  context.summary.guildRoomsWalked = guilds.guilds.length;
+  context.summary.canonicalGuildRoomsWalked = canonicalGuilds.length;
+  context.summary.canonicalGuildsChecked = canonicalGuilds.map((guild) => guild.id);
+  context.summary.extraPrototypeGuilds = extraGuilds.map((guild) => guild.id);
+  context.summary.guildRoomsWalked = canonicalGuilds.length;
   context.summary.circleReached = current.circle;
 }
 

@@ -10,6 +10,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added smoke telemetry that verifies all implemented race rerolls remain Circle 1 during character creation coverage.
+- Progression smoke now distinguishes canonical DragonRealms-style guild coverage from extra prototype guild halls.
+- Canonical guild smoke coverage now requires Barbarian, Bard, Cleric, Empath, Moon Mage, Necromancer, Paladin, Ranger, Thief, Trader, and Warrior Mage to be present and joinable at Circle 1 before training.
 - Added an `ammoPouch` quantity map to character state for stacked ammunition.
 - Practice arrow shop purchases now add bundled ammo counts instead of one inventory row per shot.
 - Ammo item metadata exposes quantity and bundle size.
@@ -90,7 +93,7 @@ Completed current slice:
 
 Current next priority:
 
-- Continue extracting backend command mechanics from Express route handling into pure modules, next targeting incapacitation event formatting and post-attack retaliation resolution boundaries.
+- Normalize prototype-only guild halls (`fighter`, `mage`, `scout`, `rogue`) into either non-guild tutorial halls or canonical guild aliases, then update the Crossing routes and UI labels.
 
 Core Philosophy
 
