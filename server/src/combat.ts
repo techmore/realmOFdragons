@@ -79,6 +79,8 @@ export type AttackRollResult = {
   threshold: number;
 };
 
+export type CombatManeuverName = 'jab' | 'bash';
+
 export type AttackOutcomeResult = {
   targetHp: number;
   collapsed: boolean;
@@ -183,6 +185,26 @@ export function buildCombatCircleSuccessEvents(advantage: unknown, balance: unkn
     `You circle for a better angle. Position: ${formatAdvantage(normalizeAdvantage(advantage))}.`,
     `Balance: ${formatBalance(balance)}.`,
   ];
+}
+
+export function buildCombatManeuverRangeFailureEvents(maneuver: CombatManeuverName, range: unknown): string[] {
+  const normalizedRange = normalizeRange(range);
+  if (maneuver === 'bash') {
+    return [`You need melee range to bash. Current range: ${formatRange(normalizedRange)}.`];
+  }
+  return [`You are too far away to jab. Current range: ${formatRange(normalizedRange)}.`];
+}
+
+export function buildCombatManeuverHitEvents(maneuver: CombatManeuverName, targetName: string, damage: number, attack: AttackRollResult): string[] {
+  return [`You ${maneuver} ${targetName} for ${Math.max(0, Math.floor(damage))} (${attack.roll}/${attack.threshold}).`];
+}
+
+export function buildCombatManeuverMissEvents(maneuver: CombatManeuverName): string[] {
+  return [`You fail to land your ${maneuver}.`];
+}
+
+export function buildCombatManeuverCollapseEvents(targetName: string): string[] {
+  return [`${targetName} collapses.`];
 }
 
 export function buildRoomTargetsFromTemplates(targets: CombatTargetTemplate[]): RoomTarget[] {

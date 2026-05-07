@@ -58,6 +58,10 @@ import {
   buildPostAttackStatusEvents,
   buildCombatCircleRangeFailureEvents,
   buildCombatCircleSuccessEvents,
+  buildCombatManeuverCollapseEvents,
+  buildCombatManeuverHitEvents,
+  buildCombatManeuverMissEvents,
+  buildCombatManeuverRangeFailureEvents,
   buildCombatRangeEvents,
   buildCombatStatusEvents,
   buildRoomTargetsFromTemplates,
@@ -590,11 +594,11 @@ function resolvePlayerManeuver(
   if (!character.combat) return false;
   const range = normalizeRange(character.combat.range);
   if (maneuver === 'bash' && range !== 'melee') {
-    events.push(`You need melee range to bash. Current range: ${formatRange(range)}.`);
+    events.push(...buildCombatManeuverRangeFailureEvents(maneuver, range));
     return false;
   }
   if (maneuver === 'jab' && range === 'missile') {
-    events.push(`You are too far away to jab. Current range: ${formatRange(range)}.`);
+    events.push(...buildCombatManeuverRangeFailureEvents(maneuver, range));
     return false;
   }
 
@@ -616,11 +620,11 @@ function resolvePlayerManeuver(
       template.damageMax,
     );
     character.combat.targetHp = Math.max(0, character.combat.targetHp - damage);
-    events.push(`You ${maneuver} ${character.combat.targetName} for ${damage} (${playerAttack.roll}/${playerAttack.threshold}).`);
+    events.push(...buildCombatManeuverHitEvents(maneuver, character.combat.targetName, damage, playerAttack));
     shiftAdvantage(character, maneuver === 'bash' ? 1 : 0);
     events.push(...applySkillPoolGain(character, 'melee', maneuver === 'bash' ? 3 : 2).events);
   } else {
-    events.push(`You fail to land your ${maneuver}.`);
+    events.push(...buildCombatManeuverMissEvents(maneuver));
     shiftAdvantage(character, -1);
   }
 
@@ -629,7 +633,7 @@ function resolvePlayerManeuver(
   events.push(`Balance: ${formatBalance(character.balance)}.`);
 
   if (character.combat.targetHp <= 0) {
-    events.push(`${character.combat.targetName} collapses.`);
+    events.push(...buildCombatManeuverCollapseEvents(character.combat.targetName));
     character.inventory.push(`${character.combat.targetName} fang`);
     events.push(...applySkillPoolGain(character, 'survival', 2).events);
     clearCombat(character);

@@ -4,6 +4,10 @@ import {
   applyBalanceChange,
   buildCombatCircleRangeFailureEvents,
   buildCombatCircleSuccessEvents,
+  buildCombatManeuverCollapseEvents,
+  buildCombatManeuverHitEvents,
+  buildCombatManeuverMissEvents,
+  buildCombatManeuverRangeFailureEvents,
   buildCombatRangeEvents,
   buildCombatStatusEvents,
   buildPostAttackStatusEvents,
@@ -174,6 +178,17 @@ assert.deepEqual(buildCombatCircleSuccessEvents(99, 99), [
   'You circle for a better angle. Position: you have overwhelming advantage.',
   'Balance: incredibly balanced.',
 ]);
+assert.deepEqual(buildCombatManeuverRangeFailureEvents('bash', 'pole'), ['You need melee range to bash. Current range: pole range.']);
+assert.deepEqual(buildCombatManeuverRangeFailureEvents('jab', 'missile'), ['You are too far away to jab. Current range: missile range.']);
+assert.deepEqual(buildCombatManeuverRangeFailureEvents('jab', 'bad-range'), ['You are too far away to jab. Current range: missile range.']);
+assert.deepEqual(buildCombatManeuverHitEvents('jab', 'test rat', 3.9, { hit: true, roll: 22, threshold: 61 }), [
+  'You jab test rat for 3 (22/61).',
+]);
+assert.deepEqual(buildCombatManeuverHitEvents('bash', 'test goblin', -4, { hit: true, roll: 18, threshold: 44 }), [
+  'You bash test goblin for 0 (18/44).',
+]);
+assert.deepEqual(buildCombatManeuverMissEvents('bash'), ['You fail to land your bash.']);
+assert.deepEqual(buildCombatManeuverCollapseEvents('test goblin'), ['test goblin collapses.']);
 
 const targetTemplates = [
   { id: 'test-rat', name: 'test rat', maxHp: 8, aggression: 30 },
@@ -221,4 +236,4 @@ assert.equal(buildTargetDetailEvents(targetTemplates[0], 'test rat', {
   range: 'melee',
 })[4], 'Suggested next verb: attack test rat.');
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true, combatStatusChecked: true, combatRangeChecked: true, combatCircleChecked: true }, null, 2));
+console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true, combatStatusChecked: true, combatRangeChecked: true, combatCircleChecked: true, combatManeuverChecked: true }, null, 2));
