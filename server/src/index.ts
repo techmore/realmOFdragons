@@ -1838,6 +1838,27 @@ app.get('/v1/world/shops', (_req: Request, res: Response) => {
   res.json({ shops: roomsWithShops });
 });
 
+app.get('/v1/world/targets', (_req: Request, res: Response) => {
+  const town = String(_req.query.town || '').toLowerCase();
+  const targets = ENEMY_TEMPLATES
+    .filter((target) => {
+      const room = worldRooms[target.roomId];
+      return room && (town ? room.code.town === town : true);
+    })
+    .map((target) => {
+      const room = worldRooms[target.roomId]!;
+      return {
+        id: target.id,
+        roomId: target.roomId,
+        roomTitle: room.title,
+        name: target.name,
+        maxHp: target.maxHp,
+        aggression: target.aggression,
+      };
+    });
+  res.json({ targets });
+});
+
 app.get('/v1/world/rooms', (_req: Request, res: Response) => {
   const town = String(_req.query.town || '').toLowerCase();
   const rooms = Object.values(worldRooms).filter((room) => (town ? room.code.town === town : true));

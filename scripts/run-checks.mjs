@@ -26,6 +26,7 @@ const localSteps = [
   { name: 'guild-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:guilds'] },
   { name: 'guild-circle10-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:guild-circle10'] },
   { name: 'target-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:targets'] },
+  { name: 'enemy-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:enemies'] },
   { name: 'damaged-ammo-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:damaged-ammo'] },
   { name: 'script-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:scripts'] },
   { name: 'api-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', 'run', 'smoke:api'] },
@@ -68,6 +69,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Structured targets | ${coverage.gameplay.structuredTargetsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Target details command | ${coverage.gameplay.targetDetailsChecked ? 'yes' : 'no'} |`);
     lines.push(`| Focused target smoke | ${coverage.gameplay.focusedTargetSmokeChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Focused Crossing enemy deployment smoke | ${coverage.gameplay.focusedEnemySmokeChecked ? 'yes' : 'no'} |`);
     lines.push(`| Verb discovery command | ${coverage.gameplay.verbDiscoveryChecked ? 'yes' : 'no'} |`);
     lines.push(`| Static command discovery note | ${coverage.frontend.staticCommandDiscoveryChecked ? 'yes' : 'no'} |`);
     lines.push(`| Browser command discovery note | ${coverage.frontend.browserCommandDiscoveryVisible ? 'yes' : 'no'} |`);
@@ -143,6 +145,8 @@ function markdownSummary(results, coverage) {
     lines.push(`| Focused guild endpoint canonical count | ${coverage.gameplay.focusedGuildEndpointCanonicalCount} |`);
     lines.push(`| Focused guild Circle 10 count | ${coverage.gameplay.focusedGuildCircleTenChecked} |`);
     lines.push(`| Guild rooms walked | ${coverage.gameplay.guildRoomsWalked} |`);
+    lines.push(`| Focused Crossing enemies checked | ${coverage.gameplay.focusedEnemyDeploymentsChecked} |`);
+    lines.push(`| Focused Crossing enemy rooms checked | ${coverage.gameplay.focusedEnemyRoomsChecked} |`);
     lines.push(`| Shop rooms walked | ${coverage.gameplay.shopRoomsWalked} |`);
     lines.push(`| Circle reached | ${coverage.gameplay.circleReached} |`);
     lines.push(`| Browser command count | ${coverage.frontend.browserCommandCount} |`);
@@ -211,6 +215,7 @@ function coverageSummary(results) {
   const guildPayload = parseLastJsonObject(byName.get('guild-smoke')?.stdoutTail ?? '') ?? {};
   const guildCirclePayload = parseLastJsonObject(byName.get('guild-circle10-smoke')?.stdoutTail ?? '') ?? {};
   const targetPayload = parseLastJsonObject(byName.get('target-smoke')?.stdoutTail ?? '') ?? {};
+  const enemyPayload = parseLastJsonObject(byName.get('enemy-smoke')?.stdoutTail ?? '') ?? {};
   const damagedAmmoPayload = parseLastJsonObject(byName.get('damaged-ammo-smoke')?.stdoutTail ?? '') ?? {};
   const scriptPayload = parseLastJsonObject(byName.get('script-smoke')?.stdoutTail ?? '') ?? {};
   const browserPayload = parseLastJsonObject(byName.get('browser-smoke')?.stdoutTail ?? '') ?? {};
@@ -280,6 +285,13 @@ function coverageSummary(results) {
       structuredTargetsChecked: apiPayload.structuredTargetsChecked === true,
       targetDetailsChecked: apiPayload.targetDetailsChecked === true,
       focusedTargetSmokeChecked: targetPayload.targetDetailsChecked === true,
+      focusedEnemyDeploymentsChecked: enemyPayload.crossingEnemyDeploymentsChecked ?? apiPayload.crossingEnemyDeploymentsChecked ?? 0,
+      focusedEnemyRoomsChecked: enemyPayload.crossingEnemyRoomsChecked ?? apiPayload.crossingEnemyRoomsChecked ?? 0,
+      focusedEnemySmokeChecked:
+        (enemyPayload.crossingEnemyScanChecked ?? apiPayload.crossingEnemyScanChecked) === true &&
+        (enemyPayload.crossingEnemyTargetDetailsChecked ?? apiPayload.crossingEnemyTargetDetailsChecked) === true &&
+        (enemyPayload.crossingEnemyAppraisalChecked ?? apiPayload.crossingEnemyAppraisalChecked) === true &&
+        (enemyPayload.crossingEnemyDeploymentsChecked ?? apiPayload.crossingEnemyDeploymentsChecked ?? 0) >= 1,
       verbDiscoveryChecked: targetPayload.verbDiscoveryChecked === true,
       agentPromptCurrentStatusChecked: agentPromptPayload.currentStatusPriorityChecked === true,
       drRaceSelectionChecked: (apiPayload.racesRolled ?? 0) === 11 && (apiPayload.fixedRaceStatsChecked ?? 0) === 11,

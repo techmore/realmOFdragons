@@ -1,6 +1,6 @@
 type JsonObject = Record<string, unknown>;
 
-type SmokeSuite = 'all' | 'identity' | 'races' | 'guilds' | 'guild-circle10' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
+type SmokeSuite = 'all' | 'identity' | 'races' | 'guilds' | 'guild-circle10' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'enemies' | 'combat';
 
 const canonicalRaceIds = [
   'human',
@@ -122,6 +122,15 @@ interface RoomTarget {
   aggression: number;
 }
 
+interface EnemyDeployment {
+  id: string;
+  roomId: string;
+  roomTitle: string;
+  name: string;
+  maxHp: number;
+  aggression: number;
+}
+
 interface GuildSummary {
   id: string;
   name: string;
@@ -155,7 +164,7 @@ interface SmokeContext {
   summary: Record<string, unknown>;
 }
 
-const suites: SmokeSuite[] = ['all', 'identity', 'races', 'guilds', 'guild-circle10', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'combat'];
+const suites: SmokeSuite[] = ['all', 'identity', 'races', 'guilds', 'guild-circle10', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'enemies', 'combat'];
 const requestedSuite = (process.argv[2] ?? 'all') as SmokeSuite;
 const baseUrl = (process.env.DR_API_BASE_URL ?? 'http://localhost:4000').replace(/\/+$/, '');
 const password = 'smoke-password-01';
@@ -1057,6 +1066,49 @@ async function runTargetSuite(context: SmokeContext): Promise<void> {
   context.summary.verbDiscoveryChecked = true;
 }
 
+async function runEnemyDeploymentSuite(context: SmokeContext): Promise<void> {
+  const deployed = await request<{ targets: EnemyDeployment[] }>('/v1/world/targets?town=crossing');
+  assert(deployed.targets.length >= 1, 'Expected Crossing enemy deployments.');
+
+  let current = context.character;
+  const checkedEnemyIds: string[] = [];
+  const checkedRooms = new Set<string>();
+
+  for (const enemy of deployed.targets) {
+    current = await walkTo(context.accessToken, current, enemy.roomId);
+    current = (await command(context.accessToken, current.id, 'wait 900')).character;
+
+    const scan = await command(context.accessToken, current.id, 'scan');
+    assert(scan.events.some((event) => event.includes(enemy.name)), `Expected scan to list ${enemy.name} in ${enemy.roomTitle}.`);
+    assert(
+      scan.targets.some((target) => target.id === enemy.id && target.name === enemy.name && target.vitality === enemy.maxHp && target.aggression === enemy.aggression),
+      `Expected structured target payload for ${enemy.name}.`,
+    );
+
+    const targetDetails = await command(context.accessToken, scan.character.id, `target ${enemy.name}`);
+    assert(targetDetails.events.some((event) => event.includes(`Target: ${enemy.name}`)), `Expected target details for ${enemy.name}.`);
+    assert(targetDetails.events.some((event) => event.includes(`Vitality: ${enemy.maxHp} baseline.`)), `Expected baseline vitality for ${enemy.name}.`);
+    assert(targetDetails.events.some((event) => event.includes(`Aggression: ${enemy.aggression}.`)), `Expected aggression for ${enemy.name}.`);
+    assert(targetDetails.events.some((event) => event.includes(`Suggested next verb: advance ${enemy.name}.`)), `Expected advance suggestion for ${enemy.name}.`);
+
+    const appraisal = await command(context.accessToken, targetDetails.character.id, `appraise ${enemy.name}`);
+    assert(appraisal.events.some((event) => event.includes(`Target: ${enemy.name}`)), `Expected appraisal target details for ${enemy.name}.`);
+    assert(appraisal.events.some((event) => event.includes(`Range: not yet engaged.`)), `Expected unengaged range for ${enemy.name}.`);
+
+    current = appraisal.character;
+    checkedEnemyIds.push(enemy.id);
+    checkedRooms.add(enemy.roomId);
+  }
+
+  context.character = current;
+  context.summary.crossingEnemyDeploymentsChecked = checkedEnemyIds.length;
+  context.summary.crossingEnemyDeploymentIds = checkedEnemyIds;
+  context.summary.crossingEnemyRoomsChecked = checkedRooms.size;
+  context.summary.crossingEnemyScanChecked = true;
+  context.summary.crossingEnemyTargetDetailsChecked = true;
+  context.summary.crossingEnemyAppraisalChecked = true;
+}
+
 async function runDamagedAmmoSuite(context: SmokeContext): Promise<void> {
   let current = await walkTo(context.accessToken, context.character, 'crossing-MA01-002');
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
@@ -1098,6 +1150,7 @@ async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void>
   if (suite === 'economy') await runEconomySuite(context);
   if (suite === 'damaged-ammo') await runDamagedAmmoSuite(context);
   if (suite === 'targets') await runTargetSuite(context);
+  if (suite === 'enemies') await runEnemyDeploymentSuite(context);
   if (suite === 'combat') await runCombatSuite(context);
   if (suite === 'all') {
     await runIdentitySuite(context);
@@ -1108,6 +1161,7 @@ async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void>
     await runScriptSuite(context);
     await runProgressionSuite(context);
     await runEconomySuite(context);
+    await runEnemyDeploymentSuite(context);
     await runCombatSuite(context);
   }
 }
