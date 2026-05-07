@@ -207,6 +207,30 @@ export function buildCombatManeuverCollapseEvents(targetName: string): string[] 
   return [`${targetName} collapses.`];
 }
 
+export function buildEnemyPressureAdvanceEvents(targetName: string, nextRange: unknown): string[] {
+  return [`${targetName} presses in to ${formatRange(normalizeRange(nextRange))}.`];
+}
+
+export function buildEnemyPressureHoldEvents(targetName: string, range: unknown): string[] {
+  return [`${targetName} holds at ${formatRange(normalizeRange(range))}.`];
+}
+
+export function buildEnemyRetaliationHitEvents(targetName: string, damage: number, currentHealth: number, maxHealth: number): string[] {
+  const normalizedDamage = Math.max(0, Math.floor(Number(damage) || 0));
+  const events = [
+    `${targetName} attacks for ${normalizedDamage}.`,
+    `You now have ${Math.max(0, Math.floor(Number(currentHealth) || 0))}/${Math.max(0, Math.floor(Number(maxHealth) || 0))} health.`,
+  ];
+  if (normalizedDamage >= 6) {
+    events.push('You take a hard hit.');
+  }
+  return events;
+}
+
+export function buildEnemyRetaliationMissEvents(targetName: string): string[] {
+  return [`${targetName} misses its strike.`];
+}
+
 export function buildRoomTargetsFromTemplates(targets: CombatTargetTemplate[]): RoomTarget[] {
   return targets.map((target) => ({
     id: target.id,

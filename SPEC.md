@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Extracted enemy pressure and melee retaliation formatting into pure combat helpers with unit coverage for advancing/holding range pressure, hit health output, hard-hit output, and missed strikes.
+- The Express enemy pressure and retaliation paths now delegate enemy-facing event text to combat-owned formatting while retaining route-local rolls, damage mitigation, health mutation, evasion gain, and attack timing.
 - Extracted combat `jab`/`bash` maneuver formatting into pure combat helpers with unit coverage for range-gated failures, hit/miss output, damage normalization, and collapse text.
 - The Express maneuver resolver now delegates jab/bash event text to combat-owned formatting while retaining route-local mutation, skill gain, balance, cooldown, loot, and retaliation.
 - Extracted combat `circle` command formatting into pure combat helpers with unit coverage for missile-range rejection and normalized position/balance success output.
@@ -207,7 +209,7 @@ Completed current slice:
 
 Current next priority:
 
-- Extract enemy pressure and retaliation formatting into combat helpers with unit coverage.
+- Add focused smoke coverage that proves every canonical guild can reach Circle 10 from its own registrar.
 
 Core Philosophy
 

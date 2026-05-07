@@ -10,6 +10,10 @@ import {
   buildCombatManeuverRangeFailureEvents,
   buildCombatRangeEvents,
   buildCombatStatusEvents,
+  buildEnemyPressureAdvanceEvents,
+  buildEnemyPressureHoldEvents,
+  buildEnemyRetaliationHitEvents,
+  buildEnemyRetaliationMissEvents,
   buildPostAttackStatusEvents,
   buildRoomTargetsFromTemplates,
   buildTargetDetailEvents,
@@ -189,6 +193,19 @@ assert.deepEqual(buildCombatManeuverHitEvents('bash', 'test goblin', -4, { hit: 
 ]);
 assert.deepEqual(buildCombatManeuverMissEvents('bash'), ['You fail to land your bash.']);
 assert.deepEqual(buildCombatManeuverCollapseEvents('test goblin'), ['test goblin collapses.']);
+assert.deepEqual(buildEnemyPressureAdvanceEvents('test goblin', 'pole'), ['test goblin presses in to pole range.']);
+assert.deepEqual(buildEnemyPressureAdvanceEvents('test goblin', 'bad-range'), ['test goblin presses in to missile range.']);
+assert.deepEqual(buildEnemyPressureHoldEvents('test rat', 'missile'), ['test rat holds at missile range.']);
+assert.deepEqual(buildEnemyRetaliationHitEvents('test goblin', 5, 17, 22), [
+  'test goblin attacks for 5.',
+  'You now have 17/22 health.',
+]);
+assert.deepEqual(buildEnemyRetaliationHitEvents('test goblin', 6.9, -2, 22), [
+  'test goblin attacks for 6.',
+  'You now have 0/22 health.',
+  'You take a hard hit.',
+]);
+assert.deepEqual(buildEnemyRetaliationMissEvents('test rat'), ['test rat misses its strike.']);
 
 const targetTemplates = [
   { id: 'test-rat', name: 'test rat', maxHp: 8, aggression: 30 },
@@ -236,4 +253,4 @@ assert.equal(buildTargetDetailEvents(targetTemplates[0], 'test rat', {
   range: 'melee',
 })[4], 'Suggested next verb: attack test rat.');
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true, combatStatusChecked: true, combatRangeChecked: true, combatCircleChecked: true, combatManeuverChecked: true }, null, 2));
+console.log(JSON.stringify({ ok: true, suite: 'unit:combat', roomTargetListingChecked: true, targetDetailFormattingChecked: true, combatStatusChecked: true, combatRangeChecked: true, combatCircleChecked: true, combatManeuverChecked: true, enemyPressureChecked: true, enemyRetaliationChecked: true }, null, 2));

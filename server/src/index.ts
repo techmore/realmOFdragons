@@ -64,6 +64,10 @@ import {
   buildCombatManeuverRangeFailureEvents,
   buildCombatRangeEvents,
   buildCombatStatusEvents,
+  buildEnemyPressureAdvanceEvents,
+  buildEnemyPressureHoldEvents,
+  buildEnemyRetaliationHitEvents,
+  buildEnemyRetaliationMissEvents,
   buildRoomTargetsFromTemplates,
   buildTargetDetailEvents as buildCombatTargetDetailEvents,
   buildTargetScanEvents,
@@ -549,15 +553,11 @@ function applyMeleeRetaliation(character: CharacterRecord, template: EnemyTempla
     const defended = character.combat.defendUntil > now;
     const stanceMitigation = character.stance === 'defensive' ? 1 : character.stance === 'evasive' ? 2 : 0;
     const damage = Math.max(0, rawDamage - (defended ? 2 : 0) - stanceMitigation - equipment.totalArmor);
-    events.push(`${character.combat.targetName} attacks for ${damage}.`);
     character.health.current = Math.max(0, character.health.current - damage);
     events.push(...applySkillPoolGain(character, 'evasion', defended ? 2 : 1).events);
-    events.push(`You now have ${character.health.current}/${character.health.max} health.`);
-    if (damage >= 6) {
-      events.push('You take a hard hit.');
-    }
+    events.push(...buildEnemyRetaliationHitEvents(character.combat.targetName, damage, character.health.current, character.health.max));
   } else {
-    events.push(`${character.combat.targetName} misses its strike.`);
+    events.push(...buildEnemyRetaliationMissEvents(character.combat.targetName));
   }
   character.combat.nextAttackAt = now + 900;
   return true;
@@ -571,10 +571,10 @@ function applyEnemyPressure(character: CharacterRecord, template: EnemyTemplate,
     if (pressureRoll <= template.aggression) {
       const nextRange = shiftCombatRange(range, 'advance');
       character.combat.range = nextRange;
-      events.push(`${character.combat.targetName} presses in to ${formatRange(nextRange)}.`);
+      events.push(...buildEnemyPressureAdvanceEvents(character.combat.targetName, nextRange));
       return true;
     }
-    events.push(`${character.combat.targetName} holds at ${formatRange(range)}.`);
+    events.push(...buildEnemyPressureHoldEvents(character.combat.targetName, range));
     return false;
   }
 
