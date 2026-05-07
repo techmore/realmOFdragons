@@ -7,6 +7,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added focused API smoke coverage proving each canonical DragonRealms guild can be joined in-world at its registrar and advanced to Circle 10 from that registrar.
+- Added `npm --prefix server run smoke:guild-circle10` and local agent telemetry execution for per-guild Circle 10 verification.
 - Extracted enemy pressure and melee retaliation formatting into pure combat helpers with unit coverage for advancing/holding range pressure, hit health output, hard-hit output, and missed strikes.
 - The Express enemy pressure and retaliation paths now delegate enemy-facing event text to combat-owned formatting while retaining route-local rolls, damage mitigation, health mutation, evasion gain, and attack timing.
 - Extracted combat `jab`/`bash` maneuver formatting into pure combat helpers with unit coverage for range-gated failures, hit/miss output, damage normalization, and collapse text.
@@ -209,7 +211,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add focused smoke coverage that proves every canonical guild can reach Circle 10 from its own registrar.
+- Add focused smoke coverage for every Crossing enemy template appearing through scan/target detail in its deployed room.
 
 Core Philosophy
 

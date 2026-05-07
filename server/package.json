@@ -12,6 +12,7 @@
     "smoke:identity": "tsx scripts/smoke-api.ts identity",
     "smoke:races": "tsx scripts/smoke-api.ts races",
     "smoke:guilds": "tsx scripts/smoke-api.ts guilds",
+    "smoke:guild-circle10": "tsx scripts/smoke-api.ts guild-circle10",
     "smoke:race-guild-matrix": "tsx scripts/smoke-api.ts race-guild-matrix",
     "smoke:scripts": "tsx scripts/smoke-api.ts scripts",
     "smoke:progression": "tsx scripts/smoke-api.ts progression",

@@ -1,6 +1,6 @@
 type JsonObject = Record<string, unknown>;
 
-type SmokeSuite = 'all' | 'identity' | 'races' | 'guilds' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
+type SmokeSuite = 'all' | 'identity' | 'races' | 'guilds' | 'guild-circle10' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'combat';
 
 const canonicalRaceIds = [
   'human',
@@ -155,7 +155,7 @@ interface SmokeContext {
   summary: Record<string, unknown>;
 }
 
-const suites: SmokeSuite[] = ['all', 'identity', 'races', 'guilds', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'combat'];
+const suites: SmokeSuite[] = ['all', 'identity', 'races', 'guilds', 'guild-circle10', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'combat'];
 const requestedSuite = (process.argv[2] ?? 'all') as SmokeSuite;
 const baseUrl = (process.env.DR_API_BASE_URL ?? 'http://localhost:4000').replace(/\/+$/, '');
 const password = 'smoke-password-01';
@@ -498,6 +498,49 @@ async function runGuildEndpointSuite(context: SmokeContext): Promise<void> {
   context.summary.guildEndpointCanonicalCount = guilds.guilds.length;
   context.summary.guildEndpointRegistrarRoomsChecked = guilds.guilds.length;
   context.summary.guildEndpointOnlyCanonical = true;
+}
+
+async function runGuildCircleTenSuite(context: SmokeContext): Promise<void> {
+  const guilds = await request<{ guilds: GuildSummary[] }>('/v1/world/guilds');
+  const canonicalGuilds = canonicalGuildIds.map((guildId) => {
+    const guild = guilds.guilds.find((entry) => entry.id === guildId);
+    assert(guild, `Expected canonical DragonRealms-style guild ${guildId} to be present.`);
+    return guild;
+  });
+
+  const circleTenGuilds: string[] = [];
+  const circleTenDetails: Record<string, { circle: number; roomId: string; guildId: string }> = {};
+
+  for (const [index, guild] of canonicalGuilds.entries()) {
+    const character = await request<CharacterSummary>('/v1/characters', {
+      method: 'POST',
+      headers: authHeaders(context.accessToken),
+      body: JSON.stringify({ name: `C10${index}${unique.slice(-6)}`, race: context.races[0].name }),
+    });
+    assert(character.guildId === 'commoner', `Expected ${guild.name} Circle 10 smoke character to start commoner.`);
+
+    let current = await walkTo(context.accessToken, character, guild.roomId);
+    const joined = await command(context.accessToken, current.id, 'join guild');
+    assert(joined.events.some((event) => event.includes('registered')), `Expected to join ${guild.name}.`);
+    current = joined.character;
+    assert(current.guildId === guild.id, `Expected joined guild id ${guild.id}, got ${current.guildId}.`);
+    assert(current.circle === 1, `Expected ${guild.name} to start at Circle 1 after joining.`);
+
+    current = await advanceToCircle(context.accessToken, current, 10);
+    assert(current.guildId === guild.id, `Expected ${guild.name} character to remain ${guild.id} at Circle 10.`);
+    assert(current.circle >= 10, `Expected ${guild.name} to reach Circle 10, got ${current.circle}.`);
+    assert(current.roomId === guild.roomId, `Expected ${guild.name} Circle 10 advancement at registrar ${guild.roomId}, got ${current.roomId}.`);
+
+    circleTenGuilds.push(guild.id);
+    circleTenDetails[guild.id] = { circle: current.circle, roomId: current.roomId, guildId: current.guildId };
+    context.character = current;
+  }
+
+  context.summary.guildCircleTenChecked = circleTenGuilds.length;
+  context.summary.guildCircleTenGuilds = circleTenGuilds;
+  context.summary.guildCircleTenDetails = circleTenDetails;
+  context.summary.guildCircleTenAllCanonical = circleTenGuilds.length === canonicalGuildIds.length;
+  context.summary.guildCircleTenRegistrarChecked = true;
 }
 
 async function runRaceGuildMatrixSuite(context: SmokeContext): Promise<void> {
@@ -1048,6 +1091,7 @@ async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void>
   if (suite === 'identity') await runIdentitySuite(context);
   if (suite === 'races') await runRaceEndpointSuite(context);
   if (suite === 'guilds') await runGuildEndpointSuite(context);
+  if (suite === 'guild-circle10') await runGuildCircleTenSuite(context);
   if (suite === 'race-guild-matrix') await runRaceGuildMatrixSuite(context);
   if (suite === 'scripts') await runScriptSuite(context);
   if (suite === 'progression') await runProgressionSuite(context);
@@ -1059,6 +1103,7 @@ async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void>
     await runIdentitySuite(context);
     await runRaceEndpointSuite(context);
     await runGuildEndpointSuite(context);
+    await runGuildCircleTenSuite(context);
     await runRaceGuildMatrixSuite(context);
     await runScriptSuite(context);
     await runProgressionSuite(context);
