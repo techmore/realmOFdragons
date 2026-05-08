@@ -30,6 +30,12 @@ type RoomShopItem = {
   currency: string;
 };
 
+type RoomShopNpc = {
+  name: string;
+  role: string;
+  dialogue: string[];
+};
+
 type ItemDetail = {
   code: string;
   name: string;
@@ -70,6 +76,8 @@ type RoomShop = {
   code: string;
   name: string;
   items: RoomShopItem[];
+  npc?: RoomShopNpc;
+  stockRefresh?: string;
 };
 
 type RoomForage = {
@@ -285,6 +293,20 @@ const guildWalkRoute: GuildWalkRoute[] = [
   { id: 'cleric', label: 'Cleric', goto: 'u', back: 'down' },
   { id: 'empath', label: 'Empath', goto: 'n', back: 's' },
 ];
+
+const SHOP_STOCK_FALLBACK_REFRESH = 'static catalog; refreshed whenever the world fixture is reloaded';
+
+function getShopNpcName(shop?: RoomShop) {
+  return shop?.npc?.name ?? (shop ? `${shop.name} clerk` : 'no shopkeeper');
+}
+
+function getShopNpcRole(shop?: RoomShop) {
+  return shop?.npc?.role ?? 'shopkeeper';
+}
+
+function getShopStockRefresh(shop?: RoomShop) {
+  return shop?.stockRefresh ?? SHOP_STOCK_FALLBACK_REFRESH;
+}
 
 const directionButtons: DirectionButton[] = [
   { label: '↖', command: 'northwest', title: 'Northwest' },
@@ -552,7 +574,7 @@ function GameStatusPanels({
         },
         {
           label: 'Shop service',
-          detail: room.shop ? `${room.shop.name} (${room.shop.items.length} items)` : 'none',
+          detail: room.shop ? `${room.shop.name} (${room.shop.items.length} items, ${getShopNpcName(room.shop)})` : 'none',
           command: room.shop ? 'shop' : undefined,
         },
         {
@@ -618,6 +640,16 @@ function GameStatusPanels({
             {room.shop ? (
               <>
                 <h3>{room.shop.name}</h3>
+                <p>NPC: {getShopNpcName(room.shop)} ({getShopNpcRole(room.shop)})</p>
+                <p className="subtle">Stock refresh: {getShopStockRefresh(room.shop)}</p>
+                <div className="action-grid">
+                  <button type="button" onClick={() => onCommand('shop talk')} disabled={loading || !character}>
+                    shop talk
+                  </button>
+                  <button type="button" onClick={() => onCommand('shop stock')} disabled={loading || !character}>
+                    shop stock
+                  </button>
+                </div>
                 <ul>
                   {room.shop.items.map((item) => (
                     <li key={item.code}>
@@ -642,7 +674,7 @@ function GameStatusPanels({
           <p><strong>New here?</strong> Use <code>verb</code> for grouped commands, <code>help scan</code> for target discovery, and <code>target &lt;name&gt;</code> before you advance.</p>
         </div>
         <div className="action-grid">
-          {['look', 'survey', 'verb', 'scan', 'forage', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'ammo', 'reload', 'recover arrows', 'wield training sword', 'shop', 'join guild', 'combat', 'attack', 'fire', 'shoot', 'defend', 'flee', 'rest'].map((entry) => (
+          {['look', 'survey', 'verb', 'scan', 'forage', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'ammo', 'reload', 'recover arrows', 'wield training sword', 'shop', 'shop talk', 'shop stock', 'join guild', 'combat', 'attack', 'fire', 'shoot', 'defend', 'flee', 'rest'].map((entry) => (
             <button type="button" key={entry} onClick={() => onCommand(entry)} disabled={loading || !character}>
               {entry}
             </button>
@@ -685,6 +717,40 @@ function GameStatusPanels({
             </div>
           </>
         ) : null}
+      </section>
+
+      <section className="panel">
+        <h2>Goal Verification</h2>
+        <div className="verification-panel">
+          <h3>Guild Circle 10 Verification</h3>
+          <p className="subtle">
+            {guildWalkRoute.length} canonical DragonRealms guilds tracked for in-world joining,
+            circle requirements, perks, and Circle 10 smoke verification.
+          </p>
+          <p>Current guild: {character?.guildName ?? 'not joined'} · Circle {character?.circle ?? 0}/10</p>
+        </div>
+        <div className="verification-panel">
+          <h3>Shop NPC Verification</h3>
+          <p className="subtle">
+            Shop NPC dialogue, stock refresh metadata, inventory, and transactions are covered for Crossing shops.
+          </p>
+          {room?.shop ? (
+            <>
+              <p>NPC: {getShopNpcName(room.shop)} ({getShopNpcRole(room.shop)})</p>
+              <p>Stock refresh: {getShopStockRefresh(room.shop)}</p>
+              <div className="action-grid">
+                <button type="button" onClick={() => onCommand('shop talk')} disabled={loading || !character}>
+                  shop talk
+                </button>
+                <button type="button" onClick={() => onCommand('shop stock')} disabled={loading || !character}>
+                  shop stock
+                </button>
+              </div>
+            </>
+          ) : (
+            <p>No shop NPC in this room.</p>
+          )}
+        </div>
       </section>
 
       <section className="panel equip">
@@ -1604,7 +1670,7 @@ function App() {
             </div>
             <h3>Known Shops</h3>
             <ul>
-              {shops.map((entry) => <li key={entry.roomId}>{entry.shop.name} ({entry.roomId})</li>)}
+              {shops.map((entry) => <li key={entry.roomId}>{entry.shop.name} ({getShopNpcName(entry.shop)}, {entry.roomId})</li>)}
             </ul>
           </article>
         </section>

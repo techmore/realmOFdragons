@@ -217,7 +217,14 @@ Completed current slice:
 
 Current next priority:
 
-- Surface guild Circle 10 and shop NPC verification in the web UI status panels.
+- Expand the web UI verification panels with enemy deployment status and combat readiness summaries.
+
+### 2026-05-07 Update - Web UI Goal Verification Panels
+
+- Added a web UI `Goal Verification` panel that surfaces canonical DragonRealms guild readiness for in-world joining, circle requirements, perks, and Circle 10 smoke verification.
+- Added shop NPC verification details to room/status panels, including visible shopkeeper identity, role, stock refresh metadata, and direct `shop talk` / `shop stock` controls.
+- Extended static UI smoke coverage to assert guild Circle 10 verification text, shop NPC verification text, shopkeeper fallback identity, stock refresh text, and the new shop NPC command buttons.
+- Extended browser smoke coverage to confirm the verification panels are visible in the loaded game, then interact with a Crossing shop NPC using `shop talk`, `shop stock`, and a purchase.
 
 Core Philosophy
 

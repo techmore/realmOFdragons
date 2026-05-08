@@ -72,6 +72,9 @@ async function main(): Promise<void> {
     await page.locator('.topbar-stats').getByText('Modern fixed racial stats').waitFor();
     await page.getByText('Room Affordances').waitFor();
     await page.getByText('Structured survey summary from room state').waitFor();
+    await page.getByText('Guild Circle 10 Verification').waitFor();
+    await page.getByText('11 canonical DragonRealms guilds tracked for in-world joining').waitFor();
+    await page.getByText('Shop NPC Verification').waitFor();
     await page.getByText('Item Details').waitFor();
     await page.getByText('training sword | weapon | 2 trias').waitFor();
 
@@ -134,6 +137,16 @@ async function main(): Promise<void> {
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('wait 1200');
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/You wait for 1200ms/).last().waitFor();
+    await page.getByText('NPC: Marksman Supply Stand clerk').first().waitFor();
+    await page.getByText('Stock refresh: static catalog; refreshed whenever the world fixture is reloaded').first().waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('shop talk');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText('Browse the catalog, ask about stock, or trade when you are ready.').waitFor();
+
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('shop stock');
+    await page.keyboard.press('Enter');
+    await page.locator('.terminal-pane .log').getByText('Marksman Supply Stand stock report').waitFor();
 
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('shop buy itm-sting-arrow');
     await page.keyboard.press('Enter');
@@ -313,6 +326,7 @@ async function main(): Promise<void> {
           verbDiscoveryClicked: true,
           surveyClicked: true,
           roomAffordancePanelVisible: true,
+          goalVerificationPanelsVisible: true,
           itemDetailsVisible: true,
           damagedAmmoItemDetailsVisible: true,
           damagedAmmoSoldFromInventory: true,
@@ -326,6 +340,7 @@ async function main(): Promise<void> {
           commandDiscoveryVisible: true,
           scriptDiscoveryVisible: true,
           scriptPresetSaved: true,
+          shopNpcCommandsVisible: true,
         },
         null,
         2,
