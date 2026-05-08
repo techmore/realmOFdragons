@@ -1,6 +1,6 @@
 type JsonObject = Record<string, unknown>;
 
-type SmokeSuite = 'all' | 'identity' | 'races' | 'guilds' | 'guild-circle10' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'damaged-ammo' | 'targets' | 'enemies' | 'combat';
+type SmokeSuite = 'all' | 'identity' | 'races' | 'guilds' | 'guild-circle10' | 'race-guild-matrix' | 'scripts' | 'progression' | 'economy' | 'shop-npcs' | 'damaged-ammo' | 'targets' | 'enemies' | 'combat';
 
 const canonicalRaceIds = [
   'human',
@@ -143,6 +143,12 @@ interface ShopRoomSummary {
   shop: {
     code: string;
     name: string;
+    npc: {
+      name: string;
+      role: string;
+      dialogue: string[];
+    };
+    stockRefresh: string;
     items: Array<{
       code: string;
       name: string;
@@ -164,7 +170,7 @@ interface SmokeContext {
   summary: Record<string, unknown>;
 }
 
-const suites: SmokeSuite[] = ['all', 'identity', 'races', 'guilds', 'guild-circle10', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'damaged-ammo', 'targets', 'enemies', 'combat'];
+const suites: SmokeSuite[] = ['all', 'identity', 'races', 'guilds', 'guild-circle10', 'race-guild-matrix', 'scripts', 'progression', 'economy', 'shop-npcs', 'damaged-ammo', 'targets', 'enemies', 'combat'];
 const requestedSuite = (process.argv[2] ?? 'all') as SmokeSuite;
 const baseUrl = (process.env.DR_API_BASE_URL ?? 'http://localhost:4000').replace(/\/+$/, '');
 const password = 'smoke-password-01';
@@ -792,6 +798,60 @@ async function runEconomySuite(context: SmokeContext): Promise<void> {
   context.summary.equipmentSlotsChecked = true;
 }
 
+async function runShopNpcSuite(context: SmokeContext): Promise<void> {
+  const shops = await request<{ shops: ShopRoomSummary[] }>('/v1/world/shops');
+  assert(shops.shops.length >= 1, 'Expected at least one shop room.');
+
+  let current = context.character;
+  const checkedShopCodes: string[] = [];
+
+  for (const [index, shopRoom] of shops.shops.entries()) {
+    assert(shopRoom.shop.npc?.name, `Expected NPC name for ${shopRoom.shop.name}.`);
+    assert(shopRoom.shop.npc?.role, `Expected NPC role for ${shopRoom.shop.name}.`);
+    assert(shopRoom.shop.npc.dialogue.length >= 1, `Expected NPC dialogue for ${shopRoom.shop.name}.`);
+    assert(shopRoom.shop.stockRefresh, `Expected stock refresh text for ${shopRoom.shop.name}.`);
+
+    current = await request<CharacterSummary>('/v1/characters', {
+      method: 'POST',
+      headers: authHeaders(context.accessToken),
+      body: JSON.stringify({ name: `Shop${index}${unique.slice(-6)}`, race: context.races[0].name }),
+    });
+    current = await walkTo(context.accessToken, current, shopRoom.roomId);
+    const shop = await command(context.accessToken, current.id, 'shop');
+    assert(shop.events.some((event) => event.includes(`NPC: ${shopRoom.shop.npc.name}`)), `Expected shop listing NPC for ${shopRoom.shop.name}.`);
+    assert(shop.events.some((event) => event.includes('Stock:')), `Expected stock line for ${shopRoom.shop.name}.`);
+    current = (await command(context.accessToken, shop.character.id, 'wait 450')).character;
+
+    const talk = await command(context.accessToken, current.id, 'shop talk');
+    assert(talk.events.some((event) => event.includes(shopRoom.shop.npc.name)), `Expected shop talk NPC name for ${shopRoom.shop.name}.`);
+    assert(talk.events.some((event) => event.includes('Browse the catalog')), `Expected shop talk dialogue for ${shopRoom.shop.name}.`);
+    current = (await command(context.accessToken, talk.character.id, 'wait 450')).character;
+
+    const stock = await command(context.accessToken, current.id, 'shop stock');
+    assert(stock.events.some((event) => event.includes(`${shopRoom.shop.name} stock report`)), `Expected stock report for ${shopRoom.shop.name}.`);
+    assert(stock.events.some((event) => event.includes(shopRoom.shop.stockRefresh)), `Expected stock refresh detail for ${shopRoom.shop.name}.`);
+    current = (await command(context.accessToken, stock.character.id, 'wait 450')).character;
+
+    const item = shopRoom.shop.items[0];
+    assert(item, `Expected at least one item for ${shopRoom.shop.name}.`);
+    const bought = await command(context.accessToken, current.id, `shop buy ${item.code}`);
+    assert(bought.events.some((event) => event.includes(`You buy ${item.name}`)), `Expected NPC transaction buy for ${shopRoom.shop.name}.`);
+    current = (await command(context.accessToken, bought.character.id, 'wait 450')).character;
+
+    const sold = await command(context.accessToken, current.id, `shop sell ${item.code}`);
+    assert(sold.events.some((event) => event.includes(`You sell ${item.name}`) || event.includes(`You sell one ${item.name}`)), `Expected NPC transaction sell for ${shopRoom.shop.name}.`);
+    current = sold.character;
+    checkedShopCodes.push(shopRoom.shop.code);
+  }
+
+  context.character = current;
+  context.summary.shopNpcRoomsChecked = shops.shops.length;
+  context.summary.shopNpcCodesChecked = checkedShopCodes;
+  context.summary.shopNpcDialogueChecked = true;
+  context.summary.shopNpcStockChecked = true;
+  context.summary.shopNpcTransactionsChecked = true;
+}
+
 async function runCombatSuite(context: SmokeContext): Promise<void> {
   let current = await walkTo(context.accessToken, context.character, 'crossing-MA01-002');
   current = (await command(context.accessToken, current.id, 'wait 900')).character;
@@ -1148,6 +1208,7 @@ async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void>
   if (suite === 'scripts') await runScriptSuite(context);
   if (suite === 'progression') await runProgressionSuite(context);
   if (suite === 'economy') await runEconomySuite(context);
+  if (suite === 'shop-npcs') await runShopNpcSuite(context);
   if (suite === 'damaged-ammo') await runDamagedAmmoSuite(context);
   if (suite === 'targets') await runTargetSuite(context);
   if (suite === 'enemies') await runEnemyDeploymentSuite(context);
@@ -1161,6 +1222,7 @@ async function runSuite(context: SmokeContext, suite: SmokeSuite): Promise<void>
     await runScriptSuite(context);
     await runProgressionSuite(context);
     await runEconomySuite(context);
+    await runShopNpcSuite(context);
     await runEnemyDeploymentSuite(context);
     await runCombatSuite(context);
   }

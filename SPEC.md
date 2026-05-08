@@ -7,6 +7,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added deterministic shop NPC presentation, dialogue, and stock refresh metadata for every shop through shared economy helpers.
+- The `shop` command now includes NPC and stock lines, and new `shop talk` / `shop stock` commands expose shopkeeper dialogue and stock refresh status.
+- Added focused `smoke:shop-npcs` coverage that walks every Crossing shop, verifies NPC metadata/dialogue/stock output, and completes a buy/sell transaction.
 - Added a read-only `/v1/world/targets` endpoint for deployed enemy templates, filterable by town, with room/title/vitality/aggression metadata.
 - Added focused `smoke:enemies` coverage that walks to every Crossing enemy deployment and verifies `scan`, structured targets, `target <enemy>`, and `appraise <enemy>` output.
 - Local agent telemetry now runs focused Crossing enemy deployment smoke and reports enemy deployment and room counts.
@@ -214,7 +217,7 @@ Completed current slice:
 
 Current next priority:
 
-- Add shop NPC metadata, dialogue output, and focused shop NPC smoke coverage for every Crossing shop.
+- Surface guild Circle 10 and shop NPC verification in the web UI status panels.
 
 Core Philosophy
 

@@ -17,6 +17,7 @@
     "smoke:scripts": "tsx scripts/smoke-api.ts scripts",
     "smoke:progression": "tsx scripts/smoke-api.ts progression",
     "smoke:economy": "tsx scripts/smoke-api.ts economy",
+    "smoke:shop-npcs": "tsx scripts/smoke-api.ts shop-npcs",
     "smoke:damaged-ammo": "tsx scripts/smoke-api.ts damaged-ammo",
     "smoke:targets": "tsx scripts/smoke-api.ts targets",
     "smoke:enemies": "tsx scripts/smoke-api.ts enemies",

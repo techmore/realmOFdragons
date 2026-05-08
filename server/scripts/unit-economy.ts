@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import type { RoomShopItem } from '../src/world.js';
 import {
+  buildShopStockEvents,
+  buildShopTalkEvents,
   canAfford,
   catalogCodeForSale,
   estimateAmmoPouchSalePrice,
@@ -10,6 +12,7 @@ import {
   isDamagedAmmoCode,
   listShopItems,
   originalAmmoCodeFromDamaged,
+  presentShop,
   resolveShopBuyDecision,
   resolveShopPurchase,
   resolveShopSellDecision,
@@ -71,8 +74,21 @@ assert.equal(resolveShopPurchase({ ...testBlade, price: 4 }, wallet, 'weapon').a
 assert.deepEqual(listShopItems(), ['No shop is open in this location.']);
 assert.deepEqual(listShopItems({ code: 'test-shop', name: 'Test Shop', items: shopItems }), [
   'Test Shop:',
+  'NPC: Test Shop clerk (shopkeeper).',
+  'Stock: 2 catalog item(s); static catalog; refreshed whenever the world fixture is reloaded.',
   'itm-sting-arrow practice arrow — 1 trias',
   'itm-test-blade test blade — 3 trias',
+]);
+assert.equal(presentShop({ code: 'test-shop', name: 'Test Shop', items: shopItems }).npc.name, 'Test Shop clerk');
+assert.deepEqual(buildShopTalkEvents(), ['No shopkeeper is present here.']);
+assert.deepEqual(buildShopTalkEvents({ code: 'test-shop', name: 'Test Shop', items: shopItems }), [
+  'Test Shop clerk is here as shopkeeper.',
+  'Test Shop clerk says, "Browse the catalog, ask about stock, or trade when you are ready."',
+]);
+assert.deepEqual(buildShopStockEvents(), ['No shop inventory is present here.']);
+assert.deepEqual(buildShopStockEvents({ code: 'test-shop', name: 'Test Shop', items: shopItems }), [
+  'Test Shop stock report: 2 catalog item(s).',
+  'Refresh: static catalog; refreshed whenever the world fixture is reloaded.',
 ]);
 
 const testShop = { code: 'test-shop', name: 'Test Shop', items: shopItems };
@@ -172,4 +188,4 @@ assert.deepEqual(resolveShopSellDecision(testShop, 'practice arrow', [], detailF
   events: ['You sell one practice arrow from your ammo pouch for 1 trias. 2 remain.'],
 });
 
-console.log(JSON.stringify({ ok: true, suite: 'unit:economy', shopListFormattingChecked: true, shopBuyDecisionChecked: true, shopSellDecisionChecked: true }, null, 2));
+console.log(JSON.stringify({ ok: true, suite: 'unit:economy', shopListFormattingChecked: true, shopNpcPresentationChecked: true, shopBuyDecisionChecked: true, shopSellDecisionChecked: true }, null, 2));

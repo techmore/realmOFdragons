@@ -20,6 +20,12 @@ export interface RoomShopItem {
 export interface RoomShop {
   code: string;
   name: string;
+  npc?: {
+    name: string;
+    role: string;
+    dialogue: string[];
+  };
+  stockRefresh?: string;
   items: RoomShopItem[];
 }
 

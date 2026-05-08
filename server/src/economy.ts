@@ -49,6 +49,15 @@ export type ShopSellDecision =
       events: string[];
     };
 
+export type ShopPresentation = RoomShop & {
+  npc: {
+    name: string;
+    role: string;
+    dialogue: string[];
+  };
+  stockRefresh: string;
+};
+
 export function isDamagedAmmoCode(code: string): boolean {
   const normalized = code.toLowerCase();
   return normalized.startsWith('damaged-itm-') || normalized.startsWith('damaged itm-');
@@ -92,10 +101,45 @@ export function resolveShopPurchase(item: RoomShopItem, wallet: CurrencyWallet, 
   };
 }
 
+export function presentShop(shop: RoomShop): ShopPresentation {
+  const npcName = shop.npc?.name ?? `${shop.name} clerk`;
+  const role = shop.npc?.role ?? 'shopkeeper';
+  const stockRefresh = shop.stockRefresh ?? 'static catalog; refreshed whenever the world fixture is reloaded';
+  const dialogue = shop.npc?.dialogue?.length
+    ? shop.npc.dialogue
+    : [`${npcName} says, "Browse the catalog, ask about stock, or trade when you are ready."`];
+  return {
+    ...shop,
+    npc: { name: npcName, role, dialogue },
+    stockRefresh,
+  };
+}
+
 export function listShopItems(shop?: RoomShop): string[] {
   if (!shop) return ['No shop is open in this location.'];
-  const rows = shop.items.map((item) => `${item.code} ${item.name} — ${item.price} ${item.currency}`);
-  return [`${shop.name}:`, ...rows];
+  const presented = presentShop(shop);
+  const rows = presented.items.map((item) => `${item.code} ${item.name} — ${item.price} ${item.currency}`);
+  return [
+    `${presented.name}:`,
+    `NPC: ${presented.npc.name} (${presented.npc.role}).`,
+    `Stock: ${presented.items.length} catalog item(s); ${presented.stockRefresh}.`,
+    ...rows,
+  ];
+}
+
+export function buildShopTalkEvents(shop?: RoomShop): string[] {
+  if (!shop) return ['No shopkeeper is present here.'];
+  const presented = presentShop(shop);
+  return [`${presented.npc.name} is here as ${presented.npc.role}.`, ...presented.npc.dialogue];
+}
+
+export function buildShopStockEvents(shop?: RoomShop): string[] {
+  if (!shop) return ['No shop inventory is present here.'];
+  const presented = presentShop(shop);
+  return [
+    `${presented.name} stock report: ${presented.items.length} catalog item(s).`,
+    `Refresh: ${presented.stockRefresh}.`,
+  ];
 }
 
 export function resolveShopBuyDecision(

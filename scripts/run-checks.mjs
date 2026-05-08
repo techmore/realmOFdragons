@@ -27,6 +27,7 @@ const localSteps = [
   { name: 'guild-circle10-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:guild-circle10'] },
   { name: 'target-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:targets'] },
   { name: 'enemy-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:enemies'] },
+  { name: 'shop-npc-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:shop-npcs'] },
   { name: 'damaged-ammo-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:damaged-ammo'] },
   { name: 'script-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', '--prefix', 'server', 'run', 'smoke:scripts'] },
   { name: 'api-smoke', command: 'node', args: ['scripts/with-test-server.mjs', 'npm', 'run', 'smoke:api'] },
@@ -112,6 +113,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Focused guild Circle 10 smoke | ${coverage.gameplay.focusedGuildCircleTenSmokeChecked ? 'yes' : 'no'} |`);
     lines.push(`| Script create/run/delete lifecycle | ${coverage.gameplay.scriptLifecycleChecked ? 'yes' : 'no'} |`);
     lines.push(`| Shop economy | ${coverage.gameplay.shopEconomyChecked ? 'yes' : 'no'} |`);
+    lines.push(`| Focused shop NPC smoke | ${coverage.gameplay.focusedShopNpcSmokeChecked ? 'yes' : 'no'} |`);
     lines.push(`| Ammo stack resale | ${coverage.gameplay.ammoSellChecked ? 'yes' : 'no'} |`);
     lines.push(`| Damaged ammo economy | ${coverage.gameplay.damagedAmmoEconomyChecked ? 'yes' : 'no'} |`);
     lines.push(`| Focused damaged ammo smoke | ${coverage.gameplay.focusedDamagedAmmoSmokeChecked ? 'yes' : 'no'} |`);
@@ -148,6 +150,7 @@ function markdownSummary(results, coverage) {
     lines.push(`| Focused Crossing enemies checked | ${coverage.gameplay.focusedEnemyDeploymentsChecked} |`);
     lines.push(`| Focused Crossing enemy rooms checked | ${coverage.gameplay.focusedEnemyRoomsChecked} |`);
     lines.push(`| Shop rooms walked | ${coverage.gameplay.shopRoomsWalked} |`);
+    lines.push(`| Focused shop NPC rooms checked | ${coverage.gameplay.shopNpcRoomsChecked} |`);
     lines.push(`| Circle reached | ${coverage.gameplay.circleReached} |`);
     lines.push(`| Browser command count | ${coverage.frontend.browserCommandCount} |`);
 
@@ -216,6 +219,7 @@ function coverageSummary(results) {
   const guildCirclePayload = parseLastJsonObject(byName.get('guild-circle10-smoke')?.stdoutTail ?? '') ?? {};
   const targetPayload = parseLastJsonObject(byName.get('target-smoke')?.stdoutTail ?? '') ?? {};
   const enemyPayload = parseLastJsonObject(byName.get('enemy-smoke')?.stdoutTail ?? '') ?? {};
+  const shopNpcPayload = parseLastJsonObject(byName.get('shop-npc-smoke')?.stdoutTail ?? '') ?? {};
   const damagedAmmoPayload = parseLastJsonObject(byName.get('damaged-ammo-smoke')?.stdoutTail ?? '') ?? {};
   const scriptPayload = parseLastJsonObject(byName.get('script-smoke')?.stdoutTail ?? '') ?? {};
   const browserPayload = parseLastJsonObject(byName.get('browser-smoke')?.stdoutTail ?? '') ?? {};
@@ -265,6 +269,15 @@ function coverageSummary(results) {
         (scriptPayload.scriptDeletedChecked ?? apiPayload.scriptDeletedChecked) === true,
       circleRequiresGuildRegistrar: apiPayload.circleRequiresGuildRegistrar === true,
       shopEconomyChecked: apiPayload.shopEconomyChecked === true,
+      shopNpcRoomsChecked: shopNpcPayload.shopNpcRoomsChecked ?? apiPayload.shopNpcRoomsChecked ?? 0,
+      shopNpcDialogueChecked: (shopNpcPayload.shopNpcDialogueChecked ?? apiPayload.shopNpcDialogueChecked) === true,
+      shopNpcStockChecked: (shopNpcPayload.shopNpcStockChecked ?? apiPayload.shopNpcStockChecked) === true,
+      shopNpcTransactionsChecked: (shopNpcPayload.shopNpcTransactionsChecked ?? apiPayload.shopNpcTransactionsChecked) === true,
+      focusedShopNpcSmokeChecked:
+        (shopNpcPayload.shopNpcDialogueChecked ?? apiPayload.shopNpcDialogueChecked) === true &&
+        (shopNpcPayload.shopNpcStockChecked ?? apiPayload.shopNpcStockChecked) === true &&
+        (shopNpcPayload.shopNpcTransactionsChecked ?? apiPayload.shopNpcTransactionsChecked) === true &&
+        (shopNpcPayload.shopNpcRoomsChecked ?? apiPayload.shopNpcRoomsChecked ?? 0) >= 1,
       ammoSellChecked: apiPayload.ammoSellChecked === true,
       damagedAmmoEconomyChecked: apiPayload.damagedAmmoEconomyChecked === true,
       focusedDamagedAmmoSmokeChecked: damagedAmmoPayload.damagedAmmoFocusedChecked === true,

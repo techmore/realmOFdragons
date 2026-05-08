@@ -80,12 +80,15 @@ import {
   type RoomTarget,
 } from './combat.js';
 import {
+  buildShopStockEvents,
+  buildShopTalkEvents,
   estimateAmmoPouchSalePrice,
   estimateInventorySalePrice,
   findLocalShopSaleItem,
   isDamagedAmmoCode,
   listShopItems,
   originalAmmoCodeFromDamaged,
+  presentShop,
   resolveShopBuyDecision,
   resolveShopSellDecision,
 } from './economy.js';
@@ -1721,6 +1724,16 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
+  if (command === 'shop talk' || command === 'talk shopkeeper' || command === 'talk clerk') {
+    events.push(...buildShopTalkEvents(room.shop));
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
+  if (command === 'shop stock' || command === 'stock') {
+    events.push(...buildShopStockEvents(room.shop));
+    return buildCommandResult(resolvedCharacter, room, events);
+  }
+
   if (command.startsWith('shop buy ')) {
     const code = command.slice(9).trim();
     const decision = resolveShopBuyDecision(room.shop, code, resolvedCharacter.wallet, (item) => {
@@ -1834,7 +1847,7 @@ app.get('/v1/world/guilds', (_req: Request, res: Response) => {
 app.get('/v1/world/shops', (_req: Request, res: Response) => {
   const roomsWithShops = Object.values(worldRooms)
     .filter((room) => room.shop)
-    .map((room) => ({ roomId: room.id, title: room.title, shop: room.shop }));
+    .map((room) => ({ roomId: room.id, title: room.title, shop: presentShop(room.shop!) }));
   res.json({ shops: roomsWithShops });
 });
 
