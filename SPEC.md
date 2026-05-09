@@ -217,7 +217,14 @@ Completed current slice:
 
 Current next priority:
 
-- Expand the web UI verification panels with enemy deployment status and combat readiness summaries.
+- Add a focused web UI route/action for walking the Crossing enemy deployment loop and starting a manual combat verification.
+
+### 2026-05-09 Update - Web UI Enemy and Combat Verification Panels
+
+- Added Crossing enemy deployment status to the web UI `Goal Verification` panel using the `/v1/world/targets?town=crossing` catalog.
+- Added combat readiness status to the web UI, including current local targets, engagement range/advantage, and direct `scan`, `range`, and `combat` controls.
+- Extended static UI smoke coverage to assert the enemy deployment list, combat readiness summary, local target visibility, and live engagement text.
+- Extended browser smoke coverage to assert that enemy deployment and combat readiness verification panels are visible after login and character creation.
 
 ### 2026-05-07 Update - Web UI Goal Verification Panels
 

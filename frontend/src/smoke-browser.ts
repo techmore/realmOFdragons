@@ -75,6 +75,10 @@ async function main(): Promise<void> {
     await page.getByText('Guild Circle 10 Verification').waitFor();
     await page.getByText('11 canonical DragonRealms guilds tracked for in-world joining').waitFor();
     await page.getByText('Shop NPC Verification').waitFor();
+    await page.getByText('Enemy Deployment Verification').waitFor();
+    await page.getByText('4 Crossing enemy deployments loaded from the world target catalog').waitFor();
+    await page.getByText('Combat Readiness').waitFor();
+    await page.getByText('Combat smoke verifies scan, target detail, advance, range, melee attack, ranged reload/fire').waitFor();
     await page.getByText('Item Details').waitFor();
     await page.getByText('training sword | weapon | 2 trias').waitFor();
 
@@ -236,7 +240,7 @@ async function main(): Promise<void> {
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/You wait for 1200ms/).last().waitFor();
 
-    await page.getByRole('button', { name: 'range', exact: true }).click();
+    await page.locator('.panel').filter({ hasText: 'Controls' }).getByRole('button', { name: 'range', exact: true }).click();
     await page.getByText('You are not engaged with a target.').waitFor();
 
     await page.getByRole('button', { name: 'verb', exact: true }).click();
@@ -293,7 +297,7 @@ async function main(): Promise<void> {
     await page.locator('.terminal-pane .log').getByText('Vitality estimates how long a target can stay in the fight').waitFor();
     await page.getByText('Visible Targets').waitFor();
     await page.getByText('Vitality estimates staying power').waitFor();
-    await page.getByText('Vitality 10 · Aggression 55').waitFor();
+    await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByText('Vitality 10 · Aggression 55').waitFor();
     await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByRole('button', { name: 'details' }).click();
     await page.locator('.terminal-pane .log').getByText('Suggested next verb: advance forage wolf-cub.').waitFor();
     await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByRole('button', { name: 'advance' }).click();
@@ -327,6 +331,7 @@ async function main(): Promise<void> {
           surveyClicked: true,
           roomAffordancePanelVisible: true,
           goalVerificationPanelsVisible: true,
+          enemyCombatVerificationPanelsVisible: true,
           itemDetailsVisible: true,
           damagedAmmoItemDetailsVisible: true,
           damagedAmmoSoldFromInventory: true,

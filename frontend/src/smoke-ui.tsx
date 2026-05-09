@@ -167,6 +167,12 @@ const markup = renderToStaticMarkup(
     selectedCharacter={character}
     skillEntries={Object.entries(character.skills)}
     localTargets={[{ id: 'rv-wolf-cub', name: 'forage wolf-cub', vitality: 12, aggression: 55 }]}
+    worldTargets={[
+      { id: 'rv-wolf-cub', roomId: 'crossing-RV02-002', roomTitle: 'Brushline Forage Fork', name: 'forage wolf-cub', maxHp: 12, aggression: 55 },
+      { id: 'rv-boarlet', roomId: 'crossing-RV02-003', roomTitle: 'Muddy Game Trail', name: 'young tusky boarlet', maxHp: 15, aggression: 60 },
+      { id: 'rv-mud-beetle', roomId: 'crossing-RV02-004', roomTitle: 'Wet Creek Cut', name: 'muddy shell beetle', maxHp: 18, aggression: 40 },
+      { id: 'rv-ridge-hare', roomId: 'crossing-RV02-005', roomTitle: 'Ridge Grass Rise', name: 'ridge hare', maxHp: 10, aggression: 35 },
+    ]}
     itemDetails={[
       testBladeDetail,
       practiceArrowDetail,
@@ -250,6 +256,14 @@ for (const expected of [
   'Current guild: Barbarian Guild · Circle 4/10',
   'Shop NPC Verification',
   'Shop NPC dialogue, stock refresh metadata, inventory, and transactions are covered for Crossing shops.',
+  'Enemy Deployment Verification',
+  '4 Crossing enemy deployments loaded from the world target catalog',
+  'forage wolf-cub in Brushline Forage Fork · Vitality 12 · Aggression 55',
+  'young tusky boarlet in Muddy Game Trail · Vitality 15 · Aggression 60',
+  'Combat Readiness',
+  'Combat smoke verifies scan, target detail, advance, range, melee attack, ranged reload/fire',
+  'Local targets visible: forage wolf-cub',
+  'Engagement: forage wolf-cub at melee range, advantage 1',
   'Controls',
   'Forage',
   'Difficulty 1',
@@ -358,6 +372,7 @@ console.log(
       legacyRaceStatModeChecked: true,
       prototypeRaceRoleLabelsHidden: true,
       goalVerificationPanelsChecked: true,
+      enemyCombatVerificationPanelsChecked: true,
     },
     null,
     2,

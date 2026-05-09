@@ -162,6 +162,15 @@ type RoomTarget = {
   aggression: number;
 };
 
+type EnemyDeployment = {
+  id: string;
+  roomId: string;
+  roomTitle: string;
+  name: string;
+  maxHp: number;
+  aggression: number;
+};
+
 type Guild = {
   id: string;
   name: string;
@@ -250,6 +259,7 @@ type GameStatusPanelsProps = {
   selectedCharacter: Character | null;
   skillEntries: Array<[string, CharacterSkill]>;
   localTargets?: RoomTarget[];
+  worldTargets?: EnemyDeployment[];
   itemDetails?: ItemDetail[];
   loading?: boolean;
   onCommand?: (command: string) => void;
@@ -554,6 +564,7 @@ function GameStatusPanels({
   selectedCharacter,
   skillEntries,
   localTargets = [],
+  worldTargets = [],
   itemDetails = [],
   loading = false,
   onCommand = () => undefined,
@@ -751,6 +762,40 @@ function GameStatusPanels({
             <p>No shop NPC in this room.</p>
           )}
         </div>
+        <div className="verification-panel">
+          <h3>Enemy Deployment Verification</h3>
+          <p className="subtle">
+            {worldTargets.length} Crossing enemy deployments loaded from the world target catalog and verified by focused enemy smoke.
+          </p>
+          {worldTargets.length ? (
+            <ul>
+              {worldTargets.map((target) => (
+                <li key={target.id}>
+                  {target.name} in {target.roomTitle} · Vitality {target.maxHp} · Aggression {target.aggression}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No deployed enemy catalog loaded.</p>
+          )}
+        </div>
+        <div className="verification-panel">
+          <h3>Combat Readiness</h3>
+          <p className="subtle">
+            Combat smoke verifies scan, target detail, advance, range, melee attack, ranged reload/fire, recovery, stance, balance, and roundtime paths.
+          </p>
+          <p>Local targets visible: {localTargets.length ? localTargets.map((target) => target.name).join(', ') : 'none'}</p>
+          <p>
+            Engagement: {character?.combat
+              ? `${character.combat.targetName} at ${character.combat.range} range, advantage ${character.combat.advantage}`
+              : 'not engaged'}
+          </p>
+          <div className="action-grid">
+            <button type="button" onClick={() => onCommand('scan')} disabled={loading || !character}>scan</button>
+            <button type="button" onClick={() => onCommand('range')} disabled={loading || !character}>range</button>
+            <button type="button" onClick={() => onCommand('combat')} disabled={loading || !character}>combat</button>
+          </div>
+        </div>
       </section>
 
       <section className="panel equip">
@@ -932,6 +977,7 @@ function App() {
     'Register/login, create/select a character, then use numpad or command input.',
   ]);
   const [localTargets, setLocalTargets] = useState<RoomTarget[]>([]);
+  const [worldTargets, setWorldTargets] = useState<EnemyDeployment[]>([]);
   const [itemDetails, setItemDetails] = useState<ItemDetail[]>([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
@@ -962,11 +1008,12 @@ function App() {
   };
 
   const hydrateLookupData = async () => {
-    const [raceData, guildData, shopData, roomData] = await Promise.all([
+    const [raceData, guildData, shopData, roomData, targetData] = await Promise.all([
       request<{ races: Race[] }>('/races', { token: accessToken }),
       request<{ guilds: Guild[] }>('/world/guilds', { token: accessToken }),
       request<{ shops: ShopSummary[] }>('/world/shops', { token: accessToken }),
       request<{ rooms: Room[] }>('/world/rooms', { token: accessToken }),
+      request<{ targets: EnemyDeployment[] }>('/world/targets?town=crossing', { token: accessToken }),
     ]);
     let presets: ScriptPreset[] = [];
     try {
@@ -985,6 +1032,7 @@ function App() {
     );
     setGuilds(guildData.guilds);
     setShops(shopData.shops);
+    setWorldTargets(targetData.targets);
     setWorldRooms(
       Object.fromEntries(
         roomData.rooms.map((entry) => [entry.id, entry]),
@@ -1543,6 +1591,7 @@ function App() {
               selectedCharacter={selectedCharacter}
               skillEntries={skillEntries}
               localTargets={localTargets}
+              worldTargets={worldTargets}
               itemDetails={itemDetails}
               loading={loading}
               onCommand={(entry) => void runCommand(entry)}
