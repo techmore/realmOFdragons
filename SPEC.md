@@ -217,7 +217,13 @@ Completed current slice:
 
 Current next priority:
 
-- Add safer automated combat drill scripting from the web UI, including retreat/recover cleanup and transcript checkpoints.
+- Add persisted script preset support for the safe combat drill so players can clone/edit it instead of only running the one-click UI action.
+
+### 2026-05-09 Update - Web UI Safe Combat Drill
+
+- Added a web UI `safe combat drill` action that routes to the first loaded Crossing enemy target, records checkpoint transcript lines, runs `look`, `scan`, `target`, `advance`, `range`, and `combat`, then cleans up with `retreat`, `recover arrows`, and final `combat` status.
+- The drill uses the existing route/pathfinder and command runner, including roundtime waits between commands, so it behaves like a normal player-driven command sequence.
+- Extended browser smoke coverage to assert the `safe combat drill` route action is visible after login and character creation.
 
 ### 2026-05-09 Update - Web UI Enemy Routing Actions
 

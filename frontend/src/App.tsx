@@ -1361,6 +1361,51 @@ function App() {
     }
   };
 
+  const runSafeCombatDrill = async () => {
+    if (!character) return;
+    setLoading(true);
+    if (!Object.keys(worldRooms).length) {
+      appendHistory('World map unavailable. Reload login and try again.');
+      setLoading(false);
+      return;
+    }
+    const target = worldTargets[0] ?? localTargets[0];
+    if (!target) {
+      appendHistory('No enemy target is available for safe combat drill.');
+      setLoading(false);
+      return;
+    }
+    appendHistory(`Starting safe combat drill with ${target.name}: route, scan, engage, status, retreat, recover.`);
+    try {
+      const deploymentTarget = target as Partial<EnemyDeployment>;
+      if (typeof deploymentTarget.roomId === 'string' && deploymentTarget.roomId !== character.roomId) {
+        const commands = findPathBetweenRooms(worldRooms, character.roomId, deploymentTarget.roomId);
+        if (!commands.length) {
+          appendHistory(`No route available to ${target.name}.`);
+          return;
+        }
+        await runCommandSequence(commands);
+      }
+      appendHistory('[drill] checkpoint: target room reached.');
+      await runCommandSequence([
+        'look',
+        'scan',
+        `target ${target.name}`,
+        `advance ${target.name}`,
+        'range',
+        'combat',
+        'retreat',
+        'recover arrows',
+        'combat',
+      ]);
+      appendHistory('[drill] complete: retreated, recovered available ammunition, and captured final combat status.');
+    } catch (error) {
+      appendHistory(`Safe combat drill failed: ${formatTokenError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCreateScript = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const lines = parseScriptLines(newScriptCommands);
@@ -1795,6 +1840,7 @@ function App() {
             <button type="button" onClick={runTourAllGuilds} disabled={loading || !character}>tour all guilds + shops</button>
             <button type="button" onClick={() => void runEnemyDeploymentLoop()} disabled={loading || !character || !worldTargets.length}>enemy deployment loop</button>
             <button type="button" onClick={() => void startManualCombatVerification()} disabled={loading || !character || (!localTargets.length && !worldTargets.length)}>start manual combat verification</button>
+            <button type="button" onClick={() => void runSafeCombatDrill()} disabled={loading || !character || (!localTargets.length && !worldTargets.length)}>safe combat drill</button>
             <div className="action-grid">
               {guildWalkRoute.map((route) => (
                 <button type="button" key={route.id} onClick={() => void runQuickGuildVisit(route)} disabled={loading || !character}>
