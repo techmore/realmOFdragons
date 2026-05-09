@@ -1278,6 +1278,89 @@ function App() {
     }
   };
 
+  const runEnemyDeploymentLoop = async () => {
+    if (!character) return;
+    setLoading(true);
+    if (!Object.keys(worldRooms).length) {
+      appendHistory('World map unavailable. Reload login and try again.');
+      setLoading(false);
+      return;
+    }
+    if (!worldTargets.length) {
+      appendHistory('No Crossing enemy deployments loaded.');
+      setLoading(false);
+      return;
+    }
+    appendHistory(`Starting Crossing enemy deployment loop across ${worldTargets.length} rooms...`);
+    try {
+      let cursorRoomId = character.roomId;
+      for (const target of worldTargets) {
+        if (target.roomId !== cursorRoomId) {
+          const commands = findPathBetweenRooms(worldRooms, cursorRoomId, target.roomId);
+          if (!commands.length) {
+            appendHistory(`No route available to ${target.name} in ${target.roomTitle}. Skipping.`);
+            continue;
+          }
+          appendHistory(`→ ${target.roomTitle}: ${target.name}`);
+          await runCommandSequence(commands);
+          cursorRoomId = target.roomId;
+        } else {
+          appendHistory(`At target room: ${target.roomTitle}: ${target.name}`);
+        }
+        const scanResult = await executeCommand('scan');
+        applyCommandResult(scanResult);
+        const detailResult = await executeCommand(`target ${target.name}`);
+        applyCommandResult(detailResult);
+        const appraisalResult = await executeCommand(`appraise ${target.name}`);
+        applyCommandResult(appraisalResult);
+      }
+      appendHistory('Enemy deployment loop complete: scanned and inspected all loaded Crossing targets.');
+    } catch (error) {
+      appendHistory(`Enemy deployment loop failed: ${formatTokenError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startManualCombatVerification = async () => {
+    if (!character) return;
+    setLoading(true);
+    if (!Object.keys(worldRooms).length) {
+      appendHistory('World map unavailable. Reload login and try again.');
+      setLoading(false);
+      return;
+    }
+    const target = localTargets[0] ?? worldTargets[0];
+    if (!target) {
+      appendHistory('No local or catalog enemy target is available for manual combat verification.');
+      setLoading(false);
+      return;
+    }
+    appendHistory(`Starting manual combat verification with ${target.name}.`);
+    try {
+      const deploymentTarget = target as Partial<EnemyDeployment>;
+      if (typeof deploymentTarget.roomId === 'string' && deploymentTarget.roomId !== character.roomId) {
+        const commands = findPathBetweenRooms(worldRooms, character.roomId, deploymentTarget.roomId);
+        if (!commands.length) {
+          appendHistory(`No route available to ${target.name}.`);
+          return;
+        }
+        await runCommandSequence(commands);
+      }
+      const scanResult = await executeCommand('scan');
+      applyCommandResult(scanResult);
+      const targetResult = await executeCommand(`target ${target.name}`);
+      applyCommandResult(targetResult);
+      const advanceResult = await executeCommand(`advance ${target.name}`);
+      applyCommandResult(advanceResult);
+      appendHistory('Manual combat verification ready: use range, combat, jab, bash, attack, or retreat.');
+    } catch (error) {
+      appendHistory(`Manual combat verification failed: ${formatTokenError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCreateScript = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const lines = parseScriptLines(newScriptCommands);
@@ -1710,6 +1793,8 @@ function App() {
           <article className="panel">
             <h2>Routes</h2>
             <button type="button" onClick={runTourAllGuilds} disabled={loading || !character}>tour all guilds + shops</button>
+            <button type="button" onClick={() => void runEnemyDeploymentLoop()} disabled={loading || !character || !worldTargets.length}>enemy deployment loop</button>
+            <button type="button" onClick={() => void startManualCombatVerification()} disabled={loading || !character || (!localTargets.length && !worldTargets.length)}>start manual combat verification</button>
             <div className="action-grid">
               {guildWalkRoute.map((route) => (
                 <button type="button" key={route.id} onClick={() => void runQuickGuildVisit(route)} disabled={loading || !character}>
@@ -1717,6 +1802,12 @@ function App() {
                 </button>
               ))}
             </div>
+            <h3>Known Enemies</h3>
+            <ul>
+              {worldTargets.map((target) => (
+                <li key={target.id}>{target.name} ({target.roomTitle}, {target.roomId})</li>
+              ))}
+            </ul>
             <h3>Known Shops</h3>
             <ul>
               {shops.map((entry) => <li key={entry.roomId}>{entry.shop.name} ({getShopNpcName(entry.shop)}, {entry.roomId})</li>)}

@@ -79,6 +79,10 @@ async function main(): Promise<void> {
     await page.getByText('4 Crossing enemy deployments loaded from the world target catalog').waitFor();
     await page.getByText('Combat Readiness').waitFor();
     await page.getByText('Combat smoke verifies scan, target detail, advance, range, melee attack, ranged reload/fire').waitFor();
+    await page.getByRole('button', { name: 'enemy deployment loop' }).waitFor();
+    await page.getByRole('button', { name: 'start manual combat verification' }).waitFor();
+    await page.getByText('Known Enemies').waitFor();
+    await page.getByText('forage wolf-cub (Brushline Forage Fork, crossing-RV02-002)').waitFor();
     await page.getByText('Item Details').waitFor();
     await page.getByText('training sword | weapon | 2 trias').waitFor();
 
@@ -332,6 +336,7 @@ async function main(): Promise<void> {
           roomAffordancePanelVisible: true,
           goalVerificationPanelsVisible: true,
           enemyCombatVerificationPanelsVisible: true,
+          enemyRouteActionsVisible: true,
           itemDetailsVisible: true,
           damagedAmmoItemDetailsVisible: true,
           damagedAmmoSoldFromInventory: true,

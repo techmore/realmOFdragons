@@ -217,7 +217,14 @@ Completed current slice:
 
 Current next priority:
 
-- Add a focused web UI route/action for walking the Crossing enemy deployment loop and starting a manual combat verification.
+- Add safer automated combat drill scripting from the web UI, including retreat/recover cleanup and transcript checkpoints.
+
+### 2026-05-09 Update - Web UI Enemy Routing Actions
+
+- Added a web UI `enemy deployment loop` route action that walks to every loaded Crossing enemy deployment room, runs `scan`, opens target details, and appraises each target.
+- Added a web UI `start manual combat verification` action that routes to the first available enemy if needed, scans, targets it, advances, and leaves the player ready to manually run `range`, `combat`, `jab`, `bash`, `attack`, or `retreat`.
+- Added a `Known Enemies` route catalog so the UI lists every loaded Crossing enemy room and target next to the existing guild/shop route helpers.
+- Extended browser smoke coverage to assert the enemy route actions and known enemy catalog are visible after login and character creation.
 
 ### 2026-05-09 Update - Web UI Enemy and Combat Verification Panels
 
