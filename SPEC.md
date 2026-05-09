@@ -217,7 +217,13 @@ Completed current slice:
 
 Current next priority:
 
-- Add persisted script preset support for the safe combat drill so players can clone/edit it instead of only running the one-click UI action.
+- Continue replacing remaining gameplay click affordances with typed command workflows, then add persisted text script presets for route/combat drills.
+
+### 2026-05-09 Update - Text-First MUD UI Correction
+
+- Converted gameplay panels from click-first action buttons to command reference text so players interact through the MUD prompt.
+- Added typed client helper commands for existing route/drill flows: `ui guild tour`, `ui enemy loop`, `ui combat verify`, and `ui combat drill`.
+- Updated browser smoke to use typed commands for `range`, `verb`, `survey`, `scan`, `target`, and `advance` instead of clicking gameplay buttons.
 
 ### 2026-05-09 Update - Web UI Safe Combat Drill
 

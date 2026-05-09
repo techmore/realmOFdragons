@@ -79,9 +79,11 @@ async function main(): Promise<void> {
     await page.getByText('4 Crossing enemy deployments loaded from the world target catalog').waitFor();
     await page.getByText('Combat Readiness').waitFor();
     await page.getByText('Combat smoke verifies scan, target detail, advance, range, melee attack, ranged reload/fire').waitFor();
-    await page.getByRole('button', { name: 'enemy deployment loop' }).waitFor();
-    await page.getByRole('button', { name: 'start manual combat verification' }).waitFor();
-    await page.getByRole('button', { name: 'safe combat drill' }).waitFor();
+    await page.getByText('Gameplay is text-first: type commands at the prompt. The panels below are reference only.').waitFor();
+    await page.getByText('Type these helper commands at the prompt; do not click gameplay actions.').waitFor();
+    await page.getByText('ui enemy loop').waitFor();
+    await page.getByText('ui combat verify').waitFor();
+    await page.getByText('ui combat drill').waitFor();
     await page.getByText('Known Enemies').waitFor();
     await page.getByText('forage wolf-cub (Brushline Forage Fork, crossing-RV02-002)').waitFor();
     await page.getByText('Item Details').waitFor();
@@ -245,10 +247,12 @@ async function main(): Promise<void> {
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/You wait for 1200ms/).last().waitFor();
 
-    await page.locator('.panel').filter({ hasText: 'Controls' }).getByRole('button', { name: 'range', exact: true }).click();
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('range');
+    await page.keyboard.press('Enter');
     await page.getByText('You are not engaged with a target.').waitFor();
 
-    await page.getByRole('button', { name: 'verb', exact: true }).click();
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('verb');
+    await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText('Verb groups:').waitFor();
     await page.locator('.terminal-pane .log').getByText('Targets: scan, target, target <name>, appraise <target>.').waitFor();
 
@@ -292,20 +296,24 @@ async function main(): Promise<void> {
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/You wait for 900ms/).last().waitFor();
 
-    await page.getByRole('button', { name: 'survey', exact: true }).click();
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('survey');
+    await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText('Surveying Brushline Forage Fork:').waitFor();
     await page.locator('.terminal-pane .log').getByText('Forage: difficulty').waitFor();
     await page.locator('.terminal-pane .log').getByText('Targets: forage wolf-cub.').waitFor();
 
-    await page.locator('.panel').filter({ hasText: 'Controls' }).getByRole('button', { name: 'scan', exact: true }).click();
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('scan');
+    await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/ - forage wolf-cub \(/).last().waitFor();
     await page.locator('.terminal-pane .log').getByText('Vitality estimates how long a target can stay in the fight').waitFor();
     await page.getByText('Visible Targets').waitFor();
     await page.getByText('Vitality estimates staying power').waitFor();
     await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByText('Vitality 10 · Aggression 55').waitFor();
-    await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByRole('button', { name: 'details' }).click();
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('target forage wolf-cub');
+    await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText('Suggested next verb: advance forage wolf-cub.').waitFor();
-    await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByRole('button', { name: 'advance' }).click();
+    await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('advance forage wolf-cub');
+    await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/You begin advancing on forage wolf-cub/).waitFor();
 
     const content = await page.content();

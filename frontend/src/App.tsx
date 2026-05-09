@@ -624,11 +624,7 @@ function GameStatusPanels({
                         <strong>{entry.label}</strong>
                         <small>{entry.detail}</small>
                       </span>
-                      {command ? (
-                        <button type="button" onClick={() => onCommand(command)} disabled={loading || !character}>
-                          {command}
-                        </button>
-                      ) : null}
+                      {command ? <code>{command}</code> : null}
                     </div>
                   );
                 })}
@@ -643,9 +639,7 @@ function GameStatusPanels({
             <h3>Exits</h3>
             <div className="exit-list">
               {room.exits.map((exit) => (
-                <button type="button" key={exit.destination + exit.direction} onClick={() => onCommand(exit.direction.toLowerCase())}>
-                  {exit.direction}
-                </button>
+                <code key={exit.destination + exit.direction}>{exit.direction}</code>
               ))}
             </div>
             {room.shop ? (
@@ -654,19 +648,13 @@ function GameStatusPanels({
                 <p>NPC: {getShopNpcName(room.shop)} ({getShopNpcRole(room.shop)})</p>
                 <p className="subtle">Stock refresh: {getShopStockRefresh(room.shop)}</p>
                 <div className="action-grid">
-                  <button type="button" onClick={() => onCommand('shop talk')} disabled={loading || !character}>
-                    shop talk
-                  </button>
-                  <button type="button" onClick={() => onCommand('shop stock')} disabled={loading || !character}>
-                    shop stock
-                  </button>
+                  <code>shop talk</code>
+                  <code>shop stock</code>
                 </div>
                 <ul>
                   {room.shop.items.map((item) => (
                     <li key={item.code}>
-                      <button type="button" onClick={() => onCommand(`shop buy ${item.code}`)}>
-                        buy {item.code}
-                      </button>
+                      <code>shop buy {item.code}</code>
                       <span>{item.name} ({item.price} {item.currency})</span>
                     </li>
                   ))}
@@ -683,26 +671,22 @@ function GameStatusPanels({
         <h2>Controls</h2>
         <div className="command-discovery">
           <p><strong>New here?</strong> Use <code>verb</code> for grouped commands, <code>help scan</code> for target discovery, and <code>target &lt;name&gt;</code> before you advance.</p>
+          <p className="subtle">Gameplay is text-first: type commands at the prompt. The panels below are reference only.</p>
         </div>
         <div className="action-grid">
           {['look', 'survey', 'verb', 'scan', 'forage', 'score', 'skills', 'circle', 'balance', 'range', 'advance', 'retreat', 'jab', 'bash', 'stance balanced', 'stance offensive', 'stance defensive', 'stance evasive', 'train', 'train melee', 'inventory', 'ammo', 'reload', 'recover arrows', 'wield training sword', 'shop', 'shop talk', 'shop stock', 'join guild', 'combat', 'attack', 'fire', 'shoot', 'defend', 'flee', 'rest'].map((entry) => (
-            <button type="button" key={entry} onClick={() => onCommand(entry)} disabled={loading || !character}>
-              {entry}
-            </button>
+            <code key={entry}>{entry}</code>
           ))}
         </div>
         <div className="dpad-grid" role="group" aria-label="Directional movement controls">
           {directionButtons.map((button) => (
-            <button
-              type="button"
+            <code
               key={button.command}
               className={button.command === 'exits' || button.command === 'look' ? 'dpad-wide' : ''}
-              onClick={() => onCommand(button.command)}
               title={button.title}
-              disabled={loading || !character}
             >
               {button.label}
-            </button>
+            </code>
           ))}
         </div>
         {localTargets.length ? (
@@ -714,15 +698,9 @@ function GameStatusPanels({
                 <span key={target.id} className="target-actions">
                   <strong>{target.name}</strong>
                   <small>Vitality {target.vitality} · Aggression {target.aggression}</small>
-                  <button type="button" onClick={() => onCommand(`target ${target.name}`)} disabled={loading || !character}>
-                    details
-                  </button>
-                  <button type="button" onClick={() => onCommand(`advance ${target.name}`)} disabled={loading || !character}>
-                    advance
-                  </button>
-                  <button type="button" onClick={() => onCommand(`attack ${target.name}`)} disabled={loading || !character}>
-                    attack
-                  </button>
+                  <code>target {target.name}</code>
+                  <code>advance {target.name}</code>
+                  <code>attack {target.name}</code>
                 </span>
               ))}
             </div>
@@ -750,12 +728,8 @@ function GameStatusPanels({
               <p>NPC: {getShopNpcName(room.shop)} ({getShopNpcRole(room.shop)})</p>
               <p>Stock refresh: {getShopStockRefresh(room.shop)}</p>
               <div className="action-grid">
-                <button type="button" onClick={() => onCommand('shop talk')} disabled={loading || !character}>
-                  shop talk
-                </button>
-                <button type="button" onClick={() => onCommand('shop stock')} disabled={loading || !character}>
-                  shop stock
-                </button>
+                <code>shop talk</code>
+                <code>shop stock</code>
               </div>
             </>
           ) : (
@@ -791,9 +765,9 @@ function GameStatusPanels({
               : 'not engaged'}
           </p>
           <div className="action-grid">
-            <button type="button" onClick={() => onCommand('scan')} disabled={loading || !character}>scan</button>
-            <button type="button" onClick={() => onCommand('range')} disabled={loading || !character}>range</button>
-            <button type="button" onClick={() => onCommand('combat')} disabled={loading || !character}>combat</button>
+            <code>scan</code>
+            <code>range</code>
+            <code>combat</code>
           </div>
         </div>
       </section>
@@ -1145,6 +1119,26 @@ function App() {
   const runCommand = async (input: string) => {
     const trimmed = input.trim();
     if (!trimmed || !character) return;
+    if (trimmed === 'ui guild tour') {
+      appendHistory(`> ${trimmed}`);
+      await runTourAllGuilds();
+      return;
+    }
+    if (trimmed === 'ui enemy loop') {
+      appendHistory(`> ${trimmed}`);
+      await runEnemyDeploymentLoop();
+      return;
+    }
+    if (trimmed === 'ui combat verify') {
+      appendHistory(`> ${trimmed}`);
+      await startManualCombatVerification();
+      return;
+    }
+    if (trimmed === 'ui combat drill') {
+      appendHistory(`> ${trimmed}`);
+      await runSafeCombatDrill();
+      return;
+    }
     setLoading(true);
     appendHistory(`> ${trimmed}`);
     try {
@@ -1837,15 +1831,16 @@ function App() {
 
           <article className="panel">
             <h2>Routes</h2>
-            <button type="button" onClick={runTourAllGuilds} disabled={loading || !character}>tour all guilds + shops</button>
-            <button type="button" onClick={() => void runEnemyDeploymentLoop()} disabled={loading || !character || !worldTargets.length}>enemy deployment loop</button>
-            <button type="button" onClick={() => void startManualCombatVerification()} disabled={loading || !character || (!localTargets.length && !worldTargets.length)}>start manual combat verification</button>
-            <button type="button" onClick={() => void runSafeCombatDrill()} disabled={loading || !character || (!localTargets.length && !worldTargets.length)}>safe combat drill</button>
+            <p className="subtle">Type these helper commands at the prompt; do not click gameplay actions.</p>
+            <div className="action-grid">
+              <code>ui guild tour</code>
+              <code>ui enemy loop</code>
+              <code>ui combat verify</code>
+              <code>ui combat drill</code>
+            </div>
             <div className="action-grid">
               {guildWalkRoute.map((route) => (
-                <button type="button" key={route.id} onClick={() => void runQuickGuildVisit(route)} disabled={loading || !character}>
-                  {route.label}
-                </button>
+                <code key={route.id}>go {route.label.toLowerCase().replace(/\s+/g, '-')}</code>
               ))}
             </div>
             <h3>Known Enemies</h3>
