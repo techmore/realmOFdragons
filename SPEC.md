@@ -7,6 +7,11 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Replaced the prototype 13-skill starter set with a 66-skill clean-room catalog covering guild, armor, weapon, magic, survival, and lore skill families.
+- Added DragonRealms-style guild specialty skills as default guild-primary training targets: Expertise, Bardic Lore, Theurgy, Empathy, Astrology, Thanatology, Conviction, Scouting, Backstab, Trading, and Summoning.
+- Kept legacy `melee`, `missile`, `survival`, and `magic` compatibility skills so current combat, forage, and smoke-test command plumbing remains stable while the richer skill families are integrated.
+- Simplified prototype skill rank-up pacing to a fixed 5-pulse threshold so Circle 10 smoke coverage remains prompt-driven but fast enough for continuous agent checks.
+- Updated progression unit coverage for the expanded starter catalog, guild-primary circle requirements, skill-shape repair, and training decisions.
 - Added deterministic shop NPC presentation, dialogue, and stock refresh metadata for every shop through shared economy helpers.
 - The `shop` command now includes NPC and stock lines, and new `shop talk` / `shop stock` commands expose shopkeeper dialogue and stock refresh status.
 - Added focused `smoke:shop-npcs` coverage that walks every Crossing shop, verifies NPC metadata/dialogue/stock output, and completes a buy/sell transaction.

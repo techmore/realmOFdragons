@@ -1,19 +1,72 @@
 import type { CharacterRecord } from './storage.js';
 
 export const STARTER_SKILLS = [
-  ['melee', 'Melee'],
-  ['missile', 'Missile'],
+  ['empathy', 'Empathy'],
+  ['astrology', 'Astrology'],
+  ['expertise', 'Expertise'],
+  ['scouting', 'Scouting'],
+  ['backstab', 'Backstab'],
+  ['summoning', 'Summoning'],
+  ['bardic_lore', 'Bardic Lore'],
+  ['conviction', 'Conviction'],
+  ['theurgy', 'Theurgy'],
+  ['thanatology', 'Thanatology'],
+  ['trading', 'Trading'],
+  ['shield_usage', 'Shield Usage'],
+  ['light_armor', 'Light Armor'],
+  ['chain_armor', 'Chain Armor'],
+  ['brigandine', 'Brigandine'],
+  ['plate_armor', 'Plate Armor'],
+  ['defending', 'Defending'],
+  ['parry_ability', 'Parry Ability'],
+  ['small_edged', 'Small Edged'],
+  ['large_edged', 'Large Edged'],
+  ['twohanded_edged', 'Twohanded Edged'],
+  ['small_blunt', 'Small Blunt'],
+  ['large_blunt', 'Large Blunt'],
+  ['twohanded_blunt', 'Twohanded Blunt'],
+  ['polearms', 'Polearms'],
+  ['staves', 'Staves'],
+  ['bows', 'Bows'],
+  ['crossbows', 'Crossbows'],
+  ['slings', 'Slings'],
+  ['light_thrown', 'Light Thrown'],
+  ['heavy_thrown', 'Heavy Thrown'],
+  ['brawling', 'Brawling'],
+  ['offhand_weapon', 'Offhand Weapon'],
+  ['melee_mastery', 'Melee Mastery'],
+  ['missile_mastery', 'Missile Mastery'],
+  ['primary_magic', 'Primary Magic'],
+  ['arcana', 'Arcana'],
+  ['attunement', 'Attunement'],
+  ['augmentation', 'Augmentation'],
+  ['debilitation', 'Debilitation'],
+  ['targeted_magic', 'Targeted Magic'],
+  ['utility', 'Utility'],
+  ['warding', 'Warding'],
+  ['sorcery', 'Sorcery'],
   ['evasion', 'Evasion'],
   ['athletics', 'Athletics'],
-  ['survival', 'Survival'],
+  ['perception', 'Perception'],
   ['stealth', 'Stealth'],
-  ['magic', 'Magic'],
-  ['tactics', 'Tactics'],
-  ['scholarship', 'Scholarship'],
-  ['performance', 'Performance'],
-  ['empathy', 'Empathy'],
-  ['trading', 'Trading'],
+  ['locksmithing', 'Locksmithing'],
+  ['thievery', 'Thievery'],
   ['first_aid', 'First Aid'],
+  ['outdoorsmanship', 'Outdoorsmanship'],
+  ['skinning', 'Skinning'],
+  ['alchemy', 'Alchemy'],
+  ['appraisal', 'Appraisal'],
+  ['enchanting', 'Enchanting'],
+  ['engineering', 'Engineering'],
+  ['forging', 'Forging'],
+  ['outfitting', 'Outfitting'],
+  ['performance', 'Performance'],
+  ['scholarship', 'Scholarship'],
+  ['tactics', 'Tactics'],
+  ['melee', 'Melee'],
+  ['missile', 'Missile'],
+  ['survival', 'Survival'],
+  ['magic', 'Magic'],
 ] as const;
 
 export const GUILD_NAMES: Record<string, string> = {
@@ -155,16 +208,16 @@ export function nextCircleRequirement(character: Pick<CharacterRecord, 'circle'>
 }
 
 export function primarySkillForGuild(guildId: string): string {
-  if (guildId === 'barbarian') return 'melee';
-  if (guildId === 'bard') return 'performance';
-  if (guildId === 'moon_mage') return 'scholarship';
-  if (guildId === 'necromancer') return 'magic';
-  if (guildId === 'paladin') return 'tactics';
-  if (guildId === 'ranger') return 'survival';
-  if (guildId === 'thief') return 'stealth';
+  if (guildId === 'barbarian') return 'expertise';
+  if (guildId === 'bard') return 'bardic_lore';
+  if (guildId === 'moon_mage') return 'astrology';
+  if (guildId === 'necromancer') return 'thanatology';
+  if (guildId === 'paladin') return 'conviction';
+  if (guildId === 'ranger') return 'scouting';
+  if (guildId === 'thief') return 'backstab';
   if (guildId === 'trader') return 'trading';
-  if (guildId === 'warrior_mage') return 'magic';
-  if (guildId === 'cleric') return 'first_aid';
+  if (guildId === 'warrior_mage') return 'summoning';
+  if (guildId === 'cleric') return 'theurgy';
   if (guildId === 'empath') return 'empathy';
   return 'athletics';
 }
@@ -342,7 +395,7 @@ export function applySkillPoolGain(
 
   const gain = Math.max(1, Math.floor(amount));
   skill.pool += gain;
-  const needed = Math.max(4, (skill.rank + 1) * 5);
+  const needed = 5;
   const events: string[] = [];
   if (skill.pool >= needed) {
     skill.pool -= needed;

@@ -305,7 +305,7 @@ async function main(): Promise<void> {
     await page.getByPlaceholder('look | exits | score | range | advance | circle | jab | bash | retreat').fill('scan');
     await page.keyboard.press('Enter');
     await page.locator('.terminal-pane .log').getByText(/ - forage wolf-cub \(/).last().waitFor();
-    await page.locator('.terminal-pane .log').getByText('Vitality estimates how long a target can stay in the fight').waitFor();
+    await page.locator('.terminal-pane .log').getByText('Vitality estimates how long a target can stay in the fight').last().waitFor();
     await page.getByText('Visible Targets').waitFor();
     await page.getByText('Vitality estimates staying power').waitFor();
     await page.locator('.target-actions').filter({ hasText: 'forage wolf-cub' }).getByText('Vitality 10 · Aggression 55').waitFor();

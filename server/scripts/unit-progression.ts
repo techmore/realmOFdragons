@@ -38,9 +38,11 @@ function character(overrides: Partial<CharacterRecord> = {}): CharacterRecord {
     guildName: 'Barbarian Guild',
     circle: 1,
     skills: {
+      expertise: skill('Expertise', 0),
       melee: skill('Melee', 0),
       athletics: skill('Athletics', 0),
       tactics: skill('Tactics', 0),
+      alchemy: skill('Alchemy', 0),
       scholarship: skill('Scholarship', 0),
     },
     roomId: 'crossing-TG01-001',
@@ -69,15 +71,19 @@ function character(overrides: Partial<CharacterRecord> = {}): CharacterRecord {
   };
 }
 
-assert.equal(primarySkillForGuild('barbarian'), 'melee');
-assert.equal(primarySkillForGuild('moon_mage'), 'scholarship');
-assert.equal(primarySkillForGuild('warrior_mage'), 'magic');
+assert.equal(primarySkillForGuild('barbarian'), 'expertise');
+assert.equal(primarySkillForGuild('moon_mage'), 'astrology');
+assert.equal(primarySkillForGuild('warrior_mage'), 'summoning');
 assert.equal(primarySkillForGuild('unknown'), 'athletics');
 assert.equal(GUILD_NAMES.commoner, 'Unaffiliated');
-assert.equal(STARTER_SKILLS.length, 13);
+assert.equal(STARTER_SKILLS.length, 66);
 
 const starterSkills = buildStarterSkills();
 assert.equal(starterSkills.melee.name, 'Melee');
+assert.equal(starterSkills.expertise.name, 'Expertise');
+assert.equal(starterSkills.shield_usage.name, 'Shield Usage');
+assert.equal(starterSkills.primary_magic.name, 'Primary Magic');
+assert.equal(starterSkills.thanatology.name, 'Thanatology');
 assert.equal(starterSkills.first_aid.name, 'First Aid');
 assert.equal(starterSkills.trading.rank, 0);
 
@@ -97,6 +103,7 @@ assert.equal(malformed.skills.melee.name, 'Melee');
 assert.equal(malformed.skills.melee.rank, 0);
 assert.equal(malformed.skills.melee.pool, 0);
 assert.equal(malformed.skills.first_aid.name, 'First Aid');
+assert.equal(malformed.skills.backstab.name, 'Backstab');
 assert.equal(ensureProgressionShape(malformed), false);
 
 const guildNameFix = character({
@@ -137,7 +144,7 @@ assert.equal(
     character({
       circle: 1,
       skills: {
-        melee: skill('Melee', 4),
+        expertise: skill('Expertise', 4),
         athletics: skill('Athletics', 2),
       },
     }),
@@ -149,7 +156,7 @@ assert.equal(
     character({
       circle: 1,
       skills: {
-        melee: skill('Melee', 3),
+        expertise: skill('Expertise', 3),
         athletics: skill('Athletics', 20),
       },
     }),
@@ -161,7 +168,7 @@ assert.equal(
     character({
       circle: 9,
       skills: {
-        melee: skill('Melee', 20),
+        expertise: skill('Expertise', 20),
         athletics: skill('Athletics', 10),
       },
     }),
@@ -216,7 +223,7 @@ assert.deepEqual(
 const circleReady = character({
   circle: 1,
   skills: {
-    melee: skill('Melee', 4),
+    expertise: skill('Expertise', 4),
     athletics: skill('Athletics', 2),
   },
 });
@@ -224,11 +231,11 @@ const circleReady = character({
 assert.deepEqual(buildCircleStatus(circleReady), [
   'Unit is Circle 1 in Barbarian Guild.',
   'Next Circle 2: total skill ranks 6/6.',
-  'Melee rank 4/4.',
+  'Expertise rank 4/4.',
 ]);
 
 assert.deepEqual(buildSkillSummaryEvents(circleReady), [
-  'melee: Melee rank 4, pool 0',
+  'expertise: Expertise rank 4, pool 0',
   'athletics: Athletics rank 2, pool 0',
 ]);
 
@@ -328,21 +335,21 @@ assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-TG01-001' 
 
 assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001', guild: 'barbarian' }), {
   allowed: true,
-  skillId: 'melee',
-  skillName: 'Melee',
-  primarySkillId: 'melee',
+  skillId: 'expertise',
+  skillName: 'Expertise',
+  primarySkillId: 'expertise',
   gains: [
-    { skillId: 'melee', amount: 5 },
+    { skillId: 'expertise', amount: 5 },
     { skillId: 'athletics', amount: 1 },
   ],
-  events: ['You drill Melee.'],
+  events: ['You drill Expertise.'],
 });
 
 assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001', guild: 'barbarian' }, 'tactics'), {
   allowed: true,
   skillId: 'tactics',
   skillName: 'Tactics',
-  primarySkillId: 'melee',
+  primarySkillId: 'expertise',
   gains: [
     { skillId: 'tactics', amount: 3 },
     { skillId: 'athletics', amount: 1 },
@@ -354,15 +361,21 @@ assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001',
   allowed: true,
   skillId: 'athletics',
   skillName: 'Athletics',
-  primarySkillId: 'melee',
+  primarySkillId: 'expertise',
   gains: [{ skillId: 'athletics', amount: 3 }],
   events: ['You drill Athletics.'],
 });
 
 assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001', guild: 'barbarian' }, 'alchemy'), {
-  allowed: false,
-  reason: 'unknown_skill',
-  events: ['You do not know how to train "alchemy".'],
+  allowed: true,
+  skillId: 'alchemy',
+  skillName: 'Alchemy',
+  primarySkillId: 'expertise',
+  gains: [
+    { skillId: 'alchemy', amount: 3 },
+    { skillId: 'athletics', amount: 1 },
+  ],
+  events: ['You drill Alchemy.'],
 });
 
 const gainCharacter = character();
@@ -394,9 +407,9 @@ assert.deepEqual(applySkillPoolGain(gainCharacter, 'melee', 0), {
   events: [],
 });
 
-assert.deepEqual(applySkillPoolGain(gainCharacter, 'alchemy', 5), {
+assert.deepEqual(applySkillPoolGain(gainCharacter, 'cleanroom_fake_skill', 5), {
   applied: false,
-  skillId: 'alchemy',
+  skillId: 'cleanroom_fake_skill',
   rank: 0,
   pool: 0,
   events: [],
