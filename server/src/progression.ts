@@ -59,6 +59,7 @@ export const STARTER_SKILLS = [
   ['enchanting', 'Enchanting'],
   ['engineering', 'Engineering'],
   ['forging', 'Forging'],
+  ['mechanical_lore', 'Mechanical Lore'],
   ['outfitting', 'Outfitting'],
   ['performance', 'Performance'],
   ['scholarship', 'Scholarship'],
@@ -83,8 +84,9 @@ export const SKILL_FAMILIES: Record<string, readonly string[]> = {
     'thanatology',
     'trading',
   ],
-  armor: ['shield_usage', 'light_armor', 'chain_armor', 'brigandine', 'plate_armor', 'defending'],
+  armor: ['shield_usage', 'light_armor', 'chain_armor', 'brigandine', 'plate_armor', 'defending', 'conviction'],
   weapon: [
+    'expertise',
     'parry_ability',
     'small_edged',
     'large_edged',
@@ -104,9 +106,9 @@ export const SKILL_FAMILIES: Record<string, readonly string[]> = {
     'melee_mastery',
     'missile_mastery',
   ],
-  magic: ['primary_magic', 'arcana', 'attunement', 'augmentation', 'debilitation', 'targeted_magic', 'utility', 'warding', 'sorcery'],
-  survival: ['evasion', 'athletics', 'perception', 'stealth', 'locksmithing', 'thievery', 'first_aid', 'outdoorsmanship', 'skinning'],
-  lore: ['alchemy', 'appraisal', 'enchanting', 'engineering', 'forging', 'outfitting', 'performance', 'scholarship', 'tactics'],
+  magic: ['primary_magic', 'arcana', 'attunement', 'augmentation', 'debilitation', 'targeted_magic', 'utility', 'warding', 'sorcery', 'astrology', 'summoning', 'theurgy'],
+  survival: ['evasion', 'athletics', 'perception', 'stealth', 'locksmithing', 'thievery', 'first_aid', 'outdoorsmanship', 'skinning', 'backstab', 'instinct', 'thanatology'],
+  lore: ['alchemy', 'appraisal', 'enchanting', 'engineering', 'forging', 'mechanical_lore', 'outfitting', 'performance', 'scholarship', 'tactics', 'bardic_lore', 'empathy', 'trading'],
   compatibility: ['melee', 'missile', 'survival', 'magic'],
 };
 

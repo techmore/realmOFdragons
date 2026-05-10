@@ -85,11 +85,14 @@ assert.equal(primarySkillForGuild('ranger'), 'instinct');
 assert.equal(primarySkillForGuild('warrior_mage'), 'summoning');
 assert.equal(primarySkillForGuild('unknown'), 'athletics');
 assert.equal(GUILD_NAMES.commoner, 'Unaffiliated');
-assert.equal(STARTER_SKILLS.length, 66);
+assert.equal(STARTER_SKILLS.length, 67);
 assert.equal(SKILL_ALIASES.scouting, 'instinct');
 assert.equal(SKILL_FAMILIES.guild.length, 11);
-assert.equal(SKILL_FAMILIES.weapon.length, 18);
-assert.equal(SKILL_FAMILIES.magic.length, 9);
+assert.equal(SKILL_FAMILIES.armor.length, 7);
+assert.equal(SKILL_FAMILIES.weapon.length, 19);
+assert.equal(SKILL_FAMILIES.magic.length, 12);
+assert.equal(SKILL_FAMILIES.survival.length, 12);
+assert.equal(SKILL_FAMILIES.lore.length, 13);
 
 const starterSkills = buildStarterSkills();
 assert.equal(starterSkills.melee.name, 'Melee');
@@ -99,6 +102,7 @@ assert.equal(starterSkills.scouting, undefined);
 assert.equal(starterSkills.shield_usage.name, 'Shield Usage');
 assert.equal(starterSkills.primary_magic.name, 'Primary Magic');
 assert.equal(starterSkills.thanatology.name, 'Thanatology');
+assert.equal(starterSkills.mechanical_lore.name, 'Mechanical Lore');
 assert.equal(starterSkills.first_aid.name, 'First Aid');
 assert.equal(starterSkills.trading.rank, 0);
 
@@ -120,6 +124,7 @@ assert.equal(malformed.skills.melee.pool, 0);
 assert.equal(malformed.skills.first_aid.name, 'First Aid');
 assert.equal(malformed.skills.backstab.name, 'Backstab');
 assert.equal(malformed.skills.instinct.name, 'Instinct');
+assert.equal(malformed.skills.mechanical_lore.name, 'Mechanical Lore');
 assert.equal(ensureProgressionShape(malformed), false);
 
 const guildNameFix = character({
@@ -277,6 +282,31 @@ assert.deepEqual(buildSkillFamilySummaryEvents(circleReady, 'guild'), [
 ]);
 assert.deepEqual(buildSkillFamilySummaryEvents(circleReady, 'bogus'), [
   'Unknown skill family "bogus". Known families: guild, armor, weapon, magic, survival, lore, compatibility.',
+]);
+assert.deepEqual(buildSkillFamilySummaryEvents(circleReady, 'weapon').slice(0, 3), [
+  'Skill family: weapon.',
+  'expertise: Expertise rank 4, pool 0',
+  'parry_ability: Parry Ability rank 0, pool 0',
+]);
+assert.deepEqual(buildSkillFamilySummaryEvents(circleReady, 'armor').slice(-2), [
+  'defending: Defending rank 0, pool 0',
+  'conviction: Conviction rank 0, pool 0',
+]);
+assert.deepEqual(buildSkillFamilySummaryEvents(circleReady, 'magic').slice(-3), [
+  'astrology: Astrology rank 0, pool 0',
+  'summoning: Summoning rank 0, pool 0',
+  'theurgy: Theurgy rank 0, pool 0',
+]);
+assert.deepEqual(buildSkillFamilySummaryEvents(circleReady, 'survival').slice(-3), [
+  'backstab: Backstab rank 0, pool 0',
+  'instinct: Instinct rank 0, pool 0',
+  'thanatology: Thanatology rank 0, pool 0',
+]);
+assert.deepEqual(buildSkillFamilySummaryEvents(circleReady, 'lore').slice(-4), [
+  'tactics: Tactics rank 0, pool 0',
+  'bardic_lore: Bardic Lore rank 0, pool 0',
+  'empathy: Empathy rank 0, pool 0',
+  'trading: Trading rank 0, pool 0',
 ]);
 
 assert.deepEqual(

@@ -7,6 +7,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Corrected the skill audit: the previous pass missed that guild skills must appear inside their real DragonRealms skillsets, not only under a separate guild overlay.
+- Skillset views now match Elanthipedia counts: Armor 7, Weapon 19, Magic 12, Survival 12, and Lore 13.
+- Added `Mechanical Lore` as a legacy Lore skill record because Elanthipedia still lists it in the Lore skillset/category, while keeping the source note that it is obsolete/no-longer-modern training.
+- `skills guild` remains available as an overlay for guild-only skills, but `skills armor|weapon|magic|survival|lore` now show the correct DragonRealms skillset membership.
 - Audited the active skill catalog against Elanthipedia's current skill category and skillset pages: the implementation was missing one current active skill, Ranger `Instinct`.
 - Replaced the stale Ranger guild skill name `Scouting` with current `Instinct`; `train scouting` remains accepted as a clean compatibility alias that trains `Instinct`.
 - Confirmed `Mechanical Lore` is listed by Elanthipedia but explicitly obsolete/no longer learnable, so it is documented as intentionally not active in the trainable catalog.
