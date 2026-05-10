@@ -4,7 +4,7 @@ export const STARTER_SKILLS = [
   ['empathy', 'Empathy'],
   ['astrology', 'Astrology'],
   ['expertise', 'Expertise'],
-  ['scouting', 'Scouting'],
+  ['instinct', 'Instinct'],
   ['backstab', 'Backstab'],
   ['summoning', 'Summoning'],
   ['bardic_lore', 'Bardic Lore'],
@@ -74,7 +74,7 @@ export const SKILL_FAMILIES: Record<string, readonly string[]> = {
     'empathy',
     'astrology',
     'expertise',
-    'scouting',
+    'instinct',
     'backstab',
     'summoning',
     'bardic_lore',
@@ -123,6 +123,10 @@ export const SKILL_FAMILY_ALIASES: Record<string, string> = {
 };
 
 const SKILL_NAME_BY_ID = Object.fromEntries(STARTER_SKILLS) as Record<string, string>;
+
+export const SKILL_ALIASES: Record<string, string> = {
+  scouting: 'instinct',
+};
 
 export const GUILD_NAMES: Record<string, string> = {
   commoner: 'Unaffiliated',
@@ -268,7 +272,7 @@ export function primarySkillForGuild(guildId: string): string {
   if (guildId === 'moon_mage') return 'astrology';
   if (guildId === 'necromancer') return 'thanatology';
   if (guildId === 'paladin') return 'conviction';
-  if (guildId === 'ranger') return 'scouting';
+  if (guildId === 'ranger') return 'instinct';
   if (guildId === 'thief') return 'backstab';
   if (guildId === 'trader') return 'trading';
   if (guildId === 'warrior_mage') return 'summoning';
@@ -353,6 +357,7 @@ export function resolveSkillFamily(value: string): string | null {
 export function resolveSkillId(character: Pick<CharacterRecord, 'skills'>, value: string): string {
   const token = normalizeSkillToken(value);
   if (!token) return '';
+  if (SKILL_ALIASES[token]) return SKILL_ALIASES[token];
   if (character.skills[token]) return token;
   const match = Object.entries(character.skills).find(([, skill]) => normalizeSkillToken(skill.name) === token);
   return match?.[0] ?? token;

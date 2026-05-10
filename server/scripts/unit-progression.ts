@@ -3,6 +3,7 @@ import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
   GUILD_NAMES,
   STARTER_SKILLS,
+  SKILL_ALIASES,
   SKILL_FAMILIES,
   applySkillPoolGain,
   buildCircleStatus,
@@ -43,6 +44,7 @@ function character(overrides: Partial<CharacterRecord> = {}): CharacterRecord {
     circle: 1,
     skills: {
       expertise: skill('Expertise', 0),
+      instinct: skill('Instinct', 0),
       bardic_lore: skill('Bardic Lore', 0),
       melee: skill('Melee', 0),
       athletics: skill('Athletics', 0),
@@ -79,10 +81,12 @@ function character(overrides: Partial<CharacterRecord> = {}): CharacterRecord {
 
 assert.equal(primarySkillForGuild('barbarian'), 'expertise');
 assert.equal(primarySkillForGuild('moon_mage'), 'astrology');
+assert.equal(primarySkillForGuild('ranger'), 'instinct');
 assert.equal(primarySkillForGuild('warrior_mage'), 'summoning');
 assert.equal(primarySkillForGuild('unknown'), 'athletics');
 assert.equal(GUILD_NAMES.commoner, 'Unaffiliated');
 assert.equal(STARTER_SKILLS.length, 66);
+assert.equal(SKILL_ALIASES.scouting, 'instinct');
 assert.equal(SKILL_FAMILIES.guild.length, 11);
 assert.equal(SKILL_FAMILIES.weapon.length, 18);
 assert.equal(SKILL_FAMILIES.magic.length, 9);
@@ -90,6 +94,8 @@ assert.equal(SKILL_FAMILIES.magic.length, 9);
 const starterSkills = buildStarterSkills();
 assert.equal(starterSkills.melee.name, 'Melee');
 assert.equal(starterSkills.expertise.name, 'Expertise');
+assert.equal(starterSkills.instinct.name, 'Instinct');
+assert.equal(starterSkills.scouting, undefined);
 assert.equal(starterSkills.shield_usage.name, 'Shield Usage');
 assert.equal(starterSkills.primary_magic.name, 'Primary Magic');
 assert.equal(starterSkills.thanatology.name, 'Thanatology');
@@ -113,6 +119,7 @@ assert.equal(malformed.skills.melee.rank, 0);
 assert.equal(malformed.skills.melee.pool, 0);
 assert.equal(malformed.skills.first_aid.name, 'First Aid');
 assert.equal(malformed.skills.backstab.name, 'Backstab');
+assert.equal(malformed.skills.instinct.name, 'Instinct');
 assert.equal(ensureProgressionShape(malformed), false);
 
 const guildNameFix = character({
@@ -252,13 +259,14 @@ assert.equal(resolveSkillFamily('compat'), 'compatibility');
 assert.equal(resolveSkillFamily('unknown'), null);
 assert.equal(resolveSkillId(character(), 'Primary Magic'), 'primary_magic');
 assert.equal(resolveSkillId(character(), 'bardic lore'), 'bardic_lore');
+assert.equal(resolveSkillId(character(), 'scouting'), 'instinct');
 assert.equal(resolveSkillId(character(), 'not a skill'), 'not_a_skill');
 assert.deepEqual(buildSkillFamilySummaryEvents(circleReady, 'guild'), [
   'Skill family: guild.',
   'empathy: Empathy rank 0, pool 0',
   'astrology: Astrology rank 0, pool 0',
   'expertise: Expertise rank 4, pool 0',
-  'scouting: Scouting rank 0, pool 0',
+  'instinct: Instinct rank 0, pool 0',
   'backstab: Backstab rank 0, pool 0',
   'summoning: Summoning rank 0, pool 0',
   'bardic_lore: Bardic Lore rank 0, pool 0',
@@ -420,6 +428,18 @@ assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001',
     { skillId: 'athletics', amount: 1 },
   ],
   events: ['You drill Bardic Lore.'],
+});
+
+assert.deepEqual(resolveTrainingDecision(character({ guildId: 'ranger' }), { id: 'crossing-GU14-001', guild: 'ranger' }, 'scouting'), {
+  allowed: true,
+  skillId: 'instinct',
+  skillName: 'Instinct',
+  primarySkillId: 'instinct',
+  gains: [
+    { skillId: 'instinct', amount: 5 },
+    { skillId: 'athletics', amount: 1 },
+  ],
+  events: ['You drill Instinct.'],
 });
 
 const gainCharacter = character();

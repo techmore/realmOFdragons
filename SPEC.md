@@ -7,6 +7,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Audited the active skill catalog against Elanthipedia's current skill category and skillset pages: the implementation was missing one current active skill, Ranger `Instinct`.
+- Replaced the stale Ranger guild skill name `Scouting` with current `Instinct`; `train scouting` remains accepted as a clean compatibility alias that trains `Instinct`.
+- Confirmed `Mechanical Lore` is listed by Elanthipedia but explicitly obsolete/no longer learnable, so it is documented as intentionally not active in the trainable catalog.
 - Added canonical skill-family metadata for guild, armor, weapon, magic, survival, lore, and compatibility skills.
 - The text command `skills` now shows known skill families before the full list, and `skills <family>` filters to one family with rank/pool details.
 - Training now accepts spaced skill names such as `train bardic lore` and `train primary magic`, resolving them to the canonical skill IDs.
