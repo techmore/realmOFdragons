@@ -69,6 +69,61 @@ export const STARTER_SKILLS = [
   ['magic', 'Magic'],
 ] as const;
 
+export const SKILL_FAMILIES: Record<string, readonly string[]> = {
+  guild: [
+    'empathy',
+    'astrology',
+    'expertise',
+    'scouting',
+    'backstab',
+    'summoning',
+    'bardic_lore',
+    'conviction',
+    'theurgy',
+    'thanatology',
+    'trading',
+  ],
+  armor: ['shield_usage', 'light_armor', 'chain_armor', 'brigandine', 'plate_armor', 'defending'],
+  weapon: [
+    'parry_ability',
+    'small_edged',
+    'large_edged',
+    'twohanded_edged',
+    'small_blunt',
+    'large_blunt',
+    'twohanded_blunt',
+    'polearms',
+    'staves',
+    'bows',
+    'crossbows',
+    'slings',
+    'light_thrown',
+    'heavy_thrown',
+    'brawling',
+    'offhand_weapon',
+    'melee_mastery',
+    'missile_mastery',
+  ],
+  magic: ['primary_magic', 'arcana', 'attunement', 'augmentation', 'debilitation', 'targeted_magic', 'utility', 'warding', 'sorcery'],
+  survival: ['evasion', 'athletics', 'perception', 'stealth', 'locksmithing', 'thievery', 'first_aid', 'outdoorsmanship', 'skinning'],
+  lore: ['alchemy', 'appraisal', 'enchanting', 'engineering', 'forging', 'outfitting', 'performance', 'scholarship', 'tactics'],
+  compatibility: ['melee', 'missile', 'survival', 'magic'],
+};
+
+export const SKILL_FAMILY_ALIASES: Record<string, string> = {
+  armors: 'armor',
+  weapons: 'weapon',
+  guilds: 'guild',
+  survivals: 'survival',
+  lores: 'lore',
+  magics: 'magic',
+  compat: 'compatibility',
+  aliases: 'compatibility',
+  all: 'all',
+};
+
+const SKILL_NAME_BY_ID = Object.fromEntries(STARTER_SKILLS) as Record<string, string>;
+
 export const GUILD_NAMES: Record<string, string> = {
   commoner: 'Unaffiliated',
   barbarian: 'Barbarian Guild',
@@ -284,6 +339,48 @@ export function buildSkillSummaryEvents(character: Pick<CharacterRecord, 'skills
   );
 }
 
+export function normalizeSkillToken(value: string): string {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+export function resolveSkillFamily(value: string): string | null {
+  const token = normalizeSkillToken(value);
+  if (!token) return null;
+  if (token in SKILL_FAMILIES || token === 'all') return token;
+  return SKILL_FAMILY_ALIASES[token] ?? null;
+}
+
+export function resolveSkillId(character: Pick<CharacterRecord, 'skills'>, value: string): string {
+  const token = normalizeSkillToken(value);
+  if (!token) return '';
+  if (character.skills[token]) return token;
+  const match = Object.entries(character.skills).find(([, skill]) => normalizeSkillToken(skill.name) === token);
+  return match?.[0] ?? token;
+}
+
+export function buildSkillFamilySummaryEvents(character: Pick<CharacterRecord, 'skills'>, requestedFamily = ''): string[] {
+  const family = resolveSkillFamily(requestedFamily);
+  if (requestedFamily.trim() && !family) {
+    return [`Unknown skill family "${requestedFamily}". Known families: ${Object.keys(SKILL_FAMILIES).join(', ')}.`];
+  }
+
+  if (!family || family === 'all') {
+    return [
+      `Skill families: ${Object.keys(SKILL_FAMILIES).join(', ')}.`,
+      ...buildSkillSummaryEvents(character),
+    ];
+  }
+
+  const ids = SKILL_FAMILIES[family];
+  return [
+    `Skill family: ${family}.`,
+    ...ids.map((id) => {
+      const skill = character.skills[id];
+      return `${id}: ${skill?.name ?? SKILL_NAME_BY_ID[id] ?? id} rank ${skill?.rank ?? 0}, pool ${skill?.pool ?? 0}`;
+    }),
+  ];
+}
+
 export function buildScoreSummaryEvents(
   character: Pick<
     CharacterRecord,
@@ -361,7 +458,7 @@ export function resolveTrainingDecision(
     return { allowed: false, reason: 'wrong_room', events: ['This is not a useful place to train.'] };
   }
 
-  const skillId = requestedSkill || primarySkillForGuild(room.guild ?? character.guildId);
+  const skillId = requestedSkill ? resolveSkillId(character, requestedSkill) : primarySkillForGuild(room.guild ?? character.guildId);
   const skill = character.skills[skillId];
   if (!skill) {
     return { allowed: false, reason: 'unknown_skill', events: [`You do not know how to train "${skillId}".`] };

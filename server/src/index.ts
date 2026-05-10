@@ -32,7 +32,7 @@ import {
   buildCircleStatus,
   buildGuildRegistrarDisplay,
   buildScoreSummaryEvents,
-  buildSkillSummaryEvents,
+  buildSkillFamilySummaryEvents,
   buildStarterSkills,
   ensureProgressionShape,
   nextCircleRequirement,
@@ -1188,8 +1188,9 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
-  if (command === 'skills') {
-    events.push(...buildSkillSummaryEvents(resolvedCharacter));
+  if (command === 'skills' || command.startsWith('skills ')) {
+    const requestedFamily = command.startsWith('skills ') ? command.slice(7).trim() : '';
+    events.push(...buildSkillFamilySummaryEvents(resolvedCharacter, requestedFamily));
     return buildCommandResult(resolvedCharacter, room, events);
   }
 
@@ -1337,7 +1338,7 @@ async function processCommand(characterId: string, rawCommand: string): Promise<
   }
 
   if (command === 'train' || command.startsWith('train ')) {
-    const requestedSkill = command.startsWith('train ') ? command.slice(6).trim().replace(/\s+/g, '_') : '';
+    const requestedSkill = command.startsWith('train ') ? command.slice(6).trim() : '';
     if (trainCharacter(resolvedCharacter, room, requestedSkill, events)) {
       setActionCooldown(resolvedCharacter, 900);
       modified = true;

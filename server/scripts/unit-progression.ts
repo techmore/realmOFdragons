@@ -3,10 +3,12 @@ import type { CharacterRecord, SkillState } from '../src/storage.js';
 import {
   GUILD_NAMES,
   STARTER_SKILLS,
+  SKILL_FAMILIES,
   applySkillPoolGain,
   buildCircleStatus,
   buildGuildRegistrarDisplay,
   buildScoreSummaryEvents,
+  buildSkillFamilySummaryEvents,
   buildSkillSummaryEvents,
   buildStarterSkills,
   canCircle,
@@ -14,6 +16,8 @@ import {
   isTrainingRoom,
   nextCircleRequirement,
   primarySkillForGuild,
+  resolveSkillFamily,
+  resolveSkillId,
   resolveCircleAdvancement,
   resolveCircleAdvancementRequest,
   resolveGuildJoinDecision,
@@ -39,10 +43,12 @@ function character(overrides: Partial<CharacterRecord> = {}): CharacterRecord {
     circle: 1,
     skills: {
       expertise: skill('Expertise', 0),
+      bardic_lore: skill('Bardic Lore', 0),
       melee: skill('Melee', 0),
       athletics: skill('Athletics', 0),
       tactics: skill('Tactics', 0),
       alchemy: skill('Alchemy', 0),
+      primary_magic: skill('Primary Magic', 0),
       scholarship: skill('Scholarship', 0),
     },
     roomId: 'crossing-TG01-001',
@@ -77,6 +83,9 @@ assert.equal(primarySkillForGuild('warrior_mage'), 'summoning');
 assert.equal(primarySkillForGuild('unknown'), 'athletics');
 assert.equal(GUILD_NAMES.commoner, 'Unaffiliated');
 assert.equal(STARTER_SKILLS.length, 66);
+assert.equal(SKILL_FAMILIES.guild.length, 11);
+assert.equal(SKILL_FAMILIES.weapon.length, 18);
+assert.equal(SKILL_FAMILIES.magic.length, 9);
 
 const starterSkills = buildStarterSkills();
 assert.equal(starterSkills.melee.name, 'Melee');
@@ -238,6 +247,29 @@ assert.deepEqual(buildSkillSummaryEvents(circleReady), [
   'expertise: Expertise rank 4, pool 0',
   'athletics: Athletics rank 2, pool 0',
 ]);
+assert.equal(resolveSkillFamily('weapons'), 'weapon');
+assert.equal(resolveSkillFamily('compat'), 'compatibility');
+assert.equal(resolveSkillFamily('unknown'), null);
+assert.equal(resolveSkillId(character(), 'Primary Magic'), 'primary_magic');
+assert.equal(resolveSkillId(character(), 'bardic lore'), 'bardic_lore');
+assert.equal(resolveSkillId(character(), 'not a skill'), 'not_a_skill');
+assert.deepEqual(buildSkillFamilySummaryEvents(circleReady, 'guild'), [
+  'Skill family: guild.',
+  'empathy: Empathy rank 0, pool 0',
+  'astrology: Astrology rank 0, pool 0',
+  'expertise: Expertise rank 4, pool 0',
+  'scouting: Scouting rank 0, pool 0',
+  'backstab: Backstab rank 0, pool 0',
+  'summoning: Summoning rank 0, pool 0',
+  'bardic_lore: Bardic Lore rank 0, pool 0',
+  'conviction: Conviction rank 0, pool 0',
+  'theurgy: Theurgy rank 0, pool 0',
+  'thanatology: Thanatology rank 0, pool 0',
+  'trading: Trading rank 0, pool 0',
+]);
+assert.deepEqual(buildSkillFamilySummaryEvents(circleReady, 'bogus'), [
+  'Unknown skill family "bogus". Known families: guild, armor, weapon, magic, survival, lore, compatibility.',
+]);
 
 assert.deepEqual(
   buildScoreSummaryEvents(circleReady, {
@@ -376,6 +408,18 @@ assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001',
     { skillId: 'athletics', amount: 1 },
   ],
   events: ['You drill Alchemy.'],
+});
+
+assert.deepEqual(resolveTrainingDecision(character(), { id: 'crossing-GU10-001', guild: 'barbarian' }, 'bardic lore'), {
+  allowed: true,
+  skillId: 'bardic_lore',
+  skillName: 'Bardic Lore',
+  primarySkillId: 'expertise',
+  gains: [
+    { skillId: 'bardic_lore', amount: 3 },
+    { skillId: 'athletics', amount: 1 },
+  ],
+  events: ['You drill Bardic Lore.'],
 });
 
 const gainCharacter = character();

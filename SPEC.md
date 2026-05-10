@@ -7,6 +7,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added canonical skill-family metadata for guild, armor, weapon, magic, survival, lore, and compatibility skills.
+- The text command `skills` now shows known skill families before the full list, and `skills <family>` filters to one family with rank/pool details.
+- Training now accepts spaced skill names such as `train bardic lore` and `train primary magic`, resolving them to the canonical skill IDs.
+- Progression unit coverage now verifies family counts, family aliases, unknown-family output, spaced skill-name resolution, and spaced-name training.
 - Replaced the prototype 13-skill starter set with a 66-skill clean-room catalog covering guild, armor, weapon, magic, survival, and lore skill families.
 - Added DragonRealms-style guild specialty skills as default guild-primary training targets: Expertise, Bardic Lore, Theurgy, Empathy, Astrology, Thanatology, Conviction, Scouting, Backstab, Trading, and Summoning.
 - Kept legacy `melee`, `missile`, `survival`, and `magic` compatibility skills so current combat, forage, and smoke-test command plumbing remains stable while the richer skill families are integrated.
