@@ -4,6 +4,12 @@ This directory is the new target runtime for the clean-room DragonRealms-inspire
 
 The existing Node/React implementation remains as a working prototype and regression reference while systems are ported.
 
+## Goal
+
+Build a clean-room, text-first DragonRealms-inspired MUD on Evennia that reaches feature parity with the current prototype, then surpasses it.
+
+Create a playable multi-user MUD where players create accounts, choose canonical DragonRealms-style races, enter Crossing as unaffiliated characters, join guilds in-world, train skills, advance through Circles, explore shops and hunting areas, and fight enemies through asynchronous range-based combat.
+
 ## Why Evennia
 
 Evennia directly supports the infrastructure we need:

@@ -4,6 +4,25 @@
 
 Pivot the runtime to Evennia while preserving the current Node/React prototype as a working reference until feature parity is reached.
 
+## Authoritative app goal
+
+Build a clean-room, text-first DragonRealms-inspired MUD on Evennia that reaches feature parity with the current prototype, then surpasses it.
+
+Core target:
+
+Create a playable multi-user MUD where players create accounts, choose canonical DragonRealms-style races, enter Crossing as unaffiliated characters, join guilds in-world, train skills, advance through Circles, explore shops and hunting areas, and fight enemies through asynchronous range-based combat.
+
+Success criteria:
+
+- All 11 races can create Circle 1 characters.
+- All 11 guilds can be joined only by visiting their registrar.
+- Every guild can progress to Circle 10 through normal commands.
+- Crossing can be walked room-to-room.
+- Shops/NPCs work with buy/sell/dialogue.
+- Enemies spawn in Crossing hunting rooms.
+- Combat is asynchronous, range-based, and skill-driven.
+- Evennia smoke tests prove the above automatically.
+
 ## Capability fit
 
 Evennia covers the platform concerns:

@@ -4,6 +4,8 @@ Clean-room DragonRealms-inspired MUD.
 
 Current direction: pivoting runtime development to Evennia. The Node/Express API and React web client remain as the working prototype and regression reference while the Evennia implementation is brought to feature parity.
 
+Goal: build a clean-room, text-first DragonRealms-inspired MUD on Evennia where players create accounts, choose canonical DragonRealms-style races, enter Crossing unaffiliated, join guilds in-world, train skills, advance through Circles, explore shops and hunting areas, and fight enemies through asynchronous range-based combat.
+
 Evennia migration entry points:
 
 - [Migration roadmap](docs/evennia-migration-roadmap.md)

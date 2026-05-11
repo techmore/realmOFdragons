@@ -1,5 +1,37 @@
 DragonRealms Clean-Room Clone - Master Specification
-Project Goal: Build a fully playable, open-source MUD that captures the observable feel and mechanics of DragonRealms (Elanthia) through legitimate play and documentation only. No proprietary code, packets, or binaries.
+
+## Authoritative Goal
+
+Build a clean-room, text-first DragonRealms-inspired MUD on Evennia that reaches feature parity with the current prototype, then surpasses it.
+
+Core target:
+
+Create a playable multi-user MUD where players create accounts, choose canonical DragonRealms-style races, enter Crossing as unaffiliated characters, join guilds in-world, train skills, advance through Circles, explore shops and hunting areas, and fight enemies through asynchronous range-based combat.
+
+Immediate priorities:
+
+1. Make Evennia the primary runtime.
+2. Port races, skills, guilds, and Circle 1-10 progression.
+3. Build the Crossing room graph with text movement.
+4. Add guild registrars and in-world `join guild`.
+5. Add shops, NPC dialogue, inventory, hands, and wallet.
+6. Add enemies, `scan`, `target`, `advance`, `retreat`, `range`, and combat maneuvers.
+7. Preserve a command-first MUD interface in both terminal/Telnet and browser webclient.
+
+Success criteria:
+
+- All 11 races can create Circle 1 characters.
+- All 11 guilds can be joined only by visiting their registrar.
+- Every guild can progress to Circle 10 through normal commands.
+- Crossing can be walked room-to-room.
+- Shops/NPCs work with buy/sell/dialogue.
+- Enemies spawn in Crossing hunting rooms.
+- Combat is asynchronous, range-based, and skill-driven.
+- Evennia smoke tests prove the above automatically.
+
+Strategic rule:
+
+The existing Node/React prototype is now a reference implementation, not the target runtime. New production gameplay should move into Evennia unless there is a strong reason not to.
 
 ## Current Status
 
