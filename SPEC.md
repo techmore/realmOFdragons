@@ -7,6 +7,12 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Began the Evennia migration by initializing `evennia-game/` as the new target runtime while preserving the Node/React prototype as a regression reference.
+- Added `requirements-evennia.txt` pinned to Evennia 5.0.1 plus `setuptools` for the Python 3.13 launcher compatibility path.
+- Added Evennia-side clean-room data for DragonRealms races, guilds, 67 skills, skillsets, and guild primary skills.
+- Added Evennia Character initialization for race, guild, circle, wallet, and skill state.
+- Added initial Evennia text commands `score`, `skills`, and `skills <skillset>`.
+- Added `docs/evennia-migration-roadmap.md` and `evennia-game/README-DR-MIGRATION.md` documenting the pivot, capability fit, and cutover criteria.
 - Corrected the skill audit: the previous pass missed that guild skills must appear inside their real DragonRealms skillsets, not only under a separate guild overlay.
 - Skillset views now match Elanthipedia counts: Armor 7, Weapon 19, Magic 12, Survival 12, and Lore 13.
 - Added `Mechanical Lore` as a legacy Lore skill record because Elanthipedia still lists it in the Lore skillset/category, while keeping the source note that it is obsolete/no-longer-modern training.

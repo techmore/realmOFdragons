@@ -1,0 +1,84 @@
+"""
+Dragon Realms Next Gen command scaffold for Evennia.
+
+These commands intentionally keep the text-first interface. They are the
+first migration bridge from the Node prototype into Evennia's command loop.
+"""
+
+from evennia.commands.command import Command
+
+from world.dr_data import SKILLSETS, build_starter_skills
+
+
+class CmdDRScore(Command):
+    """
+    Show character identity and progression state.
+
+    Usage:
+      score
+    """
+
+    key = "score"
+    aliases = ["info"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        race_name = character.db.race_name or "Human"
+        guild_name = character.db.guild_name or "Unaffiliated"
+        circle = character.db.circle or 1
+        wallet = character.db.wallet or {"plat": 0, "trias": 0, "lucan": 0, "silk": 0}
+
+        character.msg(
+            "\n".join(
+                [
+                    f"You are {character.key}, race {race_name}.",
+                    f"Guild: {guild_name}. Circle {circle}.",
+                    "Wallet: "
+                    f"{wallet.get('plat', 0)} plat, {wallet.get('trias', 0)} trias, "
+                    f"{wallet.get('lucan', 0)} lucan, {wallet.get('silk', 0)} silk.",
+                ]
+            )
+        )
+
+
+class CmdDRSkills(Command):
+    """
+    Show skill ranks and pools.
+
+    Usage:
+      skills
+      skills <skillset>
+
+    Skillsets: armor, weapon, magic, survival, lore, guild
+    """
+
+    key = "skills"
+    aliases = ["skill"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        skills = character.db.skills or build_starter_skills()
+        if not character.db.skills:
+            character.db.skills = skills
+
+        requested = self.args.strip().lower()
+        known = ", ".join(SKILLSETS.keys())
+        if requested:
+            skill_ids = SKILLSETS.get(requested)
+            if not skill_ids:
+                character.msg(f'Unknown skillset "{requested}". Known skillsets: {known}.')
+                return
+            lines = [f"Skillset: {requested}."]
+        else:
+            skill_ids = list(skills.keys())
+            lines = [f"Skillsets: {known}."]
+
+        for skill_id in skill_ids:
+            skill = skills.get(skill_id, {"name": skill_id, "rank": 0, "pool": 0})
+            lines.append(f"{skill_id}: {skill['name']} rank {skill['rank']}, pool {skill['pool']}")
+
+        character.msg("\n".join(lines))

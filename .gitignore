@@ -1,4 +1,5 @@
 node_modules/
+.venv-evennia/
 dist/
 *.tsbuildinfo
 .DS_Store
@@ -10,3 +11,10 @@ server/data/*.tmp
 frontend/dist/
 server/dist/
 artifacts/
+*.py[cod]
+__pycache__/
+*.db3
+evennia-game/server/evennia.db3
+evennia-game/server/logs/*.log
+evennia-game/server/.static/
+evennia-game/server/.media/

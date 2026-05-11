@@ -1,6 +1,16 @@
 # Realm of Dragons
 
-Clean-room DragonRealms-inspired MUD prototype with a Node/Express API, React web client, file-backed prototype persistence, command smoke coverage, and local telemetry reports.
+Clean-room DragonRealms-inspired MUD.
+
+Current direction: pivoting runtime development to Evennia. The Node/Express API and React web client remain as the working prototype and regression reference while the Evennia implementation is brought to feature parity.
+
+Evennia migration entry points:
+
+- [Migration roadmap](docs/evennia-migration-roadmap.md)
+- [Evennia game README](evennia-game/README-DR-MIGRATION.md)
+- Pinned Python requirements: [requirements-evennia.txt](requirements-evennia.txt)
+
+Legacy prototype: Node/Express API, React web client, file-backed prototype persistence, command smoke coverage, and local telemetry reports.
 
 For runtime and long-term stack direction, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
