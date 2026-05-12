@@ -92,6 +92,11 @@ Recommendation:
 - Add `join guild` command that only succeeds in registrar rooms.
 - Add tests for no-registrar rejection and all 11 canonical guild joins.
 
+Status:
+
+- Partially implemented after this audit: Crossing registrar rooms now carry guild metadata, `join guild` exists in Evennia, and helper tests prove no-registrar rejection plus all 11 canonical guild joins.
+- Remaining work: add command-level Evennia smoke that walks to every registrar room and joins through the real Room/Exit database objects.
+
 ### P1 - Circle 1-10 progression exists only as pure helper logic
 
 Subsystem: progression / smoke tests

@@ -4,7 +4,8 @@ Evennia migration smoke/unit tests for clean-room DR systems.
 
 from django.test import SimpleTestCase, TestCase
 
-from world.dr_data import RACES, SKILLSETS, build_starter_skills
+from world.dr_data import GUILDS, RACES, SKILLSETS, build_starter_skills
+from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token
 from world.dr_progression import advance_circle, primary_skill_for_guild, resolve_skill_id, train_skill
 from world.dr_world import ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
@@ -82,6 +83,35 @@ class DRWorldBuilderTests(TestCase):
         build_crossing_world()
         room = find_built_room("crossing-RV02-002")
         self.assertEqual(room.db.targets, ("rv-wolf-cub",))
+
+
+class DRGuildTests(SimpleTestCase):
+    def test_join_guild_requires_registrar_room(self):
+        state = {"guild_id": "commoner", "guild_name": "Unaffiliated", "circle": 1}
+        result = join_guild(state, {})
+        self.assertFalse(result["joined"])
+        self.assertEqual(result["events"], ["There is no guild registrar here."])
+
+    def test_all_canonical_guilds_can_be_joined_from_registrar_metadata(self):
+        for guild_id, guild_name in GUILDS.items():
+            state = {"guild_id": "commoner", "guild_name": "Unaffiliated", "circle": 1}
+            result = join_guild(state, {"guild": guild_id})
+            self.assertTrue(result["joined"])
+            self.assertEqual(state["guild_id"], guild_id)
+            self.assertEqual(state["guild_name"], guild_name)
+            self.assertEqual(state["circle"], 1)
+
+    def test_join_guild_rejects_existing_guild(self):
+        state = {"guild_id": "barbarian", "guild_name": "Barbarian Guild", "circle": 1}
+        result = join_guild(state, {"guild": "bard"})
+        self.assertFalse(result["joined"])
+        self.assertIn("already registered", result["events"][0])
+
+    def test_join_guild_rejects_unknown_registrar(self):
+        state = {"guild_id": "commoner", "guild_name": "Unaffiliated", "circle": 1}
+        result = join_guild(state, {"guild": "fighter"})
+        self.assertFalse(result["joined"])
+        self.assertIn("not recognized", result["events"][0])
 
 
 class DRProgressionTests(SimpleTestCase):

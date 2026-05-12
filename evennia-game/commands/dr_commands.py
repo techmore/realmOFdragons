@@ -8,6 +8,7 @@ first migration bridge from the Node prototype into Evennia's command loop.
 from evennia.commands.command import Command
 
 from world.dr_data import SKILLSETS, build_starter_skills
+from world.dr_guilds import join_guild
 from world.dr_identity import choose_race
 from world.dr_progression import advance_circle, train_skill
 from world.dr_world import build_crossing_world
@@ -118,6 +119,36 @@ class CmdDRRace(Command):
         if result["changed"]:
             character.db.race = state["race"]
             character.db.race_name = state["race_name"]
+            character.db.guild_id = state["guild_id"]
+            character.db.guild_name = state["guild_name"]
+            character.db.circle = state["circle"]
+        character.msg("\n".join(result["events"]))
+
+
+class CmdDRJoinGuild(Command):
+    """
+    Join the guild registrar in the current room.
+
+    Usage:
+      join guild
+    """
+
+    key = "join guild"
+    aliases = ["join"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        room = character.location
+        state = {
+            "guild_id": character.db.guild_id or "commoner",
+            "guild_name": character.db.guild_name or "Unaffiliated",
+            "circle": character.db.circle or 1,
+        }
+        room_state = {"guild": room.db.guild if room else None}
+        result = join_guild(state, room_state)
+        if result["joined"]:
             character.db.guild_id = state["guild_id"]
             character.db.guild_name = state["guild_name"]
             character.db.circle = state["circle"]

@@ -39,6 +39,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added Evennia guild helper logic for in-world registrar joining.
+- Added Evennia `join guild` command that reads guild registrar metadata from the current room.
+- Added Evennia tests proving no-registrar rejection, all 11 canonical guild joins, already-joined rejection, and unknown registrar rejection.
+- Updated the feature-parity audit to mark guild joining partially implemented and identify command-level registrar walking smoke as remaining work.
 - Added an idempotent Evennia Crossing world builder that creates/updates actual Room and Exit objects from `world.dr_world`.
 - Crossing rooms now carry deterministic room id aliases plus `dr_room_id`, `guild`, and `targets` Attributes for later systems.
 - Added builder command `drbuild crossing` and wired initial setup to build the Crossing database world.
