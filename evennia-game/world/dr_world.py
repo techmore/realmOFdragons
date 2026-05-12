@@ -325,6 +325,8 @@ def build_crossing_world():
 
     created_enemies = 0
     updated_enemies = 0
+    created_respawn_scripts = 0
+    updated_respawn_scripts = 0
     for room_id, data in ROOMS.items():
         room = room_objects[room_id]
         for enemy_id in data.get("targets", ()):
@@ -353,6 +355,18 @@ def build_crossing_world():
             enemy_obj.db.aggression = enemy["aggression"]
             enemy_obj.db.desc = enemy["description"]
             enemy_obj.save()
+        if data.get("targets"):
+            existing_scripts = [
+                script
+                for script in room.scripts.all()
+                if script.db.script_marker == "dr_room_respawn"
+            ]
+            if existing_scripts:
+                updated_respawn_scripts += 1
+            else:
+                script = room.scripts.add("typeclasses.scripts.RoomRespawnScript")
+                script.db.script_marker = "dr_room_respawn"
+                created_respawn_scripts += 1
 
     return {
         "ok": True,
@@ -364,5 +378,7 @@ def build_crossing_world():
         "updated_npcs": updated_npcs,
         "created_enemies": created_enemies,
         "updated_enemies": updated_enemies,
+        "created_respawn_scripts": created_respawn_scripts,
+        "updated_respawn_scripts": updated_respawn_scripts,
         "errors": [],
     }

@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added Evennia `RecoveryScript` and `RoomRespawnScript` typeclasses as the first Script/ticker foundation for async combat systems.
+- Updated the Crossing builder to attach room respawn scripts to configured hunting rooms idempotently.
+- Added smoke coverage proving recovery scripts clear roundtime/balance and room respawn scripts recreate missing enemies through the existing respawn helper.
 - Added deterministic room enemy respawn helper for configured Crossing hunting-room targets.
 - Fixed enemy scanning/targeting to use actual in-room enemy NPCs only, so defeated enemies stay absent until respawn.
 - Added builder-only `respawn` / `repop` command and smoke coverage for defeat, empty room enemy list, respawn, and retargeting.

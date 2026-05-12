@@ -101,3 +101,39 @@ class Script(DefaultScript):
     """
 
     pass
+
+
+class RecoveryScript(Script):
+    """
+    Timer hook for character roundtime recovery.
+    """
+
+    def at_script_creation(self):
+        self.key = "dr_recovery"
+        self.interval = 1
+        self.persistent = True
+
+    def at_repeat(self):
+        if not self.obj:
+            return
+        from world.dr_combat import wait_recover
+
+        wait_recover(self.obj)
+
+
+class RoomRespawnScript(Script):
+    """
+    Timer hook for room enemy respawns.
+    """
+
+    def at_script_creation(self):
+        self.key = "dr_room_respawn"
+        self.interval = 30
+        self.persistent = True
+
+    def at_repeat(self):
+        if not self.obj:
+            return
+        from world.dr_combat import respawn_room_enemies
+
+        respawn_room_enemies(self.obj)

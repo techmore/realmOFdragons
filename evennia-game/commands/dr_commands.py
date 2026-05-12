@@ -486,5 +486,7 @@ class CmdDRBuildCrossing(Command):
             f"{result['created_rooms']} rooms created, {result['updated_rooms']} rooms updated, "
             f"{result['created_exits']} exits created, {result['updated_exits']} exits updated, "
             f"{result['created_npcs']} NPCs created, {result['updated_npcs']} NPCs updated, "
-            f"{result['created_enemies']} enemies created, {result['updated_enemies']} enemies updated."
+            f"{result['created_enemies']} enemies created, {result['updated_enemies']} enemies updated, "
+            f"{result['created_respawn_scripts']} respawn scripts created, "
+            f"{result['updated_respawn_scripts']} respawn scripts updated."
         )

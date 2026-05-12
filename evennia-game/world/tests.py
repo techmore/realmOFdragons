@@ -3,7 +3,7 @@ Evennia migration smoke/unit tests for clean-room DR systems.
 """
 
 from django.test import SimpleTestCase, TestCase
-from evennia.utils.create import create_object
+from evennia.utils.create import create_object, create_script
 
 from world.dr_data import GUILDS, RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, respawn_room_enemies, room_enemy_ids
@@ -81,6 +81,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertGreaterEqual(second["updated_npcs"], 3)
         self.assertEqual(second["created_enemies"], 0)
         self.assertGreaterEqual(second["updated_enemies"], 4)
+        self.assertEqual(second["created_respawn_scripts"], 0)
+        self.assertGreaterEqual(second["updated_respawn_scripts"], 4)
 
     def test_built_guild_room_metadata(self):
         build_crossing_world()
@@ -118,6 +120,19 @@ class DRWorldBuilderTests(TestCase):
                 ]
                 self.assertEqual(len(enemies), 1)
                 self.assertEqual(enemies[0].key, ENEMIES[enemy_id]["name"])
+
+    def test_built_hunting_rooms_have_respawn_scripts(self):
+        build_crossing_world()
+        for room_id, data in ROOMS.items():
+            if not data.get("targets"):
+                continue
+            room = find_built_room(room_id)
+            scripts = [
+                script
+                for script in room.scripts.all()
+                if script.db.script_marker == "dr_room_respawn"
+            ]
+            self.assertEqual(len(scripts), 1)
 
 
 class DRCommandSmokeTests(TestCase):
@@ -301,6 +316,24 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(room_enemy_ids(character.location), ("rv-mud-beetle",))
         character.execute_cmd("target rv-mud-beetle")
         self.assertEqual(character.db.engagement["target"], "rv-mud-beetle")
+
+    def test_recovery_and_respawn_scripts_tick_existing_helpers(self):
+        character = self.make_character("Script Smoke")
+        character.db.roundtime = 1
+        character.db.balance = "recovering"
+        recovery_script = create_script("typeclasses.scripts.RecoveryScript", obj=character)
+        recovery_script.at_repeat()
+        self.assertEqual(character.db.roundtime, 0)
+        self.assertEqual(character.db.balance, "balanced")
+
+        self.walk_to_room(character, "crossing-RV02-005")
+        for obj in list(character.location.contents):
+            if obj.db.npc_type == "enemy":
+                obj.delete()
+        self.assertEqual(room_enemy_ids(character.location), ())
+        respawn_script = create_script("typeclasses.scripts.RoomRespawnScript", obj=character.location)
+        respawn_script.at_repeat()
+        self.assertEqual(room_enemy_ids(character.location), ("rv-ridge-hare",))
 
     def test_enemy_loot_tables_are_defined(self):
         for enemy in ENEMIES.values():
