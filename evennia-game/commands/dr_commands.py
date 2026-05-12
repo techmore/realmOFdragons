@@ -8,6 +8,7 @@ first migration bridge from the Node prototype into Evennia's command loop.
 from evennia.commands.command import Command
 
 from world.dr_data import SKILLSETS, build_starter_skills
+from world.dr_combat import advance, range_status, retreat, scan_room, target_enemy
 from world.dr_economy import buy_item, format_shop, hands_text, inventory_text, sell_item, shop_talk
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race
@@ -292,6 +293,86 @@ class CmdDRHands(Command):
         self.caller.msg(hands_text(self.caller))
 
 
+class CmdDRScan(Command):
+    """
+    Scan the room for enemies.
+
+    Usage:
+      scan
+    """
+
+    key = "scan"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(scan_room(self.caller.location))
+
+
+class CmdDRTarget(Command):
+    """
+    Target an enemy in the room.
+
+    Usage:
+      target <enemy id>
+    """
+
+    key = "target"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(target_enemy(self.caller, self.args))
+
+
+class CmdDRRange(Command):
+    """
+    Show current engagement range.
+
+    Usage:
+      range
+    """
+
+    key = "range"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(range_status(self.caller))
+
+
+class CmdDRAdvance(Command):
+    """
+    Advance toward a targeted enemy.
+
+    Usage:
+      advance
+    """
+
+    key = "advance"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(advance(self.caller))
+
+
+class CmdDRRetreat(Command):
+    """
+    Retreat from a targeted enemy.
+
+    Usage:
+      retreat
+    """
+
+    key = "retreat"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(retreat(self.caller))
+
+
 class CmdDRBuildCrossing(Command):
     """
     Build or update the Crossing room graph.
@@ -316,5 +397,6 @@ class CmdDRBuildCrossing(Command):
             "Crossing build complete: "
             f"{result['created_rooms']} rooms created, {result['updated_rooms']} rooms updated, "
             f"{result['created_exits']} exits created, {result['updated_exits']} exits updated, "
-            f"{result['created_npcs']} NPCs created, {result['updated_npcs']} NPCs updated."
+            f"{result['created_npcs']} NPCs created, {result['updated_npcs']} NPCs updated, "
+            f"{result['created_enemies']} enemies created, {result['updated_enemies']} enemies updated."
         )

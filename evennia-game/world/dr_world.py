@@ -8,6 +8,7 @@ from evennia import create_object
 from evennia.objects.models import ObjectDB
 
 from world.dr_data import GUILDS
+from world.dr_combat import ENEMIES
 from world.dr_economy import SHOPS
 
 START_ROOM_ID = "crossing-TG01-001"
@@ -322,6 +323,37 @@ def build_crossing_world():
         shopkeeper.db.dialogue = shop["dialogue"]
         shopkeeper.save()
 
+    created_enemies = 0
+    updated_enemies = 0
+    for room_id, data in ROOMS.items():
+        room = room_objects[room_id]
+        for enemy_id in data.get("targets", ()):
+            enemy = ENEMIES.get(enemy_id)
+            if not enemy:
+                continue
+            matches = [
+                obj
+                for obj in room.contents
+                if obj.db.npc_type == "enemy" and obj.db.enemy_id == enemy_id
+            ]
+            if matches:
+                enemy_obj = matches[0]
+                updated_enemies += 1
+            else:
+                enemy_obj = create_object(
+                    "typeclasses.npcs.Enemy",
+                    key=enemy["name"],
+                    location=room,
+                    home=room,
+                )
+                created_enemies += 1
+            enemy_obj.key = enemy["name"]
+            enemy_obj.db.enemy_id = enemy_id
+            enemy_obj.db.vitality = enemy["vitality"]
+            enemy_obj.db.aggression = enemy["aggression"]
+            enemy_obj.db.desc = enemy["description"]
+            enemy_obj.save()
+
     return {
         "ok": True,
         "created_rooms": created_rooms,
@@ -330,5 +362,7 @@ def build_crossing_world():
         "updated_exits": updated_exits,
         "created_npcs": created_npcs,
         "updated_npcs": updated_npcs,
+        "created_enemies": created_enemies,
+        "updated_enemies": updated_enemies,
         "errors": [],
     }

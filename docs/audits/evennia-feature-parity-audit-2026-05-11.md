@@ -150,6 +150,11 @@ Recommendation:
 - Use Evennia Scripts/tickers for enemy pressure and roundtime-like updates.
 - Add `scan`, `target`, `advance`, `retreat`, `range`, `stance`, `attack`, `jab`, `bash`, `defend`, and `flee` in thin tested slices.
 
+Status:
+
+- Partially implemented after this audit: Evennia now builds in-room enemy NPC objects for the current Crossing hunting rooms and supports `scan`, `target`, `range`, `advance`, and `retreat` command smoke.
+- Remaining work: add attacks, damage, stance/balance, enemy pressure, loot, defeat/recovery, and Evennia Script/ticker-driven asynchronous combat behavior.
+
 ### P1 - Data parity is manual and duplicated
 
 Subsystem: migration architecture / data

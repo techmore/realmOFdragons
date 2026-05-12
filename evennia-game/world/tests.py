@@ -6,6 +6,7 @@ from django.test import SimpleTestCase, TestCase
 from evennia.utils.create import create_object
 
 from world.dr_data import GUILDS, RACES, SKILLSETS, build_starter_skills
+from world.dr_combat import ENEMIES
 from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token
@@ -78,6 +79,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertEqual(second["created_exits"], 0)
         self.assertEqual(second["created_npcs"], 0)
         self.assertGreaterEqual(second["updated_npcs"], 3)
+        self.assertEqual(second["created_enemies"], 0)
+        self.assertGreaterEqual(second["updated_enemies"], 4)
 
     def test_built_guild_room_metadata(self):
         build_crossing_world()
@@ -103,6 +106,19 @@ class DRWorldBuilderTests(TestCase):
             self.assertEqual(shopkeepers[0].key, shop["keeper"])
             self.assertEqual(shopkeepers[0].db.shop_name, shop["name"])
 
+    def test_built_enemy_npcs(self):
+        build_crossing_world()
+        for room_id, data in ROOMS.items():
+            for enemy_id in data.get("targets", ()):
+                room = find_built_room(room_id)
+                enemies = [
+                    obj
+                    for obj in room.contents
+                    if obj.db.npc_type == "enemy" and obj.db.enemy_id == enemy_id
+                ]
+                self.assertEqual(len(enemies), 1)
+                self.assertEqual(enemies[0].key, ENEMIES[enemy_id]["name"])
+
 
 class DRCommandSmokeTests(TestCase):
     def make_character(self, key):
@@ -121,6 +137,7 @@ class DRCommandSmokeTests(TestCase):
         character.db.wallet = {"plat": 0, "trias": 100, "lucan": 0, "silk": 0}
         character.db.inventory = []
         character.db.hands = {"left": None, "right": None}
+        character.db.engagement = {"target": None, "range": None}
         return character
 
     def walk_to_room(self, character, destination_room_id):
@@ -199,6 +216,27 @@ class DRCommandSmokeTests(TestCase):
             self.assertTrue(shop["stock"])
             for item_id in shop["stock"]:
                 self.assertIn(item_id, ITEMS)
+
+    def test_scan_target_advance_range_and_retreat_commands(self):
+        character = self.make_character("Combat Smoke")
+        self.walk_to_room(character, "crossing-RV02-002")
+
+        character.execute_cmd("scan")
+        character.execute_cmd("target rv-wolf-cub")
+        self.assertEqual(character.db.engagement["target"], "rv-wolf-cub")
+        self.assertEqual(character.db.engagement["range"], "missile")
+
+        character.execute_cmd("range")
+        character.execute_cmd("advance")
+        self.assertEqual(character.db.engagement["range"], "pole")
+        character.execute_cmd("advance")
+        self.assertEqual(character.db.engagement["range"], "melee")
+        character.execute_cmd("retreat")
+        self.assertEqual(character.db.engagement["range"], "pole")
+        character.execute_cmd("retreat")
+        self.assertEqual(character.db.engagement["range"], "missile")
+        character.execute_cmd("retreat")
+        self.assertEqual(character.db.engagement["target"], None)
 
 
 class DRGuildTests(SimpleTestCase):

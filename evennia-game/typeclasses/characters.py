@@ -42,3 +42,4 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.wallet = {"plat": 0, "trias": 100, "lucan": 0, "silk": 0}
         self.db.inventory = []
         self.db.hands = {"left": None, "right": None}
+        self.db.engagement = {"target": None, "range": None}

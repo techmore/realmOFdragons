@@ -39,6 +39,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added Evennia enemy deployment data for the current Crossing hunting rooms.
+- Added builder-created in-room enemy NPC objects with deterministic enemy ids, vitality, aggression, and descriptions.
+- Added command-first combat engagement verbs: `scan`, `target`, `range`, `advance`, and `retreat`.
+- Added Evennia smoke proving a character can walk to a Crossing hunting room, scan, target an enemy, advance from missile to pole to melee, retreat back out, and break engagement.
 - Promoted initial Evennia shopkeepers from metadata-only entries into actual in-room NPC objects created by the Crossing world builder.
 - Added shop room metadata to built Crossing rooms and idempotent shopkeeper creation/update counts to `drbuild crossing`.
 - Added Evennia database smoke proving every configured shop room contains exactly one shopkeeper NPC with the expected room/shop metadata.

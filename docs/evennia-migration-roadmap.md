@@ -80,6 +80,8 @@ Custom systems still required:
    - Port enemies and room deployments.
    - Implement `scan`, `target`, `advance`, `retreat`, `range`, `stance`, `attack`, `jab`, `bash`, `defend`, `flee`.
    - Use Evennia Scripts/tickers for asynchronous pressure and roundtime-like behavior.
+   - Current status: initial Crossing enemy deployments build real enemy NPC objects, and command smoke covers `scan`, `target`, `range`, `advance`, and `retreat`.
+   - Current next blocker: no attacks, damage, balance/roundtime, enemy pressure, loot, or asynchronous Scripts exist yet.
 
 7. `Client`
    - Start with Evennia's built-in webclient.
