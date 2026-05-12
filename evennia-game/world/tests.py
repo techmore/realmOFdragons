@@ -335,6 +335,21 @@ class DRCommandSmokeTests(TestCase):
         respawn_script.at_repeat()
         self.assertEqual(room_enemy_ids(character.location), ("rv-ridge-hare",))
 
+    def test_combat_pressure_script_damages_engaged_character(self):
+        character = self.make_character("Pressure Smoke")
+        self.walk_to_room(character, "crossing-RV02-002")
+        character.execute_cmd("target rv-wolf-cub")
+        character.execute_cmd("advance")
+        self.assertEqual(character.db.engagement["range"], "pole")
+
+        pressure_script = create_script("typeclasses.scripts.CombatPressureScript", obj=character)
+        pressure_script.at_repeat()
+        self.assertEqual(character.db.health, 26)
+
+        character.execute_cmd("stance defensive")
+        pressure_script.at_repeat()
+        self.assertEqual(character.db.health, 25)
+
     def test_enemy_loot_tables_are_defined(self):
         for enemy in ENEMIES.values():
             self.assertIn("loot", enemy)

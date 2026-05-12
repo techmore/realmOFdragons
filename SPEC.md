@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `CombatPressureScript` as the first timed enemy pressure hook for engaged characters.
+- Added combat pressure helper logic that applies stance-modified enemy damage at pole/melee range, ignores distant targets, and breaks engagement if the enemy is gone.
+- Added smoke coverage proving a database-backed combat pressure Script damages an engaged character and respects defensive stance mitigation.
 - Added Evennia `RecoveryScript` and `RoomRespawnScript` typeclasses as the first Script/ticker foundation for async combat systems.
 - Updated the Crossing builder to attach room respawn scripts to configured hunting rooms idempotently.
 - Added smoke coverage proving recovery scripts clear roundtime/balance and room respawn scripts recreate missing enemies through the existing respawn helper.

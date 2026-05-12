@@ -142,6 +142,23 @@ def apply_enemy_retaliation(character, enemy):
     return f"{enemy['name']} presses back for {damage} damage. You have {health} health remaining."
 
 
+def apply_enemy_pressure(character):
+    ensure_engagement(character)
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target")
+    range_band = engagement.get("range")
+    if not target_id:
+        return "No enemy pressure: not engaged."
+    if range_band not in ("pole", "melee"):
+        return "No enemy pressure: target is too far away."
+
+    enemy = ENEMIES.get(target_id, {"name": target_id})
+    if not find_enemy_object(character.location, target_id):
+        character.db.engagement = {"target": None, "range": None}
+        return f"No enemy pressure: {enemy['name']} is gone."
+    return apply_enemy_retaliation(character, enemy)
+
+
 def award_loot(character, enemy):
     loot = enemy.get("loot", {})
     trias = int(loot.get("trias", 0) or 0)

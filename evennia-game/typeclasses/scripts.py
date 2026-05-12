@@ -137,3 +137,21 @@ class RoomRespawnScript(Script):
         from world.dr_combat import respawn_room_enemies
 
         respawn_room_enemies(self.obj)
+
+
+class CombatPressureScript(Script):
+    """
+    Timer hook for engaged enemy pressure against a character.
+    """
+
+    def at_script_creation(self):
+        self.key = "dr_combat_pressure"
+        self.interval = 3
+        self.persistent = True
+
+    def at_repeat(self):
+        if not self.obj:
+            return
+        from world.dr_combat import apply_enemy_pressure
+
+        apply_enemy_pressure(self.obj)

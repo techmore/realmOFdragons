@@ -152,8 +152,8 @@ Recommendation:
 
 Status:
 
-- Partially implemented after this audit: Evennia now builds in-room enemy NPC objects for the current Crossing hunting rooms and supports `scan`, `target`, `range`, `advance`, `retreat`, `stance`, deterministic `jab`/`attack`, roundtime blocking, manual `wait`/`recover`, damage, health, stance-modified enemy retaliation, defeat loot, manual room respawn, respawn Script hooks, recovery Script hooks, balance mutation, and enemy defeat cleanup.
-- Remaining work: add more maneuvers, real timed pressure, object drops/corpses, and deeper Evennia Script/ticker-driven asynchronous combat behavior.
+- Partially implemented after this audit: Evennia now builds in-room enemy NPC objects for the current Crossing hunting rooms and supports `scan`, `target`, `range`, `advance`, `retreat`, `stance`, deterministic `jab`/`attack`, roundtime blocking, manual `wait`/`recover`, damage, health, stance-modified enemy retaliation, defeat loot, manual room respawn, respawn Script hooks, recovery Script hooks, combat pressure Script hooks, balance mutation, and enemy defeat cleanup.
+- Remaining work: add more maneuvers, automatic pressure Script attachment/lifecycle, object drops/corpses, and deeper Evennia Script/ticker-driven asynchronous combat behavior.
 
 ### P1 - Data parity is manual and duplicated
 
