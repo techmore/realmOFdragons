@@ -2,30 +2,36 @@
 Clean-room enemy and engagement helpers for the Evennia migration.
 """
 
+from world.dr_economy import coins, set_coins
+
 ENEMIES = {
     "rv-wolf-cub": {
         "name": "Wolf Cub",
         "vitality": 18,
         "aggression": "watchful",
         "description": "A young wolf tests the air and keeps low to the brush.",
+        "loot": {"trias": 4, "items": ("travel_rations",)},
     },
     "rv-boarlet": {
         "name": "Boarlet",
         "vitality": 22,
         "aggression": "stubborn",
         "description": "A small boar paws at the dirt and snorts sharply.",
+        "loot": {"trias": 5, "items": ("travel_rations",)},
     },
     "rv-mud-beetle": {
         "name": "Mud Beetle",
         "vitality": 14,
         "aggression": "skittish",
         "description": "A glossy beetle pushes through the mud on hooked legs.",
+        "loot": {"trias": 3, "items": ("torch",)},
     },
     "rv-ridge-hare": {
         "name": "Ridge Hare",
         "vitality": 12,
         "aggression": "flighty",
         "description": "A lean hare freezes near the grass line.",
+        "loot": {"trias": 2, "items": ()},
     },
 }
 
@@ -98,6 +104,27 @@ def apply_enemy_retaliation(character, enemy):
     health = max(0, int(character.db.health or 0) - damage)
     character.db.health = health
     return f"{enemy['name']} presses back for {damage} damage. You have {health} health remaining."
+
+
+def award_loot(character, enemy):
+    loot = enemy.get("loot", {})
+    trias = int(loot.get("trias", 0) or 0)
+    item_ids = tuple(loot.get("items", ()) or ())
+    if trias:
+        character.db.wallet = set_coins(character.db.wallet, coins(character.db.wallet) + trias)
+    if item_ids:
+        inventory = list(character.db.inventory or [])
+        inventory.extend(item_ids)
+        character.db.inventory = inventory
+
+    parts = []
+    if trias:
+        parts.append(f"{trias} trias")
+    if item_ids:
+        parts.append(", ".join(item_ids))
+    if not parts:
+        return "You find no usable loot."
+    return "You recover " + " and ".join(parts) + "."
 
 
 def target_enemy(character, enemy_id):
@@ -182,7 +209,8 @@ def jab(character):
     if vitality <= 0:
         enemy_obj.delete()
         character.db.engagement = {"target": None, "range": None}
-        return f"You jab {enemy['name']} for {damage} damage. {enemy['name']} collapses."
+        loot_text = award_loot(character, enemy)
+        return f"You jab {enemy['name']} for {damage} damage. {enemy['name']} collapses.\n{loot_text}"
 
     enemy_obj.db.vitality = vitality
     pressure = apply_enemy_retaliation(character, enemy)

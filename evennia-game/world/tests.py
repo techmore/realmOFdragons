@@ -284,6 +284,8 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("attack")
         self.assertEqual(character.db.engagement["target"], None)
         self.assertEqual(character.db.health, 26)
+        self.assertEqual(character.db.wallet["trias"], 103)
+        self.assertIn("torch", character.db.inventory)
         self.assertFalse(
             [
                 obj
@@ -291,6 +293,12 @@ class DRCommandSmokeTests(TestCase):
                 if obj.db.npc_type == "enemy" and obj.db.enemy_id == "rv-mud-beetle"
             ]
         )
+
+    def test_enemy_loot_tables_are_defined(self):
+        for enemy in ENEMIES.values():
+            self.assertIn("loot", enemy)
+            self.assertIn("trias", enemy["loot"])
+            self.assertIn("items", enemy["loot"])
 
 
 class DRGuildTests(SimpleTestCase):

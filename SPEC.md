@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added deterministic enemy loot tables for current Crossing enemy templates.
+- Added defeat rewards that immediately grant trias to the wallet and item ids to pack inventory.
+- Added smoke coverage proving enemy defeat awards currency and loot without triggering retaliation after collapse.
 - Added deterministic enemy melee pressure after non-lethal player attacks, with stance-modified retaliation damage.
 - Added character `health` / `max_health` state plus `health` / `vitals` command output.
 - Added smoke coverage proving offensive stance takes heavier retaliation, defensive stance reduces retaliation, health mutates, and defeated enemies stop retaliating.
