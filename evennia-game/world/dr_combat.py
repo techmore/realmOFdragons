@@ -5,7 +5,7 @@ Clean-room enemy and engagement helpers for the Evennia migration.
 from evennia import create_object
 from evennia.utils.create import create_script
 
-from world.dr_economy import coins, set_coins
+from world.dr_economy import ITEMS, coins, set_coins
 
 ENEMIES = {
     "rv-wolf-cub": {
@@ -198,6 +198,17 @@ def create_corpse(room, enemy_id, enemy):
     corpse.db.loot_trias = int(loot.get("trias", 0) or 0)
     corpse.db.loot_items = tuple(loot.get("items", ()) or ())
     corpse.db.desc = f"The remains of {enemy['name']} lie here."
+    for item_id in corpse.db.loot_items:
+        item = ITEMS.get(item_id, {"name": item_id, "description": item_id})
+        item_obj = create_object(
+            "typeclasses.objects.Item",
+            key=item["name"],
+            location=corpse,
+            home=room,
+        )
+        item_obj.db.item_id = item_id
+        item_obj.db.desc = item.get("description", item["name"])
+        item_obj.save()
     script = create_script("typeclasses.scripts.CorpseDecayScript", obj=corpse, start_delay=True)
     script.db.script_marker = "dr_corpse_decay"
     corpse.save()
@@ -216,19 +227,22 @@ def loot_corpse(character):
         return "There is no corpse here to loot."
     corpse = corpses[0]
     trias = int(corpse.db.loot_trias or 0)
-    item_ids = tuple(corpse.db.loot_items or ())
     if trias:
         character.db.wallet = set_coins(character.db.wallet, coins(character.db.wallet) + trias)
-    if item_ids:
-        inventory = list(character.db.inventory or [])
-        inventory.extend(item_ids)
-        character.db.inventory = inventory
+    item_ids = []
+    for item_obj in list(corpse.contents):
+        if item_obj.db.object_type == "item" and item_obj.db.item_id:
+            item_ids.append(item_obj.db.item_id)
+            item_obj.location = character.location
+            item_obj.home = character.location
+            item_obj.save()
 
     parts = []
     if trias:
         parts.append(f"{trias} trias")
     if item_ids:
         parts.append(", ".join(item_ids))
+    corpse.db.loot_items = ()
     corpse.delete()
     if not parts:
         return "You search the corpse but find no usable loot."

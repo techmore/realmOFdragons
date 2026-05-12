@@ -80,8 +80,8 @@ Custom systems still required:
    - Port enemies and room deployments.
    - Implement `scan`, `target`, `advance`, `retreat`, `range`, `stance`, `attack`, `jab`, `bash`, `defend`, `flee`.
    - Use Evennia Scripts/tickers for asynchronous pressure and roundtime-like behavior.
-   - Current status: initial Crossing enemy deployments build real enemy NPC objects, and command smoke covers `scan`, `target`, `range`, `advance`, `retreat`, `stance`, deterministic `jab`/`attack`, `bash`, `defend`, `flee`, roundtime blocking, manual `wait`/`recover`, damage, health, stance-modified enemy retaliation, lootable corpse objects, corpse decay Script hooks, manual respawn, respawn Script hooks, recovery Script hooks, automatic combat pressure Script lifecycle, balance mutation, and enemy defeat cleanup.
-   - Current next blocker: no richer object drops or deeper asynchronous combat Scripts exist yet.
+   - Current status: initial Crossing enemy deployments build real enemy NPC objects, and command smoke covers `scan`, `target`, `range`, `advance`, `retreat`, `stance`, deterministic `jab`/`attack`, `bash`, `defend`, `flee`, roundtime blocking, manual `wait`/`recover`, damage, health, stance-modified enemy retaliation, lootable corpse objects, physical item drops, `get`, corpse decay Script hooks, manual respawn, respawn Script hooks, recovery Script hooks, automatic combat pressure Script lifecycle, balance mutation, and enemy defeat cleanup.
+   - Current next blocker: no equipment-backed item objects, richer object drops, or deeper asynchronous combat Scripts exist yet.
 
 7. `Client`
    - Start with Evennia's built-in webclient.

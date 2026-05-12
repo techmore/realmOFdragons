@@ -226,3 +226,13 @@ class Corpse(Object):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.object_type = "corpse"
+
+
+class Item(Object):
+    """
+    Physical item object for dropped loot.
+    """
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.object_type = "item"

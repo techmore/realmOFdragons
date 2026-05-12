@@ -311,10 +311,35 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(corpses[0].db.enemy_id, "rv-mud-beetle")
         self.assertEqual(corpses[0].db.loot_trias, 3)
         self.assertEqual(corpses[0].db.loot_items, ("torch",))
+        self.assertEqual(
+            [
+                obj.db.item_id
+                for obj in corpses[0].contents
+                if obj.db.object_type == "item"
+            ],
+            ["torch"],
+        )
 
         character.execute_cmd("loot corpse")
         self.assertEqual(character.db.wallet["trias"], 103)
+        self.assertNotIn("torch", character.db.inventory)
+        self.assertEqual(
+            [
+                obj.db.item_id
+                for obj in character.location.contents
+                if obj.db.object_type == "item"
+            ],
+            ["torch"],
+        )
+        character.execute_cmd("get torch")
         self.assertIn("torch", character.db.inventory)
+        self.assertFalse(
+            [
+                obj
+                for obj in character.location.contents
+                if obj.db.object_type == "item" and obj.db.item_id == "torch"
+            ]
+        )
         self.assertEqual(corpse_objects(character.location), [])
         self.assertFalse(
             [

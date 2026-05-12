@@ -178,6 +178,22 @@ def sell_item(character, item_id):
     return f"You sell {item['name']} from your {source} for {item['sell']} trias."
 
 
+def get_item(character, item_id):
+    ensure_economy_state(character)
+    item_id = (item_id or "").strip().lower().replace(" ", "_")
+    if not item_id:
+        return "Get what?"
+    for obj in list(character.location.contents):
+        if obj.db.object_type == "item" and obj.db.item_id == item_id:
+            inventory = list(character.db.inventory or [])
+            inventory.append(item_id)
+            character.db.inventory = inventory
+            item = ITEMS.get(item_id, {"name": obj.key})
+            obj.delete()
+            return f"You pick up {item['name']}."
+    return f'You do not see "{item_id}" here.'
+
+
 def inventory_text(character):
     ensure_economy_state(character)
     inventory = character.db.inventory or []

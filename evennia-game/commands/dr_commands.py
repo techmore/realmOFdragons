@@ -9,7 +9,7 @@ from evennia.commands.command import Command
 
 from world.dr_data import SKILLSETS, build_starter_skills
 from world.dr_combat import advance, bash, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, scan_room, stance, target_enemy, wait_recover
-from world.dr_economy import buy_item, format_shop, hands_text, inventory_text, sell_item, shop_talk
+from world.dr_economy import buy_item, format_shop, get_item, hands_text, inventory_text, sell_item, shop_talk
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race
 from world.dr_progression import advance_circle, train_skill
@@ -294,6 +294,22 @@ class CmdDRLoot(Command):
             self.caller.msg("Usage: loot corpse")
             return
         self.caller.msg(loot_corpse(self.caller))
+
+
+class CmdDRGet(Command):
+    """
+    Get a dropped item.
+
+    Usage:
+      get <item id>
+    """
+
+    key = "get"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(get_item(self.caller, self.args))
 
 
 class CmdDRHands(Command):

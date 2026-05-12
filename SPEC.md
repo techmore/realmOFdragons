@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added physical loot item objects for corpse item loot and a command-first `get <item id>` pickup path.
+- `loot corpse` now pays coin and spills item objects into the room; items enter pack inventory only after `get`.
+- Added smoke coverage proving corpse-contained item objects, room item drops after looting, and pickup into inventory.
 - Added `CorpseDecayScript` and attached it to newly created combat corpses.
 - Added smoke coverage proving unlooted corpses carry a decay Script and are removed when the decay Script ticks.
 - Added lootable corpse objects for defeated enemies instead of direct reward transfer on collapse.
