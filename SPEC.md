@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `CorpseDecayScript` and attached it to newly created combat corpses.
+- Added smoke coverage proving unlooted corpses carry a decay Script and are removed when the decay Script ticks.
 - Added lootable corpse objects for defeated enemies instead of direct reward transfer on collapse.
 - Added `loot corpse` command that transfers corpse trias and item ids into wallet/inventory, then removes the corpse.
 - Added smoke coverage proving defeat creates a corpse with loot metadata and rewards are only transferred after `loot corpse`.

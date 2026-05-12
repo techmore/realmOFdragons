@@ -299,8 +299,8 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("attack")
         self.assertEqual(character.db.health, 26)
         character.execute_cmd("health")
-        character.execute_cmd("recover")
-        character.execute_cmd("attack")
+        character.execute_cmd("defend")
+        character.execute_cmd("bash")
         self.assertEqual(character.db.engagement["target"], None)
         self.assertEqual(len(combat_pressure_scripts(character)), 0)
         self.assertEqual(character.db.health, 26)
@@ -401,6 +401,22 @@ class DRCommandSmokeTests(TestCase):
             self.assertIn("loot", enemy)
             self.assertIn("trias", enemy["loot"])
             self.assertIn("items", enemy["loot"])
+
+    def test_corpse_decay_script_removes_unlooted_corpse(self):
+        character = self.make_character("Corpse Decay Smoke")
+        self.walk_to_room(character, "crossing-RV02-005")
+        character.execute_cmd("target rv-ridge-hare")
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
+        character.execute_cmd("bash")
+        character.execute_cmd("defend")
+        character.execute_cmd("bash")
+        corpses = corpse_objects(character.location)
+        self.assertEqual(len(corpses), 1)
+        scripts = list(corpses[0].scripts.all())
+        self.assertEqual(len(scripts), 1)
+        scripts[0].at_repeat()
+        self.assertEqual(corpse_objects(character.location), [])
 
 
 class DRGuildTests(SimpleTestCase):

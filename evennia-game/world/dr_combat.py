@@ -198,6 +198,8 @@ def create_corpse(room, enemy_id, enemy):
     corpse.db.loot_trias = int(loot.get("trias", 0) or 0)
     corpse.db.loot_items = tuple(loot.get("items", ()) or ())
     corpse.db.desc = f"The remains of {enemy['name']} lie here."
+    script = create_script("typeclasses.scripts.CorpseDecayScript", obj=corpse, start_delay=True)
+    script.db.script_marker = "dr_corpse_decay"
     corpse.save()
     return corpse
 

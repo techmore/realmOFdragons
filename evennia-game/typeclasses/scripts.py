@@ -155,3 +155,21 @@ class CombatPressureScript(Script):
         from world.dr_combat import apply_enemy_pressure
 
         apply_enemy_pressure(self.obj)
+
+
+class CorpseDecayScript(Script):
+    """
+    Timer hook for corpse cleanup.
+    """
+
+    def at_script_creation(self):
+        self.key = "dr_corpse_decay"
+        self.interval = 60
+        self.start_delay = True
+        self.persistent = True
+
+    def at_repeat(self):
+        obj = self.obj
+        self.stop()
+        if obj:
+            obj.delete()
