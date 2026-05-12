@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added Evennia command-level smoke that builds the Crossing database world, walks actual Room/Exit objects to every guild registrar, joins all 11 canonical guilds with `join guild`, and reaches Circle 10 through `train`/`circle` commands.
+- Added a command smoke guard proving `join guild` fails outside registrar rooms, preserving in-world guild joining.
+- Updated the Evennia audit and roadmap to mark all-guild command-level Circle 10 progression smoke implemented and promote shops/NPCs/items as the next migration blocker.
 - Added Evennia guild helper logic for in-world registrar joining.
 - Added Evennia `join guild` command that reads guild registrar metadata from the current room.
 - Added Evennia tests proving no-registrar rejection, all 11 canonical guild joins, already-joined rejection, and unknown registrar rejection.

@@ -3,6 +3,7 @@ Evennia migration smoke/unit tests for clean-room DR systems.
 """
 
 from django.test import SimpleTestCase, TestCase
+from evennia.utils.create import create_object
 
 from world.dr_data import GUILDS, RACES, SKILLSETS, build_starter_skills
 from world.dr_guilds import join_guild
@@ -83,6 +84,76 @@ class DRWorldBuilderTests(TestCase):
         build_crossing_world()
         room = find_built_room("crossing-RV02-002")
         self.assertEqual(room.db.targets, ("rv-wolf-cub",))
+
+
+class DRCommandSmokeTests(TestCase):
+    def make_character(self, key):
+        build_crossing_world()
+        start = find_built_room(START_ROOM_ID)
+        character = create_object(
+            "typeclasses.characters.Character",
+            key=key,
+            location=start,
+            home=start,
+        )
+        character.db.guild_id = "commoner"
+        character.db.guild_name = "Unaffiliated"
+        character.db.circle = 1
+        character.db.skills = build_starter_skills()
+        return character
+
+    def walk_to_room(self, character, destination_room_id):
+        current_room_id = character.location.db.dr_room_id
+        for direction in find_path(current_room_id, destination_room_id):
+            exit_obj = next(
+                (
+                    candidate
+                    for candidate in character.location.exits
+                    if candidate.key == direction
+                ),
+                None,
+            )
+            self.assertIsNotNone(
+                exit_obj,
+                f"Missing exit {direction!r} from {current_room_id!r}",
+            )
+            character.move_to(exit_obj.destination, quiet=True)
+            current_room_id = character.location.db.dr_room_id
+        self.assertEqual(character.location.db.dr_room_id, destination_room_id)
+
+    def train_and_circle_to(self, character, target_circle):
+        attempts = 0
+        while character.db.circle < target_circle and attempts < 500:
+            attempts += 1
+            previous_circle = character.db.circle
+            character.execute_cmd("circle")
+            if character.db.circle > previous_circle:
+                continue
+            character.execute_cmd("train")
+        self.assertEqual(
+            character.db.circle,
+            target_circle,
+            f"{character.key} did not reach Circle {target_circle}",
+        )
+
+    def test_join_guild_requires_a_registrar_room_command(self):
+        character = self.make_character("Registrar Gate Smoke")
+        character.execute_cmd("join guild")
+        self.assertEqual(character.db.guild_id, "commoner")
+        self.assertEqual(character.db.guild_name, "Unaffiliated")
+
+    def test_all_guilds_join_and_reach_circle_ten_through_commands(self):
+        registrars = guild_registrar_rooms()
+
+        for guild_id, guild_name in GUILDS.items():
+            character = self.make_character(f"{guild_name} Smoke")
+            self.walk_to_room(character, registrars[guild_id])
+
+            character.execute_cmd("join guild")
+            self.assertEqual(character.db.guild_id, guild_id)
+            self.assertEqual(character.db.guild_name, guild_name)
+
+            self.train_and_circle_to(character, 10)
 
 
 class DRGuildTests(SimpleTestCase):

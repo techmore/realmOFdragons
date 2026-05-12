@@ -94,8 +94,7 @@ Recommendation:
 
 Status:
 
-- Partially implemented after this audit: Crossing registrar rooms now carry guild metadata, `join guild` exists in Evennia, and helper tests prove no-registrar rejection plus all 11 canonical guild joins.
-- Remaining work: add command-level Evennia smoke that walks to every registrar room and joins through the real Room/Exit database objects.
+- Implemented after this audit: Crossing registrar rooms now carry guild metadata, `join guild` exists in Evennia, helper tests prove no-registrar rejection plus all 11 canonical guild joins, and command-level smoke walks actual Room/Exit objects to every registrar before joining all 11 guilds.
 
 ### P1 - Circle 1-10 progression exists only as pure helper logic
 
@@ -110,6 +109,10 @@ Recommendation:
 
 - After registrar rooms exist, add an Evennia smoke test that joins each guild, trains through text commands, and circles to 10.
 - Keep the prototype threshold for now so the smoke stays fast.
+
+Status:
+
+- Implemented after this audit: command-level Evennia smoke now joins every canonical guild at its registrar and advances each one to Circle 10 through `train` and `circle` commands.
 
 ### P1 - Shops, NPCs, inventory, hands, and wallet are not ported
 
@@ -176,6 +179,6 @@ Recommendation:
 2. Add race-only Evennia character creation/selection tests.
 3. Add Crossing room data and idempotent world builder.
 4. Add guild registrar metadata and `join guild`.
-5. Add all-guild Circle 10 Evennia smoke.
+5. Add all-guild Circle 10 Evennia smoke. Done after this audit.
 6. Port shops/NPCs/items.
 7. Port enemies and asynchronous range combat.

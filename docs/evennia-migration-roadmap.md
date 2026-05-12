@@ -69,9 +69,11 @@ Custom systems still required:
    - Add registrar rooms.
    - Implement `join guild`.
    - Implement `skills`, `train`, `circle`, skill pools, and Circle 1-10 requirements.
+   - Current status: command smoke builds Crossing, walks actual Room/Exit paths to every guild registrar, joins all 11 guilds, and advances each guild to Circle 10 through `train`/`circle`.
 
 5. `Economy`
    - Port item catalog, shops, NPC dialogue, wallet, buy/sell, hands, inventory, and equipment.
+   - Current next blocker: Evennia has no shopkeeper NPC objects, item catalog commands, buy/sell flow, hands display, or inventory command parity yet.
 
 6. `Combat`
    - Port enemies and room deployments.
