@@ -6,6 +6,7 @@ from django.test import SimpleTestCase, TestCase
 from evennia.utils.create import create_object
 
 from world.dr_data import GUILDS, RACES, SKILLSETS, build_starter_skills
+from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token
 from world.dr_progression import advance_circle, primary_skill_for_guild, resolve_skill_id, train_skill
@@ -100,6 +101,9 @@ class DRCommandSmokeTests(TestCase):
         character.db.guild_name = "Unaffiliated"
         character.db.circle = 1
         character.db.skills = build_starter_skills()
+        character.db.wallet = {"plat": 0, "trias": 100, "lucan": 0, "silk": 0}
+        character.db.inventory = []
+        character.db.hands = {"left": None, "right": None}
         return character
 
     def walk_to_room(self, character, destination_room_id):
@@ -154,6 +158,30 @@ class DRCommandSmokeTests(TestCase):
             self.assertEqual(character.db.guild_name, guild_name)
 
             self.train_and_circle_to(character, 10)
+
+    def test_shop_buy_sell_inventory_and_hands_commands(self):
+        character = self.make_character("Economy Smoke")
+
+        character.execute_cmd("shop")
+        character.execute_cmd("shop talk")
+        character.execute_cmd("buy torch")
+        self.assertIn("torch", character.db.inventory)
+        self.assertEqual(character.db.wallet["trias"], 95)
+
+        character.execute_cmd("inventory")
+        character.execute_cmd("hands")
+        character.execute_cmd("sell torch")
+        self.assertNotIn("torch", character.db.inventory)
+        self.assertEqual(character.db.wallet["trias"], 97)
+
+    def test_shop_data_has_stock_and_dialogue(self):
+        self.assertGreaterEqual(len(SHOPS), 3)
+        for shop in SHOPS.values():
+            self.assertTrue(shop["keeper"])
+            self.assertTrue(shop["dialogue"])
+            self.assertTrue(shop["stock"])
+            for item_id in shop["stock"]:
+                self.assertIn(item_id, ITEMS)
 
 
 class DRGuildTests(SimpleTestCase):

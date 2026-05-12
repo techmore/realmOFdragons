@@ -1,0 +1,201 @@
+"""
+Clean-room Crossing economy helpers for the Evennia migration.
+
+This starts with Attribute-backed item state so commands, smoke tests, and
+world data can stabilize before promoting individual inventory entries to
+full Evennia Object instances.
+"""
+
+ITEMS = {
+    "torch": {
+        "name": "Torch",
+        "price": 5,
+        "sell": 2,
+        "slot": "held",
+        "description": "A pitch torch wrapped for travel.",
+    },
+    "travel_rations": {
+        "name": "Travel Rations",
+        "price": 8,
+        "sell": 3,
+        "slot": "pack",
+        "description": "Dry trail food packed in waxed cloth.",
+    },
+    "small_blade": {
+        "name": "Small Practice Blade",
+        "price": 35,
+        "sell": 14,
+        "slot": "right",
+        "description": "A blunt-edged practice blade for basic drills.",
+    },
+    "leather_shield": {
+        "name": "Leather Shield",
+        "price": 30,
+        "sell": 12,
+        "slot": "left",
+        "description": "A round shield faced with boiled leather.",
+    },
+    "practice_arrows": {
+        "name": "Bundle of Practice Arrows",
+        "price": 12,
+        "sell": 4,
+        "slot": "pack",
+        "description": "A tied bundle of light practice arrows.",
+    },
+}
+
+SHOPS = {
+    "crossing-TG01-001": {
+        "name": "Town Green Provisioner",
+        "keeper": "Marta",
+        "dialogue": "Marta says, 'Roads are safer when you carry light and plan ahead.'",
+        "stock": ("torch", "travel_rations"),
+    },
+    "crossing-RV02-002": {
+        "name": "Riverside Field Outfitter",
+        "keeper": "Dannen",
+        "dialogue": "Dannen says, 'Keep your shield up and your footing steady.'",
+        "stock": ("small_blade", "leather_shield", "practice_arrows"),
+    },
+    "crossing-GU10-001": {
+        "name": "Guildhall Arms Table",
+        "keeper": "Kresh",
+        "dialogue": "Kresh says, 'Training gear is cheap. Bad habits are not.'",
+        "stock": ("small_blade", "leather_shield"),
+    },
+}
+
+
+def coins(wallet):
+    wallet = wallet or {}
+    return int(wallet.get("trias", 0) or 0)
+
+
+def set_coins(wallet, amount):
+    wallet = dict(wallet or {})
+    wallet["trias"] = max(0, int(amount))
+    wallet.setdefault("plat", 0)
+    wallet.setdefault("lucan", 0)
+    wallet.setdefault("silk", 0)
+    return wallet
+
+
+def ensure_economy_state(character):
+    if not character.db.wallet:
+        character.db.wallet = {"plat": 0, "trias": 100, "lucan": 0, "silk": 0}
+    elif coins(character.db.wallet) <= 0:
+        character.db.wallet = set_coins(character.db.wallet, 100)
+    if character.db.inventory is None:
+        character.db.inventory = []
+    if character.db.hands is None:
+        character.db.hands = {"left": None, "right": None}
+
+
+def current_shop(room):
+    if not room:
+        return None
+    return SHOPS.get(room.db.dr_room_id)
+
+
+def format_shop(room):
+    shop = current_shop(room)
+    if not shop:
+        return "There is no shop counter here."
+    lines = [
+        f"{shop['name']} is watched by {shop['keeper']}.",
+        "Goods for sale:",
+    ]
+    for item_id in shop["stock"]:
+        item = ITEMS[item_id]
+        lines.append(f"{item_id}: {item['name']} - {item['price']} trias")
+    return "\n".join(lines)
+
+
+def shop_talk(room):
+    shop = current_shop(room)
+    if not shop:
+        return "There is no shopkeeper here."
+    return shop["dialogue"]
+
+
+def buy_item(character, item_id):
+    ensure_economy_state(character)
+    shop = current_shop(character.location)
+    item_id = (item_id or "").strip().lower().replace(" ", "_")
+    if not shop:
+        return "There is no shop counter here."
+    if not item_id:
+        return "Buy what?"
+    if item_id not in shop["stock"] or item_id not in ITEMS:
+        return f'The shop does not stock "{item_id}".'
+    item = ITEMS[item_id]
+    wallet = character.db.wallet
+    if coins(wallet) < item["price"]:
+        return f"You need {item['price']} trias to buy {item['name']}."
+
+    character.db.wallet = set_coins(wallet, coins(wallet) - item["price"])
+    inventory = list(character.db.inventory or [])
+    hands = dict(character.db.hands or {"left": None, "right": None})
+    if item["slot"] in ("left", "right") and not hands.get(item["slot"]):
+        hands[item["slot"]] = item_id
+        character.db.hands = hands
+        return f"You buy {item['name']} for {item['price']} trias and hold it in your {item['slot']} hand."
+    inventory.append(item_id)
+    character.db.inventory = inventory
+    return f"You buy {item['name']} for {item['price']} trias."
+
+
+def sell_item(character, item_id):
+    ensure_economy_state(character)
+    shop = current_shop(character.location)
+    item_id = (item_id or "").strip().lower().replace(" ", "_")
+    if not shop:
+        return "There is no shop counter here."
+    if not item_id:
+        return "Sell what?"
+    if item_id not in ITEMS:
+        return f'Unknown item "{item_id}".'
+
+    inventory = list(character.db.inventory or [])
+    hands = dict(character.db.hands or {"left": None, "right": None})
+    source = None
+    if item_id in inventory:
+        inventory.remove(item_id)
+        source = "pack"
+    else:
+        for hand, held_item_id in hands.items():
+            if held_item_id == item_id:
+                hands[hand] = None
+                source = hand
+                break
+    if not source:
+        return f"You are not carrying {ITEMS[item_id]['name']}."
+
+    item = ITEMS[item_id]
+    character.db.inventory = inventory
+    character.db.hands = hands
+    character.db.wallet = set_coins(character.db.wallet, coins(character.db.wallet) + item["sell"])
+    return f"You sell {item['name']} from your {source} for {item['sell']} trias."
+
+
+def inventory_text(character):
+    ensure_economy_state(character)
+    inventory = character.db.inventory or []
+    if not inventory:
+        return "You are carrying nothing in your pack."
+    lines = ["You are carrying:"]
+    for item_id in inventory:
+        item = ITEMS.get(item_id, {"name": item_id})
+        lines.append(f"- {item['name']} ({item_id})")
+    return "\n".join(lines)
+
+
+def hands_text(character):
+    ensure_economy_state(character)
+    hands = character.db.hands or {"left": None, "right": None}
+    lines = ["Hands:"]
+    for hand in ("left", "right"):
+        item_id = hands.get(hand)
+        item = ITEMS.get(item_id, {"name": "Empty"})
+        lines.append(f"{hand}: {item['name'] if item_id else 'Empty'}")
+    return "\n".join(lines)

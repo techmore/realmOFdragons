@@ -8,6 +8,7 @@ first migration bridge from the Node prototype into Evennia's command loop.
 from evennia.commands.command import Command
 
 from world.dr_data import SKILLSETS, build_starter_skills
+from world.dr_economy import buy_item, format_shop, hands_text, inventory_text, sell_item, shop_talk
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race
 from world.dr_progression import advance_circle, train_skill
@@ -203,6 +204,92 @@ class CmdDRCircle(Command):
         character.db.circle = state["circle"]
         character.db.skills = state["skills"]
         character.msg("\n".join(events))
+
+
+class CmdDRShop(Command):
+    """
+    Show or talk to the current shopkeeper.
+
+    Usage:
+      shop
+      shop talk
+    """
+
+    key = "shop"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        action = self.args.strip().lower()
+        if action == "talk":
+            self.caller.msg(shop_talk(self.caller.location))
+            return
+        self.caller.msg(format_shop(self.caller.location))
+
+
+class CmdDRBuy(Command):
+    """
+    Buy an item from the current shop.
+
+    Usage:
+      buy <item id>
+    """
+
+    key = "buy"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(buy_item(self.caller, self.args))
+
+
+class CmdDRSell(Command):
+    """
+    Sell a carried item to the current shop.
+
+    Usage:
+      sell <item id>
+    """
+
+    key = "sell"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(sell_item(self.caller, self.args))
+
+
+class CmdDRInventory(Command):
+    """
+    Show carried pack inventory.
+
+    Usage:
+      inventory
+    """
+
+    key = "inventory"
+    aliases = ["inv"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(inventory_text(self.caller))
+
+
+class CmdDRHands(Command):
+    """
+    Show held items.
+
+    Usage:
+      hands
+    """
+
+    key = "hands"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(hands_text(self.caller))
 
 
 class CmdDRBuildCrossing(Command):

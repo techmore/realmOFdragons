@@ -39,4 +39,6 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.guild_name = "Unaffiliated"
         self.db.circle = 1
         self.db.skills = {}
-        self.db.wallet = {"plat": 0, "trias": 0, "lucan": 0, "silk": 0}
+        self.db.wallet = {"plat": 0, "trias": 100, "lucan": 0, "silk": 0}
+        self.db.inventory = []
+        self.db.hands = {"left": None, "right": None}

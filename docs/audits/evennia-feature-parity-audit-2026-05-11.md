@@ -130,6 +130,11 @@ Recommendation:
 - Model shopkeepers as Evennia objects/NPCs and item inventory as Evennia objects or Attribute-backed prototypes.
 - Add buy/sell/dialogue tests matching the prototype smoke expectations.
 
+Status:
+
+- Partially implemented after this audit: Evennia now has initial Crossing shop data, shopkeeper names/dialogue, stock catalogs, wallet/inventory/hands Attributes, and command smoke for `shop`, `shop talk`, `buy`, `sell`, `inventory`, and `hands`.
+- Remaining work: promote shopkeepers to in-room NPC objects, add more Crossing shops from the reference implementation, implement richer item/equipment semantics, and add stock refresh behavior.
+
 ### P1 - Enemies and asynchronous range combat are not ported
 
 Subsystem: combat / scripts
