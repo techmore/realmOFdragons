@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added Evennia-side pure progression helpers for skill-name normalization, guild primary skill lookup, training, skill pool gains, Circle requirements, and Circle advancement.
+- Added Evennia text commands `train`, `train <skill>`, and `circle` to the character command set.
+- Added Evennia tests covering 67-skill catalog counts, DragonRealms skillset counts, guild primary skills, spaced skill-name resolution, legacy `scouting` alias, training rank-up, commoner Circle rejection, and Circle 2 advancement.
 - Began the Evennia migration by initializing `evennia-game/` as the new target runtime while preserving the Node/React prototype as a regression reference.
 - Added `requirements-evennia.txt` pinned to Evennia 5.0.1 plus `setuptools` for the Python 3.13 launcher compatibility path.
 - Added Evennia-side clean-room data for DragonRealms races, guilds, 67 skills, skillsets, and guild primary skills.

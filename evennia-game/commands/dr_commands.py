@@ -8,6 +8,7 @@ first migration bridge from the Node prototype into Evennia's command loop.
 from evennia.commands.command import Command
 
 from world.dr_data import SKILLSETS, build_starter_skills
+from world.dr_progression import advance_circle, train_skill
 
 
 class CmdDRScore(Command):
@@ -82,3 +83,53 @@ class CmdDRSkills(Command):
             lines.append(f"{skill_id}: {skill['name']} rank {skill['rank']}, pool {skill['pool']}")
 
         character.msg("\n".join(lines))
+
+
+class CmdDRTrain(Command):
+    """
+    Train a skill.
+
+    Usage:
+      train
+      train <skill>
+    """
+
+    key = "train"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        state = {
+            "guild_id": character.db.guild_id or "commoner",
+            "skills": character.db.skills or build_starter_skills(),
+        }
+        events = train_skill(state, self.args.strip())
+        character.db.skills = state["skills"]
+        character.msg("\n".join(events))
+
+
+class CmdDRCircle(Command):
+    """
+    Check or advance Circle progression.
+
+    Usage:
+      circle
+    """
+
+    key = "circle"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        state = {
+            "guild_id": character.db.guild_id or "commoner",
+            "guild_name": character.db.guild_name or "Unaffiliated",
+            "circle": character.db.circle or 1,
+            "skills": character.db.skills or build_starter_skills(),
+        }
+        events = advance_circle(state)
+        character.db.circle = state["circle"]
+        character.db.skills = state["skills"]
+        character.msg("\n".join(events))
