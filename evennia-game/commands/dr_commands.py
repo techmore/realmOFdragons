@@ -8,7 +8,7 @@ first migration bridge from the Node prototype into Evennia's command loop.
 from evennia.commands.command import Command
 
 from world.dr_data import SKILLSETS, build_starter_skills
-from world.dr_combat import advance, health_text, jab, range_status, respawn_room_enemies, retreat, scan_room, stance, target_enemy, wait_recover
+from world.dr_combat import advance, bash, defend, flee, health_text, jab, range_status, respawn_room_enemies, retreat, scan_room, stance, target_enemy, wait_recover
 from world.dr_economy import buy_item, format_shop, hands_text, inventory_text, sell_item, shop_talk
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race
@@ -408,6 +408,22 @@ class CmdDRJab(Command):
         self.caller.msg(jab(self.caller))
 
 
+class CmdDRBash(Command):
+    """
+    Bash a targeted enemy at melee range.
+
+    Usage:
+      bash
+    """
+
+    key = "bash"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(bash(self.caller))
+
+
 class CmdDRStance(Command):
     """
     View or set combat stance.
@@ -425,6 +441,38 @@ class CmdDRStance(Command):
 
     def func(self):
         self.caller.msg(stance(self.caller, self.args))
+
+
+class CmdDRDefend(Command):
+    """
+    Recover into a defensive guard.
+
+    Usage:
+      defend
+    """
+
+    key = "defend"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(defend(self.caller))
+
+
+class CmdDRFlee(Command):
+    """
+    Break engagement.
+
+    Usage:
+      flee
+    """
+
+    key = "flee"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(flee(self.caller))
 
 
 class CmdDRWait(Command):

@@ -39,6 +39,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added command-first `bash`, `defend`, and `flee` combat maneuvers.
+- `bash` provides a heavier melee attack with longer roundtime, enemy retaliation, loot on defeat, and pressure cleanup.
+- `defend` recovers balance/roundtime while setting defensive stance; `flee` breaks engagement and stops pressure Scripts.
+- Added smoke coverage for bash damage/roundtime, defend recovery, and flee pressure cleanup.
 - Added automatic combat pressure Script lifecycle: targeting starts one pressure Script, repeated targeting does not duplicate it, retreat cleanup stops it, and enemy defeat stops it.
 - Added smoke coverage for pressure Script attach/deduplication/cleanup during target, retreat, defeat, and retarget-after-respawn flows.
 - Added `CombatPressureScript` as the first timed enemy pressure hook for engaged characters.

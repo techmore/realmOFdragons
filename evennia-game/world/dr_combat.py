@@ -300,6 +300,40 @@ def jab(character):
     return f"You jab {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.\n{pressure}"
 
 
+def bash(character):
+    ensure_engagement(character)
+    if int(character.db.roundtime or 0) > 0:
+        return f"You are still recovering for {character.db.roundtime} pulse."
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target")
+    if not target_id:
+        return "Bash what? Target an enemy first."
+    if engagement.get("range") != "melee":
+        return "You need to be at melee range to bash."
+
+    enemy = ENEMIES.get(target_id, {"name": target_id})
+    enemy_obj = find_enemy_object(character.location, target_id)
+    if not enemy_obj:
+        character.db.engagement = {"target": None, "range": None}
+        stop_combat_pressure(character)
+        return f"{enemy['name']} is no longer here."
+
+    damage = 10
+    vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
+    character.db.balance = "recovering"
+    character.db.roundtime = 2
+    if vitality <= 0:
+        enemy_obj.delete()
+        character.db.engagement = {"target": None, "range": None}
+        stop_combat_pressure(character)
+        loot_text = award_loot(character, enemy)
+        return f"You bash {enemy['name']} for {damage} damage. {enemy['name']} collapses.\n{loot_text}"
+
+    enemy_obj.db.vitality = vitality
+    pressure = apply_enemy_retaliation(character, enemy)
+    return f"You bash {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.\n{pressure}"
+
+
 def stance(character, requested):
     ensure_engagement(character)
     requested = (requested or "").strip().lower()
@@ -309,6 +343,26 @@ def stance(character, requested):
         return f'Unknown stance "{requested}". Stances: {", ".join(STANCES)}.'
     character.db.stance = requested
     return f"You settle into a {requested} stance."
+
+
+def defend(character):
+    ensure_engagement(character)
+    character.db.stance = "defensive"
+    character.db.balance = "balanced"
+    character.db.roundtime = 0
+    return "You set your feet, raise your guard, and recover your balance."
+
+
+def flee(character):
+    ensure_engagement(character)
+    engagement = dict(character.db.engagement or {})
+    if not engagement.get("target"):
+        return "You are not engaged."
+    character.db.engagement = {"target": None, "range": None}
+    character.db.balance = "recovering"
+    character.db.roundtime = 1
+    stop_combat_pressure(character)
+    return "You break away from combat and flee to missile range."
 
 
 def wait_recover(character):

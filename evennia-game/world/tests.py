@@ -356,6 +356,36 @@ class DRCommandSmokeTests(TestCase):
         pressure_script.at_repeat()
         self.assertEqual(character.db.health, 25)
 
+    def test_bash_defend_and_flee_commands(self):
+        character = self.make_character("Maneuver Smoke")
+        self.walk_to_room(character, "crossing-RV02-003")
+        character.execute_cmd("target rv-boarlet")
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
+        self.assertEqual(len(combat_pressure_scripts(character)), 1)
+
+        character.execute_cmd("bash")
+        boarlet = next(
+            obj
+            for obj in character.location.contents
+            if obj.db.npc_type == "enemy" and obj.db.enemy_id == "rv-boarlet"
+        )
+        self.assertEqual(boarlet.db.vitality, 12)
+        self.assertEqual(character.db.roundtime, 2)
+        self.assertEqual(character.db.balance, "recovering")
+        self.assertEqual(character.db.health, 28)
+
+        character.execute_cmd("defend")
+        self.assertEqual(character.db.stance, "defensive")
+        self.assertEqual(character.db.roundtime, 0)
+        self.assertEqual(character.db.balance, "balanced")
+
+        character.execute_cmd("flee")
+        self.assertEqual(character.db.engagement["target"], None)
+        self.assertEqual(character.db.roundtime, 1)
+        self.assertEqual(character.db.balance, "recovering")
+        self.assertEqual(len(combat_pressure_scripts(character)), 0)
+
     def test_enemy_loot_tables_are_defined(self):
         for enemy in ENEMIES.values():
             self.assertIn("loot", enemy)
