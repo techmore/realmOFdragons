@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added deterministic room enemy respawn helper for configured Crossing hunting-room targets.
+- Fixed enemy scanning/targeting to use actual in-room enemy NPCs only, so defeated enemies stay absent until respawn.
+- Added builder-only `respawn` / `repop` command and smoke coverage for defeat, empty room enemy list, respawn, and retargeting.
 - Added deterministic enemy loot tables for current Crossing enemy templates.
 - Added defeat rewards that immediately grant trias to the wallet and item ids to pack inventory.
 - Added smoke coverage proving enemy defeat awards currency and loot without triggering retaliation after collapse.

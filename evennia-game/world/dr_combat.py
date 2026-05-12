@@ -2,6 +2,8 @@
 Clean-room enemy and engagement helpers for the Evennia migration.
 """
 
+from evennia import create_object
+
 from world.dr_economy import coins, set_coins
 
 ENEMIES = {
@@ -42,12 +44,11 @@ STANCES = ("balanced", "offensive", "defensive")
 def room_enemy_ids(room):
     if not room:
         return ()
-    enemy_ids = tuple(
+    return tuple(
         obj.db.enemy_id
         for obj in room.contents
         if obj.db.npc_type == "enemy" and obj.db.enemy_id
     )
-    return enemy_ids or tuple(room.db.targets or ())
 
 
 def find_enemy_object(room, enemy_id):
@@ -68,6 +69,41 @@ def scan_room(room):
         enemy = ENEMIES.get(enemy_id, {"name": enemy_id, "aggression": "unknown"})
         lines.append(f"- {enemy['name']} ({enemy_id}), {enemy['aggression']}")
     return "\n".join(lines)
+
+
+def create_enemy(room, enemy_id):
+    enemy = ENEMIES[enemy_id]
+    enemy_obj = create_object(
+        "typeclasses.npcs.Enemy",
+        key=enemy["name"],
+        location=room,
+        home=room,
+    )
+    enemy_obj.db.enemy_id = enemy_id
+    enemy_obj.db.vitality = enemy["vitality"]
+    enemy_obj.db.aggression = enemy["aggression"]
+    enemy_obj.db.desc = enemy["description"]
+    enemy_obj.save()
+    return enemy_obj
+
+
+def respawn_room_enemies(room):
+    if not room:
+        return "There is nowhere to respawn enemies."
+    target_ids = tuple(room.db.targets or ())
+    if not target_ids:
+        return "No enemy spawns are configured here."
+
+    existing = set(room_enemy_ids(room))
+    created = []
+    for enemy_id in target_ids:
+        if enemy_id in existing or enemy_id not in ENEMIES:
+            continue
+        create_enemy(room, enemy_id)
+        created.append(ENEMIES[enemy_id]["name"])
+    if not created:
+        return "Enemy spawns are already active here."
+    return "Respawned: " + ", ".join(created) + "."
 
 
 def ensure_engagement(character):

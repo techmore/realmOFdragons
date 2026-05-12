@@ -6,7 +6,7 @@ from django.test import SimpleTestCase, TestCase
 from evennia.utils.create import create_object
 
 from world.dr_data import GUILDS, RACES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES
+from world.dr_combat import ENEMIES, respawn_room_enemies, room_enemy_ids
 from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token
@@ -293,6 +293,14 @@ class DRCommandSmokeTests(TestCase):
                 if obj.db.npc_type == "enemy" and obj.db.enemy_id == "rv-mud-beetle"
             ]
         )
+        self.assertEqual(room_enemy_ids(character.location), ())
+        character.execute_cmd("scan")
+
+        result = respawn_room_enemies(character.location)
+        self.assertIn("Respawned: Mud Beetle.", result)
+        self.assertEqual(room_enemy_ids(character.location), ("rv-mud-beetle",))
+        character.execute_cmd("target rv-mud-beetle")
+        self.assertEqual(character.db.engagement["target"], "rv-mud-beetle")
 
     def test_enemy_loot_tables_are_defined(self):
         for enemy in ENEMIES.values():
