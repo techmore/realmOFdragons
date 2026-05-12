@@ -7,6 +7,7 @@ from django.test import SimpleTestCase
 from world.dr_data import RACES, SKILLSETS, build_starter_skills
 from world.dr_identity import choose_race, normalize_race_token
 from world.dr_progression import advance_circle, primary_skill_for_guild, resolve_skill_id, train_skill
+from world.dr_world import ROOMS, START_ROOM_ID, find_path, guild_registrar_rooms, validate_world_graph
 
 
 class DRDataTests(SimpleTestCase):
@@ -27,6 +28,27 @@ class DRDataTests(SimpleTestCase):
         self.assertEqual(primary_skill_for_guild("ranger"), "instinct")
         self.assertEqual(primary_skill_for_guild("warrior_mage"), "summoning")
         self.assertEqual(primary_skill_for_guild("commoner"), "athletics")
+
+
+class DRWorldTests(SimpleTestCase):
+    def test_crossing_world_graph_is_valid(self):
+        self.assertEqual(validate_world_graph(), [])
+        self.assertIn(START_ROOM_ID, ROOMS)
+        self.assertGreaterEqual(len(ROOMS), 25)
+
+    def test_all_guild_registrars_exist(self):
+        registrars = guild_registrar_rooms()
+        self.assertEqual(len(registrars), 11)
+        self.assertEqual(registrars["barbarian"], "crossing-GU10-001")
+        self.assertEqual(registrars["warrior_mage"], "crossing-GU11-001")
+
+    def test_all_guild_registrars_are_reachable_from_town_green(self):
+        for room_id in guild_registrar_rooms().values():
+            self.assertTrue(find_path(START_ROOM_ID, room_id), f"Expected path to {room_id}")
+
+    def test_hunting_rooms_are_reachable_from_town_green(self):
+        self.assertEqual(find_path(START_ROOM_ID, "crossing-RV02-002"), ["south", "south", "east"])
+        self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-005"))
 
 
 class DRProgressionTests(SimpleTestCase):

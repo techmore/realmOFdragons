@@ -39,6 +39,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added Evennia Crossing room graph data with deterministic room ids, town routes, hunting rooms, and all 11 guild registrar rooms.
+- Added Evennia world helpers for graph validation, guild registrar lookup, and shortest pathfinding.
+- Added Evennia tests proving the Crossing graph is valid, all guild registrars exist, all registrars are reachable from Town Green, and hunting rooms are reachable.
+- Updated the feature-parity audit to mark Crossing data/route work partially implemented and identify the Evennia database world builder as remaining work.
 - Added Evennia identity helpers for canonical race normalization and race selection.
 - Added Evennia `race` / `choose race` command for choosing one of the 11 canonical races while unaffiliated at Circle 1.
 - Added Evennia tests proving all 11 races can be selected as unaffiliated Circle 1 characters, invalid races are rejected, and race changes are blocked after guild join or Circle advancement.

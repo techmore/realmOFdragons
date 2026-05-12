@@ -70,6 +70,11 @@ Recommendation:
 - Add an idempotent Evennia world builder command/script.
 - Add tests for room count, critical route connectivity, and deterministic aliases.
 
+Status:
+
+- Partially implemented after this audit: added `world.dr_world` with Crossing room ids, exits, all 11 guild registrar rooms, hunting rooms, graph validation, registrar lookup, and pathfinding tests.
+- Remaining work: add an idempotent Evennia database world builder that creates actual Room/Exit objects from the data module.
+
 ### P0 - Guild registrars and in-world joining are missing in Evennia
 
 Subsystem: guilds / progression
