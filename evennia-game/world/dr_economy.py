@@ -6,6 +6,8 @@ world data can stabilize before promoting individual inventory entries to
 full Evennia Object instances.
 """
 
+from evennia import create_object
+
 ITEMS = {
     "torch": {
         "name": "Torch",
@@ -99,6 +101,31 @@ def current_shop(room):
     return SHOPS.get(room.db.dr_room_id)
 
 
+def create_item_object(item_id, location, home=None):
+    item = ITEMS[item_id]
+    item_obj = create_object(
+        "typeclasses.objects.Item",
+        key=item["name"],
+        location=location,
+        home=home or location,
+    )
+    item_obj.db.item_id = item_id
+    item_obj.db.desc = item["description"]
+    item_obj.save()
+    return item_obj
+
+
+def carried_item_objects(character, item_id=None):
+    objects = [
+        obj
+        for obj in character.contents
+        if obj.db.object_type == "item" and obj.db.item_id
+    ]
+    if item_id:
+        return [obj for obj in objects if obj.db.item_id == item_id]
+    return objects
+
+
 def format_shop(room):
     shop = current_shop(room)
     if not shop:
@@ -138,6 +165,7 @@ def buy_item(character, item_id):
     character.db.wallet = set_coins(wallet, coins(wallet) - item["price"])
     inventory = list(character.db.inventory or [])
     hands = dict(character.db.hands or {"left": None, "right": None})
+    item_obj = create_item_object(item_id, character, character.location)
     if item["slot"] in ("left", "right") and not hands.get(item["slot"]):
         hands[item["slot"]] = item_id
         character.db.hands = hands
@@ -164,11 +192,17 @@ def sell_item(character, item_id):
     if item_id in inventory:
         inventory.remove(item_id)
         source = "pack"
+        objects = carried_item_objects(character, item_id)
+        if objects:
+            objects[0].delete()
     else:
         for hand, held_item_id in hands.items():
             if held_item_id == item_id:
                 hands[hand] = None
                 source = hand
+                objects = carried_item_objects(character, item_id)
+                if objects:
+                    objects[0].delete()
                 break
     if not source:
         return f"You are not carrying {ITEMS[item_id]['name']}."
@@ -191,7 +225,9 @@ def get_item(character, item_id):
             inventory.append(item_id)
             character.db.inventory = inventory
             item = ITEMS.get(item_id, {"name": obj.key})
-            obj.delete()
+            obj.location = character
+            obj.home = character.location
+            obj.save()
             return f"You pick up {item['name']}."
     return f'You do not see "{item_id}" here.'
 
@@ -208,7 +244,7 @@ def wield_item(character, item_id):
         return f"{item['name']} is not a weapon you can wield."
 
     inventory = list(character.db.inventory or [])
-    if item_id not in inventory:
+    if item_id not in inventory or not carried_item_objects(character, item_id):
         return f"You are not carrying {item['name']}."
     hands = dict(character.db.hands or {"left": None, "right": None})
     if hands.get("right"):
@@ -234,10 +270,10 @@ def wear_item(character, item_id):
     inventory = list(character.db.inventory or [])
     hands = dict(character.db.hands or {"left": None, "right": None})
     source = None
-    if item_id in inventory:
+    if item_id in inventory and carried_item_objects(character, item_id):
         inventory.remove(item_id)
         source = "pack"
-    elif hands.get("left") == item_id:
+    elif hands.get("left") == item_id and carried_item_objects(character, item_id):
         hands["left"] = None
         source = "left hand"
     if not source:

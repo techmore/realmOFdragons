@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Promoted shop purchases and room pickups into physical Evennia `Item` objects carried by the character.
+- Updated sell/wield/wear/get flows to require and preserve object-backed item ownership while still maintaining the current pack/hands/equipment summaries.
+- Added smoke coverage proving bought, wielded, worn, picked-up, and sold items have corresponding physical object state.
 - Added first equipment-backed item handling with `wield`, `wear`, and `equipment` / `equip` commands.
 - Added character worn-equipment state while preserving left/right hands and pack inventory.
 - Added smoke coverage for buying gear, wielding a practice blade, wearing a leather shield, and rendering equipment state.

@@ -152,8 +152,8 @@ Recommendation:
 
 Status:
 
-- Partially implemented after this audit: Evennia now builds in-room enemy NPC objects for the current Crossing hunting rooms and supports `scan`, `target`, `range`, `advance`, `retreat`, `stance`, deterministic `jab`/`attack`, `bash`, `defend`, `flee`, roundtime blocking, manual `wait`/`recover`, damage, health, stance-modified enemy retaliation, lootable corpse objects, physical item drops, `get`, basic `wield`/`wear`/`equipment`, corpse decay Script hooks, manual room respawn, respawn Script hooks, recovery Script hooks, automatic combat pressure Script lifecycle, balance mutation, and enemy defeat cleanup.
-- Remaining work: promote shop purchases to physical objects, add richer object drops, and deepen Evennia Script/ticker-driven asynchronous combat behavior.
+- Partially implemented after this audit: Evennia now builds in-room enemy NPC objects for the current Crossing hunting rooms and supports object-backed shop purchases, `scan`, `target`, `range`, `advance`, `retreat`, `stance`, deterministic `jab`/`attack`, `bash`, `defend`, `flee`, roundtime blocking, manual `wait`/`recover`, damage, health, stance-modified enemy retaliation, lootable corpse objects, physical item drops, `get`, basic `wield`/`wear`/`equipment`, corpse decay Script hooks, manual room respawn, respawn Script hooks, recovery Script hooks, automatic combat pressure Script lifecycle, balance mutation, and enemy defeat cleanup.
+- Remaining work: add richer object drops and deepen Evennia Script/ticker-driven asynchronous combat behavior.
 - Remaining work: add richer object drops and deeper Evennia Script/ticker-driven asynchronous combat behavior.
 
 ### P1 - Data parity is manual and duplicated

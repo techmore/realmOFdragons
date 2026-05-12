@@ -73,7 +73,7 @@ Custom systems still required:
 
 5. `Economy`
    - Port item catalog, shops, NPC dialogue, wallet, buy/sell, hands, inventory, and equipment.
-   - Current status: initial Attribute-backed shop data, in-room shopkeeper NPC objects, shopkeeper dialogue, `shop`, `shop talk`, `buy`, `sell`, `inventory`, `hands`, wallet mutation, pack inventory, and hand display are implemented with command smoke.
+   - Current status: initial shop data, in-room shopkeeper NPC objects, shopkeeper dialogue, object-backed `buy`/`get` item ownership, `shop`, `shop talk`, `sell`, `inventory`, `hands`, `wield`, `wear`, `equipment`, wallet mutation, pack inventory, and hand display are implemented with command smoke.
    - Current next blocker: stock refresh is not modeled, Crossing shop coverage is still sparse, and item/equipment behavior is still minimal.
 
 6. `Combat`
@@ -81,7 +81,7 @@ Custom systems still required:
    - Implement `scan`, `target`, `advance`, `retreat`, `range`, `stance`, `attack`, `jab`, `bash`, `defend`, `flee`.
    - Use Evennia Scripts/tickers for asynchronous pressure and roundtime-like behavior.
    - Current status: initial Crossing enemy deployments build real enemy NPC objects, and command smoke covers `scan`, `target`, `range`, `advance`, `retreat`, `stance`, deterministic `jab`/`attack`, `bash`, `defend`, `flee`, roundtime blocking, manual `wait`/`recover`, damage, health, stance-modified enemy retaliation, lootable corpse objects, physical item drops, `get`, basic `wield`/`wear`/`equipment`, corpse decay Script hooks, manual respawn, respawn Script hooks, recovery Script hooks, automatic combat pressure Script lifecycle, balance mutation, and enemy defeat cleanup.
-   - Current next blocker: shop purchases are not physical objects yet, object drops are still sparse, and deeper asynchronous combat Scripts remain limited.
+   - Current next blocker: object drops are still sparse and deeper asynchronous combat Scripts remain limited.
 
 7. `Client`
    - Start with Evennia's built-in webclient.

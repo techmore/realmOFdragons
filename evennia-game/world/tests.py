@@ -221,12 +221,26 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("shop talk")
         character.execute_cmd("buy torch")
         self.assertIn("torch", character.db.inventory)
+        self.assertTrue(
+            [
+                obj
+                for obj in character.contents
+                if obj.db.object_type == "item" and obj.db.item_id == "torch"
+            ]
+        )
         self.assertEqual(character.db.wallet["trias"], 95)
 
         character.execute_cmd("inventory")
         character.execute_cmd("hands")
         character.execute_cmd("sell torch")
         self.assertNotIn("torch", character.db.inventory)
+        self.assertFalse(
+            [
+                obj
+                for obj in character.contents
+                if obj.db.object_type == "item" and obj.db.item_id == "torch"
+            ]
+        )
         self.assertEqual(character.db.wallet["trias"], 97)
 
     def test_wield_wear_and_equipment_commands(self):
@@ -238,12 +252,26 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("wield small_blade")
         self.assertEqual(character.db.hands["right"], "small_blade")
         self.assertNotIn("small_blade", character.db.inventory)
+        self.assertTrue(
+            [
+                obj
+                for obj in character.contents
+                if obj.db.object_type == "item" and obj.db.item_id == "small_blade"
+            ]
+        )
 
         character.execute_cmd("buy leather_shield")
         self.assertEqual(character.db.hands["left"], "leather_shield")
         character.execute_cmd("wear leather_shield")
         self.assertEqual(character.db.hands["left"], None)
         self.assertIn("leather_shield", character.db.equipment["worn"])
+        self.assertTrue(
+            [
+                obj
+                for obj in character.contents
+                if obj.db.object_type == "item" and obj.db.item_id == "leather_shield"
+            ]
+        )
         character.execute_cmd("equipment")
 
     def test_shop_data_has_stock_and_dialogue(self):
@@ -351,6 +379,13 @@ class DRCommandSmokeTests(TestCase):
         )
         character.execute_cmd("get torch")
         self.assertIn("torch", character.db.inventory)
+        self.assertTrue(
+            [
+                obj
+                for obj in character.contents
+                if obj.db.object_type == "item" and obj.db.item_id == "torch"
+            ]
+        )
         self.assertFalse(
             [
                 obj
