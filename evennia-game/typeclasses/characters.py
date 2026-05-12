@@ -46,3 +46,5 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.balance = "balanced"
         self.db.roundtime = 0
         self.db.stance = "balanced"
+        self.db.max_health = 30
+        self.db.health = 30

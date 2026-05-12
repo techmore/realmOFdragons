@@ -73,6 +73,31 @@ def ensure_engagement(character):
         character.db.roundtime = 0
     if character.db.stance is None:
         character.db.stance = "balanced"
+    if character.db.max_health is None:
+        character.db.max_health = 30
+    if character.db.health is None:
+        character.db.health = character.db.max_health
+
+
+def health_text(character):
+    ensure_engagement(character)
+    return f"Health: {character.db.health}/{character.db.max_health}. Balance: {character.db.balance}. Stance: {character.db.stance}."
+
+
+def retaliation_damage(character):
+    stance_name = character.db.stance or "balanced"
+    if stance_name == "defensive":
+        return 1
+    if stance_name == "offensive":
+        return 3
+    return 2
+
+
+def apply_enemy_retaliation(character, enemy):
+    damage = retaliation_damage(character)
+    health = max(0, int(character.db.health or 0) - damage)
+    character.db.health = health
+    return f"{enemy['name']} presses back for {damage} damage. You have {health} health remaining."
 
 
 def target_enemy(character, enemy_id):
@@ -160,7 +185,8 @@ def jab(character):
         return f"You jab {enemy['name']} for {damage} damage. {enemy['name']} collapses."
 
     enemy_obj.db.vitality = vitality
-    return f"You jab {enemy['name']} for {damage} damage. It has {vitality} vitality remaining."
+    pressure = apply_enemy_retaliation(character, enemy)
+    return f"You jab {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.\n{pressure}"
 
 
 def stance(character, requested):

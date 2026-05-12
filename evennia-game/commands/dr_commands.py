@@ -8,7 +8,7 @@ first migration bridge from the Node prototype into Evennia's command loop.
 from evennia.commands.command import Command
 
 from world.dr_data import SKILLSETS, build_starter_skills
-from world.dr_combat import advance, jab, range_status, retreat, scan_room, stance, target_enemy, wait_recover
+from world.dr_combat import advance, health_text, jab, range_status, retreat, scan_room, stance, target_enemy, wait_recover
 from world.dr_economy import buy_item, format_shop, hands_text, inventory_text, sell_item, shop_talk
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race
@@ -291,6 +291,23 @@ class CmdDRHands(Command):
 
     def func(self):
         self.caller.msg(hands_text(self.caller))
+
+
+class CmdDRHealth(Command):
+    """
+    Show current health and combat posture.
+
+    Usage:
+      health
+    """
+
+    key = "health"
+    aliases = ["vitals"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(health_text(self.caller))
 
 
 class CmdDRScan(Command):

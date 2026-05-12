@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added deterministic enemy melee pressure after non-lethal player attacks, with stance-modified retaliation damage.
+- Added character `health` / `max_health` state plus `health` / `vitals` command output.
+- Added smoke coverage proving offensive stance takes heavier retaliation, defensive stance reduces retaliation, health mutates, and defeated enemies stop retaliating.
 - Added Evennia combat stance state and the `stance` command for viewing or selecting `balanced`, `offensive`, or `defensive`.
 - Added deterministic roundtime state to characters: `jab`/`attack` now sets recovery, repeat attacks are blocked during roundtime, and `wait` / `recover` clears one recovery pulse.
 - Added command smoke proving stance selection, roundtime blocking, recovery, and continued enemy defeat flow.

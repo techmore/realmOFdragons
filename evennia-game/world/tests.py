@@ -141,6 +141,8 @@ class DRCommandSmokeTests(TestCase):
         character.db.balance = "balanced"
         character.db.roundtime = 0
         character.db.stance = "balanced"
+        character.db.max_health = 30
+        character.db.health = 30
         return character
 
     def walk_to_room(self, character, destination_room_id):
@@ -258,6 +260,7 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("jab")
         self.assertEqual(character.db.balance, "recovering")
         self.assertEqual(character.db.roundtime, 1)
+        self.assertEqual(character.db.health, 27)
         beetle = next(
             obj
             for obj in character.location.contents
@@ -272,10 +275,15 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.balance, "balanced")
         self.assertEqual(character.db.roundtime, 0)
 
+        character.execute_cmd("stance defensive")
+        self.assertEqual(character.db.stance, "defensive")
         character.execute_cmd("attack")
+        self.assertEqual(character.db.health, 26)
+        character.execute_cmd("health")
         character.execute_cmd("recover")
         character.execute_cmd("attack")
         self.assertEqual(character.db.engagement["target"], None)
+        self.assertEqual(character.db.health, 26)
         self.assertFalse(
             [
                 obj
