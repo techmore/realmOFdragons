@@ -39,6 +39,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added an idempotent Evennia Crossing world builder that creates/updates actual Room and Exit objects from `world.dr_world`.
+- Crossing rooms now carry deterministic room id aliases plus `dr_room_id`, `guild`, and `targets` Attributes for later systems.
+- Added builder command `drbuild crossing` and wired initial setup to build the Crossing database world.
+- Added Evennia database tests proving Crossing rooms/exits are created, rebuilds are idempotent, and guild/hunting metadata is stored.
 - Added Evennia Crossing room graph data with deterministic room ids, town routes, hunting rooms, and all 11 guild registrar rooms.
 - Added Evennia world helpers for graph validation, guild registrar lookup, and shortest pathfinding.
 - Added Evennia tests proving the Crossing graph is valid, all guild registrars exist, all registrars are reachable from Town Green, and hunting rooms are reachable.

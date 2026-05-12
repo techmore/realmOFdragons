@@ -72,8 +72,8 @@ Recommendation:
 
 Status:
 
-- Partially implemented after this audit: added `world.dr_world` with Crossing room ids, exits, all 11 guild registrar rooms, hunting rooms, graph validation, registrar lookup, and pathfinding tests.
-- Remaining work: add an idempotent Evennia database world builder that creates actual Room/Exit objects from the data module.
+- Implemented after this audit: added `world.dr_world` with Crossing room ids, exits, all 11 guild registrar rooms, hunting rooms, graph validation, registrar lookup, pathfinding tests, and an idempotent Evennia database world builder that creates actual Room/Exit objects.
+- Remaining work: add richer room metadata for shops/NPCs/forage once those systems are ported.
 
 ### P0 - Guild registrars and in-world joining are missing in Evennia
 

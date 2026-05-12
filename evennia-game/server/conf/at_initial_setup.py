@@ -14,6 +14,8 @@ does what you expect it to.
 
 """
 
+from world.dr_world import build_crossing_world
+
 
 def at_initial_setup():
-    pass
+    build_crossing_world()

@@ -10,6 +10,7 @@ from evennia.commands.command import Command
 from world.dr_data import SKILLSETS, build_starter_skills
 from world.dr_identity import choose_race
 from world.dr_progression import advance_circle, train_skill
+from world.dr_world import build_crossing_world
 
 
 class CmdDRScore(Command):
@@ -171,3 +172,30 @@ class CmdDRCircle(Command):
         character.db.circle = state["circle"]
         character.db.skills = state["skills"]
         character.msg("\n".join(events))
+
+
+class CmdDRBuildCrossing(Command):
+    """
+    Build or update the Crossing room graph.
+
+    Usage:
+      drbuild crossing
+    """
+
+    key = "drbuild"
+    locks = "cmd:perm(Builders)"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        if self.args.strip().lower() != "crossing":
+            self.caller.msg("Usage: drbuild crossing")
+            return
+        result = build_crossing_world()
+        if not result["ok"]:
+            self.caller.msg("Crossing build failed:\n" + "\n".join(result["errors"]))
+            return
+        self.caller.msg(
+            "Crossing build complete: "
+            f"{result['created_rooms']} rooms created, {result['updated_rooms']} rooms updated, "
+            f"{result['created_exits']} exits created, {result['updated_exits']} exits updated."
+        )

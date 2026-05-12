@@ -2,12 +2,12 @@
 Evennia migration smoke/unit tests for clean-room DR systems.
 """
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
 from world.dr_data import RACES, SKILLSETS, build_starter_skills
 from world.dr_identity import choose_race, normalize_race_token
 from world.dr_progression import advance_circle, primary_skill_for_guild, resolve_skill_id, train_skill
-from world.dr_world import ROOMS, START_ROOM_ID, find_path, guild_registrar_rooms, validate_world_graph
+from world.dr_world import ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
 
 
 class DRDataTests(SimpleTestCase):
@@ -49,6 +49,39 @@ class DRWorldTests(SimpleTestCase):
     def test_hunting_rooms_are_reachable_from_town_green(self):
         self.assertEqual(find_path(START_ROOM_ID, "crossing-RV02-002"), ["south", "south", "east"])
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-005"))
+
+
+class DRWorldBuilderTests(TestCase):
+    def test_build_crossing_world_creates_rooms_and_exits(self):
+        result = build_crossing_world()
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["created_rooms"], len(ROOMS))
+        town_green = find_built_room(START_ROOM_ID)
+        self.assertIsNotNone(town_green)
+        self.assertEqual(town_green.key, "Crossing Town Green")
+        self.assertEqual(town_green.db.dr_room_id, START_ROOM_ID)
+        self.assertIn(START_ROOM_ID.lower(), town_green.aliases.all())
+        self.assertEqual(len(town_green.exits), len(ROOMS[START_ROOM_ID]["exits"]))
+
+    def test_build_crossing_world_is_idempotent(self):
+        first = build_crossing_world()
+        second = build_crossing_world()
+        self.assertTrue(first["ok"])
+        self.assertTrue(second["ok"])
+        self.assertEqual(second["created_rooms"], 0)
+        self.assertGreaterEqual(second["updated_rooms"], len(ROOMS))
+        self.assertEqual(second["created_exits"], 0)
+
+    def test_built_guild_room_metadata(self):
+        build_crossing_world()
+        room = find_built_room("crossing-GU10-001")
+        self.assertEqual(room.db.guild, "barbarian")
+        self.assertEqual(room.db.dr_room_id, "crossing-GU10-001")
+
+    def test_built_hunting_room_metadata(self):
+        build_crossing_world()
+        room = find_built_room("crossing-RV02-002")
+        self.assertEqual(room.db.targets, ("rv-wolf-cub",))
 
 
 class DRProgressionTests(SimpleTestCase):

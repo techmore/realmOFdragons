@@ -4,6 +4,9 @@ Crossing room graph for the Evennia migration.
 
 from collections import deque
 
+from evennia import create_object
+from evennia.objects.models import ObjectDB
+
 from world.dr_data import GUILDS
 
 START_ROOM_ID = "crossing-TG01-001"
@@ -207,3 +210,93 @@ def find_path(start_room_id, end_room_id):
             seen.add(destination)
             queue.append((destination, next_path))
     return []
+
+
+def find_built_room(room_id):
+    """Find an Evennia room by deterministic Crossing room id."""
+
+    matches = ObjectDB.objects.filter(db_attributes__db_key="dr_room_id", db_attributes__db_value=room_id)
+    for match in matches:
+        if match.db.dr_room_id == room_id:
+            return match
+    return None
+
+
+def build_crossing_world():
+    """
+    Create or update Crossing Room/Exit objects from ROOMS.
+
+    This function is intentionally idempotent so builders and tests can rerun it
+    safely while the data model is still evolving.
+    """
+
+    errors = validate_world_graph()
+    if errors:
+        return {"ok": False, "created_rooms": 0, "updated_rooms": 0, "created_exits": 0, "updated_exits": 0, "errors": errors}
+
+    room_objects = {}
+    created_rooms = 0
+    updated_rooms = 0
+    for room_id, data in ROOMS.items():
+        room = find_built_room(room_id)
+        if room:
+            updated_rooms += 1
+        else:
+            room = create_object("typeclasses.rooms.Room", key=data["title"], aliases=[room_id])
+            created_rooms += 1
+        room.key = data["title"]
+        room.db.desc = data["desc"]
+        room.db.dr_room_id = room_id
+        room.db.guild = data.get("guild")
+        room.db.targets = tuple(data.get("targets", ()))
+        if room_id not in room.aliases.all():
+            room.aliases.add(room_id)
+        room.save()
+        room_objects[room_id] = room
+
+    created_exits = 0
+    updated_exits = 0
+    for room_id, data in ROOMS.items():
+        room = room_objects[room_id]
+        wanted_exit_ids = set()
+        for direction, destination_id in data.get("exits", {}).items():
+            exit_id = f"{room_id}:{direction}"
+            wanted_exit_ids.add(exit_id)
+            destination = room_objects[destination_id]
+            exit_obj = None
+            for existing in room.exits:
+                if existing.db.dr_exit_id == exit_id:
+                    exit_obj = existing
+                    break
+            if exit_obj:
+                updated_exits += 1
+            else:
+                exit_obj = create_object(
+                    "typeclasses.exits.Exit",
+                    key=direction,
+                    location=room,
+                    destination=destination,
+                    aliases=[exit_id],
+                )
+                created_exits += 1
+            exit_obj.key = direction
+            exit_obj.destination = destination
+            exit_obj.db.dr_exit_id = exit_id
+            exit_obj.db.dr_room_id = room_id
+            exit_obj.db.dr_destination_room_id = destination_id
+            if exit_id not in exit_obj.aliases.all():
+                exit_obj.aliases.add(exit_id)
+            exit_obj.save()
+
+        for existing in list(room.exits):
+            if existing.db.dr_exit_id and existing.db.dr_exit_id not in wanted_exit_ids:
+                existing.delete()
+
+    return {
+        "ok": True,
+        "created_rooms": created_rooms,
+        "updated_rooms": updated_rooms,
+        "created_exits": created_exits,
+        "updated_exits": updated_exits,
+        "errors": [],
+    }
