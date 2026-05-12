@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added lootable corpse objects for defeated enemies instead of direct reward transfer on collapse.
+- Added `loot corpse` command that transfers corpse trias and item ids into wallet/inventory, then removes the corpse.
+- Added smoke coverage proving defeat creates a corpse with loot metadata and rewards are only transferred after `loot corpse`.
 - Added command-first `bash`, `defend`, and `flee` combat maneuvers.
 - `bash` provides a heavier melee attack with longer roundtime, enemy retaliation, loot on defeat, and pressure cleanup.
 - `defend` recovers balance/roundtime while setting defensive stance; `flee` breaks engagement and stops pressure Scripts.

@@ -6,7 +6,7 @@ from django.test import SimpleTestCase, TestCase
 from evennia.utils.create import create_object, create_script
 
 from world.dr_data import GUILDS, RACES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, combat_pressure_scripts, respawn_room_enemies, room_enemy_ids
+from world.dr_combat import ENEMIES, combat_pressure_scripts, corpse_objects, respawn_room_enemies, room_enemy_ids
 from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token
@@ -304,8 +304,18 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.engagement["target"], None)
         self.assertEqual(len(combat_pressure_scripts(character)), 0)
         self.assertEqual(character.db.health, 26)
+        self.assertEqual(character.db.wallet["trias"], 100)
+        self.assertNotIn("torch", character.db.inventory)
+        corpses = corpse_objects(character.location)
+        self.assertEqual(len(corpses), 1)
+        self.assertEqual(corpses[0].db.enemy_id, "rv-mud-beetle")
+        self.assertEqual(corpses[0].db.loot_trias, 3)
+        self.assertEqual(corpses[0].db.loot_items, ("torch",))
+
+        character.execute_cmd("loot corpse")
         self.assertEqual(character.db.wallet["trias"], 103)
         self.assertIn("torch", character.db.inventory)
+        self.assertEqual(corpse_objects(character.location), [])
         self.assertFalse(
             [
                 obj

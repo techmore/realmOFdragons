@@ -118,6 +118,7 @@ class Object(ObjectParent, DefaultObject):
      get_display_name(looker=None, **kwargs)
      get_extra_display_name_info(looker=None, **kwargs)
      get_numbered_name(count, looker, **kwargs)
+
      get_display_header(looker, **kwargs)
      get_display_desc(looker, **kwargs)
      get_display_exits(looker, **kwargs)
@@ -215,3 +216,13 @@ class Object(ObjectParent, DefaultObject):
     """
 
     pass
+
+
+class Corpse(Object):
+    """
+    Lootable combat corpse object.
+    """
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.object_type = "corpse"

@@ -185,10 +185,36 @@ def stop_combat_pressure(character):
         script.delete()
 
 
-def award_loot(character, enemy):
+def create_corpse(room, enemy_id, enemy):
     loot = enemy.get("loot", {})
-    trias = int(loot.get("trias", 0) or 0)
-    item_ids = tuple(loot.get("items", ()) or ())
+    corpse = create_object(
+        "typeclasses.objects.Corpse",
+        key=f"{enemy['name']} corpse",
+        location=room,
+        home=room,
+    )
+    corpse.db.enemy_id = enemy_id
+    corpse.db.enemy_name = enemy["name"]
+    corpse.db.loot_trias = int(loot.get("trias", 0) or 0)
+    corpse.db.loot_items = tuple(loot.get("items", ()) or ())
+    corpse.db.desc = f"The remains of {enemy['name']} lie here."
+    corpse.save()
+    return corpse
+
+
+def corpse_objects(room):
+    if not room:
+        return []
+    return [obj for obj in room.contents if obj.db.object_type == "corpse"]
+
+
+def loot_corpse(character):
+    corpses = corpse_objects(character.location)
+    if not corpses:
+        return "There is no corpse here to loot."
+    corpse = corpses[0]
+    trias = int(corpse.db.loot_trias or 0)
+    item_ids = tuple(corpse.db.loot_items or ())
     if trias:
         character.db.wallet = set_coins(character.db.wallet, coins(character.db.wallet) + trias)
     if item_ids:
@@ -196,6 +222,21 @@ def award_loot(character, enemy):
         inventory.extend(item_ids)
         character.db.inventory = inventory
 
+    parts = []
+    if trias:
+        parts.append(f"{trias} trias")
+    if item_ids:
+        parts.append(", ".join(item_ids))
+    corpse.delete()
+    if not parts:
+        return "You search the corpse but find no usable loot."
+    return "You loot " + " and ".join(parts) + " from the corpse."
+
+
+def loot_preview(enemy):
+    loot = enemy.get("loot", {})
+    trias = int(loot.get("trias", 0) or 0)
+    item_ids = tuple(loot.get("items", ()) or ())
     parts = []
     if trias:
         parts.append(f"{trias} trias")
@@ -290,9 +331,10 @@ def jab(character):
     character.db.roundtime = 1
     if vitality <= 0:
         enemy_obj.delete()
+        create_corpse(character.location, target_id, enemy)
         character.db.engagement = {"target": None, "range": None}
         stop_combat_pressure(character)
-        loot_text = award_loot(character, enemy)
+        loot_text = loot_preview(enemy)
         return f"You jab {enemy['name']} for {damage} damage. {enemy['name']} collapses.\n{loot_text}"
 
     enemy_obj.db.vitality = vitality
@@ -324,9 +366,10 @@ def bash(character):
     character.db.roundtime = 2
     if vitality <= 0:
         enemy_obj.delete()
+        create_corpse(character.location, target_id, enemy)
         character.db.engagement = {"target": None, "range": None}
         stop_combat_pressure(character)
-        loot_text = award_loot(character, enemy)
+        loot_text = loot_preview(enemy)
         return f"You bash {enemy['name']} for {damage} damage. {enemy['name']} collapses.\n{loot_text}"
 
     enemy_obj.db.vitality = vitality
