@@ -3,6 +3,7 @@ Clean-room enemy and engagement helpers for the Evennia migration.
 """
 
 from evennia import create_object
+from evennia.utils.create import create_script
 
 from world.dr_economy import coins, set_coins
 
@@ -39,6 +40,7 @@ ENEMIES = {
 
 RANGES = ("missile", "pole", "melee")
 STANCES = ("balanced", "offensive", "defensive")
+PRESSURE_SCRIPT_MARKER = "dr_combat_pressure"
 
 
 def room_enemy_ids(room):
@@ -155,8 +157,32 @@ def apply_enemy_pressure(character):
     enemy = ENEMIES.get(target_id, {"name": target_id})
     if not find_enemy_object(character.location, target_id):
         character.db.engagement = {"target": None, "range": None}
+        stop_combat_pressure(character)
         return f"No enemy pressure: {enemy['name']} is gone."
     return apply_enemy_retaliation(character, enemy)
+
+
+def combat_pressure_scripts(character):
+    return [
+        script
+        for script in character.scripts.all()
+        if script.db.script_marker == PRESSURE_SCRIPT_MARKER
+    ]
+
+
+def ensure_combat_pressure(character):
+    scripts = combat_pressure_scripts(character)
+    if scripts:
+        return scripts[0]
+    script = create_script("typeclasses.scripts.CombatPressureScript", obj=character)
+    script.db.script_marker = PRESSURE_SCRIPT_MARKER
+    return script
+
+
+def stop_combat_pressure(character):
+    for script in combat_pressure_scripts(character):
+        script.stop()
+        script.delete()
 
 
 def award_loot(character, enemy):
@@ -191,6 +217,7 @@ def target_enemy(character, enemy_id):
     if not enemy:
         return f'Unknown enemy "{enemy_id}".'
     character.db.engagement = {"target": enemy_id, "range": "missile"}
+    ensure_combat_pressure(character)
     return f"You target {enemy['name']} at missile range."
 
 
@@ -230,6 +257,7 @@ def retreat(character):
     current = engagement.get("range") or "missile"
     if current == "missile":
         character.db.engagement = {"target": None, "range": None}
+        stop_combat_pressure(character)
         return "You retreat and break engagement."
     next_range = RANGES[RANGES.index(current) - 1]
     engagement["range"] = next_range
@@ -253,6 +281,7 @@ def jab(character):
     enemy_obj = find_enemy_object(character.location, target_id)
     if not enemy_obj:
         character.db.engagement = {"target": None, "range": None}
+        stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
     damage = 6
@@ -262,6 +291,7 @@ def jab(character):
     if vitality <= 0:
         enemy_obj.delete()
         character.db.engagement = {"target": None, "range": None}
+        stop_combat_pressure(character)
         loot_text = award_loot(character, enemy)
         return f"You jab {enemy['name']} for {damage} damage. {enemy['name']} collapses.\n{loot_text}"
 

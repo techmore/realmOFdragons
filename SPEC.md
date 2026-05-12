@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added automatic combat pressure Script lifecycle: targeting starts one pressure Script, repeated targeting does not duplicate it, retreat cleanup stops it, and enemy defeat stops it.
+- Added smoke coverage for pressure Script attach/deduplication/cleanup during target, retreat, defeat, and retarget-after-respawn flows.
 - Added `CombatPressureScript` as the first timed enemy pressure hook for engaged characters.
 - Added combat pressure helper logic that applies stance-modified enemy damage at pole/melee range, ignores distant targets, and breaks engagement if the enemy is gone.
 - Added smoke coverage proving a database-backed combat pressure Script damages an engaged character and respects defensive stance mitigation.
