@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added deterministic Evennia `jab` combat as the first damaging attack command, with `attack` as a command alias.
+- Added melee-range gating, enemy vitality mutation, character balance mutation, enemy defeat cleanup, and command smoke for defeating a Crossing enemy.
+- Updated enemy scanning/targeting to prefer actual in-room enemy NPCs so defeated enemies stop appearing until a future respawn system recreates them.
 - Added Evennia enemy deployment data for the current Crossing hunting rooms.
 - Added builder-created in-room enemy NPC objects with deterministic enemy ids, vitality, aggression, and descriptions.
 - Added command-first combat engagement verbs: `scan`, `target`, `range`, `advance`, and `retreat`.

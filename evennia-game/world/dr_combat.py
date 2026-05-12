@@ -33,7 +33,23 @@ RANGES = ("missile", "pole", "melee")
 
 
 def room_enemy_ids(room):
-    return tuple(room.db.targets or ()) if room else ()
+    if not room:
+        return ()
+    enemy_ids = tuple(
+        obj.db.enemy_id
+        for obj in room.contents
+        if obj.db.npc_type == "enemy" and obj.db.enemy_id
+    )
+    return enemy_ids or tuple(room.db.targets or ())
+
+
+def find_enemy_object(room, enemy_id):
+    if not room:
+        return None
+    for obj in room.contents:
+        if obj.db.npc_type == "enemy" and obj.db.enemy_id == enemy_id:
+            return obj
+    return None
 
 
 def scan_room(room):
@@ -50,6 +66,8 @@ def scan_room(room):
 def ensure_engagement(character):
     if character.db.engagement is None:
         character.db.engagement = {"target": None, "range": None}
+    if character.db.balance is None:
+        character.db.balance = "balanced"
 
 
 def target_enemy(character, enemy_id):
@@ -108,3 +126,30 @@ def retreat(character):
     character.db.engagement = engagement
     enemy = ENEMIES.get(target_id, {"name": target_id})
     return f"You retreat from {enemy['name']} to {next_range} range."
+
+
+def jab(character):
+    ensure_engagement(character)
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target")
+    if not target_id:
+        return "Jab what? Target an enemy first."
+    if engagement.get("range") != "melee":
+        return "You need to be at melee range to jab."
+
+    enemy = ENEMIES.get(target_id, {"name": target_id})
+    enemy_obj = find_enemy_object(character.location, target_id)
+    if not enemy_obj:
+        character.db.engagement = {"target": None, "range": None}
+        return f"{enemy['name']} is no longer here."
+
+    damage = 6
+    vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
+    character.db.balance = "recovering"
+    if vitality <= 0:
+        enemy_obj.delete()
+        character.db.engagement = {"target": None, "range": None}
+        return f"You jab {enemy['name']} for {damage} damage. {enemy['name']} collapses."
+
+    enemy_obj.db.vitality = vitality
+    return f"You jab {enemy['name']} for {damage} damage. It has {vitality} vitality remaining."

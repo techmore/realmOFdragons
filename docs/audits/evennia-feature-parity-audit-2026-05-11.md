@@ -152,8 +152,8 @@ Recommendation:
 
 Status:
 
-- Partially implemented after this audit: Evennia now builds in-room enemy NPC objects for the current Crossing hunting rooms and supports `scan`, `target`, `range`, `advance`, and `retreat` command smoke.
-- Remaining work: add attacks, damage, stance/balance, enemy pressure, loot, defeat/recovery, and Evennia Script/ticker-driven asynchronous combat behavior.
+- Partially implemented after this audit: Evennia now builds in-room enemy NPC objects for the current Crossing hunting rooms and supports `scan`, `target`, `range`, `advance`, `retreat`, and deterministic `jab`/`attack` command smoke with melee gating, damage, balance mutation, and enemy defeat cleanup.
+- Remaining work: add more maneuvers, stance, roundtime, enemy pressure, loot, recovery/respawn, and Evennia Script/ticker-driven asynchronous combat behavior.
 
 ### P1 - Data parity is manual and duplicated
 

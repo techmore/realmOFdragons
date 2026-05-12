@@ -43,3 +43,4 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.inventory = []
         self.db.hands = {"left": None, "right": None}
         self.db.engagement = {"target": None, "range": None}
+        self.db.balance = "balanced"

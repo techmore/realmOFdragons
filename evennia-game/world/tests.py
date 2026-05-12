@@ -138,6 +138,7 @@ class DRCommandSmokeTests(TestCase):
         character.db.inventory = []
         character.db.hands = {"left": None, "right": None}
         character.db.engagement = {"target": None, "range": None}
+        character.db.balance = "balanced"
         return character
 
     def walk_to_room(self, character, destination_room_id):
@@ -237,6 +238,38 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.engagement["range"], "missile")
         character.execute_cmd("retreat")
         self.assertEqual(character.db.engagement["target"], None)
+
+    def test_jab_requires_melee_and_defeats_enemy(self):
+        character = self.make_character("Jab Smoke")
+        self.walk_to_room(character, "crossing-RV02-004")
+
+        character.execute_cmd("target rv-mud-beetle")
+        character.execute_cmd("jab")
+        self.assertEqual(character.db.engagement["target"], "rv-mud-beetle")
+
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
+        self.assertEqual(character.db.engagement["range"], "melee")
+
+        character.execute_cmd("jab")
+        self.assertEqual(character.db.balance, "recovering")
+        beetle = next(
+            obj
+            for obj in character.location.contents
+            if obj.db.npc_type == "enemy" and obj.db.enemy_id == "rv-mud-beetle"
+        )
+        self.assertEqual(beetle.db.vitality, 8)
+
+        character.execute_cmd("attack")
+        character.execute_cmd("attack")
+        self.assertEqual(character.db.engagement["target"], None)
+        self.assertFalse(
+            [
+                obj
+                for obj in character.location.contents
+                if obj.db.npc_type == "enemy" and obj.db.enemy_id == "rv-mud-beetle"
+            ]
+        )
 
 
 class DRGuildTests(SimpleTestCase):
