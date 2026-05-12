@@ -9,7 +9,7 @@ from evennia.commands.command import Command
 
 from world.dr_data import SKILLSETS, build_starter_skills
 from world.dr_combat import advance, bash, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, scan_room, stance, target_enemy, wait_recover
-from world.dr_economy import buy_item, format_shop, get_item, hands_text, inventory_text, sell_item, shop_talk
+from world.dr_economy import buy_item, equipment_text, format_shop, get_item, hands_text, inventory_text, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race
 from world.dr_progression import advance_circle, train_skill
@@ -326,6 +326,55 @@ class CmdDRHands(Command):
 
     def func(self):
         self.caller.msg(hands_text(self.caller))
+
+
+class CmdDREquipment(Command):
+    """
+    Show held and worn equipment.
+
+    Usage:
+      equipment
+    """
+
+    key = "equipment"
+    aliases = ["equip"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(equipment_text(self.caller))
+
+
+class CmdDRWield(Command):
+    """
+    Wield carried gear.
+
+    Usage:
+      wield <item id>
+    """
+
+    key = "wield"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(wield_item(self.caller, self.args))
+
+
+class CmdDRWear(Command):
+    """
+    Wear carried gear.
+
+    Usage:
+      wear <item id>
+    """
+
+    key = "wear"
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(wear_item(self.caller, self.args))
 
 
 class CmdDRHealth(Command):

@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added first equipment-backed item handling with `wield`, `wear`, and `equipment` / `equip` commands.
+- Added character worn-equipment state while preserving left/right hands and pack inventory.
+- Added smoke coverage for buying gear, wielding a practice blade, wearing a leather shield, and rendering equipment state.
 - Added physical loot item objects for corpse item loot and a command-first `get <item id>` pickup path.
 - `loot corpse` now pays coin and spills item objects into the room; items enter pack inventory only after `get`.
 - Added smoke coverage proving corpse-contained item objects, room item drops after looting, and pickup into inventory.

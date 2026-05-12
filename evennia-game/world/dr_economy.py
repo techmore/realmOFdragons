@@ -89,6 +89,8 @@ def ensure_economy_state(character):
         character.db.inventory = []
     if character.db.hands is None:
         character.db.hands = {"left": None, "right": None}
+    if character.db.equipment is None:
+        character.db.equipment = {"worn": []}
 
 
 def current_shop(room):
@@ -194,6 +196,65 @@ def get_item(character, item_id):
     return f'You do not see "{item_id}" here.'
 
 
+def wield_item(character, item_id):
+    ensure_economy_state(character)
+    item_id = (item_id or "").strip().lower().replace(" ", "_")
+    if not item_id:
+        return "Wield what?"
+    item = ITEMS.get(item_id)
+    if not item:
+        return f'Unknown item "{item_id}".'
+    if item["slot"] != "right":
+        return f"{item['name']} is not a weapon you can wield."
+
+    inventory = list(character.db.inventory or [])
+    if item_id not in inventory:
+        return f"You are not carrying {item['name']}."
+    hands = dict(character.db.hands or {"left": None, "right": None})
+    if hands.get("right"):
+        return "Your right hand is already full."
+    inventory.remove(item_id)
+    hands["right"] = item_id
+    character.db.inventory = inventory
+    character.db.hands = hands
+    return f"You wield {item['name']} in your right hand."
+
+
+def wear_item(character, item_id):
+    ensure_economy_state(character)
+    item_id = (item_id or "").strip().lower().replace(" ", "_")
+    if not item_id:
+        return "Wear what?"
+    item = ITEMS.get(item_id)
+    if not item:
+        return f'Unknown item "{item_id}".'
+    if item["slot"] not in ("left", "armor"):
+        return f"{item['name']} is not wearable gear."
+
+    inventory = list(character.db.inventory or [])
+    hands = dict(character.db.hands or {"left": None, "right": None})
+    source = None
+    if item_id in inventory:
+        inventory.remove(item_id)
+        source = "pack"
+    elif hands.get("left") == item_id:
+        hands["left"] = None
+        source = "left hand"
+    if not source:
+        return f"You are not carrying {item['name']}."
+
+    equipment = dict(character.db.equipment or {"worn": []})
+    worn = list(equipment.get("worn", []))
+    if item_id in worn:
+        return f"You are already wearing {item['name']}."
+    worn.append(item_id)
+    equipment["worn"] = worn
+    character.db.inventory = inventory
+    character.db.hands = hands
+    character.db.equipment = equipment
+    return f"You wear {item['name']} from your {source}."
+
+
 def inventory_text(character):
     ensure_economy_state(character)
     inventory = character.db.inventory or []
@@ -214,4 +275,16 @@ def hands_text(character):
         item_id = hands.get(hand)
         item = ITEMS.get(item_id, {"name": "Empty"})
         lines.append(f"{hand}: {item['name'] if item_id else 'Empty'}")
+    return "\n".join(lines)
+
+
+def equipment_text(character):
+    ensure_economy_state(character)
+    lines = [hands_text(character), "Worn:"]
+    worn = list((character.db.equipment or {}).get("worn", []))
+    if not worn:
+        lines.append("- Nothing")
+    for item_id in worn:
+        item = ITEMS.get(item_id, {"name": item_id})
+        lines.append(f"- {item['name']} ({item_id})")
     return "\n".join(lines)

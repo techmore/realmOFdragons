@@ -152,6 +152,7 @@ class DRCommandSmokeTests(TestCase):
         character.db.wallet = {"plat": 0, "trias": 100, "lucan": 0, "silk": 0}
         character.db.inventory = []
         character.db.hands = {"left": None, "right": None}
+        character.db.equipment = {"worn": []}
         character.db.engagement = {"target": None, "range": None}
         character.db.balance = "balanced"
         character.db.roundtime = 0
@@ -227,6 +228,23 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("sell torch")
         self.assertNotIn("torch", character.db.inventory)
         self.assertEqual(character.db.wallet["trias"], 97)
+
+    def test_wield_wear_and_equipment_commands(self):
+        character = self.make_character("Equipment Smoke")
+        self.walk_to_room(character, "crossing-RV02-002")
+
+        character.execute_cmd("buy torch")
+        character.execute_cmd("buy small_blade")
+        character.execute_cmd("wield small_blade")
+        self.assertEqual(character.db.hands["right"], "small_blade")
+        self.assertNotIn("small_blade", character.db.inventory)
+
+        character.execute_cmd("buy leather_shield")
+        self.assertEqual(character.db.hands["left"], "leather_shield")
+        character.execute_cmd("wear leather_shield")
+        self.assertEqual(character.db.hands["left"], None)
+        self.assertIn("leather_shield", character.db.equipment["worn"])
+        character.execute_cmd("equipment")
 
     def test_shop_data_has_stock_and_dialogue(self):
         self.assertGreaterEqual(len(SHOPS), 3)
