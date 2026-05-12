@@ -73,8 +73,8 @@ Custom systems still required:
 
 5. `Economy`
    - Port item catalog, shops, NPC dialogue, wallet, buy/sell, hands, inventory, and equipment.
-   - Current status: initial Attribute-backed shop data, shopkeeper dialogue, `shop`, `shop talk`, `buy`, `sell`, `inventory`, `hands`, wallet mutation, pack inventory, and hand display are implemented with command smoke.
-   - Current next blocker: shopkeepers are metadata rather than NPC objects, stock refresh is not modeled, and item/equipment behavior is still minimal.
+   - Current status: initial Attribute-backed shop data, in-room shopkeeper NPC objects, shopkeeper dialogue, `shop`, `shop talk`, `buy`, `sell`, `inventory`, `hands`, wallet mutation, pack inventory, and hand display are implemented with command smoke.
+   - Current next blocker: stock refresh is not modeled, Crossing shop coverage is still sparse, and item/equipment behavior is still minimal.
 
 6. `Combat`
    - Port enemies and room deployments.

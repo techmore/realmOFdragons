@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Promoted initial Evennia shopkeepers from metadata-only entries into actual in-room NPC objects created by the Crossing world builder.
+- Added shop room metadata to built Crossing rooms and idempotent shopkeeper creation/update counts to `drbuild crossing`.
+- Added Evennia database smoke proving every configured shop room contains exactly one shopkeeper NPC with the expected room/shop metadata.
 - Added Evennia-side Crossing economy data for three initial shop counters, shopkeepers, dialogue, and stock catalogs.
 - Added command-first Evennia economy verbs: `shop`, `shop talk`, `buy`, `sell`, `inventory`, and `hands`.
 - Added Attribute-backed wallet, pack inventory, and left/right hand state to Evennia characters so economy smoke can stabilize before item-object promotion.

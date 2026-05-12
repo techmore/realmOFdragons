@@ -315,5 +315,6 @@ class CmdDRBuildCrossing(Command):
         self.caller.msg(
             "Crossing build complete: "
             f"{result['created_rooms']} rooms created, {result['updated_rooms']} rooms updated, "
-            f"{result['created_exits']} exits created, {result['updated_exits']} exits updated."
+            f"{result['created_exits']} exits created, {result['updated_exits']} exits updated, "
+            f"{result['created_npcs']} NPCs created, {result['updated_npcs']} NPCs updated."
         )

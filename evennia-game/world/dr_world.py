@@ -8,6 +8,7 @@ from evennia import create_object
 from evennia.objects.models import ObjectDB
 
 from world.dr_data import GUILDS
+from world.dr_economy import SHOPS
 
 START_ROOM_ID = "crossing-TG01-001"
 
@@ -249,6 +250,7 @@ def build_crossing_world():
         room.db.dr_room_id = room_id
         room.db.guild = data.get("guild")
         room.db.targets = tuple(data.get("targets", ()))
+        room.db.shop = SHOPS.get(room_id)
         if room_id not in room.aliases.all():
             room.aliases.add(room_id)
         room.save()
@@ -292,11 +294,41 @@ def build_crossing_world():
             if existing.db.dr_exit_id and existing.db.dr_exit_id not in wanted_exit_ids:
                 existing.delete()
 
+    created_npcs = 0
+    updated_npcs = 0
+    for room_id, shop in SHOPS.items():
+        room = room_objects.get(room_id)
+        if not room:
+            continue
+        shopkeepers = [
+            obj
+            for obj in room.contents
+            if obj.db.npc_type == "shopkeeper" and obj.db.shop_room_id == room_id
+        ]
+        if shopkeepers:
+            shopkeeper = shopkeepers[0]
+            updated_npcs += 1
+        else:
+            shopkeeper = create_object(
+                "typeclasses.npcs.Shopkeeper",
+                key=shop["keeper"],
+                location=room,
+                home=room,
+            )
+            created_npcs += 1
+        shopkeeper.key = shop["keeper"]
+        shopkeeper.db.shop_name = shop["name"]
+        shopkeeper.db.shop_room_id = room_id
+        shopkeeper.db.dialogue = shop["dialogue"]
+        shopkeeper.save()
+
     return {
         "ok": True,
         "created_rooms": created_rooms,
         "updated_rooms": updated_rooms,
         "created_exits": created_exits,
         "updated_exits": updated_exits,
+        "created_npcs": created_npcs,
+        "updated_npcs": updated_npcs,
         "errors": [],
     }

@@ -59,10 +59,12 @@ class DRWorldBuilderTests(TestCase):
         result = build_crossing_world()
         self.assertTrue(result["ok"])
         self.assertEqual(result["created_rooms"], len(ROOMS))
+        self.assertGreaterEqual(result["created_npcs"], 3)
         town_green = find_built_room(START_ROOM_ID)
         self.assertIsNotNone(town_green)
         self.assertEqual(town_green.key, "Crossing Town Green")
         self.assertEqual(town_green.db.dr_room_id, START_ROOM_ID)
+        self.assertTrue(town_green.db.shop)
         self.assertIn(START_ROOM_ID.lower(), town_green.aliases.all())
         self.assertEqual(len(town_green.exits), len(ROOMS[START_ROOM_ID]["exits"]))
 
@@ -74,6 +76,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertEqual(second["created_rooms"], 0)
         self.assertGreaterEqual(second["updated_rooms"], len(ROOMS))
         self.assertEqual(second["created_exits"], 0)
+        self.assertEqual(second["created_npcs"], 0)
+        self.assertGreaterEqual(second["updated_npcs"], 3)
 
     def test_built_guild_room_metadata(self):
         build_crossing_world()
@@ -85,6 +89,19 @@ class DRWorldBuilderTests(TestCase):
         build_crossing_world()
         room = find_built_room("crossing-RV02-002")
         self.assertEqual(room.db.targets, ("rv-wolf-cub",))
+
+    def test_built_shopkeeper_npcs(self):
+        build_crossing_world()
+        for room_id, shop in SHOPS.items():
+            room = find_built_room(room_id)
+            shopkeepers = [
+                obj
+                for obj in room.contents
+                if obj.db.npc_type == "shopkeeper" and obj.db.shop_room_id == room_id
+            ]
+            self.assertEqual(len(shopkeepers), 1)
+            self.assertEqual(shopkeepers[0].key, shop["keeper"])
+            self.assertEqual(shopkeepers[0].db.shop_name, shop["name"])
 
 
 class DRCommandSmokeTests(TestCase):
