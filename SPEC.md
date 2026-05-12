@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added a structured Evennia feature-parity audit at `docs/audits/evennia-feature-parity-audit-2026-05-11.md`.
+- Added `npm run check:evennia` as a root validation command for Evennia compile checks and Evennia world tests.
+- Updated the Evennia roadmap to make audit/validation an explicit migration phase before additional feature ports.
 - Added Evennia-side pure progression helpers for skill-name normalization, guild primary skill lookup, training, skill pool gains, Circle requirements, and Circle advancement.
 - Added Evennia text commands `train`, `train <skill>`, and `circle` to the character command set.
 - Added Evennia tests covering 67-skill catalog counts, DragonRealms skillset counts, guild primary skills, spaced skill-name resolution, legacy `scouting` alias, training rank-up, commoner Circle rejection, and Circle 2 advancement.

@@ -9,6 +9,7 @@
     "smoke:ui": "npm --prefix frontend run smoke:ui",
     "smoke:browser": "npm --prefix frontend run smoke:browser",
     "smoke:api": "npm --prefix server run smoke:api",
+    "check:evennia": "node scripts/check-evennia.mjs",
     "smoke:agent-prompt": "node scripts/smoke-agent-prompt.mjs",
     "ci:check": "node scripts/run-checks.mjs ci",
     "agent:check": "node scripts/run-checks.mjs local",

@@ -44,6 +44,11 @@ Custom systems still required:
 
 ## Migration phases
 
+0. `Audit and validation`
+   - Maintain a committed audit report for feature-parity blockers.
+   - Run `npm run check:evennia` for Evennia migration slices.
+   - Keep legacy prototype checks available for regression comparison, but prioritize Evennia implementation.
+
 1. `Foundation`
    - Initialize Evennia project.
    - Add pinned Python requirements.
