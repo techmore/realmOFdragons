@@ -16,7 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 
-from commands.dr_commands import CmdDRAdvance, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRHands, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRRace, CmdDRRange, CmdDRRetreat, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRTarget, CmdDRTrain
+from commands.dr_commands import CmdDRAdvance, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRHands, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRRace, CmdDRRange, CmdDRRetreat, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRStance, CmdDRTarget, CmdDRTrain, CmdDRWait
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -49,8 +49,10 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDRSell())
         self.add(CmdDRShop())
         self.add(CmdDRSkills())
+        self.add(CmdDRStance())
         self.add(CmdDRTarget())
         self.add(CmdDRTrain())
+        self.add(CmdDRWait())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

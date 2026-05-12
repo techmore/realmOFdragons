@@ -30,6 +30,7 @@ ENEMIES = {
 }
 
 RANGES = ("missile", "pole", "melee")
+STANCES = ("balanced", "offensive", "defensive")
 
 
 def room_enemy_ids(room):
@@ -68,6 +69,10 @@ def ensure_engagement(character):
         character.db.engagement = {"target": None, "range": None}
     if character.db.balance is None:
         character.db.balance = "balanced"
+    if character.db.roundtime is None:
+        character.db.roundtime = 0
+    if character.db.stance is None:
+        character.db.stance = "balanced"
 
 
 def target_enemy(character, enemy_id):
@@ -130,6 +135,8 @@ def retreat(character):
 
 def jab(character):
     ensure_engagement(character)
+    if int(character.db.roundtime or 0) > 0:
+        return f"You are still recovering for {character.db.roundtime} pulse."
     engagement = dict(character.db.engagement or {})
     target_id = engagement.get("target")
     if not target_id:
@@ -146,6 +153,7 @@ def jab(character):
     damage = 6
     vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
     character.db.balance = "recovering"
+    character.db.roundtime = 1
     if vitality <= 0:
         enemy_obj.delete()
         character.db.engagement = {"target": None, "range": None}
@@ -153,3 +161,28 @@ def jab(character):
 
     enemy_obj.db.vitality = vitality
     return f"You jab {enemy['name']} for {damage} damage. It has {vitality} vitality remaining."
+
+
+def stance(character, requested):
+    ensure_engagement(character)
+    requested = (requested or "").strip().lower()
+    if not requested:
+        return f"Your stance is {character.db.stance} and your balance is {character.db.balance}."
+    if requested not in STANCES:
+        return f'Unknown stance "{requested}". Stances: {", ".join(STANCES)}.'
+    character.db.stance = requested
+    return f"You settle into a {requested} stance."
+
+
+def wait_recover(character):
+    ensure_engagement(character)
+    roundtime = int(character.db.roundtime or 0)
+    if roundtime <= 0:
+        character.db.balance = "balanced"
+        return "You are already balanced."
+    roundtime -= 1
+    character.db.roundtime = roundtime
+    if roundtime <= 0:
+        character.db.balance = "balanced"
+        return "You recover your balance."
+    return f"You wait. Roundtime: {roundtime}."

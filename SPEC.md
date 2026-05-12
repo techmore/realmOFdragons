@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added Evennia combat stance state and the `stance` command for viewing or selecting `balanced`, `offensive`, or `defensive`.
+- Added deterministic roundtime state to characters: `jab`/`attack` now sets recovery, repeat attacks are blocked during roundtime, and `wait` / `recover` clears one recovery pulse.
+- Added command smoke proving stance selection, roundtime blocking, recovery, and continued enemy defeat flow.
 - Added deterministic Evennia `jab` combat as the first damaging attack command, with `attack` as a command alias.
 - Added melee-range gating, enemy vitality mutation, character balance mutation, enemy defeat cleanup, and command smoke for defeating a Crossing enemy.
 - Updated enemy scanning/targeting to prefer actual in-room enemy NPCs so defeated enemies stop appearing until a future respawn system recreates them.
