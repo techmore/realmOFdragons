@@ -8,6 +8,7 @@ first migration bridge from the Node prototype into Evennia's command loop.
 from evennia.commands.command import Command
 
 from world.dr_data import SKILLSETS, build_starter_skills
+from world.dr_identity import choose_race
 from world.dr_progression import advance_circle, train_skill
 
 
@@ -83,6 +84,43 @@ class CmdDRSkills(Command):
             lines.append(f"{skill_id}: {skill['name']} rank {skill['rank']}, pool {skill['pool']}")
 
         character.msg("\n".join(lines))
+
+
+class CmdDRRace(Command):
+    """
+    Choose or view your race.
+
+    Usage:
+      race
+      race <race name>
+      choose race <race name>
+
+    Race selection is only available before joining a guild and before
+    advancing beyond Circle 1.
+    """
+
+    key = "race"
+    aliases = ["choose race"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        state = {
+            "race": character.db.race or "human",
+            "race_name": character.db.race_name or "Human",
+            "guild_id": character.db.guild_id or "commoner",
+            "guild_name": character.db.guild_name or "Unaffiliated",
+            "circle": character.db.circle or 1,
+        }
+        result = choose_race(state, self.args.strip())
+        if result["changed"]:
+            character.db.race = state["race"]
+            character.db.race_name = state["race_name"]
+            character.db.guild_id = state["guild_id"]
+            character.db.guild_name = state["guild_name"]
+            character.db.circle = state["circle"]
+        character.msg("\n".join(result["events"]))
 
 
 class CmdDRTrain(Command):

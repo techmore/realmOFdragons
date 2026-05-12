@@ -16,7 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 
-from commands.dr_commands import CmdDRCircle, CmdDRScore, CmdDRSkills, CmdDRTrain
+from commands.dr_commands import CmdDRCircle, CmdDRRace, CmdDRScore, CmdDRSkills, CmdDRTrain
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -34,6 +34,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         """
         super().at_cmdset_creation()
         self.add(CmdDRCircle())
+        self.add(CmdDRRace())
         self.add(CmdDRScore())
         self.add(CmdDRSkills())
         self.add(CmdDRTrain())

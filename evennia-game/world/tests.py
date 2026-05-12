@@ -4,11 +4,15 @@ Evennia migration smoke/unit tests for clean-room DR systems.
 
 from django.test import SimpleTestCase
 
-from world.dr_data import SKILLSETS, build_starter_skills
+from world.dr_data import RACES, SKILLSETS, build_starter_skills
+from world.dr_identity import choose_race, normalize_race_token
 from world.dr_progression import advance_circle, primary_skill_for_guild, resolve_skill_id, train_skill
 
 
 class DRDataTests(SimpleTestCase):
+    def test_canonical_race_count(self):
+        self.assertEqual(len(RACES), 11)
+
     def test_skillset_counts_match_current_catalog(self):
         self.assertEqual(len(build_starter_skills()), 67)
         self.assertEqual(len(SKILLSETS["armor"]), 7)
@@ -53,3 +57,38 @@ class DRProgressionTests(SimpleTestCase):
         events = advance_circle(state)
         self.assertIn("You advance to Circle 2.", events)
         self.assertEqual(state["circle"], 2)
+
+
+class DRIdentityTests(SimpleTestCase):
+    def test_race_aliases(self):
+        self.assertEqual(normalize_race_token("Gor'Tog"), "gor_tog")
+        self.assertEqual(normalize_race_token("S'Kra Mur"), "s_raeth")
+
+    def test_all_canonical_races_can_be_chosen_at_circle_one(self):
+        for race_id, race_name in RACES.items():
+            state = {"guild_id": "commoner", "guild_name": "Unaffiliated", "circle": 1}
+            result = choose_race(state, race_id)
+            self.assertTrue(result["changed"])
+            self.assertEqual(state["race"], race_id)
+            self.assertEqual(state["race_name"], race_name)
+            self.assertEqual(state["guild_id"], "commoner")
+            self.assertEqual(state["guild_name"], "Unaffiliated")
+            self.assertEqual(state["circle"], 1)
+
+    def test_invalid_race_is_rejected(self):
+        state = {"guild_id": "commoner", "guild_name": "Unaffiliated", "circle": 1}
+        result = choose_race(state, "orc")
+        self.assertFalse(result["changed"])
+        self.assertIn('Unknown race "orc".', result["events"][0])
+
+    def test_race_cannot_change_after_guild_join(self):
+        state = {"guild_id": "barbarian", "guild_name": "Barbarian Guild", "circle": 1}
+        result = choose_race(state, "elf")
+        self.assertFalse(result["changed"])
+        self.assertIn("Race can only be chosen before joining a guild", result["events"][0])
+
+    def test_race_cannot_change_after_circle_one(self):
+        state = {"guild_id": "commoner", "guild_name": "Unaffiliated", "circle": 2}
+        result = choose_race(state, "elf")
+        self.assertFalse(result["changed"])
+        self.assertIn("Race can only be chosen before joining a guild", result["events"][0])

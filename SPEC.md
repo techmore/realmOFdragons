@@ -39,6 +39,10 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added Evennia identity helpers for canonical race normalization and race selection.
+- Added Evennia `race` / `choose race` command for choosing one of the 11 canonical races while unaffiliated at Circle 1.
+- Added Evennia tests proving all 11 races can be selected as unaffiliated Circle 1 characters, invalid races are rejected, and race changes are blocked after guild join or Circle advancement.
+- Updated the feature-parity audit to mark race selection partially implemented and identify required creation-flow integration as remaining work.
 - Added a structured Evennia feature-parity audit at `docs/audits/evennia-feature-parity-audit-2026-05-11.md`.
 - Added `npm run check:evennia` as a root validation command for Evennia compile checks and Evennia world tests.
 - Updated the Evennia roadmap to make audit/validation an explicit migration phase before additional feature ports.

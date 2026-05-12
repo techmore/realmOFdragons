@@ -49,6 +49,11 @@ Recommendation:
 - Reject guild-at-creation and start every character as `commoner` / `Unaffiliated` / Circle 1.
 - Add Evennia tests for all 11 races.
 
+Status:
+
+- Partially implemented after this audit: added `race` / `choose race` command and pure identity tests proving all 11 canonical races can be selected only while unaffiliated at Circle 1.
+- Remaining work: wire this into Evennia's account/character creation flow so race selection is required before normal play.
+
 ### P0 - Crossing map is not ported to Evennia
 
 Subsystem: world / rooms / exits
