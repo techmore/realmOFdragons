@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Updated the generated Evennia smoke transcript to include the Reed-Choked Culvert, Culvert Cache, and Reed Snake beginner path.
 - Added the Reed-Choked Culvert as another beginner Crossing hunting room branching from Muddy Beetle Bend.
 - Added the Reed Snake enemy template and a Culvert Cache supply counter, expanding all-room movement, all-shop, and all-enemy smoke coverage through existing Evennia tests.
 - Updated the generated Evennia smoke transcript so the command-first Circle progression path includes registrar `boon` claims.

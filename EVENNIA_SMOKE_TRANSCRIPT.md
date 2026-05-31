@@ -117,6 +117,12 @@ The shopkeeper explains the counter's trade goods and beginner supplies.
 > shop stock
 Current stock lists carried room-backed inventory.
 
+> east
+You walk into the Reed-Choked Culvert.
+
+> shop
+The Culvert Cache offers field_bandage, torch, and travel_rations for the deeper brush path.
+
 > buy field_bandage
 You buy a field bandage.
 
@@ -141,14 +147,14 @@ You sell a practice blade.
 ```text
 > scan
 You scan the area.
-wolf_cub is here at missile range.
+reed_snake is here at missile range.
 
-> target wolf_cub
-You target wolf_cub at missile range.
+> target reed_snake
+You target reed_snake at missile range.
 Enemy pressure begins ticking asynchronously.
 
 > range
-You are at missile range from wolf_cub.
+You are at missile range from reed_snake.
 
 > advance
 You advance to pole range.
@@ -197,5 +203,6 @@ You pick up the dropped item.
 - Guild focus, technique, practice, and boon behavior: the all-guild Circle 10 command smoke invokes `focus`, `guild focus`, `technique`, `guild technique`, `practice`, `guild practice`, `boon`, and `guild boon`.
 - Crossing movement: `DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room`.
 - Shops/items/equipment: `DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh` and `test_wield_wear_and_equipment_commands`.
+- Beginner content breadth: all-room, all-shop, and all-enemy smoke covers the Reed-Choked Culvert, Culvert Cache, and Reed Snake.
 - Wound care: `DRCommandSmokeTests.test_tend_defaults_to_field_bandage_and_treats_bleeding` and `test_field_bandage_treats_combat_bleeding`.
 - Async range combat: `DRCommandSmokeTests.test_scan_target_advance_range_and_retreat_commands`, combat pressure tests, bleeding tests, recovery tests, corpse/loot tests, and all-enemy command loop smoke.
