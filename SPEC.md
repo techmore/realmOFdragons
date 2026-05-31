@@ -916,6 +916,20 @@ Next priority:
 
 - Audit remaining level-10 parity gaps around guild progression visibility, shop/NPC interactions, and account/character login flow.
 
+Implementation Notes - 2026-05-31, Evennia Circle Status Guidance
+
+Completed in the Evennia runtime:
+
+- `circle status` now guides unaffiliated characters toward visiting a guild registrar and using `join guild`.
+- Joined characters now see their registrar room id, total-rank remaining count, primary-skill remaining count, and an actionable next step.
+- Ready-to-circle characters are told to use `circle` when already at their registrar, or to return to their registrar otherwise.
+- Circle 10 capped characters now get a cap explanation plus a next step to continue training or test Crossing systems.
+- Smoke coverage now verifies registrar guidance, train/circle guidance, unaffiliated guidance, and Circle 10 cap guidance across all guilds.
+
+Next priority:
+
+- Improve shop/NPC interaction parity by adding clearer text affordances for shopkeepers, dialogue, accepted stock, and failed transactions.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:

@@ -10,7 +10,7 @@ from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scrip
 from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import advance_circle, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks
+from world.dr_progression import advance_circle, circle_status, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
 
 
@@ -351,6 +351,19 @@ class DRCommandSmokeTests(TestCase):
             self.assertEqual(character.db.guild_perks, [guild_circle_perk(guild_id, 1)])
             character.execute_cmd("guild")
             character.execute_cmd("circle status")
+            status_text = "\n".join(
+                circle_status(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "guild_name": character.db.guild_name,
+                        "circle": character.db.circle,
+                        "skills": character.db.skills,
+                        "room_guild_id": character.location.db.guild,
+                    }
+                )
+            )
+            self.assertIn(f"Registrar: {registrars[guild_id]}.", status_text)
+            self.assertIn("Next step: train", status_text)
             self.assertEqual(character.db.circle, 1)
 
             self.train_and_circle_to(character, 10)
@@ -358,7 +371,51 @@ class DRCommandSmokeTests(TestCase):
             self.assertEqual(character.db.guild_perks[-1], guild_circle_perk(guild_id, 10))
             character.execute_cmd("perks")
             character.execute_cmd("circle")
+            capped_status_text = "\n".join(
+                circle_status(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "guild_name": character.db.guild_name,
+                        "circle": character.db.circle,
+                        "skills": character.db.skills,
+                        "room_guild_id": character.location.db.guild,
+                    }
+                )
+            )
+            self.assertIn("Circle 10 is the current supported cap", capped_status_text)
+            self.assertIn("Next step: continue training skills", capped_status_text)
             self.assertEqual(character.db.circle, 10)
+
+    def test_circle_status_guides_unaffiliated_and_ready_characters(self):
+        character = self.make_character("Circle Guidance Smoke")
+        unaffiliated_status = "\n".join(
+            circle_status(
+                {
+                    "guild_id": character.db.guild_id,
+                    "guild_name": character.db.guild_name,
+                    "circle": character.db.circle,
+                    "skills": character.db.skills,
+                    "room_guild_id": character.location.db.guild,
+                }
+            )
+        )
+        self.assertIn("join guild", unaffiliated_status)
+
+        self.walk_to_room(character, guild_registrar_rooms()["barbarian"])
+        character.execute_cmd("join guild")
+        self.prepare_circle_two_requirements(character)
+        ready_status = "\n".join(
+            circle_status(
+                {
+                    "guild_id": character.db.guild_id,
+                    "guild_name": character.db.guild_name,
+                    "circle": character.db.circle,
+                    "skills": character.db.skills,
+                    "room_guild_id": character.location.db.guild,
+                }
+            )
+        )
+        self.assertIn("Next step: use `circle` to advance.", ready_status)
 
     def test_circle_requires_own_guild_registrar_room_command(self):
         registrars = guild_registrar_rooms()

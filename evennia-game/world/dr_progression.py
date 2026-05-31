@@ -121,21 +121,57 @@ def circle_status(character_state):
     guild_name = character_state.get("guild_name") or "Unaffiliated"
     guild_id = character_state.get("guild_id") or "commoner"
     skills = character_state.setdefault("skills", build_starter_skills())
+    if guild_id == "commoner":
+        return [
+            f"You are Circle {circle} in {guild_name}.",
+            "You are unaffiliated and cannot advance circles yet.",
+            "Next step: visit a guild registrar in Crossing and use `join guild`.",
+        ]
+    registrar_room_id = registrar_room_for_guild(guild_id)
+    room_guild_id = character_state.get("room_guild_id")
+    location_hint = f"Registrar: {registrar_room_id}." if registrar_room_id else "Registrar: unknown."
     if circle >= MAX_SUPPORTED_CIRCLE:
         return [
             f"You are Circle {circle} in {guild_name}.",
             f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported cap for this Evennia port.",
             f"Current milestone: {guild_circle_perk(guild_id, circle)}.",
+            location_hint,
+            "Next step: continue training skills or test Crossing shops and hunting rooms.",
         ]
     requirement = next_circle_requirement(circle)
     primary_skill_id = primary_skill_for_guild(guild_id)
     primary_skill = skills.get(primary_skill_id, {"name": SKILLS.get(primary_skill_id, "Primary skill"), "rank": 0})
+    total_ranks = total_skill_ranks(skills)
+    primary_rank = int(primary_skill.get("rank", 0) or 0)
+    total_remaining = max(0, requirement["total_ranks"] - total_ranks)
+    primary_remaining = max(0, requirement["primary_rank"] - primary_rank)
+    if total_remaining == 0 and primary_remaining == 0:
+        if room_guild_id == guild_id:
+            next_step = "Next step: use `circle` to advance."
+        else:
+            next_step = "Next step: stand before your guild registrar and use `circle`."
+    elif room_guild_id == guild_id:
+        next_step = f"Next step: train {primary_skill_id}."
+    else:
+        next_step = "Next step: return to your guild registrar to train and circle."
     return [
         f"You are Circle {circle} in {guild_name}.",
-        f"Next Circle {requirement['next_circle']}: total skill ranks {total_skill_ranks(skills)}/{requirement['total_ranks']}.",
-        f"{primary_skill['name']} rank {primary_skill.get('rank', 0)}/{requirement['primary_rank']}.",
+        f"Next Circle {requirement['next_circle']}: total skill ranks {total_ranks}/{requirement['total_ranks']} ({total_remaining} needed).",
+        f"{primary_skill['name']} rank {primary_rank}/{requirement['primary_rank']} ({primary_remaining} needed).",
         f"Current milestone: {guild_circle_perk(guild_id, circle)}.",
+        location_hint,
+        next_step,
     ]
+
+
+def registrar_room_for_guild(guild_id):
+    """Return the Crossing registrar room id without making progression own world data."""
+
+    try:
+        from world.dr_world import guild_registrar_rooms
+    except ImportError:
+        return ""
+    return guild_registrar_rooms().get(guild_id, "")
 
 
 def can_circle(character_state):
