@@ -1255,10 +1255,14 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(corpses[0].db.enemy_id, "rv-mud-beetle")
         self.assertEqual(corpses[0].db.loot_trias, 3)
         self.assertEqual(corpses[0].db.loot_items, ("torch",))
+        reloaded_corpse = ObjectDB.objects.get(id=corpses[0].id)
+        self.assertEqual(reloaded_corpse.db.enemy_id, "rv-mud-beetle")
+        self.assertEqual(reloaded_corpse.db.loot_trias, 3)
+        self.assertEqual(reloaded_corpse.db.loot_items, ("torch",))
         self.assertEqual(
             [
                 obj.db.item_id
-                for obj in corpses[0].contents
+                for obj in reloaded_corpse.contents
                 if obj.db.object_type == "item"
             ],
             ["torch"],
@@ -1301,15 +1305,19 @@ class DRCommandSmokeTests(TestCase):
         skin_text = skin_corpse(character)
         self.assertIn("rough_pelt", skin_text)
         self.assertTrue(corpses[0].db.skinned)
+        reloaded_skinned_corpse = ObjectDB.objects.get(id=corpses[0].id)
+        self.assertTrue(reloaded_skinned_corpse.db.skinned)
         self.assertGreater(character.db.skills["skinning"]["pool"], skinning_before)
         self.assertGreater(character.db.skills["outdoorsmanship"]["pool"], outdoors_before)
-        self.assertTrue(
-            [
-                obj
-                for obj in character.location.contents
-                if obj.db.object_type == "item" and obj.db.item_id == "rough_pelt"
-            ]
-        )
+        pelt_objects = [
+            obj
+            for obj in character.location.contents
+            if obj.db.object_type == "item" and obj.db.item_id == "rough_pelt"
+        ]
+        self.assertTrue(pelt_objects)
+        reloaded_pelt = ObjectDB.objects.get(id=pelt_objects[0].id)
+        self.assertEqual(reloaded_pelt.db.item_id, "rough_pelt")
+        self.assertEqual(reloaded_pelt.location.id, character.location.id)
         self.assertIn("already been skinned", skin_corpse(character))
         character.execute_cmd("skin corpse")
         character.execute_cmd("get rough_pelt")

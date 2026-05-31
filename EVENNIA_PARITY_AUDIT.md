@@ -128,7 +128,8 @@ Status: Proven by command and script smoke.
 Evidence:
 - `DRCommandSmokeTests.test_scan_target_advance_range_and_retreat_commands` verifies `scan`, `target`, `range`, `advance`, `retreat`, pressure scripts, and combat status.
 - `DRCommandSmokeTests.test_jab_requires_melee_and_defeats_enemy` verifies melee gating, roundtime, recovery, skill-pool gains, corpse creation, loot, and cleanup.
-- `DRCommandSmokeTests.test_skin_corpse_creates_pelt_and_trains_hunting_skills` verifies post-combat corpse skinning, pelt creation, duplicate prevention, pickup, and Skinning/Outdoorsmanship progress.
+- `DRCommandSmokeTests.test_jab_requires_melee_and_defeats_enemy` reloads the created corpse and verifies enemy id, coin loot, item loot, and contained loot object persistence before looting.
+- `DRCommandSmokeTests.test_skin_corpse_creates_pelt_and_trains_hunting_skills` verifies post-combat corpse skinning, reload-persistent skinned state, reload-persistent pelt creation, duplicate prevention, pickup, and Skinning/Outdoorsmanship progress.
 - `DRCommandSmokeTests.test_race_attributes_and_weapon_skill_modify_combat_damage` verifies attribute and skill-rank damage effects.
 - `DRCommandSmokeTests.test_combat_pressure_script_damages_engaged_character` verifies async enemy pressure.
 - `DRCommandSmokeTests.test_field_bandage_treats_combat_bleeding` and bleeding guidance smoke verify wound response suggestions and treatment.
