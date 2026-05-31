@@ -958,6 +958,18 @@ Next priority:
 
 - Run a completion-oriented Evennia parity audit against SPEC success criteria and close the highest-risk missing item found.
 
+Implementation Notes - 2026-05-31, Evennia Race Creation Audit Coverage
+
+Completed in the Evennia runtime:
+
+- Added command-level account smoke proving every one of the 11 canonical races can create an unaffiliated Circle 1 character through `create character <name> = <race>`.
+- The smoke verifies race id, race display name, race-derived attributes, `creation_complete`, commoner guild state, Circle 1 state, and Crossing start room placement for every race.
+- This closes the weakest audit evidence for the SPEC success criterion "All 11 races can create Circle 1 characters."
+
+Next priority:
+
+- Continue the SPEC completion audit by checking whether remaining success criteria are proven broadly enough or need additional command-level smoke coverage.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:

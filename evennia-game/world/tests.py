@@ -42,6 +42,38 @@ class DRAccountCreationTests(TestCase):
         account.execute_cmd("account help")
         account.execute_cmd("drhelp")
 
+    def test_account_create_character_supports_all_races_as_circle_one_commoners(self):
+        account = create_account("AllRaceCreationAccount", None, "test-password")
+        names = (
+            "Race Smoke Ada",
+            "Race Smoke Bera",
+            "Race Smoke Cora",
+            "Race Smoke Dara",
+            "Race Smoke Elda",
+            "Race Smoke Fara",
+            "Race Smoke Gala",
+            "Race Smoke Hara",
+            "Race Smoke Ilya",
+            "Race Smoke Jora",
+            "Race Smoke Kara",
+        )
+        for character_name, (race_id, race_name) in zip(names, RACES.items()):
+            account.execute_cmd(f"create character {character_name} = {race_name}")
+            character = next(
+                character
+                for character in account.characters.all()
+                if character.key == character_name
+            )
+            self.assertEqual(character.db.race, race_id)
+            self.assertEqual(character.db.race_name, race_name)
+            self.assertEqual(character.db.attributes, RACE_STARTING_ATTRIBUTES[race_id])
+            self.assertTrue(character.db.creation_complete)
+            self.assertEqual(character.db.guild_id, "commoner")
+            self.assertEqual(character.db.guild_name, "Unaffiliated")
+            self.assertEqual(character.db.circle, 1)
+            self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
+        self.assertEqual(len(list(account.characters.all())), len(RACES))
+
     def test_account_help_and_empty_roster_explain_creation_and_puppeting(self):
         account = create_account("EmptyRosterAccount", None, "test-password")
         empty_roster_text = account_roster_text(account)
