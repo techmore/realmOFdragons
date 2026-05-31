@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Updated the generated Evennia smoke transcript to show registrar `practice`, field bandage purchase, bleeding prompts, `tend`, and First Aid wound-care coverage.
 - Added `tend` / `treat` as command-first wound care verbs that default to using a carried `field_bandage`.
 - Added smoke coverage proving `tend` treats bleeding, consumes the physical bandage, and advances First Aid while `treat field_bandage` preserves explicit item-use behavior.
 - Combat prompts now suggest `use field_bandage` for bleeding characters carrying one, or retreating to buy one when none is carried.
