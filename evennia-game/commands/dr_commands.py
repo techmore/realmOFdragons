@@ -16,7 +16,7 @@ from world.dr_economy import appraise_item, buy_item, complete_shop_task, drop_i
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, circle_status, experience_summary, guild_ability_summary, guild_path_summary, guild_title, guild_title_ladder, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_capstone, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_rite, use_guild_technique
-from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room, guild_guide, hunting_guide, shop_guide, survey_room
+from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room, forage_guide, guild_guide, hunting_guide, shop_guide, survey_room
 
 
 CHARACTER_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z '-]{2,29}$")
@@ -39,7 +39,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
         "Guilds/Circles: guilds, registrar, join guild, guild/perks, title, experience, abilities, guild path, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
         "Movement: room/exits/where, survey, hunting, then use direction names or aliases like n, sw, u, d.",
-        "Shops/Fieldcraft: shops, shop, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
+        "Shops/Fieldcraft: shops, forage guide, shop, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
         "Focused help: help progression, help room, help scan, help targets, help combat.",
     ]
@@ -1274,6 +1274,25 @@ class CmdDRForage(Command):
 
     def func(self):
         self.caller.msg(forage_room(self.caller))
+
+
+class CmdDRForageGuide(Command):
+    """
+    Show forage sites and routes from here.
+
+    Usage:
+      forage guide
+      forage sites
+      gather guide
+    """
+
+    key = "forage guide"
+    aliases = ["forage sites", "gather guide"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(forage_guide(self.caller.location))
 
 
 class CmdDRDrop(Command):

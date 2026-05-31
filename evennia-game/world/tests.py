@@ -14,7 +14,7 @@ from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_it
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
-from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, validate_world_graph
+from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, validate_world_graph
 
 
 class DRAccountCreationTests(TestCase):
@@ -449,6 +449,13 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("go south, east", town_guilds)
         self.assertIn("Warrior Mage Guild", town_guilds)
         character.execute_cmd("guilds")
+        town_forage = forage_guide(character.location)
+        self.assertIn("Crossing forage sites:", town_forage)
+        self.assertIn("South Gate Trailhead", town_forage)
+        self.assertIn("wild_herbs; go south, south", town_forage)
+        self.assertIn("Sluice Yard", town_forage)
+        self.assertIn("Suggested loop: travel, survey, forage", town_forage)
+        character.execute_cmd("forage guide")
         self.walk_to_room(character, "crossing-RV02-002")
         character.execute_cmd("room")
         character.execute_cmd("search room")
@@ -468,6 +475,11 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("here.", local_shops)
         self.assertIn("Suggested loop: travel, survey, shop", local_shops)
         character.execute_cmd("stores")
+        local_forage = forage_guide(character.location)
+        self.assertIn("Brushline Forage Fork", local_forage)
+        self.assertIn("here", local_forage)
+        self.assertIn("appraise wild_herbs", local_forage)
+        character.execute_cmd("gather guide")
         self.walk_to_room(character, "crossing-GU10-001")
         registrar_survey = survey_room(character.location, character)
         self.assertIn("Guild registrar: Barbarian Guild", registrar_survey)

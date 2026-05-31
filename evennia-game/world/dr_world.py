@@ -349,6 +349,27 @@ def guild_guide(room):
     return "\n".join(lines)
 
 
+def forage_guide(room):
+    """Return command-first forage guidance from the current room."""
+
+    current_room_id = room.db.dr_room_id if room else START_ROOM_ID
+    lines = ["Crossing forage sites:"]
+    for room_id, forage in FORAGE_ROOMS.items():
+        room_data = ROOMS.get(room_id, {"title": room_id})
+        path = find_path(current_room_id, room_id)
+        if room_id == current_room_id:
+            route = "here"
+        elif path:
+            route = "go " + ", ".join(path)
+        else:
+            route = "route unknown"
+        shop = SHOPS.get(room_id)
+        shop_text = f"; nearby shop: {shop['name']}" if shop else ""
+        lines.append(f"- {room_data['title']} ({room_id}): {forage['item']}; {route}{shop_text}.")
+    lines.append("Suggested loop: travel, survey, forage, get wild_herbs, appraise wild_herbs, shops, sell wild_herbs.")
+    return "\n".join(lines)
+
+
 def survey_room(room, viewer=None):
     """Return command-first room affordances for movement, shops, guilds, forage, and targets."""
 
