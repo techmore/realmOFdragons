@@ -16,7 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 
-from commands.dr_commands import CmdDRAccountCharacters, CmdDRAccountCreateCharacter, CmdDRAccountHelp, CmdDRAim, CmdDRAdvance, CmdDRAppraise, CmdDRAttributes, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCombat, CmdDRCreateCharacter, CmdDRDefend, CmdDRDodge, CmdDRDrop, CmdDREquipment, CmdDRExperience, CmdDRFlee, CmdDRForage, CmdDRForageGuide, CmdDRGet, CmdDRGuildAbilities, CmdDRGuildBoon, CmdDRGuildCapstone, CmdDRGuildDrill, CmdDRGuildFocus, CmdDRGuildHistory, CmdDRGuildMilestone, CmdDRGuildsGuide, CmdDRGuildPassive, CmdDRGuildPath, CmdDRGuildPerks, CmdDRGuildPractice, CmdDRGuildRite, CmdDRGuildTechnique, CmdDRGuildTitle, CmdDRHands, CmdDRHealth, CmdDRHelp, CmdDRHunting, CmdDRHurl, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRJourney, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRegistrar, CmdDRRemove, CmdDRRepair, CmdDRRerollAttributes, CmdDRRespawn, CmdDRRest, CmdDRRetreat, CmdDRRevive, CmdDRRoom, CmdDRRoutes, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRShops, CmdDRSkills, CmdDRSkin, CmdDRStance, CmdDRStudy, CmdDRSurvey, CmdDRTarget, CmdDRTask, CmdDRTasksGuide, CmdDRTend, CmdDRTrain, CmdDRUse, CmdDRWait, CmdDRWallet, CmdDRWear, CmdDRWield
+from commands.dr_commands import CmdDRAccountCharacters, CmdDRAccountCreateCharacter, CmdDRAccountHelp, CmdDRAim, CmdDRAdvance, CmdDRAppraise, CmdDRAttributes, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCombat, CmdDRCreateCharacter, CmdDRDefend, CmdDRDodge, CmdDRDrop, CmdDREquipment, CmdDRExperience, CmdDRFlee, CmdDRForage, CmdDRForageGuide, CmdDRGet, CmdDRGuildAbilities, CmdDRGuildBoon, CmdDRGuildCapstone, CmdDRGuildDrill, CmdDRGuildFocus, CmdDRGuildHistory, CmdDRGuildMilestone, CmdDRGuildsGuide, CmdDRGuildPassive, CmdDRGuildPath, CmdDRGuildPerks, CmdDRGuildPractice, CmdDRGuildRite, CmdDRGuildTechnique, CmdDRGuildTitle, CmdDRHands, CmdDRHealth, CmdDRHelp, CmdDRHunting, CmdDRHurl, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRJourney, CmdDRLoot, CmdDRParry, CmdDRRace, CmdDRRange, CmdDRRegistrar, CmdDRRemove, CmdDRRepair, CmdDRRerollAttributes, CmdDRRespawn, CmdDRRest, CmdDRRetreat, CmdDRRevive, CmdDRRoom, CmdDRRoutes, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRShops, CmdDRSkills, CmdDRSkin, CmdDRStance, CmdDRStudy, CmdDRSurvey, CmdDRTarget, CmdDRTask, CmdDRTasksGuide, CmdDRTend, CmdDRTrain, CmdDRUse, CmdDRWait, CmdDRWallet, CmdDRWear, CmdDRWield
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -77,6 +77,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDRJoinGuild())
         self.add(CmdDRJourney())
         self.add(CmdDRLoot())
+        self.add(CmdDRParry())
         self.add(CmdDRRace())
         self.add(CmdDRRange())
         self.add(CmdDRRegistrar())

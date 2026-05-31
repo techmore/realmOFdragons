@@ -9,7 +9,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, dodge, health_text, hurl, jab, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
+from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, dodge, health_text, hurl, jab, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -1968,9 +1968,34 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.balance, "balanced")
 
         character.execute_cmd("defend")
+        self.assertIn("held weapon", parry(character))
+        character.execute_cmd("flee")
+        character.execute_cmd("rest")
+        self.walk_to_room(character, "crossing-RV02-002")
+        character.execute_cmd("buy small_blade")
+        character.execute_cmd("target rv-wolf-cub")
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
+        parry_text = parry(character)
+        self.assertIn("Small Practice Blade", parry_text)
+        self.assertEqual(character.db.stance, "defensive")
+        self.assertEqual(character.db.balance, "parrying")
+        self.assertEqual(character.db.roundtime, 1)
+        self.assertEqual(character.db.skills["parry_ability"]["pool"], 2)
+        self.assertEqual(character.db.skills["tactics"]["pool"], 3)
+        parry_health = character.db.health
+        parry_pressure_text = apply_enemy_pressure(character)
+        self.assertIn("parry", parry_pressure_text)
+        self.assertEqual(character.db.health, parry_health)
+        self.assertEqual(character.db.balance, "balanced")
+
+        character.execute_cmd("defend")
         self.assertEqual(character.db.stance, "defensive")
         self.assertEqual(character.db.roundtime, 0)
         self.assertEqual(character.db.balance, "balanced")
+        character.execute_cmd("parry")
+        self.assertEqual(character.db.balance, "parrying")
+        character.execute_cmd("rest")
         character.execute_cmd("evade")
         self.assertEqual(character.db.balance, "dodging")
         character.execute_cmd("rest")
