@@ -739,7 +739,9 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("equipment")
 
     def test_shop_data_has_stock_and_dialogue(self):
-        self.assertGreaterEqual(len(SHOPS), 3)
+        self.assertGreaterEqual(len(SHOPS), 4)
+        self.assertIn("field_bandage", ITEMS)
+        self.assertEqual(SHOPS["crossing-RV02-006"]["stock"][0], "field_bandage")
         for shop in SHOPS.values():
             self.assertTrue(shop["keeper"])
             self.assertTrue(shop["dialogue"])

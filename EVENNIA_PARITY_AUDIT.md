@@ -85,6 +85,7 @@ Evidence:
 
 Residual risk:
 - Shop inventories are intentionally small beginner inventories.
+- Beginner economy breadth now includes a Drainage Trail Peddler near the expanded hunting path and field bandage stock, but shops remain starter-scale.
 
 ### Enemies spawn in Crossing hunting rooms
 
@@ -131,7 +132,7 @@ Residual risk:
 
 ## Highest remaining parity risks
 
-- Original-map fidelity: current Crossing is an expanding clean-room scaffold with canonical-style districts and hunting/shop/guild affordances, not a full original Crossing clone.
+- Original-map fidelity: current Crossing is an expanding clean-room scaffold with canonical-style districts, hunting/shop/guild affordances, and beginner supply placement, not a full original Crossing clone.
 - Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, and distinct `technique` support-skill behavior, but these are clean-room mechanics rather than full original guild ability systems.
 - Browser webclient parity: command-first runtime is Evennia-backed and a generated terminal-style transcript exists; browser-specific polish may still live in the legacy frontend.
 - Persistence/security hardening: Evennia account persistence exists, but this audit did not do a security review beyond command behavior.

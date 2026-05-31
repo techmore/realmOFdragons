@@ -44,6 +44,13 @@ ITEMS = {
         "slot": "pack",
         "description": "A tied bundle of light practice arrows.",
     },
+    "field_bandage": {
+        "name": "Field Bandage",
+        "price": 10,
+        "sell": 4,
+        "slot": "pack",
+        "description": "A clean cloth wrap packed for quick field treatment.",
+    },
 }
 
 SHOPS = {
@@ -64,6 +71,12 @@ SHOPS = {
         "keeper": "Kresh",
         "dialogue": "Kresh says, 'Training gear is cheap. Bad habits are not.'",
         "stock": ("small_blade", "leather_shield"),
+    },
+    "crossing-RV02-006": {
+        "name": "Drainage Trail Peddler",
+        "keeper": "Sella",
+        "dialogue": "Sella says, 'The low cuts are wet, quick, and mean to unprepared hands.'",
+        "stock": ("field_bandage", "travel_rations", "torch"),
     },
 }
 
