@@ -22,6 +22,45 @@ from world.dr_world import START_ROOM_ID, build_crossing_world, find_built_room
 CHARACTER_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z '-]{2,29}$")
 
 
+ACCOUNT_HELP_TEXT = "\n".join(
+    [
+        "Dragon Realms account commands:",
+        "create character <name> = <race> - create an unaffiliated Circle 1 character.",
+        "characters / roster - list playable characters on this account.",
+        f"Races: {', '.join(RACES.values())}.",
+    ]
+)
+
+CHARACTER_HELP_TEXT = "\n".join(
+    [
+        "Dragon Realms commands:",
+        "Identity: score, attributes/stats, skills, race, reroll attributes.",
+        "Guilds/Circles: join guild, guild/perks, train, circle, circle status.",
+        "Movement: use Evennia exits by direction; guilds and shops are in Crossing rooms.",
+        "Shops: shop, shop talk, shop stock, shop refresh, buy <item>, sell <item>, inventory, hands, equipment.",
+        "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, revive/stand.",
+    ]
+)
+
+
+class CmdDRAccountHelp(Command):
+    """
+    Show Dragon Realms account command help.
+
+    Usage:
+      account help
+      drhelp
+    """
+
+    key = "account help"
+    aliases = ["drhelp"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        (self.account or self.caller).msg(ACCOUNT_HELP_TEXT)
+
+
 class CmdDRAccountCreateCharacter(Command):
     """
     Create a playable character from the account prompt.
@@ -238,6 +277,24 @@ class CmdDRRerollAttributes(Command):
         if result["changed"]:
             character.db.attributes = state["attributes"]
         character.msg("\n".join(result["events"]))
+
+
+class CmdDRHelp(Command):
+    """
+    Show Dragon Realms command help.
+
+    Usage:
+      drhelp
+      commands
+    """
+
+    key = "drhelp"
+    aliases = ["commands"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(CHARACTER_HELP_TEXT)
 
 
 class CmdDRSkills(Command):

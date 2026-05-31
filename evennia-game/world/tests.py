@@ -33,6 +33,8 @@ class DRAccountCreationTests(TestCase):
         self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
         account.execute_cmd("characters")
         account.execute_cmd("roster")
+        account.execute_cmd("account help")
+        account.execute_cmd("drhelp")
 
     def test_account_roster_lists_multiple_characters(self):
         account = create_account("RosterAccount", None, "test-password")
@@ -257,6 +259,8 @@ class DRCommandSmokeTests(TestCase):
 
     def test_join_guild_requires_a_registrar_room_command(self):
         character = self.make_character("Registrar Gate Smoke")
+        character.execute_cmd("drhelp")
+        character.execute_cmd("commands")
         character.execute_cmd("join guild")
         self.assertEqual(character.db.guild_id, "commoner")
         self.assertEqual(character.db.guild_name, "Unaffiliated")

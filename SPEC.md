@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added command-first Dragon Realms help surfaces: account-side `account help` / `drhelp` and in-character `drhelp` / `commands`.
+- Help text now summarizes account creation, race selection, guild/circle progression, shops, inventory, and async combat commands, with account and character smoke coverage.
 - Crossing world build now initializes `shop_stock` and `shop_last_refresh` metadata on every shop room, so stock exists before the first shop command.
 - Builder idempotency now preserves mutated room stock/refresh state across rebuilds, with smoke coverage for initial stock metadata and preservation after mutation.
 - Shop sell restocking now avoids duplicate stock entries, keeping `shop stock` as a clean catalog-style listing.
