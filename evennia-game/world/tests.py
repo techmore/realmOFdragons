@@ -3,6 +3,7 @@ Evennia migration smoke/unit tests for clean-room DR systems.
 """
 
 from django.test import SimpleTestCase, TestCase
+from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
@@ -103,6 +104,27 @@ class DRAccountCreationTests(TestCase):
         account.execute_cmd("create character 9Aela = elf")
         account.execute_cmd("create character Aela! = elf")
         self.assertEqual(list(account.characters.all()), [])
+
+    def test_account_created_character_persists_core_start_state_after_reload(self):
+        account = create_account("PersistenceAccount", None, "test-password")
+        account.execute_cmd("create character Persist Aela = elf")
+        character = next(character for character in account.characters.all() if character.key == "Persist Aela")
+        character_id = character.id
+
+        reloaded = ObjectDB.objects.get(id=character_id)
+        self.assertEqual(reloaded.key, "Persist Aela")
+        self.assertEqual(reloaded.db.race, "elf")
+        self.assertEqual(reloaded.db.race_name, "Elf")
+        self.assertEqual(reloaded.db.attributes, RACE_STARTING_ATTRIBUTES["elf"])
+        self.assertTrue(reloaded.db.creation_complete)
+        self.assertEqual(reloaded.db.guild_id, "commoner")
+        self.assertEqual(reloaded.db.guild_name, "Unaffiliated")
+        self.assertEqual(reloaded.db.circle, 1)
+        self.assertEqual(reloaded.location.db.dr_room_id, START_ROOM_ID)
+        self.assertIn(reloaded, list(account.characters.all()))
+        self.assertIn("Persist Aela: Elf, Unaffiliated, Circle 1", account_roster_text(account))
+        self.assertIn("athletics", reloaded.db.skills)
+        self.assertEqual(reloaded.db.wallet["trias"], 100)
 
 
 class DRDataTests(SimpleTestCase):

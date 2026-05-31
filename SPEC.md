@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added account-created character persistence smoke proving race, attributes, unaffiliated Circle 1 state, Crossing location, roster membership, starter skills, and wallet survive database reload.
 - Updated the generated Evennia smoke transcript so the shop/fieldcraft path shows the Old Orchard Verge, Orchard Verge Basket, Orchard Crow scan, and orchard forage.
 - Added the Old Orchard Verge west of South Gate Trailhead with an Orchard Crow enemy, orchard shop basket, forage support, and all-room/all-enemy smoke coverage.
 - Updated the generated Evennia smoke transcript so guild progression help and the walkthrough include `drill` before registrar practice.

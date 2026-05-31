@@ -214,6 +214,20 @@ class CmdDRAccountCreateCharacter(Command):
         character.db.guild_id = state["guild_id"]
         character.db.guild_name = state["guild_name"]
         character.db.circle = state["circle"]
+        character.db.skills = build_starter_skills()
+        character.db.wallet = {"plat": 0, "trias": 100, "lucan": 0, "silk": 0}
+        character.db.inventory = []
+        character.db.hands = {"left": None, "right": None}
+        character.db.equipment = {"worn": []}
+        character.db.equipment_condition = {}
+        character.db.health = 25
+        character.db.max_health = 25
+        character.db.balance = "balanced"
+        character.db.roundtime = 0
+        character.db.stance = "balanced"
+        character.db.engagement = {"target": None, "range": None}
+        character.db.bleeding = False
+        character.db.incapacitated = False
         character.db.creation_complete = True
         account.characters.add(character)
         account.msg(
