@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Selling an item now returns it to the current room-backed shop stock when that shop normally carries the item.
+- Expanded economy smoke to prove selling a torch restocks the provisioner counter after the item object is removed from the character.
 - Shop purchases now decrement room-backed shop stock, and empty/missing stock blocks repeat purchases until `shop refresh` restocks the counter.
 - Expanded shop smoke to prove buying removes an item from stock, repeat buying the depleted item fails, and manual refresh restores stock.
 - Added room-backed shop stock helpers plus `shop stock` and `shop refresh` commands for explicit NPC shop inventory/refresh state.

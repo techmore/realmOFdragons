@@ -125,6 +125,15 @@ def remove_shop_stock(room, item_id):
     room.db.shop_stock = tuple(stock)
 
 
+def add_shop_stock(room, item_id):
+    shop = current_shop(room)
+    if not shop or item_id not in shop["stock"]:
+        return
+    stock = list(current_stock(room))
+    stock.append(item_id)
+    room.db.shop_stock = tuple(stock)
+
+
 def format_shop_stock(room):
     shop = current_shop(room)
     if not shop:
@@ -253,6 +262,7 @@ def sell_item(character, item_id):
     character.db.inventory = inventory
     character.db.hands = hands
     character.db.wallet = set_coins(character.db.wallet, coins(character.db.wallet) + item["sell"])
+    add_shop_stock(character.location, item_id)
     return f"You sell {item['name']} from your {source} for {item['sell']} trias."
 
 
