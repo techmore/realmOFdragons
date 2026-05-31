@@ -256,6 +256,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertEqual(canal_edge.db.targets, ("rv-marsh-spider",))
         orchard = find_built_room("crossing-RV02-009")
         self.assertEqual(orchard.db.targets, ("rv-orchard-crow",))
+        lockworks = find_built_room("crossing-RV02-011")
+        self.assertEqual(lockworks.db.targets, ("rv-lockwork-crab",))
 
     def test_built_shopkeeper_npcs(self):
         build_crossing_world()
@@ -1083,6 +1085,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(SHOPS["crossing-RV02-008"]["stock"][0], "field_bandage")
         self.assertIn("crossing-RV02-010", SHOPS)
         self.assertEqual(SHOPS["crossing-RV02-010"]["stock"][0], "field_bandage")
+        self.assertIn("crossing-RV02-011", SHOPS)
+        self.assertEqual(SHOPS["crossing-RV02-011"]["stock"][0], "field_bandage")
         for shop in SHOPS.values():
             self.assertTrue(shop["keeper"])
             self.assertTrue(shop["dialogue"])
@@ -1094,6 +1098,7 @@ class DRCommandSmokeTests(TestCase):
         character = self.make_character("Forage Smoke")
         self.assertIn("crossing-RV02-002", FORAGE_ROOMS)
         self.assertIn("crossing-RV02-010", FORAGE_ROOMS)
+        self.assertIn("crossing-RV02-011", FORAGE_ROOMS)
         self.walk_to_room(character, "crossing-RV02-002")
         outdoors_before = character.db.skills["outdoorsmanship"]["pool"]
         perception_before = character.db.skills["perception"]["pool"]
@@ -1544,6 +1549,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(ROOMS["crossing-RV02-007"]["targets"], ("rv-reed-snake",))
         self.assertIn("rv-marsh-spider", ENEMIES)
         self.assertEqual(ROOMS["crossing-RV02-008"]["targets"], ("rv-marsh-spider",))
+        self.assertIn("rv-lockwork-crab", ENEMIES)
+        self.assertEqual(ROOMS["crossing-RV02-011"]["targets"], ("rv-lockwork-crab",))
         for enemy in ENEMIES.values():
             self.assertIn("loot", enemy)
             self.assertIn("trias", enemy["loot"])

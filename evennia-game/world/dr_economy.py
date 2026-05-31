@@ -118,6 +118,12 @@ SHOPS = {
         "dialogue": "Jarik says, 'The old towpath is shallow, but the footing lies. Keep wraps dry.'",
         "stock": ("field_bandage", "torch", "wild_herbs"),
     },
+    "crossing-RV02-011": {
+        "name": "Lockworks Dry Box",
+        "keeper": "Nera",
+        "dialogue": "Nera says, 'If you hear claws on stone, keep your boots out of the pools.'",
+        "stock": ("field_bandage", "travel_rations", "torch"),
+    },
 }
 
 FORAGE_ROOMS = {
@@ -128,6 +134,7 @@ FORAGE_ROOMS = {
     "crossing-RV02-007": {"item": "wild_herbs", "text": "You part the reeds around the culvert and find wild_herbs."},
     "crossing-RV02-008": {"item": "wild_herbs", "text": "You search the canal edge silt and find wild_herbs."},
     "crossing-RV02-010": {"item": "wild_herbs", "text": "You check moss along the flooded towpath and find wild_herbs."},
+    "crossing-RV02-011": {"item": "wild_herbs", "text": "You pry useful greens from cracks in the ruined lockworks and find wild_herbs."},
 }
 
 SHOP_TASKS = {

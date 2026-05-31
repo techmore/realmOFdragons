@@ -122,8 +122,14 @@ ROOMS = {
     "crossing-RV02-010": {
         "title": "Flooded Towpath",
         "desc": "A half-sunk towpath follows the old canal through slick stones, moss, and shallow pools.",
-        "exits": {"west": "crossing-RV02-008"},
+        "exits": {"west": "crossing-RV02-008", "south": "crossing-RV02-011"},
         "targets": ("rv-canal-newt",),
+    },
+    "crossing-RV02-011": {
+        "title": "Ruined Lockworks",
+        "desc": "Broken lock gates and algae-dark stonework mark an old water control point beyond the towpath.",
+        "exits": {"north": "crossing-RV02-010"},
+        "targets": ("rv-lockwork-crab",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",

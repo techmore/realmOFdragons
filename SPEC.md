@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added the Ruined Lockworks south of the Flooded Towpath with a Lockwork Crab enemy, dry-box shop, forage support, and smoke assertions.
 - Added Circle 10 `capstone` / `guild capstone` registrar rewards for every guild, with all-guild smoke proving distinct skill gains and reload-persistent capstone records.
 - Added account reload smoke proving roster membership and roster text persist after character creation and after Barbarian Circle 2 progression.
 - Added hunting loot persistence smoke proving corpse enemy id, coin loot, item loot, skinned state, and created rough pelts survive database reloads.

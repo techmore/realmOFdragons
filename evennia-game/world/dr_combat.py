@@ -73,6 +73,13 @@ ENEMIES = {
         "description": "A slick canal newt slips through shallow pools and snaps at moving fingers.",
         "loot": {"trias": 3, "items": ("field_bandage",)},
     },
+    "rv-lockwork-crab": {
+        "name": "Lockwork Crab",
+        "vitality": 17,
+        "aggression": "clacking",
+        "description": "A hard-shelled crab clacks through broken lock stones and guards a shallow pool.",
+        "loot": {"trias": 4, "items": ("rough_pelt",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")
