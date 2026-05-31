@@ -799,6 +799,11 @@ class DRCommandSmokeTests(TestCase):
             self.assertGreater(milestone_after, milestone_before)
             character.execute_cmd("milestone")
             character.execute_cmd("guild lesson")
+            milestone_command_after = (character.db.skills[milestone_skill_id]["rank"] * 5) + character.db.skills[milestone_skill_id]["pool"]
+            self.assertGreater(milestone_command_after, milestone_after)
+            reloaded_milestone = ObjectDB.objects.get(id=character.id)
+            reloaded_milestone_after = (reloaded_milestone.db.skills[milestone_skill_id]["rank"] * 5) + reloaded_milestone.db.skills[milestone_skill_id]["pool"]
+            self.assertGreaterEqual(reloaded_milestone_after, milestone_command_after)
             primary_skill_id = primary_skill_for_guild(guild_id)
             focus_before = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
             character.execute_cmd("focus")
