@@ -13,7 +13,7 @@ from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, com
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
+from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, task_guide, validate_world_graph
 
 
@@ -195,6 +195,17 @@ class DRDataTests(SimpleTestCase):
         self.assertEqual(primary_skill_for_guild("ranger"), "instinct")
         self.assertEqual(primary_skill_for_guild("warrior_mage"), "summoning")
         self.assertEqual(primary_skill_for_guild("commoner"), "athletics")
+
+    def test_all_guilds_have_named_circle_one_to_ten_milestones(self):
+        self.assertEqual(set(GUILD_CIRCLE_PERK_NAMES), set(GUILDS))
+        for guild_id, perk_names in GUILD_CIRCLE_PERK_NAMES.items():
+            self.assertEqual(len(perk_names), 10)
+            self.assertEqual(len(set(perk_names)), 10)
+            unlocked = unlocked_guild_perks(guild_id, 10)
+            self.assertEqual(len(unlocked), 10)
+            self.assertNotIn("recognition", " ".join(unlocked).lower())
+            self.assertIn(perk_names[0], guild_circle_perk(guild_id, 1))
+            self.assertIn(perk_names[-1], guild_circle_perk(guild_id, 10))
 
 
 class DRWorldTests(SimpleTestCase):
@@ -1892,7 +1903,7 @@ class DRProgressionTests(SimpleTestCase):
         state = {"guild_id": "barbarian", "guild_name": "Barbarian Guild", "circle": 1, "skills": skills, "room_guild_id": "barbarian"}
         events = advance_circle(state)
         self.assertIn("You advance to Circle 2.", events)
-        self.assertIn("Milestone unlocked: Barbarian Guild Circle 2 recognition.", events)
+        self.assertIn(f"Milestone unlocked: {guild_circle_perk('barbarian', 2)}.", events)
         self.assertEqual(state["circle"], 2)
         self.assertEqual(state["guild_perks"], unlocked_guild_perks("barbarian", 2))
 

@@ -7,14 +7,6 @@ from world.dr_data import GUILDS, GUILD_PRIMARY_SKILLS, SKILLS, build_starter_sk
 
 MAX_SUPPORTED_CIRCLE = 10
 
-GUILD_CIRCLE_PERKS = {
-    guild_id: {
-        circle: f"{guild_name} Circle {circle} recognition"
-        for circle in range(1, 11)
-    }
-    for guild_id, guild_name in GUILDS.items()
-}
-
 GUILD_TITLE_BASES = {
     "barbarian": "Pit",
     "bard": "Verse",
@@ -40,6 +32,149 @@ GUILD_TITLE_RANKS = {
     8: "Veteran",
     9: "Senior",
     10: "Tenth-Circle",
+}
+
+GUILD_CIRCLE_PERK_NAMES = {
+    "barbarian": (
+        "Pit Footing",
+        "War Cry Breath",
+        "Iron Hide Habit",
+        "Blooded Measure",
+        "Fury Harness",
+        "Shock Line Read",
+        "Unbroken Charge",
+        "Pain Ledger",
+        "Field Dominance",
+        "Roar-Keeper Authority",
+    ),
+    "bard": (
+        "Conservatory Ear",
+        "Carried Beat",
+        "Audience Read",
+        "Memory Verse",
+        "Counter-Melody",
+        "Story Anchor",
+        "Resonant Step",
+        "Lore Chorus",
+        "Commanding Refrain",
+        "Masterwork Cadence",
+    ),
+    "cleric": (
+        "Votive Posture",
+        "Quiet Prayer",
+        "Clean Doctrine",
+        "Sanctuary Habit",
+        "Consecrated Focus",
+        "Wound Vigil",
+        "Litany Resolve",
+        "Pilgrim Authority",
+        "Rite-Keeper Memory",
+        "Charged Benediction",
+    ),
+    "empath": (
+        "Gentle Attention",
+        "Pulse Read",
+        "Calm Hands",
+        "Triage Path",
+        "Shared Burden",
+        "Pain Boundary",
+        "Steady Clinic",
+        "Crisis Poise",
+        "Whole-Patient Sense",
+        "Vigilant Mercy",
+    ),
+    "moon_mage": (
+        "Night-Sky Habit",
+        "Timing Mark",
+        "Pattern Glimpse",
+        "Careful Forecast",
+        "Conjunction Step",
+        "Fate Ledger",
+        "Horizon Read",
+        "Moment Thread",
+        "Prediction Anchor",
+        "Tenth Sign Clarity",
+    ),
+    "necromancer": (
+        "Quiet Margin",
+        "Veiled Method",
+        "Bone-Library Recall",
+        "Sealed Question",
+        "Forbidden Discipline",
+        "Ashen Proof",
+        "Hidden Vessel",
+        "Grave Measure",
+        "Closed Formula",
+        "Black Thesis Control",
+    ),
+    "paladin": (
+        "Oath Stance",
+        "Shield Courtesy",
+        "Line Discipline",
+        "Judgment Habit",
+        "Vigil Step",
+        "Guarded Advance",
+        "Mercy Bound",
+        "Standard Bearer",
+        "Unyielding Watch",
+        "Oath-Forged Charge",
+    ),
+    "ranger": (
+        "Trail Memory",
+        "Weather Nose",
+        "Quiet Footing",
+        "Game Sign",
+        "Green Route",
+        "Ambush Sense",
+        "Long Path Patience",
+        "Wilderness Ledger",
+        "Known Crossing",
+        "Trailmaster Certainty",
+    ),
+    "thief": (
+        "Blind-Corner Sense",
+        "Soft Step",
+        "Crowd Mask",
+        "Lock Patience",
+        "Shadow Route",
+        "Clean Lift",
+        "Exit Ledger",
+        "Silent Bargain",
+        "Perfect Timing",
+        "Unseen Authority",
+    ),
+    "trader": (
+        "Counter Courtesy",
+        "Quick Tally",
+        "Route Price",
+        "Risk Ledger",
+        "Contract Poise",
+        "Market Memory",
+        "Cargo Judgment",
+        "Negotiator's Pause",
+        "Guild Credit",
+        "Master Ledger Authority",
+    ),
+    "warrior_mage": (
+        "Spark Discipline",
+        "Battle Channel",
+        "Elemental Reach",
+        "Heat Measure",
+        "Storm Focus",
+        "Target Line",
+        "Force Reserve",
+        "Battlefield Attunement",
+        "Elemental Command",
+        "Tenth-Circle Vector",
+    ),
+}
+
+GUILD_CIRCLE_PERKS = {
+    guild_id: {
+        circle: f"{GUILDS[guild_id]} Circle {circle}: {perk_name}"
+        for circle, perk_name in enumerate(perk_names, start=1)
+    }
+    for guild_id, perk_names in GUILD_CIRCLE_PERK_NAMES.items()
 }
 
 GUILD_ABILITY_THEMES = {
