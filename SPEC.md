@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added a persistent `BleedingScript` so untreated bleeding wounds tick asynchronously after enemy pressure.
+- Extended field bandage smoke coverage to prove bleeding tick damage starts after pressure and stops when the bandage is used.
 - Added a visible `bleeding` wound state from enemy pressure and combat status/health output.
 - Extended `field_bandage` use so it treats bleeding while restoring health, with smoke coverage from live enemy pressure.
 - Added registrar-gated `practice` / `guild practice`, combining guild focus and technique pulses only at the character's own guild registrar.

@@ -160,6 +160,25 @@ class CombatPressureScript(Script):
         apply_enemy_pressure(self.obj)
 
 
+class BleedingScript(Script):
+    """
+    Timer hook for untreated bleeding wounds.
+    """
+
+    def at_script_creation(self):
+        self.key = "dr_bleeding"
+        self.interval = 5
+        self.start_delay = True
+        self.persistent = True
+
+    def at_repeat(self):
+        if not self.obj:
+            return
+        from world.dr_combat import apply_bleeding_tick
+
+        apply_bleeding_tick(self.obj)
+
+
 class CorpseDecayScript(Script):
     """
     Timer hook for corpse cleanup.

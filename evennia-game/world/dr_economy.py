@@ -398,7 +398,12 @@ def use_item(character, item_id):
     healed = min(8, max_health - current_health)
     character.db.health = current_health + healed
     was_bleeding = bool(character.db.bleeding)
-    character.db.bleeding = False
+    if was_bleeding:
+        from world.dr_combat import stop_bleeding
+
+        stop_bleeding(character)
+    else:
+        character.db.bleeding = False
     inventory.remove(item_id)
     character.db.inventory = inventory
     objects = carried_item_objects(character, item_id)

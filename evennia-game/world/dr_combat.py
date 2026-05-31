@@ -51,6 +51,7 @@ RANGES = ("missile", "pole", "melee")
 STANCES = ("balanced", "offensive", "defensive")
 PRESSURE_SCRIPT_MARKER = "dr_combat_pressure"
 RECOVERY_SCRIPT_MARKER = "dr_recovery"
+BLEEDING_SCRIPT_MARKER = "dr_bleeding"
 
 
 def room_enemy_ids(room):
@@ -285,6 +286,7 @@ def apply_enemy_retaliation(character, enemy):
     character.db.health = health
     if damage >= 2:
         character.db.bleeding = True
+        ensure_bleeding(character)
     if health <= 0:
         character.db.incapacitated = True
         character.db.engagement = {"target": None, "range": None}
@@ -323,6 +325,48 @@ def combat_pressure_scripts(character):
         for script in character.scripts.all()
         if script.db.script_marker == PRESSURE_SCRIPT_MARKER
     ]
+
+
+def bleeding_scripts(character):
+    return [
+        script
+        for script in character.scripts.all()
+        if script.db.script_marker == BLEEDING_SCRIPT_MARKER
+    ]
+
+
+def ensure_bleeding(character):
+    scripts = bleeding_scripts(character)
+    if scripts:
+        return scripts[0]
+    script = create_script("typeclasses.scripts.BleedingScript", obj=character)
+    script.db.script_marker = BLEEDING_SCRIPT_MARKER
+    return script
+
+
+def stop_bleeding(character):
+    character.db.bleeding = False
+    for script in bleeding_scripts(character):
+        script.stop()
+        script.delete()
+
+
+def apply_bleeding_tick(character):
+    ensure_engagement(character)
+    if not character.db.bleeding:
+        stop_bleeding(character)
+        return "No bleeding: wounds are stable."
+    health = max(0, int(character.db.health or 0) - 1)
+    character.db.health = health
+    if health <= 0:
+        character.db.incapacitated = True
+        character.db.engagement = {"target": None, "range": None}
+        character.db.balance = "fallen"
+        character.db.roundtime = 0
+        stop_combat_pressure(character)
+        stop_bleeding(character)
+        return "Bleeding overwhelms you. You collapse, incapacitated."
+    return f"You lose 1 health to bleeding. You have {health} health remaining."
 
 
 def ensure_combat_pressure(character):
