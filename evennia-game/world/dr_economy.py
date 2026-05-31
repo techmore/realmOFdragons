@@ -105,7 +105,7 @@ def current_stock(room):
     shop = current_shop(room)
     if not shop:
         return ()
-    stock = room.db.shop_stock if room and room.db.shop_stock else shop["stock"]
+    stock = room.db.shop_stock if room and room.db.shop_stock is not None else shop["stock"]
     return tuple(item_id for item_id in stock if item_id in ITEMS)
 
 
@@ -116,6 +116,13 @@ def refresh_shop_stock(room):
     room.db.shop_stock = tuple(shop["stock"])
     room.db.shop_last_refresh = "manual"
     return f"{shop['keeper']} refreshes the stock at {shop['name']}."
+
+
+def remove_shop_stock(room, item_id):
+    stock = list(current_stock(room))
+    if item_id in stock:
+        stock.remove(item_id)
+    room.db.shop_stock = tuple(stock)
 
 
 def format_shop_stock(room):
@@ -197,6 +204,7 @@ def buy_item(character, item_id):
         return f"You need {item['price']} trias to buy {item['name']}."
 
     character.db.wallet = set_coins(wallet, coins(wallet) - item["price"])
+    remove_shop_stock(character.location, item_id)
     inventory = list(character.db.inventory or [])
     hands = dict(character.db.hands or {"left": None, "right": None})
     item_obj = create_item_object(item_id, character, character.location)

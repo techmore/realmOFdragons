@@ -351,6 +351,11 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations"))
         character.execute_cmd("shop stock")
         character.execute_cmd("buy torch")
+        self.assertEqual(character.location.db.shop_stock, ("travel_rations",))
+        character.execute_cmd("buy torch")
+        self.assertEqual(character.db.inventory.count("torch"), 1)
+        character.execute_cmd("shop refresh")
+        self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations"))
         self.assertIn("torch", character.db.inventory)
         self.assertTrue(
             [

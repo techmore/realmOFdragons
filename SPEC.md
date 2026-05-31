@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Shop purchases now decrement room-backed shop stock, and empty/missing stock blocks repeat purchases until `shop refresh` restocks the counter.
+- Expanded shop smoke to prove buying removes an item from stock, repeat buying the depleted item fails, and manual refresh restores stock.
 - Added room-backed shop stock helpers plus `shop stock` and `shop refresh` commands for explicit NPC shop inventory/refresh state.
 - Shop listings and purchases now read current room stock metadata, with smoke coverage proving stock display, manual refresh, and buy/sell flow continue to work.
 - Enemy pressure and retaliation now incapacitate characters at zero health, clear engagement, stop combat pressure, and prevent targeting, advancing, attacking, defending, or fleeing while down.
