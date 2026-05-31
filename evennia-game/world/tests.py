@@ -144,6 +144,7 @@ class DRWorldTests(SimpleTestCase):
     def test_hunting_rooms_are_reachable_from_town_green(self):
         self.assertEqual(find_path(START_ROOM_ID, "crossing-RV02-002"), ["south", "south", "east"])
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-005"))
+        self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-006"))
 
 
 class DRWorldBuilderTests(TestCase):
@@ -196,6 +197,8 @@ class DRWorldBuilderTests(TestCase):
         build_crossing_world()
         room = find_built_room("crossing-RV02-002")
         self.assertEqual(room.db.targets, ("rv-wolf-cub",))
+        drainage = find_built_room("crossing-RV02-006")
+        self.assertEqual(drainage.db.targets, ("rv-ditch-rat",))
 
     def test_built_shopkeeper_npcs(self):
         build_crossing_world()

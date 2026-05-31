@@ -38,6 +38,13 @@ ENEMIES = {
         "description": "A lean hare freezes near the grass line.",
         "loot": {"trias": 2, "items": ()},
     },
+    "rv-ditch-rat": {
+        "name": "Ditch Rat",
+        "vitality": 10,
+        "aggression": "nipping",
+        "description": "A muddy rat darts between roots and broken stones.",
+        "loot": {"trias": 2, "items": ("travel_rations",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")

@@ -99,6 +99,7 @@ Evidence:
 
 Residual risk:
 - Spawn variety is limited to the current beginner enemy set.
+- Beginner combat breadth now includes an added Root-Tangled Drainage room and Ditch Rat enemy, but Crossing remains a compact clean-room scaffold.
 
 ### Combat is asynchronous, range-based, and skill-driven
 
@@ -130,7 +131,7 @@ Residual risk:
 
 ## Highest remaining parity risks
 
-- Original-map fidelity: current Crossing is a clean-room scaffold with canonical-style districts and hunting/shop/guild affordances, not a full original Crossing clone.
+- Original-map fidelity: current Crossing is an expanding clean-room scaffold with canonical-style districts and hunting/shop/guild affordances, not a full original Crossing clone.
 - Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, and distinct `technique` support-skill behavior, but these are clean-room mechanics rather than full original guild ability systems.
 - Browser webclient parity: command-first runtime is Evennia-backed and a generated terminal-style transcript exists; browser-specific polish may still live in the legacy frontend.
 - Persistence/security hardening: Evennia account persistence exists, but this audit did not do a security review beyond command behavior.

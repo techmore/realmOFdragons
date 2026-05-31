@@ -92,8 +92,14 @@ ROOMS = {
     "crossing-RV02-005": {
         "title": "Low Ridge Rabbit Run",
         "desc": "A low grassy ridge overlooks the outer brush and small animal tracks.",
-        "exits": {"north": "crossing-RV02-003"},
+        "exits": {"north": "crossing-RV02-003", "east": "crossing-RV02-006"},
         "targets": ("rv-ridge-hare",),
+    },
+    "crossing-RV02-006": {
+        "title": "Root-Tangled Drainage",
+        "desc": "A damp drainage cut winds through roots, stones, and discarded trail scraps.",
+        "exits": {"west": "crossing-RV02-005"},
+        "targets": ("rv-ditch-rat",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",
