@@ -14,6 +14,7 @@ const requiredTokens = [
   '> circle status',
   '> train',
   '> mentor',
+  '> lesson',
   '> perk',
   '> signature',
   '> milestone',

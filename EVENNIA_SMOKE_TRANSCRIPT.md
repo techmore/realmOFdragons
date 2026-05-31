@@ -99,6 +99,9 @@ You study Barbarian Guild registrar notes, reinforcing Scholarship and Expertise
 > mentor
 Pit Mentor measures your stance and demands cleaner pressure before the next charge, reinforcing Circle 1 Expertise and Tactics.
 
+> lesson
+Pressure Lesson breaks a fight into stance, breath, and finishing force, reinforcing Circle 1 Expertise.
+
 > focus
 You center your Barbarian Guild focus through Circle 1, feeding Expertise by 1.
 

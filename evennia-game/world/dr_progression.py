@@ -233,6 +233,20 @@ GUILD_MENTORS = {
     "warrior_mage": {"name": "Range Mentor", "skill": "attunement", "advice": "forces your battle focus back into stable elemental control"},
 }
 
+GUILD_LESSONS = {
+    "barbarian": {"name": "Pressure Lesson", "skill": "expertise", "text": "breaks a fight into stance, breath, and finishing force"},
+    "bard": {"name": "Cadence Lesson", "skill": "bardic_lore", "text": "ties a working refrain to memory, timing, and audience read"},
+    "cleric": {"name": "Doctrine Lesson", "skill": "theurgy", "text": "sets practice inside prayer, doctrine, and field resolve"},
+    "empath": {"name": "Triage Lesson", "skill": "empathy", "text": "orders pain signs, calm hands, and patient attention"},
+    "moon_mage": {"name": "Conjunction Lesson", "skill": "astrology", "text": "turns timing marks into a practical forecast habit"},
+    "necromancer": {"name": "Sealed Lesson", "skill": "thanatology", "text": "keeps forbidden inquiry disciplined, indexed, and quiet"},
+    "paladin": {"name": "Oath Lesson", "skill": "conviction", "text": "tests protection against pressure, judgment, and restraint"},
+    "ranger": {"name": "Trail Lesson", "skill": "instinct", "text": "reads weather, sign, route, and likely movement together"},
+    "thief": {"name": "Angle Lesson", "skill": "stealth", "text": "maps exits, blind corners, and timing before action"},
+    "trader": {"name": "Route Lesson", "skill": "trading", "text": "balances price memory, risk, and contract discipline"},
+    "warrior_mage": {"name": "Vector Lesson", "skill": "attunement", "text": "aligns elemental control with target line and battle tempo"},
+}
+
 GUILD_BOONS = {
     "barbarian": {"name": "Battle Temper", "skill": "expertise", "text": "hardens your battle presence"},
     "bard": {"name": "Resonant Memory", "skill": "bardic_lore", "text": "sets guild lore into practiced recall"},
@@ -466,6 +480,9 @@ def guild_ability_summary(guild_id, circle):
     if guild_id in GUILD_MENTORS:
         mentor = GUILD_MENTORS[guild_id]
         lines.append(f"Registrar mentor: {mentor['name']} supports {SKILLS[mentor['skill']]}. Use `mentor` at your registrar.")
+    if guild_id in GUILD_LESSONS:
+        lesson = GUILD_LESSONS[guild_id]
+        lines.append(f"Registrar lesson: {lesson['name']} supports {SKILLS[lesson['skill']]}. Use `lesson` at your registrar.")
     if guild_id in GUILD_BOONS:
         boon = GUILD_BOONS[guild_id]
         lines.append(f"Registrar boon: {boon['name']} supports {SKILLS[boon['skill']]}. Use `boon` at your registrar once per Circle.")
@@ -552,7 +569,7 @@ def guild_path_summary(character_state):
         f"Current title: {guild_title(guild_id, circle)}.",
         f"Current milestone: {milestone}.",
         f"Primary training: {primary_skill['name']} rank {primary_skill.get('rank', 0)}.",
-        "Core loop: train, study, mentor, signature, focus, technique, passive, drill, circle status, circle.",
+        "Core loop: train, study, mentor, lesson, signature, focus, technique, passive, drill, circle status, circle.",
     ]
     if circle >= 5:
         rite = GUILD_RITES.get(guild_id)
@@ -610,12 +627,15 @@ def guild_plan_summary(character_state):
         lines.append(f"- Circle {step}: {guild_circle_perk(guild_id, step)}; trains {SKILLS.get(skill_id, skill_id)} ({marker}).")
 
     mentor = GUILD_MENTORS.get(guild_id)
+    lesson = GUILD_LESSONS.get(guild_id)
     signature = GUILD_SIGNATURES.get(guild_id)
     if mentor:
         lines.append(f"Registrar mentor: use `mentor` for {mentor['name']} ({SKILLS[mentor['skill']]}).")
+    if lesson:
+        lines.append(f"Registrar lesson: use `lesson` for {lesson['name']} ({SKILLS[lesson['skill']]}).")
     if signature:
         lines.append(f"Anywhere signature: use `signature` for {signature['name']} ({SKILLS[signature['skill']]}).")
-    lines.append("Registrar actions: train, study, perk, milestone, drill, practice, rite, boon, capstone, circle status, circle.")
+    lines.append("Registrar actions: train, study, mentor, lesson, perk, milestone, drill, practice, rite, boon, capstone, circle status, circle.")
     if circle >= MAX_SUPPORTED_CIRCLE:
         lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported plan cap; continue guild rewards, shops, fieldcraft, and hunting.")
     else:
@@ -723,6 +743,39 @@ def use_guild_mentor(character_state):
         f"{mentor['name']} {mentor['advice']}, reinforcing Circle {circle} {milestone_skill['name']} by {milestone_pulse} and {mentor_skill['name']} by {mentor_pulse}."
     )
     events.append("Guild mentors are registrar NPC guidance for the current Circle band; use `guild path` for the full loop.")
+    return events
+
+
+def use_guild_lesson(character_state):
+    """Run a registrar-gated guild lesson that trains lesson and milestone skills."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    lesson = GUILD_LESSONS.get(guild_id)
+    if not lesson:
+        return ["You need to join a guild before taking guild lessons."]
+    if room_guild_id != guild_id:
+        return ["Guild lessons require your own registrar. Use `guilds` or `circle status` to find the right room."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    skills = character_state.setdefault("skills", build_starter_skills())
+    milestone_skill_id = milestone_skill_for_guild_circle(guild_id, circle)
+    lesson_skill_id = lesson["skill"]
+    milestone_skill = skills.get(milestone_skill_id)
+    lesson_skill = skills.get(lesson_skill_id)
+    if not milestone_skill:
+        return [f"{lesson['name']} cannot find {milestone_skill_id} training."]
+    if not lesson_skill:
+        return [f"{lesson['name']} cannot find {lesson_skill_id} training."]
+
+    milestone_pulse = 1 + ((circle - 1) // 5)
+    lesson_pulse = 2 + ((circle - 1) // 4)
+    events = apply_skill_pool_gain(skills, milestone_skill_id, milestone_pulse)
+    events.extend(apply_skill_pool_gain(skills, lesson_skill_id, lesson_pulse))
+    events.append(
+        f"{lesson['name']} {lesson['text']}, reinforcing Circle {circle} {milestone_skill['name']} by {milestone_pulse} and {lesson_skill['name']} by {lesson_pulse}."
+    )
+    events.append("Guild lessons are registrar-gated Circle-scaled instruction; use `guild plan` for the full Circle 1-10 route.")
     return events
 
 
