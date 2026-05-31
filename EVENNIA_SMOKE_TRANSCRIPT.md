@@ -130,6 +130,10 @@ Outdoorsmanship and Perception gain field experience.
 > get wild_herbs
 You pick up the wild_herbs.
 
+> appraise wild_herbs
+Wild Herbs are worth 1 trias at shop price and 3 trias for resale.
+Appraisal gains field experience.
+
 > buy field_bandage
 You buy a field bandage.
 
@@ -234,6 +238,7 @@ You pick up the dropped item.
 - Gear upkeep: `DRCommandSmokeTests.test_wield_wear_and_equipment_commands` covers repair and equipment condition.
 - Beginner content breadth: all-room, all-shop, and all-enemy smoke covers the Reed-Choked Culvert, Culvert Cache, and Reed Snake.
 - Fieldcraft: `DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills`.
+- Item appraisal: `DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills` covers `appraise wild_herbs`.
 - Wound care: `DRCommandSmokeTests.test_tend_defaults_to_field_bandage_and_treats_bleeding` and `test_field_bandage_treats_combat_bleeding`.
 - Hunting harvest: `DRCommandSmokeTests.test_skin_corpse_creates_pelt_and_trains_hunting_skills`.
 - Async range combat: `DRCommandSmokeTests.test_scan_target_advance_range_and_retreat_commands`, combat pressure tests, bleeding tests, recovery tests, corpse/loot tests, and all-enemy command loop smoke.

@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Updated the generated Evennia smoke transcript so the shop/fieldcraft path includes `appraise wild_herbs`.
 - Expanded `appraise` beyond enemies so visible/carried/shop items can be appraised for price, resale value, description, condition, and Appraisal training.
 - Added smoke coverage proving gathered `wild_herbs` can be appraised through both helper and command paths before selling.
 - Updated the generated Evennia smoke transcript so the equipment path includes buying, wearing, and repairing a leather shield.
