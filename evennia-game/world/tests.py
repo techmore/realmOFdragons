@@ -11,7 +11,7 @@ from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, com
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, forage_room, format_shop, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_BOONS, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_focus, use_guild_practice, use_guild_technique
+from world.dr_progression import GUILD_BOONS, GUILD_PASSIVES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
 
 
@@ -471,6 +471,7 @@ class DRCommandSmokeTests(TestCase):
             self.assertIn(f"{guild_name} abilities through Circle 10:", ability_text)
             self.assertIn("Circle 10 is the current supported ability cap.", ability_text)
             self.assertIn("Registrar boon:", ability_text)
+            self.assertIn("Passive training:", ability_text)
             self.assertEqual(ability_text.count("- Circle "), 10)
             primary_skill_id = primary_skill_for_guild(guild_id)
             focus_before = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
@@ -484,6 +485,12 @@ class DRCommandSmokeTests(TestCase):
             character.execute_cmd("guild technique")
             technique_after = (character.db.skills[technique_skill_id]["rank"] * 5) + character.db.skills[technique_skill_id]["pool"]
             self.assertGreater(technique_after, technique_before)
+            passive_skill_id = GUILD_PASSIVES[guild_id]["skill"]
+            passive_before = (character.db.skills[passive_skill_id]["rank"] * 5) + character.db.skills[passive_skill_id]["pool"]
+            character.execute_cmd("passive")
+            character.execute_cmd("guild passive")
+            passive_after = (character.db.skills[passive_skill_id]["rank"] * 5) + character.db.skills[passive_skill_id]["pool"]
+            self.assertGreater(passive_after, passive_before)
             practice_before = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
             character.execute_cmd("practice")
             character.execute_cmd("guild practice")
@@ -542,6 +549,14 @@ class DRCommandSmokeTests(TestCase):
             }
         )
         self.assertIn("join guild", "\n".join(unaffiliated_technique))
+        unaffiliated_passive = use_guild_passive(
+            {
+                "guild_id": character.db.guild_id,
+                "circle": character.db.circle,
+                "skills": character.db.skills,
+            }
+        )
+        self.assertIn("join guild", "\n".join(unaffiliated_passive))
         unaffiliated_practice = use_guild_practice(
             {
                 "guild_id": character.db.guild_id,

@@ -57,6 +57,20 @@ GUILD_BOONS = {
     "warrior_mage": {"name": "Elemental Reserve", "skill": "summoning", "text": "stores battlefield force in elemental focus"},
 }
 
+GUILD_PASSIVES = {
+    "barbarian": {"name": "Battle Readiness", "skill": "defending", "text": "keeps your guard braced between exchanges"},
+    "bard": {"name": "Carried Cadence", "skill": "performance", "text": "keeps a useful rhythm under every action"},
+    "cleric": {"name": "Steady Devotion", "skill": "theurgy", "text": "keeps devotional discipline present in small choices"},
+    "empath": {"name": "Triage Awareness", "skill": "first_aid", "text": "keeps injury signs close to mind"},
+    "moon_mage": {"name": "Pattern Watch", "skill": "perception", "text": "keeps subtle timing changes visible"},
+    "necromancer": {"name": "Hidden Method", "skill": "thanatology", "text": "keeps forbidden study compartmentalized"},
+    "paladin": {"name": "Oath Posture", "skill": "shield_usage", "text": "keeps protective habits set into stance"},
+    "ranger": {"name": "Trail Sense", "skill": "outdoorsmanship", "text": "keeps terrain reads active while moving"},
+    "thief": {"name": "Urban Cover", "skill": "stealth", "text": "keeps escape lines and blind spots mapped"},
+    "trader": {"name": "Ledger Mind", "skill": "trading", "text": "keeps value and risk balanced"},
+    "warrior_mage": {"name": "Elemental Poise", "skill": "attunement", "text": "keeps battle focus aligned with power"},
+}
+
 STUDY_ROOMS = {
     "crossing-GU02-001": {"name": "Arcane Study Hall", "skill": "arcana", "text": "You study public notes on basic magical theory"},
     "crossing-GU12-001": {"name": "Moon Mage Observatory", "skill": "astrology", "text": "You study careful star tables and timing marks"},
@@ -127,6 +141,9 @@ def guild_ability_summary(guild_id, circle):
     if guild_id in GUILD_BOONS:
         boon = GUILD_BOONS[guild_id]
         lines.append(f"Registrar boon: {boon['name']} supports {SKILLS[boon['skill']]}. Use `boon` at your registrar once per Circle.")
+    if guild_id in GUILD_PASSIVES:
+        passive = GUILD_PASSIVES[guild_id]
+        lines.append(f"Passive training: {passive['name']} supports {SKILLS[passive['skill']]}. Use `passive` to reinforce it.")
     if max_circle >= MAX_SUPPORTED_CIRCLE:
         lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported ability cap.")
     else:
@@ -170,6 +187,26 @@ def use_guild_technique(character_state):
     events = apply_skill_pool_gain(skills, skill_id, pulse)
     events.append(f"{technique['name']} {technique['verb']}, feeding {skill['name']} by {pulse}.")
     events.append("Use `guild` and `abilities` to review your Circle milestones.")
+    return events
+
+
+def use_guild_passive(character_state):
+    """Reinforce a guild's passive Circle-scaled training identity."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    passive = GUILD_PASSIVES.get(guild_id)
+    if not passive:
+        return ["You have no guild passive training yet. Visit a registrar and use `join guild`."]
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    skills = character_state.setdefault("skills", build_starter_skills())
+    skill_id = passive["skill"]
+    skill = skills.get(skill_id)
+    if not skill:
+        return [f"{passive['name']} cannot find {skill_id} training."]
+    pulse = 1 + ((circle - 1) // 4)
+    events = apply_skill_pool_gain(skills, skill_id, pulse)
+    events.append(f"{passive['name']} {passive['text']}, reinforcing {skill['name']} by {pulse}.")
+    events.append("This is passive guild identity training; use `abilities` to review the full Circle list.")
     return events
 
 

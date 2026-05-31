@@ -16,7 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 
-from commands.dr_commands import CmdDRAccountCharacters, CmdDRAccountCreateCharacter, CmdDRAccountHelp, CmdDRAdvance, CmdDRAppraise, CmdDRAttributes, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCombat, CmdDRCreateCharacter, CmdDRDefend, CmdDREquipment, CmdDRFlee, CmdDRForage, CmdDRGet, CmdDRGuildAbilities, CmdDRGuildBoon, CmdDRGuildFocus, CmdDRGuildPerks, CmdDRGuildPractice, CmdDRGuildTechnique, CmdDRHands, CmdDRHealth, CmdDRHelp, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRegistrar, CmdDRRepair, CmdDRRerollAttributes, CmdDRRespawn, CmdDRRetreat, CmdDRRevive, CmdDRRoom, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRSkin, CmdDRStance, CmdDRStudy, CmdDRTarget, CmdDRTask, CmdDRTend, CmdDRTrain, CmdDRUse, CmdDRWait, CmdDRWear, CmdDRWield
+from commands.dr_commands import CmdDRAccountCharacters, CmdDRAccountCreateCharacter, CmdDRAccountHelp, CmdDRAdvance, CmdDRAppraise, CmdDRAttributes, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCombat, CmdDRCreateCharacter, CmdDRDefend, CmdDREquipment, CmdDRFlee, CmdDRForage, CmdDRGet, CmdDRGuildAbilities, CmdDRGuildBoon, CmdDRGuildFocus, CmdDRGuildPassive, CmdDRGuildPerks, CmdDRGuildPractice, CmdDRGuildTechnique, CmdDRHands, CmdDRHealth, CmdDRHelp, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRegistrar, CmdDRRepair, CmdDRRerollAttributes, CmdDRRespawn, CmdDRRetreat, CmdDRRevive, CmdDRRoom, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRSkin, CmdDRStance, CmdDRStudy, CmdDRTarget, CmdDRTask, CmdDRTend, CmdDRTrain, CmdDRUse, CmdDRWait, CmdDRWear, CmdDRWield
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -50,6 +50,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDRGuildAbilities())
         self.add(CmdDRGuildBoon())
         self.add(CmdDRGuildFocus())
+        self.add(CmdDRGuildPassive())
         self.add(CmdDRGuildPerks())
         self.add(CmdDRGuildPractice())
         self.add(CmdDRGuildTechnique())

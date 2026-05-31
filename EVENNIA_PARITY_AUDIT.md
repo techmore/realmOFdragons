@@ -50,6 +50,7 @@ Status: Proven by command smoke.
 Evidence:
 - `DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands` uses `join guild`, repeated `train`, and repeated `circle` to advance every guild to Circle 10.
 - The smoke verifies Circle 1 milestone unlock, Circle 10 cap, ten unlocked milestones, and final Circle 10 state for each guild.
+- The all-guild smoke verifies `passive` / `guild passive` for every guild, with distinct passive identities and Circle-scaled skill progress.
 - `DRCommandSmokeTests.test_circle_requires_own_guild_registrar_room_command` verifies circling is registrar-gated.
 - `DRCommandSmokeTests.test_joined_training_requires_own_guild_registrar_room_command` verifies training is own-registrar-gated.
 - `DRCommandSmokeTests.test_circle_status_guides_unaffiliated_and_ready_characters` verifies status guidance for unaffiliated and ready-to-circle states.
