@@ -17,6 +17,7 @@ from world.dr_world import ROOMS, START_ROOM_ID, build_crossing_world, find_buil
 class DRAccountCreationTests(TestCase):
     def test_account_create_character_command_creates_race_selected_commoner(self):
         account = create_account("CreationAccount", None, "test-password")
+        account.execute_cmd("characters")
         account.execute_cmd("create character Aela = elf")
         characters = list(account.characters.all())
         self.assertEqual(len(characters), 1)
@@ -30,6 +31,15 @@ class DRAccountCreationTests(TestCase):
         self.assertEqual(character.db.guild_name, "Unaffiliated")
         self.assertEqual(character.db.circle, 1)
         self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
+        account.execute_cmd("characters")
+        account.execute_cmd("roster")
+
+    def test_account_roster_lists_multiple_characters(self):
+        account = create_account("RosterAccount", None, "test-password")
+        account.execute_cmd("create character Aela = elf")
+        account.execute_cmd("create character Brin = human")
+        self.assertEqual(len(list(account.characters.all())), 2)
+        account.execute_cmd("characters")
 
 
 class DRDataTests(SimpleTestCase):

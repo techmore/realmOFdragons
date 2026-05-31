@@ -95,6 +95,36 @@ class CmdDRAccountCreateCharacter(Command):
         )
 
 
+class CmdDRAccountCharacters(Command):
+    """
+    List playable characters on this account.
+
+    Usage:
+      characters
+      roster
+    """
+
+    key = "characters"
+    aliases = ["roster"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        account = self.account or self.caller
+        characters = list(account.characters.all())
+        if not characters:
+            account.msg("No characters yet. Usage: create character <name> = <race name>")
+            return
+        lines = ["Characters:"]
+        for character in characters:
+            race_name = character.db.race_name or "Unchosen"
+            guild_name = character.db.guild_name or "Unaffiliated"
+            circle = character.db.circle or 1
+            location = character.location.key if character.location else "nowhere"
+            lines.append(f"- {character.key}: {race_name}, {guild_name}, Circle {circle}, at {location}.")
+        account.msg("\n".join(lines))
+
+
 class CmdDRScore(Command):
     """
     Show character identity and progression state.

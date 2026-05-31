@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added account-prompt `characters` / `roster` command for listing all playable characters on an account with race, guild, Circle, and location.
+- Added account smoke coverage for empty roster feedback, single-character roster display, alias display, and multiple-character accounts.
 - Added `circle status` / `circle check` / `circle requirements` modes for reading Circle requirements and milestones without attempting advancement.
 - Added all-guild smoke coverage proving `circle status` is safe and does not mutate Circle state before training.
 - Added an explicit Circle 10 support boundary so the Evennia port does not silently advance into unimplemented higher-circle progression.
