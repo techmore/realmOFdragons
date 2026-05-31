@@ -11,7 +11,7 @@ from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import advance_circle, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks
-from world.dr_world import ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
+from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
 
 
 class DRAccountCreationTests(TestCase):
@@ -113,6 +113,17 @@ class DRWorldBuilderTests(TestCase):
         self.assertTrue(town_green.db.shop)
         self.assertIn(START_ROOM_ID.lower(), town_green.aliases.all())
         self.assertEqual(len(town_green.exits), len(ROOMS[START_ROOM_ID]["exits"]))
+
+    def test_built_crossing_exits_have_mud_direction_aliases(self):
+        build_crossing_world()
+        for room_id, data in ROOMS.items():
+            room = find_built_room(room_id)
+            for direction in data.get("exits", {}):
+                expected_alias = DIRECTION_ALIASES[direction]
+                exit_obj = next(
+                    candidate for candidate in room.exits if candidate.key == direction
+                )
+                self.assertIn(expected_alias, exit_obj.aliases.all())
 
     def test_build_crossing_world_is_idempotent(self):
         first = build_crossing_world()
@@ -251,6 +262,17 @@ class DRCommandSmokeTests(TestCase):
             target_circle,
             f"{character.key} did not reach Circle {target_circle}",
         )
+
+    def test_direction_alias_commands_move_through_crossing(self):
+        character = self.make_character("Direction Alias Smoke")
+        character.execute_cmd("s")
+        self.assertEqual(character.location.db.dr_room_id, "crossing-RV01-001")
+        character.execute_cmd("n")
+        self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
+        character.execute_cmd("ne")
+        self.assertEqual(character.location.db.dr_room_id, "crossing-GU01-001")
+        character.execute_cmd("sw")
+        self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
 
     def prepare_circle_two_requirements(self, character):
         primary = primary_skill_for_guild(character.db.guild_id)

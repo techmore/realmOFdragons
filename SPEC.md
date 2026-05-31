@@ -856,6 +856,17 @@ Next priority:
 
 - Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
 
+Implementation Notes - 2026-05-31, Evennia Direction Aliases
+
+Completed in the Evennia runtime:
+
+- Crossing exits now receive classic MUD direction aliases during world build (`n`, `s`, `e`, `w`, `ne`, `nw`, `se`, `sw`, `u`, `d`).
+- Evennia smoke coverage now verifies both built exit aliases and command-level alias movement through Town Green.
+
+Next priority:
+
+- Continue command-first Evennia parity by expanding text movement/status feedback and reducing any remaining browser-first assumptions.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:

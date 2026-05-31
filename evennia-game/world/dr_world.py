@@ -13,6 +13,19 @@ from world.dr_economy import SHOPS
 
 START_ROOM_ID = "crossing-TG01-001"
 
+DIRECTION_ALIASES = {
+    "north": "n",
+    "south": "s",
+    "east": "e",
+    "west": "w",
+    "northeast": "ne",
+    "northwest": "nw",
+    "southeast": "se",
+    "southwest": "sw",
+    "up": "u",
+    "down": "d",
+}
+
 ROOMS = {
     START_ROOM_ID: {
         "title": "Crossing Town Green",
@@ -294,6 +307,9 @@ def build_crossing_world():
             exit_obj.db.dr_destination_room_id = destination_id
             if exit_id not in exit_obj.aliases.all():
                 exit_obj.aliases.add(exit_id)
+            direction_alias = DIRECTION_ALIASES.get(direction)
+            if direction_alias and direction_alias not in exit_obj.aliases.all():
+                exit_obj.aliases.add(direction_alias)
             exit_obj.save()
 
         for existing in list(room.exits):
