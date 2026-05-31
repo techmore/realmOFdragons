@@ -28,7 +28,7 @@ Aela enters Crossing as an unaffiliated Circle 1 Elf.
 
 > roster
 Characters:
-Aela: Elf, Unaffiliated, Circle 1 (crossing-TG-001)
+Aela: Elf, Unaffiliated, Circle 1 (crossing-TG01-001)
 Use `puppet <name>` to enter Crossing.
 
 > puppet Aela
@@ -41,11 +41,11 @@ You become Aela at Crossing Town Green.
 > drhelp
 Dragon Realms commands:
 Identity: score, attributes/stats, skills, race, reroll attributes.
-Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, passive, drill, practice, rite, boon, study, train, circle, circle status.
+Guilds/Circles: registrar, join guild, guild/perks, abilities, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.
 Movement: room/exits/where, survey, then use direction names or aliases like n, sw, u, d.
 
 > room
-Crossing Town Green [crossing-TG-001]
+Crossing Town Green [crossing-TG01-001]
 Exits lead deeper into Crossing's guildhalls, shops, and hunting paths.
 
 > survey
@@ -65,7 +65,7 @@ Next commands: join guild, guild, train, circle status.
 
 > join guild
 You join the Barbarian Guild.
-Barbarian Guild Circle 1 recognition.
+Barbarian Guild Circle 1: Pit Footing.
 
 > ask registrar
 Barbarian Guild registrar:
@@ -75,7 +75,7 @@ Next commands: train, circle status, circle, abilities, focus, technique, practi
 > guild
 Guild: Barbarian Guild. Circle 1.
 Unlocked milestones:
-- Barbarian Guild Circle 1 recognition
+- Barbarian Guild Circle 1: Pit Footing
 
 > circle status
 You are Circle 1 in Barbarian Guild.
@@ -97,6 +97,9 @@ You center your Barbarian Guild focus through Circle 1, feeding Expertise by 1.
 > technique
 Roar of Readiness turns battlefield pressure into tactical clarity, feeding Tactics by 1.
 
+> milestone
+You practice Barbarian Guild Circle 1: Pit Footing, reinforcing Expertise.
+
 > passive
 Battle Readiness keeps your guard braced between exchanges, reinforcing Defending by 1.
 
@@ -109,7 +112,7 @@ Expertise and Tactics gain guild practice.
 
 > circle
 You train and advance through the registrar to Circle 5.
-Barbarian Guild Circle 5 recognition.
+Barbarian Guild Circle 5: Fury Harness.
 
 > rite
 Circle of Iron turns controlled fury into disciplined readiness, training Expertise and Expertise.
@@ -122,6 +125,10 @@ This boon is now recorded on your guild progression.
 > circle
 You train and advance through normal commands to Circle 10.
 Circle 10 is the current supported ability cap.
+
+> capstone
+Tenth-Circle Roar sets battlefield authority into a finished Circle 10 form.
+This capstone is now recorded on your guild progression.
 ```
 
 ## Shops, physical items, hands, and equipment
@@ -206,6 +213,31 @@ You return to the Silted Canal Edge.
 
 > task complete
 You complete Towpath wrap bundle and earn 7 trias.
+Trading, Appraisal, and Athletics gain practical experience.
+
+> east
+> south
+> east
+You travel through the Ruined Lockworks and Canal Sluice Yard to the Mossy Spillway Steps.
+
+> shop
+The Spillway Rope Hook offers field_bandage, wild_herbs, and torch beside the slick steps.
+
+> task request
+Brakka asks you to carry a rope count back to the Sluice Yard Crate.
+
+> scan
+You scan the area.
+spillway_eel is here at missile range.
+
+> forage
+You search moss between spillway stones and find wild_herbs.
+
+> west
+You return to the Canal Sluice Yard.
+
+> task complete
+You complete Spillway rope count and earn 8 trias.
 Trading, Appraisal, and Athletics gain practical experience.
 
 > get wild_herbs
@@ -313,11 +345,11 @@ You pick up the dropped item.
 - Race-only unaffiliated Circle 1 starts: `DRAccountCreationTests.test_account_create_character_supports_all_races_as_circle_one_commoners`.
 - Registrar-only guild joining and Circle 10 progression: `DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands`.
 - Registrar guidance: the all-guild command smoke invokes `registrar` and `ask registrar` before and after joining every guild.
-- Guild focus, technique, passive, drill, practice, Circle 5+ rite, study, and boon behavior: the all-guild Circle 10 command smoke invokes progression commands and dedicated study smoke covers public study rooms plus registrar reading.
+- Guild focus, milestone, technique, passive, drill, practice, Circle 5+ rite, study, boon, and capstone behavior: the all-guild Circle 10 command smoke invokes progression commands and dedicated study smoke covers public study rooms plus registrar reading.
 - Crossing movement and room discovery: `DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room` and `test_room_status_commands_describe_text_navigation_context`.
 - Shops/items/equipment: `DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh` and `test_wield_wear_and_equipment_commands`.
 - Gear upkeep: `DRCommandSmokeTests.test_wield_wear_and_equipment_commands` covers repair and equipment condition.
-- Beginner content breadth: all-room, all-shop, and all-enemy smoke covers the Reed-Choked Culvert, Culvert Cache, Reed Snake, Silted Canal Edge, Old Orchard Verge, Flooded Towpath, Marsh Spider, Orchard Crow, and Canal Newt.
+- Beginner content breadth: all-room, all-shop, and all-enemy smoke covers the Reed-Choked Culvert, Culvert Cache, Reed Snake, Silted Canal Edge, Old Orchard Verge, Flooded Towpath, Ruined Lockworks, Canal Sluice Yard, Mossy Spillway Steps, Marsh Spider, Orchard Crow, Canal Newt, Lockwork Crab, Sluice Rat, and Spillway Eel.
 - Fieldcraft: `DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills`.
 - Item appraisal: `DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills` covers `appraise wild_herbs`.
 - Wound care: `DRCommandSmokeTests.test_tend_defaults_to_field_bandage_and_treats_bleeding` and `test_field_bandage_treats_combat_bleeding`.

@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Refreshed the generated Evennia command transcript so the documented terminal/Telnet path includes named milestones, `milestone`, Circle 10 `capstone`, Mossy Spillway Steps, Spillway Rope Hook, Spillway Eel, and spillway task coverage.
 - Added the Mossy Spillway Steps beyond the Canal Sluice Yard with a Spillway Eel enemy, Spillway Rope Hook shop, forage support, shop task, and smoke assertions.
 - Added registrar-gated `milestone` / `guild milestone` / `guild lesson` practice, making each guild's current named Circle milestone train its mapped guild skill through Circle 10.
 - Replaced generic guild Circle recognition text with named per-guild Circle 1-10 milestone ladders, with coverage proving every guild has ten distinct clean-room milestone names.
