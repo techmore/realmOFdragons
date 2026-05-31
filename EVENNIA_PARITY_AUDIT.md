@@ -129,7 +129,7 @@ Residual risk:
 ## Highest remaining parity risks
 
 - Original-map fidelity: current Crossing is a clean-room scaffold with canonical-style districts and hunting/shop/guild affordances, not a full original Crossing clone.
-- Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries and a shared `focus` command that pulses each guild primary skill, but these are clean-room mechanics rather than full original guild ability systems.
+- Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, and distinct `technique` support-skill behavior, but these are clean-room mechanics rather than full original guild ability systems.
 - Browser webclient parity: command-first runtime is Evennia-backed; current browser-specific polish may still live in the legacy frontend.
 - Persistence/security hardening: Evennia account persistence exists, but this audit did not do a security review beyond command behavior.
 
@@ -137,4 +137,4 @@ Residual risk:
 
 1. Add a small `help progression` topic summarizing the complete race -> puppet -> registrar -> train -> circle -> hunt/shop loop.
 2. Add an Evennia browser/telnet smoke transcript if tooling is available.
-3. Expand guild-specific Circle 1-10 passive perks beyond the shared `focus` mechanic into deeper per-guild command behavior.
+3. Expand guild-specific Circle 1-10 passive perks beyond `focus` and `technique` into deeper per-guild command behavior.

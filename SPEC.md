@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added distinct `technique` / `guild technique` behavior for every guild, with Circle-scaled support-skill pulses tied to each guild's clean-room identity.
+- Expanded all-guild Circle 10 smoke coverage to invoke each guild technique and prove it advances that guild's configured support skill.
 - Added a concrete `focus` / `guild focus` command for joined characters, turning guild ability unlocks into a Circle-scaled primary-skill pulse instead of purely descriptive text.
 - Expanded all-guild Circle 10 smoke coverage to invoke guild focus for every guild and prove each focus increases that guild's primary skill progress.
 - Added command-first Dragon Realms help surfaces: account-side `account help` / `drhelp` and in-character `drhelp` / `commands`.

@@ -29,6 +29,20 @@ GUILD_ABILITY_THEMES = {
     "warrior_mage": "battle magic, elemental focus, and aggression",
 }
 
+GUILD_TECHNIQUES = {
+    "barbarian": {"name": "Roar of Readiness", "skill": "tactics", "verb": "turns battlefield pressure into tactical clarity"},
+    "bard": {"name": "Measured Refrain", "skill": "performance", "verb": "sets a rhythm that sharpens performance"},
+    "cleric": {"name": "Litany of Resolve", "skill": "scholarship", "verb": "anchors devotion through studied discipline"},
+    "empath": {"name": "Careful Diagnosis", "skill": "first_aid", "verb": "reads wounds and steadies triage"},
+    "moon_mage": {"name": "Moment of Alignment", "skill": "perception", "verb": "studies timing through heightened perception"},
+    "necromancer": {"name": "Hidden Thesis", "skill": "sorcery", "verb": "channels forbidden study into controlled theory"},
+    "paladin": {"name": "Guarded Oath", "skill": "defending", "verb": "sets an oath into practical defense"},
+    "ranger": {"name": "Trail Sign", "skill": "outdoorsmanship", "verb": "reads terrain and wilderness movement"},
+    "thief": {"name": "Quiet Angle", "skill": "stealth", "verb": "finds cover in city noise and shadow"},
+    "trader": {"name": "Ledger Sense", "skill": "appraisal", "verb": "weighs risk through quick appraisal"},
+    "warrior_mage": {"name": "Elemental Vector", "skill": "targeted_magic", "verb": "aligns aggression with targeted magic"},
+}
+
 
 def normalize_skill_token(value):
     """Normalize player-entered skill names to internal ids."""
@@ -111,6 +125,26 @@ def use_guild_focus(character_state):
     events = apply_skill_pool_gain(skills, primary_skill_id, pulse)
     events.append(f"You center your {GUILDS[guild_id]} focus through Circle {circle}, feeding {primary_skill['name']} by {pulse}.")
     events.append("Use `abilities` to review your current guild unlocks.")
+    return events
+
+
+def use_guild_technique(character_state):
+    """Apply a guild-specific Circle-scaled support technique."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    technique = GUILD_TECHNIQUES.get(guild_id)
+    if not technique:
+        return ["You have no guild technique yet. Visit a registrar and use `join guild`."]
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    skills = character_state.setdefault("skills", build_starter_skills())
+    skill_id = technique["skill"]
+    skill = skills.get(skill_id)
+    if not skill:
+        return [f"Your {technique['name']} cannot find {skill_id} training."]
+    pulse = 1 + (circle // 4)
+    events = apply_skill_pool_gain(skills, skill_id, pulse)
+    events.append(f"{technique['name']} {technique['verb']}, feeding {skill['name']} by {pulse}.")
+    events.append("Use `guild` and `abilities` to review your Circle milestones.")
     return events
 
 
