@@ -9,7 +9,7 @@ from evennia.commands.command import Command
 from evennia.utils.create import create_object
 
 from world.dr_data import ATTRIBUTES, RACES, SKILLSETS, build_starter_skills
-from world.dr_combat import advance, appraise_enemy, bash, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, scan_room, stance, target_enemy, wait_recover
+from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, scan_room, stance, target_enemy, wait_recover
 from world.dr_economy import buy_item, equipment_text, format_shop, get_item, hands_text, inventory_text, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
@@ -622,6 +622,24 @@ class CmdDRHealth(Command):
 
     def func(self):
         self.caller.msg(health_text(self.caller))
+
+
+class CmdDRCombat(Command):
+    """
+    Show combat prompt state.
+
+    Usage:
+      combat
+      prompt
+    """
+
+    key = "combat"
+    aliases = ["prompt"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(combat_status(self.caller))
 
 
 class CmdDRScan(Command):

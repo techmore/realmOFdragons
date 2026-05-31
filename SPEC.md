@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added text-first `combat` / `prompt` status command summarizing health, balance, roundtime, stance, engagement range, and enemy vitality.
+- Extended combat movement smoke to display combat prompt state during and after engagement.
 - Added command-first combat appraisal with `appraise <enemy id>`, `appraise target`, and `assess` alias for enemy vitality, aggression, range, loot signs, and description.
 - Extended combat movement smoke to appraise visible and targeted enemies while preserving existing scan/target/range/advance/retreat behavior.
 - Added text-first `guild`, `perks`, and `milestones` commands for inspecting guild identity and unlocked Circle milestones.

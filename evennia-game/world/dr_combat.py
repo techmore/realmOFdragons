@@ -163,6 +163,29 @@ def health_text(character):
     return f"Health: {character.db.health}/{character.db.max_health}. Balance: {character.db.balance}. Stance: {character.db.stance}."
 
 
+def combat_status(character):
+    """Return a concise combat prompt/status block."""
+
+    ensure_engagement(character)
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target")
+    lines = [
+        f"Health: {character.db.health}/{character.db.max_health}.",
+        f"Balance: {character.db.balance}. Roundtime: {character.db.roundtime}. Stance: {character.db.stance}.",
+    ]
+    if not target_id:
+        lines.append("Engagement: none.")
+        return "\n".join(lines)
+    enemy = ENEMIES.get(target_id, {"name": target_id})
+    enemy_obj = find_enemy_object(character.location, target_id)
+    if not enemy_obj:
+        lines.append(f"Engagement: {enemy['name']} is gone.")
+        return "\n".join(lines)
+    lines.append(f"Engagement: {enemy['name']} at {engagement.get('range') or 'unknown'} range.")
+    lines.append(f"Enemy vitality: {int(enemy_obj.db.vitality or 0)}/{int(enemy.get('vitality', 0) or 0)}.")
+    return "\n".join(lines)
+
+
 def retaliation_damage(character):
     stance_name = character.db.stance or "balanced"
     if stance_name == "defensive":

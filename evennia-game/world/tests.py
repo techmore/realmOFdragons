@@ -349,6 +349,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(len(combat_pressure_scripts(character)), 1)
 
         character.execute_cmd("appraise target")
+        character.execute_cmd("combat")
         character.execute_cmd("range")
         character.execute_cmd("advance")
         self.assertEqual(character.db.engagement["range"], "pole")
@@ -361,6 +362,7 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("retreat")
         self.assertEqual(character.db.engagement["target"], None)
         self.assertEqual(len(combat_pressure_scripts(character)), 0)
+        character.execute_cmd("combat")
 
     def test_jab_requires_melee_and_defeats_enemy(self):
         character = self.make_character("Jab Smoke")
