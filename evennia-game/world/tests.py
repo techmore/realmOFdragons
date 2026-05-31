@@ -267,6 +267,8 @@ class DRCommandSmokeTests(TestCase):
             self.assertEqual(character.db.guild_name, guild_name)
             self.assertEqual(character.db.guild_perks, [guild_circle_perk(guild_id, 1)])
             character.execute_cmd("guild")
+            character.execute_cmd("circle status")
+            self.assertEqual(character.db.circle, 1)
 
             self.train_and_circle_to(character, 10)
             self.assertEqual(len(character.db.guild_perks), 10)

@@ -13,7 +13,7 @@ from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend
 from world.dr_economy import buy_item, equipment_text, format_shop, get_item, hands_text, inventory_text, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
-from world.dr_progression import advance_circle, train_skill, unlocked_guild_perks
+from world.dr_progression import advance_circle, circle_status, train_skill, unlocked_guild_perks
 from world.dr_world import START_ROOM_ID, build_crossing_world, find_built_room
 
 
@@ -416,6 +416,7 @@ class CmdDRCircle(Command):
 
     Usage:
       circle
+      circle status
     """
 
     key = "circle"
@@ -432,6 +433,10 @@ class CmdDRCircle(Command):
             "guild_perks": character.db.guild_perks or [],
             "room_guild_id": character.location.db.guild if character.location else None,
         }
+        if self.args.strip().lower() in ("status", "check", "requirements", "reqs"):
+            events = circle_status(state)
+            character.msg("\n".join(events))
+            return
         events = advance_circle(state)
         character.db.circle = state["circle"]
         character.db.skills = state["skills"]

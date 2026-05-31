@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `circle status` / `circle check` / `circle requirements` modes for reading Circle requirements and milestones without attempting advancement.
+- Added all-guild smoke coverage proving `circle status` is safe and does not mutate Circle state before training.
 - Added an explicit Circle 10 support boundary so the Evennia port does not silently advance into unimplemented higher-circle progression.
 - `circle` now reports the current Circle 10 cap with preserved guild milestone state, and command smoke verifies all guilds remain capped at Circle 10.
 - Added progression unit coverage proving overqualified characters at Circle 10 stay at Circle 10 and retain ten unlocked guild milestones.
