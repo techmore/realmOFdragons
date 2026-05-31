@@ -272,6 +272,8 @@ class DRCommandSmokeTests(TestCase):
             self.assertEqual(len(character.db.guild_perks), 10)
             self.assertEqual(character.db.guild_perks[-1], guild_circle_perk(guild_id, 10))
             character.execute_cmd("perks")
+            character.execute_cmd("circle")
+            self.assertEqual(character.db.circle, 10)
 
     def test_circle_requires_own_guild_registrar_room_command(self):
         registrars = guild_registrar_rooms()
@@ -701,6 +703,17 @@ class DRProgressionTests(SimpleTestCase):
         events = advance_circle(state)
         self.assertIn("This registrar cannot advance your guild.", events)
         self.assertEqual(state["circle"], 1)
+
+    def test_circle_ten_is_current_supported_cap(self):
+        skills = build_starter_skills()
+        skills["expertise"]["rank"] = 99
+        skills["athletics"]["rank"] = 99
+        state = {"guild_id": "barbarian", "guild_name": "Barbarian Guild", "circle": 10, "skills": skills, "room_guild_id": "barbarian"}
+        events = advance_circle(state)
+        self.assertIn("Circle 10 is the current supported cap for this Evennia port.", events)
+        self.assertIn("You have reached the current Circle 10 cap.", events)
+        self.assertEqual(state["circle"], 10)
+        self.assertEqual(len(state["guild_perks"]), 10)
 
 
 class DRIdentityTests(SimpleTestCase):

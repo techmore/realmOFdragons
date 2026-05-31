@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added an explicit Circle 10 support boundary so the Evennia port does not silently advance into unimplemented higher-circle progression.
+- `circle` now reports the current Circle 10 cap with preserved guild milestone state, and command smoke verifies all guilds remain capped at Circle 10.
+- Added progression unit coverage proving overqualified characters at Circle 10 stay at Circle 10 and retain ten unlocked guild milestones.
 - Guild training is now room-aware: joined characters must train at their own guild registrar, with clear rejection from ordinary rooms or other guildhalls.
 - Added command smoke proving Barbarian training fails from Town Green and a Bard registrar, then succeeds at the Barbarian registrar.
 - Added progression unit coverage for matching and mismatched guild training room metadata.

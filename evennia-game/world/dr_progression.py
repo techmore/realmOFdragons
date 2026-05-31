@@ -5,6 +5,8 @@ Progression helpers for the Evennia Dragon Realms migration.
 from world.dr_data import GUILDS, GUILD_PRIMARY_SKILLS, SKILLS, build_starter_skills
 
 
+MAX_SUPPORTED_CIRCLE = 10
+
 GUILD_CIRCLE_PERKS = {
     guild_id: {
         circle: f"{guild_name} Circle {circle} recognition"
@@ -119,6 +121,12 @@ def circle_status(character_state):
     guild_name = character_state.get("guild_name") or "Unaffiliated"
     guild_id = character_state.get("guild_id") or "commoner"
     skills = character_state.setdefault("skills", build_starter_skills())
+    if circle >= MAX_SUPPORTED_CIRCLE:
+        return [
+            f"You are Circle {circle} in {guild_name}.",
+            f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported cap for this Evennia port.",
+            f"Current milestone: {guild_circle_perk(guild_id, circle)}.",
+        ]
     requirement = next_circle_requirement(circle)
     primary_skill_id = primary_skill_for_guild(guild_id)
     primary_skill = skills.get(primary_skill_id, {"name": SKILLS.get(primary_skill_id, "Primary skill"), "rank": 0})
@@ -135,6 +143,8 @@ def can_circle(character_state):
 
     circle = int(character_state.get("circle") or 1)
     guild_id = character_state.get("guild_id") or "commoner"
+    if circle >= MAX_SUPPORTED_CIRCLE:
+        return False
     if guild_id == "commoner":
         return False
     skills = character_state.setdefault("skills", build_starter_skills())
@@ -161,6 +171,10 @@ def advance_circle(character_state):
     """Advance one Circle if possible and return output events."""
 
     events = circle_status(character_state)
+    if int(character_state.get("circle") or 1) >= MAX_SUPPORTED_CIRCLE:
+        events.append("You have reached the current Circle 10 cap.")
+        character_state["guild_perks"] = unlocked_guild_perks(character_state.get("guild_id"), MAX_SUPPORTED_CIRCLE)
+        return events
     if character_state.get("guild_id") == "commoner":
         events.append("You need to join a guild before you can advance circles.")
         return events
