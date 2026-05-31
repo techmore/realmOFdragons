@@ -14,7 +14,7 @@ from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_it
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
-from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, survey_room, validate_world_graph
+from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, hunting_guide, survey_room, validate_world_graph
 
 
 class DRAccountCreationTests(TestCase):
@@ -429,6 +429,12 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Survey: Crossing Town Green", town_survey)
         self.assertIn("Shop: Town Green Provisioner", town_survey)
         self.assertIn("Shop task: South road supply note", town_survey)
+        town_hunting = hunting_guide(character.location)
+        self.assertIn("Crossing hunting grounds:", town_hunting)
+        self.assertIn("Brushline Forage Fork", town_hunting)
+        self.assertIn("go south, south, east", town_hunting)
+        self.assertIn("rv-sluice-rat", town_hunting)
+        character.execute_cmd("hunting")
         self.walk_to_room(character, "crossing-RV02-002")
         character.execute_cmd("room")
         character.execute_cmd("search room")
@@ -438,6 +444,11 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Enemies: rv-wolf-cub", hunting_survey)
         self.assertIn("Shop: Riverside Field Outfitter", hunting_survey)
         self.assertEqual(character.location.db.targets, ("rv-wolf-cub",))
+        local_hunting = hunting_guide(character.location)
+        self.assertIn("Brushline Forage Fork", local_hunting)
+        self.assertIn("here", local_hunting)
+        self.assertIn("Suggested loop: travel, survey, scan", local_hunting)
+        character.execute_cmd("hunt")
         self.walk_to_room(character, "crossing-GU10-001")
         registrar_survey = survey_room(character.location, character)
         self.assertIn("Guild registrar: Barbarian Guild", registrar_survey)

@@ -279,6 +279,35 @@ def find_built_room(room_id):
     return None
 
 
+def hunting_guide(room):
+    """Return command-first hunting ground guidance from the current room."""
+
+    current_room_id = room.db.dr_room_id if room else START_ROOM_ID
+    lines = ["Crossing hunting grounds:"]
+    hunting_room_ids = [room_id for room_id, data in ROOMS.items() if data.get("targets")]
+    for room_id in hunting_room_ids:
+        data = ROOMS[room_id]
+        path = find_path(current_room_id, room_id)
+        if room_id == current_room_id:
+            route = "here"
+        elif path:
+            route = "go " + ", ".join(path)
+        else:
+            route = "route unknown"
+        targets = ", ".join(data.get("targets", ()))
+        shop = SHOPS.get(room_id)
+        forage = FORAGE_ROOMS.get(room_id)
+        affordances = []
+        if shop:
+            affordances.append(f"shop: {shop['name']}")
+        if forage:
+            affordances.append(f"forage: {forage['item']}")
+        extra = f" ({'; '.join(affordances)})" if affordances else ""
+        lines.append(f"- {data['title']} ({room_id}): {targets}; {route}.{extra}")
+    lines.append("Suggested loop: travel, survey, scan, appraise <enemy>, target <enemy>, advance, jab/bash, skin corpse, loot corpse.")
+    return "\n".join(lines)
+
+
 def survey_room(room, viewer=None):
     """Return command-first room affordances for movement, shops, guilds, forage, and targets."""
 
