@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `journey` / `next steps` / `todo` / `status` as a compact current-state guide covering location, route guidance, active shop tasks, guild next steps, combat state, and economy/fieldcraft prompts.
 - Added `routes` / `travel guide` / `map` as a command-first all-room Crossing route guide listing every configured room, path from the current room, and guild/shop/task/forage/enemy markers.
 - Added an automated Evennia transcript freshness smoke to `npm run check:evennia`, preventing the terminal/Telnet evidence artifact from drifting behind implemented commands and content.
 - Refreshed the generated Evennia command transcript so the documented terminal/Telnet path includes named milestones, `milestone`, Circle 10 `capstone`, Mossy Spillway Steps, Spillway Rope Hook, Spillway Eel, and spillway task coverage.

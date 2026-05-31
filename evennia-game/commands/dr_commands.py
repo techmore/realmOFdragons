@@ -12,11 +12,11 @@ from evennia.utils.create import create_object
 
 from world.dr_data import ATTRIBUTES, GUILDS, RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, rest, retreat, revive, room_enemy_ids, scan_room, skin_corpse, stance, target_enemy, wait_recover
-from world.dr_economy import appraise_item, buy_item, complete_shop_task, drop_item, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text, wear_item, wield_item
+from world.dr_economy import SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text, wear_item, wield_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, circle_status, experience_summary, guild_ability_summary, guild_path_summary, guild_title, guild_title_ladder, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_capstone, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_practice, use_guild_rite, use_guild_technique
-from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room, forage_guide, guild_guide, hunting_guide, shop_guide, survey_room, task_guide, travel_guide
+from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, hunting_guide, shop_guide, survey_room, task_guide, travel_guide
 
 
 CHARACTER_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z '-]{2,29}$")
@@ -38,7 +38,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Dragon Realms commands:",
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
         "Guilds/Circles: guilds, registrar, join guild, guild/perks, title, experience, abilities, guild path, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
-        "Movement: room/exits/where, survey, routes, hunting, then use direction names or aliases like n, sw, u, d.",
+        "Movement: journey, room/exits/where, survey, routes, hunting, then use direction names or aliases like n, sw, u, d.",
         "Shops/Fieldcraft: shops, tasks, forage guide, shop, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
         "Focused help: help progression, help room, help scan, help targets, help combat.",
@@ -86,7 +86,7 @@ CHARACTER_HELP_TOPICS = {
         [
             "Progression path:",
             "1. From the account prompt: create character <name> = <race>, then puppet <name>.",
-            "2. In Crossing: use room/exits/where, survey, and routes, then walk with directions or aliases like n, sw, u, d.",
+            "2. In Crossing: use journey, room/exits/where, survey, and routes, then walk with directions or aliases like n, sw, u, d.",
             "3. Join in-world: visit a guild registrar, use registrar for guidance, then use join guild. Guilds are not chosen during account creation.",
             "4. Train and circle: use guild path, title, experience, train, study, milestone, passive, drill, practice, boon, capstone, skills, circle status, circle, abilities, focus, and technique at your own guild registrar through Circle 10.",
             "5. Gear up and work: use shop, task request/status/complete, appraise <item>, shop talk, shop stock, buy <item>, sell <item>, get/drop, use <item>, tend/treat wounds, inventory, hands, equipment, wield, wear, remove/stow, and repair.",
@@ -96,6 +96,71 @@ CHARACTER_HELP_TOPICS = {
     ),
 }
 CHARACTER_HELP_TOPICS["target"] = CHARACTER_HELP_TOPICS["targets"]
+
+
+def format_route(current_room_id, destination_room_id):
+    if current_room_id == destination_room_id:
+        return "here"
+    path = find_path(current_room_id, destination_room_id)
+    if not path:
+        return "route unknown"
+    return "go " + ", ".join(path)
+
+
+def journey_summary(character):
+    """Return a compact command-first next-step summary for the current character."""
+
+    room = character.location
+    room_id = room.db.dr_room_id if room else START_ROOM_ID
+    room_title = room.key if room else "nowhere"
+    lines = [
+        "Journey:",
+        f"Location: {room_title} ({room_id}).",
+        "Navigation: use `routes` for all destinations or `survey` for this room.",
+    ]
+
+    active_task = character.db.active_task
+    if active_task:
+        destination_id = active_task.get("destination")
+        destination_title = SHOPS.get(destination_id, ROOMS.get(destination_id, {"title": destination_id})).get("name") or ROOMS.get(destination_id, {"title": destination_id})["title"]
+        lines.append(
+            f"Task: {active_task.get('name')} -> {destination_title} ({destination_id}); {format_route(room_id, destination_id)}; then `task complete`."
+        )
+    else:
+        lines.append("Task: none. Use `tasks` to find shop work or `task request` at a task shop.")
+
+    guild_id = character.db.guild_id or "commoner"
+    circle = int(character.db.circle or 1)
+    if guild_id == "commoner":
+        lines.append("Guild: unaffiliated. Use `guilds`, travel to a registrar, then `join guild`.")
+    else:
+        guild_state = {
+            "guild_id": guild_id,
+            "circle": circle,
+            "skills": character.db.skills or build_starter_skills(),
+            "guild_boons": character.db.guild_boons or [],
+            "guild_capstones": character.db.guild_capstones or [],
+            "room_guild_id": room.db.guild if room else None,
+        }
+        guild_path = guild_path_summary(guild_state)
+        lines.append(f"Guild: {character.db.guild_name or GUILDS.get(guild_id, guild_id)}, Circle {circle}. {guild_path[-1]}")
+
+    engagement = dict(character.db.engagement or {})
+    target = engagement.get("target")
+    range_band = engagement.get("range")
+    if character.db.incapacitated:
+        lines.append("Combat: incapacitated. Use `revive` or `rest`.")
+    elif character.db.bleeding:
+        lines.append("Combat: bleeding. Use `tend` or `use field_bandage`.")
+    elif target:
+        lines.append(f"Combat: engaged with {target} at {range_band}. Use `combat`, `advance`, `jab`, `bash`, `defend`, or `flee`.")
+    elif room and room_enemy_ids(room):
+        lines.append("Combat: enemies here. Use `scan`, `appraise <enemy>`, `target <enemy>`, and `advance`.")
+    else:
+        lines.append("Combat: no active target. Use `hunting` to find enemies.")
+
+    lines.append("Economy/fieldcraft: use `shops`, `forage guide`, `inventory`, `wallet`, and `equipment`.")
+    return "\n".join(lines)
 
 
 def account_roster_text(account):
@@ -511,6 +576,25 @@ class CmdDRRoutes(Command):
 
     def func(self):
         self.caller.msg(travel_guide(self.caller.location))
+
+
+class CmdDRJourney(Command):
+    """
+    Show a compact current journey and next-step summary.
+
+    Usage:
+      journey
+      next steps
+      todo
+    """
+
+    key = "journey"
+    aliases = ["next steps", "todo", "status"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(journey_summary(self.caller))
 
 
 class CmdDRSkills(Command):

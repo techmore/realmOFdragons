@@ -7,7 +7,7 @@ from evennia.accounts.models import AccountDB
 from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_account, create_object, create_script
 
-from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
+from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
@@ -469,6 +469,30 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.location.db.dr_room_id, "crossing-GU01-001")
         character.execute_cmd("sw")
         self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
+
+    def test_journey_summary_guides_current_next_steps(self):
+        character = self.make_character("Journey Smoke")
+        town_summary = journey_summary(character)
+        self.assertIn("Journey:", town_summary)
+        self.assertIn("Location: Crossing Town Green", town_summary)
+        self.assertIn("Task: none", town_summary)
+        self.assertIn("Guild: unaffiliated", town_summary)
+        self.assertIn("Combat: no active target", town_summary)
+        character.execute_cmd("journey")
+        character.execute_cmd("next steps")
+
+        request_shop_task(character)
+        task_summary = journey_summary(character)
+        self.assertIn("South road supply note", task_summary)
+        self.assertIn("Culvert Cache", task_summary)
+        self.assertIn("go south, south, east, east, east", task_summary)
+        character.execute_cmd("todo")
+
+        self.walk_to_room(character, "crossing-RV02-002")
+        character.execute_cmd("target rv-wolf-cub")
+        combat_summary = journey_summary(character)
+        self.assertIn("Combat: engaged with rv-wolf-cub at missile", combat_summary)
+        character.execute_cmd("status")
 
     def test_command_exits_can_walk_to_every_crossing_room(self):
         character = self.make_character("Full Crossing Walk Smoke")
