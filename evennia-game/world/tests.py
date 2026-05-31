@@ -1027,6 +1027,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(SHOPS["crossing-RV02-007"]["stock"][0], "field_bandage")
         self.assertIn("crossing-RV02-008", SHOPS)
         self.assertEqual(SHOPS["crossing-RV02-008"]["stock"][0], "field_bandage")
+        self.assertIn("crossing-RV02-010", SHOPS)
+        self.assertEqual(SHOPS["crossing-RV02-010"]["stock"][0], "field_bandage")
         for shop in SHOPS.values():
             self.assertTrue(shop["keeper"])
             self.assertTrue(shop["dialogue"])
@@ -1037,6 +1039,7 @@ class DRCommandSmokeTests(TestCase):
     def test_forage_creates_gatherable_and_trains_survival_skills(self):
         character = self.make_character("Forage Smoke")
         self.assertIn("crossing-RV02-002", FORAGE_ROOMS)
+        self.assertIn("crossing-RV02-010", FORAGE_ROOMS)
         self.walk_to_room(character, "crossing-RV02-002")
         outdoors_before = character.db.skills["outdoorsmanship"]["pool"]
         perception_before = character.db.skills["perception"]["pool"]

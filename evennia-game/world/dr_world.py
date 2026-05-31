@@ -116,8 +116,14 @@ ROOMS = {
     "crossing-RV02-008": {
         "title": "Silted Canal Edge",
         "desc": "A slow canal edge gathers silt, broken reeds, and skittering shapes beyond the culvert.",
-        "exits": {"west": "crossing-RV02-007"},
+        "exits": {"west": "crossing-RV02-007", "east": "crossing-RV02-010"},
         "targets": ("rv-marsh-spider",),
+    },
+    "crossing-RV02-010": {
+        "title": "Flooded Towpath",
+        "desc": "A half-sunk towpath follows the old canal through slick stones, moss, and shallow pools.",
+        "exits": {"west": "crossing-RV02-008"},
+        "targets": ("rv-canal-newt",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",

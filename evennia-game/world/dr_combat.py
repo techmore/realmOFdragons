@@ -66,6 +66,13 @@ ENEMIES = {
         "description": "A black crow hops between fallen fruit and snaps at anything too close.",
         "loot": {"trias": 2, "items": ("wild_herbs",)},
     },
+    "rv-canal-newt": {
+        "name": "Canal Newt",
+        "vitality": 15,
+        "aggression": "slippery",
+        "description": "A slick canal newt slips through shallow pools and snaps at moving fingers.",
+        "loot": {"trias": 3, "items": ("field_bandage",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")

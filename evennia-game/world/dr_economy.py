@@ -112,6 +112,12 @@ SHOPS = {
         "dialogue": "Merrin says, 'Crows are bold near the old trees. Carry food and keep your hands clear.'",
         "stock": ("travel_rations", "wild_herbs", "torch"),
     },
+    "crossing-RV02-010": {
+        "name": "Towpath Supply Shelf",
+        "keeper": "Jarik",
+        "dialogue": "Jarik says, 'The old towpath is shallow, but the footing lies. Keep wraps dry.'",
+        "stock": ("field_bandage", "torch", "wild_herbs"),
+    },
 }
 
 FORAGE_ROOMS = {
@@ -121,6 +127,7 @@ FORAGE_ROOMS = {
     "crossing-RV02-005": {"item": "wild_herbs", "text": "You check the low ridge grasses and find wild_herbs."},
     "crossing-RV02-007": {"item": "wild_herbs", "text": "You part the reeds around the culvert and find wild_herbs."},
     "crossing-RV02-008": {"item": "wild_herbs", "text": "You search the canal edge silt and find wild_herbs."},
+    "crossing-RV02-010": {"item": "wild_herbs", "text": "You check moss along the flooded towpath and find wild_herbs."},
 }
 
 SHOP_TASKS = {

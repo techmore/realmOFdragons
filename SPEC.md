@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added the Flooded Towpath beyond the Silted Canal Edge with a Canal Newt enemy, towpath supply shelf, forage support, and data smoke coverage.
 - Added Circle 5+ `rite` / `guild rite` registrar exercises for every guild, with all-guild smoke proving distinct rite skill gains and reload persistence.
 - Expanded all-guild Circle 10 smoke to reload after focus, technique, passive, drill, and practice, proving guild ability skill gains persist.
 - Added bleeding persistence smoke proving untreated bleeding, health, engagement target, prompt guidance, persistent bleeding script, and follow-up bleed tick survive database reload.
