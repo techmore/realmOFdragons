@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `tasks` / `task guide` / `jobs` / `job guide` as a command-first shop-task guide listing task shops, rewards, routes, destination counters, and the request/status/complete loop.
 - Added `forage guide` / `forage sites` / `gather guide` as a command-first guide listing forage sites, routes, nearby shops, and the gather/get/appraise/sell loop.
 - Added `guilds` / `guild guide` / `registrars` as a command-first guide listing every guild registrar, primary skill, route from the current room, and the join/train/circle loop.
 - Added `shops` / `shop guide` / `stores` as a command-first guide listing every shop, stock, task destination, route from the current room, and the shop/task loop.

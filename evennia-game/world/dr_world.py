@@ -329,6 +329,32 @@ def shop_guide(room):
     return "\n".join(lines)
 
 
+def task_guide(room):
+    """Return command-first shop task guidance from the current room."""
+
+    current_room_id = room.db.dr_room_id if room else START_ROOM_ID
+    lines = ["Crossing shop tasks:"]
+    for room_id, task in SHOP_TASKS.items():
+        shop = SHOPS.get(room_id, {"name": room_id, "keeper": "shopkeeper"})
+        destination_id = task["destination"]
+        destination_shop = SHOPS.get(destination_id)
+        destination_room = ROOMS.get(destination_id, {"title": destination_id})
+        path = find_path(current_room_id, room_id)
+        if room_id == current_room_id:
+            route = "here"
+        elif path:
+            route = "go " + ", ".join(path)
+        else:
+            route = "route unknown"
+        destination_text = destination_shop["name"] if destination_shop else destination_room["title"]
+        lines.append(
+            f"- {task['name']} from {shop['name']} ({room_id}, {shop['keeper']}): "
+            f"reward {task['reward']} trias; {route}; deliver to {destination_text} ({destination_id})."
+        )
+    lines.append("Suggested loop: travel to a task shop, survey, task request, travel to destination, task status, task complete, wallet, experience.")
+    return "\n".join(lines)
+
+
 def guild_guide(room):
     """Return command-first guild registrar guidance from the current room."""
 

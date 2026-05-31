@@ -14,7 +14,7 @@ from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_it
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
-from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, validate_world_graph
+from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, task_guide, validate_world_graph
 
 
 class DRAccountCreationTests(TestCase):
@@ -220,8 +220,29 @@ class DRWorldTests(SimpleTestCase):
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-008"))
         self.assertEqual(find_path(START_ROOM_ID, "crossing-RV02-009"), ["south", "south", "west"])
 
+    def test_task_guide_lists_routes_rewards_and_destinations(self):
+        town_guide = task_guide(None)
+        self.assertIn("Crossing shop tasks:", town_guide)
+        self.assertIn("South road supply note from Town Green Provisioner", town_guide)
+        self.assertIn("reward 9 trias; here; deliver to Culvert Cache", town_guide)
+        self.assertIn("Towpath wrap bundle from Towpath Supply Shelf", town_guide)
+        self.assertIn("Suggested loop: travel to a task shop, survey, task request", town_guide)
+
 
 class DRWorldBuilderTests(TestCase):
+    def test_task_guide_command_lists_local_routes_rewards_and_destinations(self):
+        build_crossing_world()
+        towpath = find_built_room("crossing-RV02-010")
+        local_guide = task_guide(towpath)
+        self.assertIn("Towpath wrap bundle from Towpath Supply Shelf", local_guide)
+        self.assertIn("reward 7 trias; here; deliver to Canal Edge Pack Stand", local_guide)
+
+        character = create_object("typeclasses.characters.Character", key="Task Guide Smoke", location=towpath, home=towpath)
+        character.execute_cmd("tasks")
+        character.execute_cmd("task guide")
+        character.execute_cmd("jobs")
+        character.execute_cmd("job guide")
+
     def test_build_crossing_world_creates_rooms_and_exits(self):
         result = build_crossing_world()
         self.assertTrue(result["ok"])
