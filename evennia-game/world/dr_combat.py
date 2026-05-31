@@ -200,12 +200,15 @@ def ensure_engagement(character):
         character.db.health = character.db.max_health
     if character.db.incapacitated is None:
         character.db.incapacitated = False
+    if character.db.bleeding is None:
+        character.db.bleeding = False
 
 
 def health_text(character):
     ensure_engagement(character)
     condition = "incapacitated" if character.db.incapacitated else "standing"
-    return f"Health: {character.db.health}/{character.db.max_health}. Balance: {character.db.balance}. Stance: {character.db.stance}. Condition: {condition}."
+    bleeding = "bleeding" if character.db.bleeding else "not bleeding"
+    return f"Health: {character.db.health}/{character.db.max_health}. Balance: {character.db.balance}. Stance: {character.db.stance}. Condition: {condition}. Wounds: {bleeding}."
 
 
 def combat_status(character):
@@ -218,6 +221,7 @@ def combat_status(character):
         f"Health: {character.db.health}/{character.db.max_health}.",
         f"Balance: {character.db.balance}. Roundtime: {character.db.roundtime}. Stance: {character.db.stance}.",
         f"Condition: {'incapacitated' if character.db.incapacitated else 'standing'}.",
+        f"Wounds: {'bleeding' if character.db.bleeding else 'not bleeding'}.",
     ]
     if not target_id:
         lines.append("Engagement: none.")
@@ -279,6 +283,8 @@ def apply_enemy_retaliation(character, enemy):
     damage = retaliation_damage(character)
     health = max(0, int(character.db.health or 0) - damage)
     character.db.health = health
+    if damage >= 2:
+        character.db.bleeding = True
     if health <= 0:
         character.db.incapacitated = True
         character.db.engagement = {"target": None, "range": None}
@@ -286,7 +292,8 @@ def apply_enemy_retaliation(character, enemy):
         character.db.roundtime = 0
         stop_combat_pressure(character)
         return f"{enemy['name']} presses back for {damage} damage. You collapse, incapacitated."
-    return f"{enemy['name']} presses back for {damage} damage. You have {health} health remaining."
+    wound_text = " You are bleeding." if character.db.bleeding else ""
+    return f"{enemy['name']} presses back for {damage} damage. You have {health} health remaining.{wound_text}"
 
 
 def apply_enemy_pressure(character):

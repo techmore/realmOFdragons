@@ -87,6 +87,7 @@ Residual risk:
 - Shop inventories are intentionally small beginner inventories.
 - Beginner economy breadth now includes a Drainage Trail Peddler near the expanded hunting path and field bandage stock, but shops remain starter-scale.
 - `field_bandage` now has command-level `use` behavior that restores health and consumes the physical item object.
+- Enemy pressure can now inflict a visible bleeding wound state, and `field_bandage` treats it while restoring health.
 
 ### Enemies spawn in Crossing hunting rooms
 

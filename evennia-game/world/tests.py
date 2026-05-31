@@ -7,7 +7,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scripts, combat_status, corpse_objects, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
+from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
 from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -1018,6 +1018,22 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("stance defensive")
         pressure_script.at_repeat()
         self.assertEqual(character.db.health, 25)
+        self.assertTrue(character.db.bleeding)
+
+    def test_field_bandage_treats_combat_bleeding(self):
+        character = self.make_character("Bleeding Bandage Smoke")
+        self.walk_to_room(character, "crossing-RV02-006")
+        character.execute_cmd("buy field_bandage")
+        character.execute_cmd("target rv-ditch-rat")
+        character.execute_cmd("advance")
+        pressure_script = combat_pressure_scripts(character)[0]
+        pressure_script.at_repeat()
+        self.assertTrue(character.db.bleeding)
+        self.assertIn("Wounds: bleeding", health_text(character))
+        bandage_text = use_item(character, "field_bandage")
+        self.assertIn("bleeding stops", bandage_text)
+        self.assertFalse(character.db.bleeding)
+        self.assertIn("Wounds: not bleeding", health_text(character))
 
     def test_enemy_pressure_incapacitation_and_revive(self):
         character = self.make_character("Incapacitation Smoke")

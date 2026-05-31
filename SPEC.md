@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added a visible `bleeding` wound state from enemy pressure and combat status/health output.
+- Extended `field_bandage` use so it treats bleeding while restoring health, with smoke coverage from live enemy pressure.
 - Added registrar-gated `practice` / `guild practice`, combining guild focus and technique pulses only at the character's own guild registrar.
 - Expanded all-guild Circle 10 smoke coverage to invoke guild practice for every guild and prove it advances guild primary skill progress.
 - Added `use <item>` for carried consumables, starting with `field_bandage` healing and item consumption.

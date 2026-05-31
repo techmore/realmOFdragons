@@ -397,12 +397,15 @@ def use_item(character, item_id):
 
     healed = min(8, max_health - current_health)
     character.db.health = current_health + healed
+    was_bleeding = bool(character.db.bleeding)
+    character.db.bleeding = False
     inventory.remove(item_id)
     character.db.inventory = inventory
     objects = carried_item_objects(character, item_id)
     if objects:
         objects[0].delete()
-    return f"You bind the worst cuts with {item['name']} and recover {healed} health."
+    bleeding_text = " The bleeding stops." if was_bleeding else ""
+    return f"You bind the worst cuts with {item['name']} and recover {healed} health.{bleeding_text}"
 
 
 def inventory_text(character):
