@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Account-side character creation now rejects duplicate playable character names on the same account case-insensitively before creating an Evennia object.
+- Added account smoke coverage proving duplicate roster creation does not add a second character or mutate the original race.
 - Added account-prompt `characters` / `roster` command for listing all playable characters on an account with race, guild, Circle, and location.
 - Added account smoke coverage for empty roster feedback, single-character roster display, alias display, and multiple-character accounts.
 - Added `circle status` / `circle check` / `circle requirements` modes for reading Circle requirements and milestones without attempting advancement.

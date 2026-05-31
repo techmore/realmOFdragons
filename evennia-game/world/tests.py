@@ -41,6 +41,14 @@ class DRAccountCreationTests(TestCase):
         self.assertEqual(len(list(account.characters.all())), 2)
         account.execute_cmd("characters")
 
+    def test_account_create_character_rejects_duplicate_roster_name(self):
+        account = create_account("DuplicateAccount", None, "test-password")
+        account.execute_cmd("create character Aela = elf")
+        account.execute_cmd("create character aela = human")
+        characters = list(account.characters.all())
+        self.assertEqual(len(characters), 1)
+        self.assertEqual(characters[0].db.race, "elf")
+
 
 class DRDataTests(SimpleTestCase):
     def test_canonical_race_count(self):

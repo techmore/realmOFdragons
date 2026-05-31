@@ -51,6 +51,10 @@ class CmdDRAccountCreateCharacter(Command):
         if not name:
             account.msg("Name is required. Usage: create character <name> = <race name>")
             return
+        existing_names = {character.key.lower() for character in account.characters.all()}
+        if name.lower() in existing_names:
+            account.msg(f'You already have a character named "{name}". Choose another name.')
+            return
         if race_id not in RACES:
             account.msg(f'Unknown race "{race_name}". Races: {races}.')
             return
