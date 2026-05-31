@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `slice` / `cut` as a held-blade melee combat maneuver using Small Edged plus reflex, with feint interaction, command help, smoke tests, transcript coverage, and skill-driven combat validation.
+
 - Added repeatable Circle 10 `mastery` / `guild mastery` registrar practice for every guild, with distinct mastery identities, skill pulses, registrar guidance, ability/plan help, all-guild persistence smoke, and transcript coverage.
 
 - Added the Sunk Willow Shoal beyond the Fallen Reed Causeway with a Shoal Frog enemy, Shoal Willow Satchel shop, forage support, shop task, transcript coverage, and targeted route/content smoke assertions.

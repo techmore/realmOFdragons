@@ -9,7 +9,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary, parse_account_character_creation
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, guard, health_text, hurl, jab, kick, maneuver_guide, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, shoot, skin_corpse
+from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, guard, health_text, hurl, jab, kick, maneuver_guide, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, shoot, skin_corpse, slice_attack
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, talk_shopkeeper, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -674,7 +674,9 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("ask task", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("boon", CHARACTER_HELP_TEXT)
         self.assertIn("guard/brace", CHARACTER_HELP_TEXT)
+        self.assertIn("slice/cut", CHARACTER_HELP_TEXT)
         self.assertIn("rest", CHARACTER_HELP_TEXT)
+        self.assertIn("slice / cut", CHARACTER_HELP_TOPICS["combat"])
         self.assertIn("guard / brace", CHARACTER_HELP_TOPICS["combat"])
         self.assertIn("rest - recover roundtime", CHARACTER_HELP_TOPICS["combat"])
         self.assertIn("study", CHARACTER_HELP_TEXT)
@@ -1882,11 +1884,12 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("retreat", pole_guide)
         character.execute_cmd("advance")
         self.assertEqual(character.db.engagement["range"], "melee")
-        self.assertIn("Suggested next command: jab, guard, or bash.", combat_status(character))
+        self.assertIn("Suggested next command: jab, slice, guard, or bash.", combat_status(character))
         melee_guide = maneuver_guide(character)
         self.assertIn("Target: Wolf Cub at melee range.", melee_guide)
         self.assertIn("feint / fake", melee_guide)
         self.assertIn("jab / attack", melee_guide)
+        self.assertIn("slice / cut", melee_guide)
         self.assertIn("kick", melee_guide)
         self.assertIn("guard / brace", melee_guide)
         self.assertIn("dodge / evade", melee_guide)
@@ -2160,7 +2163,7 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("advance")
         character.execute_cmd("advance")
         feint_text = feint(character)
-        self.assertIn("jab, kick, or bash", feint_text)
+        self.assertIn("jab, slice, kick, or bash", feint_text)
         character.execute_cmd("wait")
         kick_text = kick(character)
         self.assertIn("You kick Boarlet", kick_text)
@@ -2171,6 +2174,37 @@ class DRCommandSmokeTests(TestCase):
         self.assertGreater(character.db.skills["tactics"]["pool"], 0)
         character.execute_cmd("wait")
         character.execute_cmd("kick")
+
+    def test_slice_requires_blade_and_trains_small_edged(self):
+        unarmed = self.make_character("Slice Unarmed Smoke")
+        self.walk_to_room(unarmed, "crossing-RV02-003")
+        unarmed.execute_cmd("target rv-boarlet")
+        unarmed.execute_cmd("advance")
+        unarmed.execute_cmd("advance")
+        self.assertIn("small_blade", slice_attack(unarmed))
+
+        character = self.make_character("Slice Smoke")
+        self.walk_to_room(character, "crossing-RV02-002")
+        buy_item(character, "small_blade")
+        character.execute_cmd("wield small_blade")
+        self.walk_to_room(character, "crossing-RV02-003")
+        character.execute_cmd("target rv-boarlet")
+        self.assertIn("melee range", slice_attack(character))
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
+        feint_text = feint(character)
+        self.assertIn("jab, slice, kick, or bash", feint_text)
+        character.execute_cmd("wait")
+        small_edged_before = character.db.skills["small_edged"]["pool"]
+        slice_text = slice_attack(character)
+        self.assertIn("You slice Boarlet", slice_text)
+        self.assertIn("Your feint opens the strike.", slice_text)
+        self.assertIn("Roundtime: 1", slice_text)
+        self.assertFalse(character.db.engagement["feinted"])
+        self.assertGreater(character.db.skills["small_edged"]["pool"], small_edged_before)
+        self.assertGreater(character.db.skills["tactics"]["pool"], 0)
+        character.execute_cmd("wait")
+        character.execute_cmd("cut")
 
     def test_guard_reduces_next_close_pressure_and_trains_defending(self):
         character = self.make_character("Guard Smoke")

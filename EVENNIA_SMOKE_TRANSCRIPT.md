@@ -440,6 +440,11 @@ You jab at wolf_cub with agility and Small Edged behind the strike.
 Small Edged and Tactics gain field experience.
 Roundtime begins.
 
+> slice
+You slice wolf_cub with a held practice blade, reflex, and Small Edged behind the strike.
+Small Edged and Tactics gain field experience.
+Roundtime begins.
+
 > wait
 Roundtime eases.
 

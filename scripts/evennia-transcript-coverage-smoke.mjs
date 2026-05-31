@@ -55,6 +55,7 @@ const requiredTokens = [
   '> advance',
   '> combat',
   '> guard',
+  '> slice',
   '> kick',
   '> tend',
   '> skin corpse',
