@@ -16,7 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 
-from commands.dr_commands import CmdDRAccountCharacters, CmdDRAccountCreateCharacter, CmdDRAccountHelp, CmdDRAdvance, CmdDRAppraise, CmdDRAttributes, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCombat, CmdDRCreateCharacter, CmdDRDefend, CmdDRDrop, CmdDREquipment, CmdDRFlee, CmdDRForage, CmdDRGet, CmdDRGuildAbilities, CmdDRGuildBoon, CmdDRGuildCapstone, CmdDRGuildDrill, CmdDRGuildFocus, CmdDRGuildPassive, CmdDRGuildPath, CmdDRGuildPerks, CmdDRGuildPractice, CmdDRGuildRite, CmdDRGuildTechnique, CmdDRGuildTitle, CmdDRHands, CmdDRHealth, CmdDRHelp, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRegistrar, CmdDRRemove, CmdDRRepair, CmdDRRerollAttributes, CmdDRRespawn, CmdDRRest, CmdDRRetreat, CmdDRRevive, CmdDRRoom, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRSkin, CmdDRStance, CmdDRStudy, CmdDRSurvey, CmdDRTarget, CmdDRTask, CmdDRTend, CmdDRTrain, CmdDRUse, CmdDRWait, CmdDRWear, CmdDRWield
+from commands.dr_commands import CmdDRAccountCharacters, CmdDRAccountCreateCharacter, CmdDRAccountHelp, CmdDRAdvance, CmdDRAppraise, CmdDRAttributes, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCombat, CmdDRCreateCharacter, CmdDRDefend, CmdDRDrop, CmdDREquipment, CmdDRExperience, CmdDRFlee, CmdDRForage, CmdDRGet, CmdDRGuildAbilities, CmdDRGuildBoon, CmdDRGuildCapstone, CmdDRGuildDrill, CmdDRGuildFocus, CmdDRGuildPassive, CmdDRGuildPath, CmdDRGuildPerks, CmdDRGuildPractice, CmdDRGuildRite, CmdDRGuildTechnique, CmdDRGuildTitle, CmdDRHands, CmdDRHealth, CmdDRHelp, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRegistrar, CmdDRRemove, CmdDRRepair, CmdDRRerollAttributes, CmdDRRespawn, CmdDRRest, CmdDRRetreat, CmdDRRevive, CmdDRRoom, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRSkin, CmdDRStance, CmdDRStudy, CmdDRSurvey, CmdDRTarget, CmdDRTask, CmdDRTend, CmdDRTrain, CmdDRUse, CmdDRWait, CmdDRWear, CmdDRWield
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -45,6 +45,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDRDefend())
         self.add(CmdDRDrop())
         self.add(CmdDREquipment())
+        self.add(CmdDRExperience())
         self.add(CmdDRFlee())
         self.add(CmdDRForage())
         self.add(CmdDRGet())

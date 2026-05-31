@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `experience` / `exp` / `progress` as a compact Circle progress view showing guild, title, total ranks, primary rank/pool, next Circle requirements, and cap reward guidance, with all-guild smoke coverage.
 - Added clean-room Circle 1-10 guild titles with `title` / `titles` / `guild title`, surfaced current titles in guild, ability, and path views, and covered them across all guilds.
 - Added the Canal Sluice Yard beyond the Ruined Lockworks with a Sluice Rat enemy, Sluice Yard Crate shop, forage support, shop task, and smoke assertions.
 - Added `guild path` / `path` / `next` as a Circle-aware registrar guidance command, with all-guild smoke coverage for early-Circle, Circle 5+ rite, boon, and Circle 10 capstone guidance.

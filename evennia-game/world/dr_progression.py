@@ -217,6 +217,49 @@ def guild_title_ladder(guild_id, circle):
     return lines
 
 
+def experience_summary(character_state):
+    """Return a compact progression/experience summary for command users."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    guild_name = character_state.get("guild_name") or GUILDS.get(guild_id, "Unaffiliated")
+    circle = int(character_state.get("circle") or 1)
+    skills = character_state.setdefault("skills", build_starter_skills())
+    total_ranks = total_skill_ranks(skills)
+    primary_skill_id = primary_skill_for_guild(guild_id)
+    primary_skill = skills.get(primary_skill_id, {"name": SKILLS.get(primary_skill_id, primary_skill_id), "rank": 0, "pool": 0})
+    lines = [
+        f"Experience summary: {guild_name}, Circle {circle}.",
+        f"Title: {guild_title(guild_id, circle)}.",
+        f"Total skill ranks: {total_ranks}.",
+        f"Primary skill: {primary_skill['name']} rank {primary_skill.get('rank', 0)}, pool {primary_skill.get('pool', 0)}/5.",
+    ]
+    if guild_id == "commoner":
+        lines.append("Next step: join a guild before Circle advancement.")
+        return lines
+    if circle >= MAX_SUPPORTED_CIRCLE:
+        boon_key = f"{guild_id}:{MAX_SUPPORTED_CIRCLE}"
+        capstone_key = f"{guild_id}:{MAX_SUPPORTED_CIRCLE}"
+        claimed_boons = set(character_state.get("guild_boons") or [])
+        claimed_capstones = set(character_state.get("guild_capstones") or [])
+        lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported cap.")
+        if boon_key not in claimed_boons:
+            lines.append("Next step: use `boon` at your guild registrar.")
+        elif capstone_key not in claimed_capstones:
+            lines.append("Next step: use `capstone` at your guild registrar.")
+        else:
+            lines.append("Next step: continue training, shops, fieldcraft, and hunting.")
+        return lines
+
+    requirement = next_circle_requirement(circle)
+    primary_rank = int(primary_skill.get("rank", 0) or 0)
+    lines.append(f"Next Circle {requirement['next_circle']}: total ranks {total_ranks}/{requirement['total_ranks']}; {primary_skill['name']} {primary_rank}/{requirement['primary_rank']}.")
+    if total_ranks >= requirement["total_ranks"] and primary_rank >= requirement["primary_rank"]:
+        lines.append("Next step: stand before your guild registrar and use `circle`.")
+    else:
+        lines.append("Next step: train at your guild registrar, then check `circle status`.")
+    return lines
+
+
 def unlocked_guild_perks(guild_id, circle):
     """Return all guild milestones unlocked through the current Circle, capped to Circle 10."""
 
