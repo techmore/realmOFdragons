@@ -101,6 +101,13 @@ ENEMIES = {
         "description": "A sleek otter darts along the weir timbers and snaps with surprising force.",
         "loot": {"trias": 5, "items": ("field_bandage",)},
     },
+    "rv-bank-mink": {
+        "name": "Bank Mink",
+        "vitality": 16,
+        "aggression": "quick",
+        "description": "A narrow mink slips along the canal bank, watching hands and packs for openings.",
+        "loot": {"trias": 4, "items": ("wild_herbs",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")

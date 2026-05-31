@@ -237,6 +237,7 @@ class DRWorldTests(SimpleTestCase):
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-008"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-013"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-014"))
+        self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-015"))
         self.assertEqual(find_path(START_ROOM_ID, "crossing-RV02-009"), ["south", "south", "west"])
 
     def test_task_guide_lists_routes_rewards_and_destinations(self):
@@ -256,11 +257,15 @@ class DRWorldTests(SimpleTestCase):
         self.assertIn("enemies: rv-spillway-eel", town_guide)
         self.assertIn("Weir Watch Platform (crossing-RV02-014): go south, south, east, east, east, east, east, south, east, east, east.", town_guide)
         self.assertIn("enemies: rv-weir-otter", town_guide)
+        self.assertIn("Canal Bank Narrows (crossing-RV02-015): go south, south, east, east, east, east, east, south, east, east, east, east.", town_guide)
+        self.assertIn("enemies: rv-bank-mink", town_guide)
         self.assertIn("guild: Barbarian Guild", town_guide)
         self.assertIn("shop: Spillway Rope Hook", town_guide)
         self.assertIn("task: Spillway rope count", town_guide)
         self.assertIn("shop: Weir Watch Kit", town_guide)
         self.assertIn("task: Weir hook report", town_guide)
+        self.assertIn("shop: Canal Bank Supply Tin", town_guide)
+        self.assertIn("task: Bank narrows count", town_guide)
 
 
 class DRWorldBuilderTests(TestCase):
@@ -353,6 +358,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertEqual(spillway.db.targets, ("rv-spillway-eel",))
         weir = find_built_room("crossing-RV02-014")
         self.assertEqual(weir.db.targets, ("rv-weir-otter",))
+        bank = find_built_room("crossing-RV02-015")
+        self.assertEqual(bank.db.targets, ("rv-bank-mink",))
 
     def test_built_shopkeeper_npcs(self):
         build_crossing_world()
@@ -531,6 +538,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("go south, south, east", town_hunting)
         self.assertIn("rv-sluice-rat", town_hunting)
         self.assertIn("rv-weir-otter", town_hunting)
+        self.assertIn("rv-bank-mink", town_hunting)
         character.execute_cmd("hunting")
         town_shops = shop_guide(character.location)
         self.assertIn("Crossing shops and tasks:", town_shops)
@@ -539,6 +547,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Sluice Yard Crate", town_shops)
         self.assertIn("field_bandage, torch, travel_rations", town_shops)
         self.assertIn("Weir Watch Kit", town_shops)
+        self.assertIn("Canal Bank Supply Tin", town_shops)
         character.execute_cmd("shops")
         town_guilds = guild_guide(character.location)
         self.assertIn("Crossing guild registrars:", town_guilds)
@@ -553,6 +562,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("wild_herbs; go south, south", town_forage)
         self.assertIn("Sluice Yard", town_forage)
         self.assertIn("Weir Watch Platform", town_forage)
+        self.assertIn("Canal Bank Narrows", town_forage)
         self.assertIn("Suggested loop: travel, survey, forage", town_forage)
         character.execute_cmd("forage guide")
         self.walk_to_room(character, "crossing-RV02-002")
@@ -1279,6 +1289,19 @@ class DRCommandSmokeTests(TestCase):
         self.assertGreater(spillway_runner.db.wallet["trias"], spillway_wallet_before)
         self.assertIsNone(spillway_runner.db.active_task)
 
+        bank_runner = self.make_character("Bank Task Smoke")
+        self.walk_to_room(bank_runner, "crossing-RV02-015")
+        bank_text = request_shop_task(bank_runner)
+        self.assertIn("Weir Watch Kit", bank_text)
+        self.assertIn("crossing-RV02-014", task_status(bank_runner))
+        self.walk_to_room(bank_runner, "crossing-RV02-014")
+        bank_wallet_before = bank_runner.db.wallet["trias"]
+        bank_complete_text = complete_shop_task(bank_runner)
+        self.assertIn("Bank narrows count", bank_complete_text)
+        self.assertIn("Shop task complete", bank_complete_text)
+        self.assertGreater(bank_runner.db.wallet["trias"], bank_wallet_before)
+        self.assertIsNone(bank_runner.db.active_task)
+
     def test_shopkeepers_reject_untraded_items_and_missing_carried_items(self):
         character = self.make_character("Shop Refusal Smoke")
         self.walk_to_room(character, "crossing-RV02-002")
@@ -1501,6 +1524,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(SHOPS["crossing-RV02-012"]["stock"][0], "field_bandage")
         self.assertIn("crossing-RV02-013", SHOPS)
         self.assertEqual(SHOPS["crossing-RV02-013"]["stock"][0], "field_bandage")
+        self.assertIn("crossing-RV02-015", SHOPS)
+        self.assertEqual(SHOPS["crossing-RV02-015"]["stock"][0], "field_bandage")
         for shop in SHOPS.values():
             self.assertTrue(shop["keeper"])
             self.assertTrue(shop["dialogue"])
@@ -1515,6 +1540,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("crossing-RV02-011", FORAGE_ROOMS)
         self.assertIn("crossing-RV02-012", FORAGE_ROOMS)
         self.assertIn("crossing-RV02-013", FORAGE_ROOMS)
+        self.assertIn("crossing-RV02-015", FORAGE_ROOMS)
         self.walk_to_room(character, "crossing-RV02-002")
         outdoors_before = character.db.skills["outdoorsmanship"]["pool"]
         perception_before = character.db.skills["perception"]["pool"]
@@ -2131,6 +2157,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(ROOMS["crossing-RV02-008"]["targets"], ("rv-marsh-spider",))
         self.assertIn("rv-lockwork-crab", ENEMIES)
         self.assertEqual(ROOMS["crossing-RV02-011"]["targets"], ("rv-lockwork-crab",))
+        self.assertIn("rv-bank-mink", ENEMIES)
+        self.assertEqual(ROOMS["crossing-RV02-015"]["targets"], ("rv-bank-mink",))
         for enemy in ENEMIES.values():
             self.assertIn("loot", enemy)
             self.assertIn("trias", enemy["loot"])

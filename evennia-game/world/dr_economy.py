@@ -142,6 +142,12 @@ SHOPS = {
         "dialogue": "Lessa says, 'The weir looks quiet until the foam moves against the current.'",
         "stock": ("field_bandage", "travel_rations", "wild_herbs"),
     },
+    "crossing-RV02-015": {
+        "name": "Canal Bank Supply Tin",
+        "keeper": "Perren",
+        "dialogue": "Perren says, 'The bank narrows fast. Keep your pack closed and your footing quiet.'",
+        "stock": ("field_bandage", "travel_rations", "torch"),
+    },
 }
 
 FORAGE_ROOMS = {
@@ -156,6 +162,7 @@ FORAGE_ROOMS = {
     "crossing-RV02-012": {"item": "wild_herbs", "text": "You search damp crate seams in the sluice yard and find wild_herbs."},
     "crossing-RV02-013": {"item": "wild_herbs", "text": "You search moss between spillway stones and find wild_herbs."},
     "crossing-RV02-014": {"item": "wild_herbs", "text": "You check the damp planks of the weir platform and find wild_herbs."},
+    "crossing-RV02-015": {"item": "wild_herbs", "text": "You search the canal bank narrows and find wild_herbs."},
 }
 
 SHOP_TASKS = {
@@ -194,6 +201,12 @@ SHOP_TASKS = {
         "destination": "crossing-RV02-013",
         "reward": 8,
         "text": "Lessa asks you to bring a hook report back to the Spillway Rope Hook.",
+    },
+    "crossing-RV02-015": {
+        "name": "Bank narrows count",
+        "destination": "crossing-RV02-014",
+        "reward": 8,
+        "text": "Perren asks you to bring a bank narrows count back to the Weir Watch Kit.",
     },
 }
 

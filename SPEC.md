@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added the Canal Bank Narrows beyond the Weir Watch Platform with a Bank Mink enemy, Canal Bank Supply Tin shop, forage support, shop task, and targeted route/content smoke assertions.
 - Added `perk` / `circle perk` as a registrar-gated action for invoking the current earned guild Circle milestone, with all-guild Circle 10 smoke proving mapped milestone skill gains and reload persistence.
 - Added `maneuvers` / `combat tactics` as a command-first combat guide that lists range-appropriate attacks, setup moves, defenses, equipment hints, and current aimed/feinted/defensive states.
 - Added `feint` / `fake` as a melee setup maneuver that trains Tactics, marks the next jab or bash for bonus damage, and surfaces feint state in combat/range feedback.
