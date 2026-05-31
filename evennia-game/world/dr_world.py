@@ -152,8 +152,14 @@ ROOMS = {
     "crossing-RV02-015": {
         "title": "Canal Bank Narrows",
         "desc": "The canal bank pinches into a narrow shelf of reeds, damp stones, and quick animal tracks.",
-        "exits": {"west": "crossing-RV02-014"},
+        "exits": {"west": "crossing-RV02-014", "east": "crossing-RV02-016"},
         "targets": ("rv-bank-mink",),
+    },
+    "crossing-RV02-016": {
+        "title": "Reed Bank Blind",
+        "desc": "A low blind of river reeds overlooks still canal water where long-legged shapes stalk the mud.",
+        "exits": {"west": "crossing-RV02-015"},
+        "targets": ("rv-reed-heron",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",

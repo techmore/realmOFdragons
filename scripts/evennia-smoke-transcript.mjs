@@ -239,6 +239,24 @@ The Spillway Rope Hook offers field_bandage, wild_herbs, and torch beside the sl
 > task request
 Brakka asks you to carry a rope count back to the Sluice Yard Crate.
 
+> east
+> east
+> east
+You follow the Weir Watch Platform and Canal Bank Narrows to the Reed Bank Blind.
+
+> shop
+The Reed Blind Tackle Box offers field_bandage, wild_herbs, and travel_rations in the reeds.
+
+> task request
+Haska asks you to bring a Reed blind tally back to the Canal Bank Supply Tin.
+
+> scan
+You scan the area.
+reed_heron is here at missile range.
+
+> forage
+You part reed blind grasses and find wild_herbs.
+
 > scan
 You scan the area.
 spillway_eel is here at missile range.

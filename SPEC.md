@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added the Reed Bank Blind beyond Canal Bank Narrows with a Reed Heron enemy, Reed Blind Tackle Box shop, forage support, shop task, transcript coverage, and targeted route/content smoke assertions.
 - Strengthened the Evennia webclient smoke to verify the auth login route, create and authenticate a smoke account with a standalone session-handler stub, and render the authenticated webclient with websocket, command input, and connect affordances.
 - Added `signature` / `guild signature` as an always-available Circle-scaled guild identity action for every guild, training primary plus distinct support skills with all-guild reload smoke coverage.
 - Made asynchronous enemy pressure range-aware so enemies close from missile to pole to melee on pressure ticks before landing close attacks, with smoke coverage for staged closing, bleeding, and incapacitation.

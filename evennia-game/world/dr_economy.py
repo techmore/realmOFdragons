@@ -148,6 +148,12 @@ SHOPS = {
         "dialogue": "Perren says, 'The bank narrows fast. Keep your pack closed and your footing quiet.'",
         "stock": ("field_bandage", "travel_rations", "torch"),
     },
+    "crossing-RV02-016": {
+        "name": "Reed Blind Tackle Box",
+        "keeper": "Haska",
+        "dialogue": "Haska says, 'Past the narrows, birds and mud both wait for loose steps.'",
+        "stock": ("field_bandage", "wild_herbs", "travel_rations"),
+    },
 }
 
 FORAGE_ROOMS = {
@@ -163,6 +169,7 @@ FORAGE_ROOMS = {
     "crossing-RV02-013": {"item": "wild_herbs", "text": "You search moss between spillway stones and find wild_herbs."},
     "crossing-RV02-014": {"item": "wild_herbs", "text": "You check the damp planks of the weir platform and find wild_herbs."},
     "crossing-RV02-015": {"item": "wild_herbs", "text": "You search the canal bank narrows and find wild_herbs."},
+    "crossing-RV02-016": {"item": "wild_herbs", "text": "You part reed blind grasses and find wild_herbs."},
 }
 
 SHOP_TASKS = {
@@ -207,6 +214,12 @@ SHOP_TASKS = {
         "destination": "crossing-RV02-014",
         "reward": 8,
         "text": "Perren asks you to bring a bank narrows count back to the Weir Watch Kit.",
+    },
+    "crossing-RV02-016": {
+        "name": "Reed blind tally",
+        "destination": "crossing-RV02-015",
+        "reward": 8,
+        "text": "Haska asks you to bring a reed blind tally back to the Canal Bank Supply Tin.",
     },
 }
 

@@ -108,6 +108,13 @@ ENEMIES = {
         "description": "A narrow mink slips along the canal bank, watching hands and packs for openings.",
         "loot": {"trias": 4, "items": ("wild_herbs",)},
     },
+    "rv-reed-heron": {
+        "name": "Reed Heron",
+        "vitality": 18,
+        "aggression": "stabbing",
+        "description": "A tall heron stalks the reed blind and jabs its beak at anything that crowds the mud.",
+        "loot": {"trias": 4, "items": ("field_bandage",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")
