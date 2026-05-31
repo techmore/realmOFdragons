@@ -1492,6 +1492,7 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("target rv-ditch-rat")
         character.execute_cmd("advance")
         combat_pressure_scripts(character)[0].at_repeat()
+        combat_pressure_scripts(character)[0].at_repeat()
         self.assertTrue(character.db.bleeding)
         first_aid_before = character.db.skills["first_aid"]["pool"]
         character.execute_cmd("tend")
@@ -1937,16 +1938,32 @@ class DRCommandSmokeTests(TestCase):
         character = self.make_character("Pressure Smoke")
         self.walk_to_room(character, "crossing-RV02-002")
         character.execute_cmd("target rv-wolf-cub")
+        missile_pressure_text = apply_enemy_pressure(character)
+        self.assertIn("closes from missile to pole", missile_pressure_text)
+        self.assertEqual(character.db.engagement["range"], "pole")
+        self.assertEqual(character.db.health, 30)
+        pole_pressure_text = apply_enemy_pressure(character)
+        self.assertIn("closes from pole to melee", pole_pressure_text)
+        self.assertEqual(character.db.engagement["range"], "melee")
+        self.assertEqual(character.db.health, 30)
+        melee_pressure_text = apply_enemy_pressure(character)
+        self.assertIn("presses back", melee_pressure_text)
+        self.assertEqual(character.db.health, 28)
+
+        character.execute_cmd("flee")
+        character.execute_cmd("rest")
+        character.execute_cmd("target rv-wolf-cub")
         character.execute_cmd("advance")
         self.assertEqual(character.db.engagement["range"], "pole")
 
-        pressure_script = create_script("typeclasses.scripts.CombatPressureScript", obj=character)
+        pressure_script = combat_pressure_scripts(character)[0]
         pressure_script.at_repeat()
-        self.assertEqual(character.db.health, 26)
+        self.assertEqual(character.db.engagement["range"], "melee")
+        self.assertEqual(character.db.health, 28)
 
         character.execute_cmd("stance defensive")
         pressure_script.at_repeat()
-        self.assertEqual(character.db.health, 25)
+        self.assertEqual(character.db.health, 27)
         self.assertTrue(character.db.bleeding)
 
     def test_field_bandage_treats_combat_bleeding(self):
@@ -1956,6 +1973,8 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("target rv-ditch-rat")
         character.execute_cmd("advance")
         pressure_script = combat_pressure_scripts(character)[0]
+        pressure_script.at_repeat()
+        self.assertEqual(character.db.engagement["range"], "melee")
         pressure_script.at_repeat()
         self.assertTrue(character.db.bleeding)
         self.assertEqual(len(bleeding_scripts(character)), 1)
@@ -1979,6 +1998,7 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("advance")
         pressure_script = combat_pressure_scripts(character)[0]
         pressure_script.at_repeat()
+        pressure_script.at_repeat()
         self.assertTrue(character.db.bleeding)
         self.assertEqual(len(bleeding_scripts(character)), 1)
         health_after_pressure = character.db.health
@@ -2000,6 +2020,7 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("advance")
         pressure_script = combat_pressure_scripts(character)[0]
         pressure_script.at_repeat()
+        pressure_script.at_repeat()
         self.assertTrue(character.db.bleeding)
         self.assertIn("Suggested next command: retreat and buy field_bandage.", combat_status(character))
 
@@ -2010,6 +2031,8 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("target rv-wolf-cub")
         character.execute_cmd("advance")
         pressure_script = combat_pressure_scripts(character)[0]
+        pressure_script.at_repeat()
+        self.assertEqual(character.db.engagement["range"], "melee")
         pressure_script.at_repeat()
         self.assertEqual(character.db.health, 0)
         self.assertTrue(character.db.incapacitated)

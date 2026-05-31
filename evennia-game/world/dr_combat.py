@@ -497,14 +497,26 @@ def apply_enemy_pressure(character):
     range_band = engagement.get("range")
     if not target_id:
         return "No enemy pressure: not engaged."
-    if range_band not in ("pole", "melee"):
-        return "No enemy pressure: target is too far away."
+    if not engagement.get("pressure_ready"):
+        engagement["pressure_ready"] = True
+        character.db.engagement = engagement
+        return "Enemy pressure gathers at range."
 
     enemy = ENEMIES.get(target_id, {"name": target_id})
     if not find_enemy_object(character.location, target_id):
         character.db.engagement = {"target": None, "range": None}
         stop_combat_pressure(character)
         return f"No enemy pressure: {enemy['name']} is gone."
+    if range_band == "missile":
+        engagement["range"] = "pole"
+        character.db.engagement = engagement
+        return f"{enemy['name']} closes from missile to pole range."
+    if range_band == "pole":
+        engagement["range"] = "melee"
+        character.db.engagement = engagement
+        return f"{enemy['name']} closes from pole to melee range."
+    if range_band != "melee":
+        return "No enemy pressure: target is at an unknown range."
     return apply_enemy_retaliation(character, enemy)
 
 
@@ -709,7 +721,7 @@ def target_enemy(character, enemy_id):
     enemy = ENEMIES.get(enemy_id)
     if not enemy:
         return f'Unknown enemy "{enemy_id}".'
-    character.db.engagement = {"target": enemy_id, "range": "missile", "aimed": False, "feinted": False}
+    character.db.engagement = {"target": enemy_id, "range": "missile", "aimed": False, "feinted": False, "pressure_ready": False}
     ensure_combat_pressure(character)
     return f"You target {enemy['name']} at missile range."
 
