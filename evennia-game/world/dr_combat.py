@@ -296,6 +296,8 @@ def combat_status(character):
         lines.append("Suggested next command: scan.")
         return "\n".join(lines)
     lines.append(f"Engagement: {enemy['name']} at {engagement.get('range') or 'unknown'} range.")
+    if engagement.get("aimed"):
+        lines.append("Aim: set for your next ranged attack.")
     lines.append(f"Enemy vitality: {int(enemy_obj.db.vitality or 0)}/{int(enemy.get('vitality', 0) or 0)}.")
     lines.append(engagement_suggestion(character))
     return "\n".join(lines)
@@ -583,7 +585,7 @@ def target_enemy(character, enemy_id):
     enemy = ENEMIES.get(enemy_id)
     if not enemy:
         return f'Unknown enemy "{enemy_id}".'
-    character.db.engagement = {"target": enemy_id, "range": "missile"}
+    character.db.engagement = {"target": enemy_id, "range": "missile", "aimed": False}
     ensure_combat_pressure(character)
     return f"You target {enemy['name']} at missile range."
 
@@ -596,7 +598,33 @@ def range_status(character):
     if not target_id:
         return "You are not engaged."
     enemy = ENEMIES.get(target_id, {"name": target_id})
-    return f"You are engaged with {enemy['name']} at {range_band or 'unknown'} range."
+    aimed = " Aim is set." if engagement.get("aimed") else ""
+    return f"You are engaged with {enemy['name']} at {range_band or 'unknown'} range.{aimed}"
+
+
+def aim(character):
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot aim."
+    if int(character.db.roundtime or 0) > 0:
+        return f"You are still recovering for {character.db.roundtime} pulse."
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target")
+    if not target_id:
+        return "Aim at what? Target an enemy first."
+    if engagement.get("range") not in ("missile", "pole"):
+        return "You need missile or pole range to aim."
+    enemy = ENEMIES.get(target_id, {"name": target_id})
+    if not find_enemy_object(character.location, target_id):
+        character.db.engagement = {"target": None, "range": None, "aimed": False}
+        stop_combat_pressure(character)
+        return f"{enemy['name']} is no longer here."
+    engagement["aimed"] = True
+    character.db.engagement = engagement
+    character.db.balance = "aiming"
+    character.db.roundtime = 1
+    ensure_recovery(character)
+    return f"You take careful aim at {enemy['name']}. Your next hurl will strike harder."
 
 
 def advance(character):
@@ -625,7 +653,7 @@ def retreat(character):
         return "You are not engaged."
     current = engagement.get("range") or "missile"
     if current == "missile":
-        character.db.engagement = {"target": None, "range": None}
+        character.db.engagement = {"target": None, "range": None, "aimed": False}
         stop_combat_pressure(character)
         return "You retreat and break engagement."
     next_range = RANGES[RANGES.index(current) - 1]
@@ -651,7 +679,7 @@ def jab(character):
     enemy = ENEMIES.get(target_id, {"name": target_id})
     enemy_obj = find_enemy_object(character.location, target_id)
     if not enemy_obj:
-        character.db.engagement = {"target": None, "range": None}
+        character.db.engagement = {"target": None, "range": None, "aimed": False}
         stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
@@ -664,7 +692,7 @@ def jab(character):
     if vitality <= 0:
         enemy_obj.delete()
         create_corpse(character.location, target_id, enemy)
-        character.db.engagement = {"target": None, "range": None}
+        character.db.engagement = {"target": None, "range": None, "aimed": False}
         stop_combat_pressure(character)
         loot_text = loot_preview(enemy)
         parts = [
@@ -702,7 +730,7 @@ def bash(character):
     enemy = ENEMIES.get(target_id, {"name": target_id})
     enemy_obj = find_enemy_object(character.location, target_id)
     if not enemy_obj:
-        character.db.engagement = {"target": None, "range": None}
+        character.db.engagement = {"target": None, "range": None, "aimed": False}
         stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
@@ -715,7 +743,7 @@ def bash(character):
     if vitality <= 0:
         enemy_obj.delete()
         create_corpse(character.location, target_id, enemy)
-        character.db.engagement = {"target": None, "range": None}
+        character.db.engagement = {"target": None, "range": None, "aimed": False}
         stop_combat_pressure(character)
         loot_text = loot_preview(enemy)
         parts = [
@@ -757,16 +785,19 @@ def hurl(character):
         stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
-    damage = maneuver_damage(character, "hurl")
+    aimed = bool(engagement.get("aimed"))
+    damage = maneuver_damage(character, "hurl") + (2 if aimed else 0)
     vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
     character.db.balance = "recovering"
     character.db.roundtime = 1
     ensure_recovery(character)
+    engagement["aimed"] = False
+    character.db.engagement = engagement
     skill_events = apply_combat_skill_gain(character, "light_thrown")
     if vitality <= 0:
         enemy_obj.delete()
         create_corpse(character.location, target_id, enemy)
-        character.db.engagement = {"target": None, "range": None}
+        character.db.engagement = {"target": None, "range": None, "aimed": False}
         stop_combat_pressure(character)
         loot_text = loot_preview(enemy)
         parts = [
@@ -782,6 +813,8 @@ def hurl(character):
         f"You hurl at {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.",
         *skill_events,
     ]
+    if aimed:
+        parts.append("Your careful aim adds force to the throw.")
     if engagement.get("range") == "pole":
         parts.append(apply_enemy_retaliation(character, enemy))
     else:

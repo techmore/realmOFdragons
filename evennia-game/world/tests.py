@@ -9,7 +9,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, hurl, jab, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
+from world.dr_combat import ENEMIES, aim, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, hurl, jab, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -1713,10 +1713,20 @@ class DRCommandSmokeTests(TestCase):
 
         character.execute_cmd("target rv-mud-beetle")
         self.assertEqual(character.db.engagement["range"], "missile")
+        aim_text = aim(character)
+        self.assertIn("take careful aim", aim_text)
+        self.assertTrue(character.db.engagement["aimed"])
+        self.assertIn("Aim: set for your next ranged attack.", combat_status(character))
+        character.execute_cmd("range")
+        self.assertEqual(character.db.roundtime, 1)
+        self.assertEqual(len(recovery_scripts(character)), 1)
+        character.execute_cmd("wait")
         hurl_text = hurl(character)
         self.assertIn("You hurl at Mud Beetle", hurl_text)
+        self.assertIn("careful aim adds force", hurl_text)
         self.assertIn("too far away to press back", hurl_text)
         self.assertIn("Roundtime: 1", hurl_text)
+        self.assertFalse(character.db.engagement["aimed"])
         self.assertEqual(character.db.health, 30)
         self.assertEqual(character.db.skills["light_thrown"]["pool"], 2)
         self.assertEqual(character.db.skills["tactics"]["pool"], 1)
@@ -1738,6 +1748,7 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("wait")
         character.execute_cmd("advance")
         self.assertEqual(character.db.engagement["range"], "melee")
+        self.assertIn("missile or pole range", aim(character))
         melee_text = hurl(character)
         self.assertIn("missile or pole range", melee_text)
         character.execute_cmd("lob")
