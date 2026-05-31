@@ -9,7 +9,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary, parse_account_character_creation
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, health_text, hurl, jab, maneuver_guide, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, shoot, skin_corpse
+from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, health_text, hurl, jab, kick, maneuver_guide, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, shoot, skin_corpse
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, talk_shopkeeper, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -1823,6 +1823,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Target: Wolf Cub at melee range.", melee_guide)
         self.assertIn("feint / fake", melee_guide)
         self.assertIn("jab / attack", melee_guide)
+        self.assertIn("kick", melee_guide)
         self.assertIn("dodge / evade", melee_guide)
         self.assertIn("parry", melee_guide)
         self.assertIn("block / shield block", melee_guide)
@@ -2084,6 +2085,27 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("advance")
         character.execute_cmd("advance")
         self.assertIn("missile or pole range", shoot(character))
+
+    def test_kick_attacks_at_melee_and_trains_brawling(self):
+        character = self.make_character("Kick Smoke")
+        self.walk_to_room(character, "crossing-RV02-003")
+
+        character.execute_cmd("target rv-boarlet")
+        self.assertIn("melee range", kick(character))
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
+        feint_text = feint(character)
+        self.assertIn("jab, kick, or bash", feint_text)
+        character.execute_cmd("wait")
+        kick_text = kick(character)
+        self.assertIn("You kick Boarlet", kick_text)
+        self.assertIn("Your feint opens the strike.", kick_text)
+        self.assertIn("Roundtime: 1", kick_text)
+        self.assertFalse(character.db.engagement["feinted"])
+        self.assertGreater(character.db.skills["brawling"]["pool"], 0)
+        self.assertGreater(character.db.skills["tactics"]["pool"], 0)
+        character.execute_cmd("wait")
+        character.execute_cmd("kick")
 
     def test_skin_corpse_creates_pelt_and_trains_hunting_skills(self):
         character = self.make_character("Skinning Smoke")

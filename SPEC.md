@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `kick` as a melee Brawling combat maneuver with feint support, roundtime/recovery, enemy pressure, command wiring, smoke coverage, and transcript coverage.
 - Added `shoot`/`fire` as a bow-style ranged combat maneuver that consumes `practice_arrows`, works at missile/pole range, benefits from `aim`, trains Bows/Missile Mastery/Tactics, and has smoke plus transcript coverage.
 - Expanded account-side race-only character creation syntax so `create character <name> as <race>`, `race <race>`, and `with race <race>` forms create unaffiliated Circle 1 starts with smoke and transcript coverage.
 - Added registrar-gated `lesson`/`guild lesson` instruction for every guild, with Circle-scaled lesson skill training, help/plan/registrar guidance, all-guild Circle 10 smoke, and transcript coverage.

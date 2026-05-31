@@ -412,6 +412,14 @@ Roundtime begins.
 > wait
 Roundtime eases.
 
+> kick
+You kick wolf_cub with Brawling and agility behind the strike.
+Brawling and Tactics gain field experience.
+Roundtime begins.
+
+> wait
+Roundtime eases.
+
 > combat
 Wounds: bleeding.
 Suggested next command: tend.

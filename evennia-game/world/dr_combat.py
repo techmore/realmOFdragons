@@ -394,8 +394,9 @@ def maneuver_guide(character):
     elif range_band == "melee":
         lines.extend(
             [
-                "- feint / fake: set up the next jab or bash.",
+                "- feint / fake: set up the next jab, kick, or bash.",
                 "- jab / attack: fast melee strike.",
+                "- kick: brawling strike with moderate roundtime.",
                 "- bash: heavier melee strike.",
                 "- dodge / evade: avoid the next close pressure.",
                 "- parry: turn aside pressure with a held weapon.",
@@ -410,7 +411,7 @@ def maneuver_guide(character):
     if engagement.get("aimed"):
         lines.append("Set state: aim is ready; your next hurl or shot is stronger.")
     if engagement.get("feinted"):
-        lines.append("Set state: feint is ready; your next jab or bash is stronger.")
+        lines.append("Set state: feint is ready; your next jab, kick, or bash is stronger.")
     if character.db.balance == "dodging":
         lines.append("Defensive state: ready to dodge the next close pressure.")
     if character.db.balance == "parrying":
@@ -464,6 +465,8 @@ def maneuver_damage(character, maneuver):
         return 4 + attribute_value(character, "agility") // 5 + skill_rank(character, "small_edged") // 10
     if maneuver == "bash":
         return 8 + attribute_value(character, "strength") // 5 + skill_rank(character, "brawling") // 10
+    if maneuver == "kick":
+        return 6 + attribute_value(character, "agility") // 6 + skill_rank(character, "brawling") // 10
     if maneuver == "hurl":
         return 3 + attribute_value(character, "agility") // 6 + skill_rank(character, "light_thrown") // 10
     if maneuver == "shoot":
@@ -810,7 +813,7 @@ def feint(character):
     lines = [
         f"You feint at {enemy['name']}, opening a line for your next melee strike.",
         *skill_events,
-        "Your next jab or bash will strike harder.",
+        "Your next jab, kick, or bash will strike harder.",
     ]
     return "\n".join(lines)
 
@@ -956,6 +959,63 @@ def bash(character):
     pressure = apply_enemy_retaliation(character, enemy)
     parts = [
         f"You bash {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.",
+        *skill_events,
+        pressure,
+        maneuver_status_text(character),
+    ]
+    if feinted:
+        parts.insert(1, "Your feint opens the strike.")
+    return "\n".join(parts)
+
+
+def kick(character):
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot kick."
+    if int(character.db.roundtime or 0) > 0:
+        return f"You are still recovering for {character.db.roundtime} pulse."
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target")
+    if not target_id:
+        return "Kick what? Target an enemy first."
+    if engagement.get("range") != "melee":
+        return "You need to be at melee range to kick."
+
+    enemy = ENEMIES.get(target_id, {"name": target_id})
+    enemy_obj = find_enemy_object(character.location, target_id)
+    if not enemy_obj:
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
+        stop_combat_pressure(character)
+        return f"{enemy['name']} is no longer here."
+
+    feinted = bool(engagement.get("feinted"))
+    damage = maneuver_damage(character, "kick") + (1 if feinted else 0)
+    vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
+    character.db.balance = "recovering"
+    character.db.roundtime = 1
+    ensure_recovery(character)
+    if feinted:
+        engagement["feinted"] = False
+        character.db.engagement = engagement
+    skill_events = apply_combat_skill_gain(character, "brawling")
+    if vitality <= 0:
+        enemy_obj.delete()
+        create_corpse(character.location, target_id, enemy)
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
+        stop_combat_pressure(character)
+        loot_text = loot_preview(enemy)
+        parts = [
+            f"You kick {enemy['name']} for {damage} damage. {enemy['name']} collapses.",
+            *skill_events,
+            loot_text,
+            "Suggested next command: loot corpse.",
+        ]
+        return "\n".join(parts)
+
+    enemy_obj.db.vitality = vitality
+    pressure = apply_enemy_retaliation(character, enemy)
+    parts = [
+        f"You kick {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.",
         *skill_events,
         pressure,
         maneuver_status_text(character),
