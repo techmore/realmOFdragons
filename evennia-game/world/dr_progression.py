@@ -71,6 +71,20 @@ GUILD_PASSIVES = {
     "warrior_mage": {"name": "Elemental Poise", "skill": "attunement", "text": "keeps battle focus aligned with power"},
 }
 
+GUILD_DRILLS = {
+    "barbarian": {"name": "Pit Exchange", "skill": "brawling", "text": "turns close pressure into controlled force"},
+    "bard": {"name": "Verse Exchange", "skill": "bardic_lore", "text": "ties performance timing back to remembered lore"},
+    "cleric": {"name": "Votive Cycle", "skill": "scholarship", "text": "binds formal study to devotional habit"},
+    "empath": {"name": "Clinic Rotation", "skill": "empathy", "text": "pairs careful care with direct empathic attention"},
+    "moon_mage": {"name": "Prediction Walk", "skill": "astrology", "text": "maps small observations onto practiced prediction"},
+    "necromancer": {"name": "Sealed Recitation", "skill": "sorcery", "text": "keeps forbidden theory constrained by repetition"},
+    "paladin": {"name": "Shield Line", "skill": "defending", "text": "sets protection into measured movement"},
+    "ranger": {"name": "Trail Loop", "skill": "outdoorsmanship", "text": "links field signs with ranger instinct"},
+    "thief": {"name": "Blind-Corner Pass", "skill": "backstab", "text": "turns quiet movement into practical angle control"},
+    "trader": {"name": "Counter Ledger", "skill": "appraisal", "text": "ties market judgment to active negotiation"},
+    "warrior_mage": {"name": "Spark Pattern", "skill": "targeted_magic", "text": "connects elemental reserve to aimed battle focus"},
+}
+
 STUDY_ROOMS = {
     "crossing-GU02-001": {"name": "Arcane Study Hall", "skill": "arcana", "text": "You study public notes on basic magical theory"},
     "crossing-GU12-001": {"name": "Moon Mage Observatory", "skill": "astrology", "text": "You study careful star tables and timing marks"},
@@ -144,6 +158,9 @@ def guild_ability_summary(guild_id, circle):
     if guild_id in GUILD_PASSIVES:
         passive = GUILD_PASSIVES[guild_id]
         lines.append(f"Passive training: {passive['name']} supports {SKILLS[passive['skill']]}. Use `passive` to reinforce it.")
+    if guild_id in GUILD_DRILLS:
+        drill = GUILD_DRILLS[guild_id]
+        lines.append(f"Registrar drill: {drill['name']} supports {SKILLS[drill['skill']]}. Use `drill` at your registrar.")
     if max_circle >= MAX_SUPPORTED_CIRCLE:
         lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported ability cap.")
     else:
@@ -207,6 +224,39 @@ def use_guild_passive(character_state):
     events = apply_skill_pool_gain(skills, skill_id, pulse)
     events.append(f"{passive['name']} {passive['text']}, reinforcing {skill['name']} by {pulse}.")
     events.append("This is passive guild identity training; use `abilities` to review the full Circle list.")
+    return events
+
+
+def use_guild_drill(character_state):
+    """Run a registrar-gated guild drill that trains primary and support skills."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    drill = GUILD_DRILLS.get(guild_id)
+    if not drill:
+        return ["You need to join a guild before using guild drills."]
+    if room_guild_id != guild_id:
+        return ["Guild drills require your own registrar. Use `circle status` to find the right room."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    skills = character_state.setdefault("skills", build_starter_skills())
+    primary_skill_id = primary_skill_for_guild(guild_id)
+    support_skill_id = drill["skill"]
+    primary_skill = skills.get(primary_skill_id)
+    support_skill = skills.get(support_skill_id)
+    if not primary_skill:
+        return [f"{drill['name']} cannot find {primary_skill_id} training."]
+    if not support_skill:
+        return [f"{drill['name']} cannot find {support_skill_id} training."]
+
+    primary_pulse = 1 + ((circle - 1) // 5)
+    support_pulse = 1 + ((circle - 1) // 3)
+    events = apply_skill_pool_gain(skills, primary_skill_id, primary_pulse)
+    events.extend(apply_skill_pool_gain(skills, support_skill_id, support_pulse))
+    events.append(
+        f"{drill['name']} {drill['text']}, training {primary_skill['name']} by {primary_pulse} and {support_skill['name']} by {support_pulse}."
+    )
+    events.append("Registrar drills are guild-specific Circle practice for the current level-10 progression band.")
     return events
 
 

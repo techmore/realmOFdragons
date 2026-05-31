@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `drill` / `guild drill` as registrar-gated per-guild Circle-scaled practice that trains both primary and distinct support skills across all 11 guilds.
 - Strengthened the Evennia webclient smoke so it now renders `/webclient/` through Django's test client and requires webclient markup, not just URL resolution.
 - Added an Evennia webclient route smoke script and wired it into `npm run check:evennia`, proving the Django `/webclient/` route resolves through the local Evennia web configuration.
 - Updated the generated Evennia smoke transcript so the shop/fieldcraft path reaches Silted Canal Edge, shows its pack stand, and scans the Marsh Spider.
