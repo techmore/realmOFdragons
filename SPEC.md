@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added registrar-gated `milestone` / `guild milestone` / `guild lesson` practice, making each guild's current named Circle milestone train its mapped guild skill through Circle 10.
 - Replaced generic guild Circle recognition text with named per-guild Circle 1-10 milestone ladders, with coverage proving every guild has ten distinct clean-room milestone names.
 - Added `tasks` / `task guide` / `jobs` / `job guide` as a command-first shop-task guide listing task shops, rewards, routes, destination counters, and the request/status/complete loop.
 - Added `forage guide` / `forage sites` / `gather guide` as a command-first guide listing forage sites, routes, nearby shops, and the gather/get/appraise/sell loop.

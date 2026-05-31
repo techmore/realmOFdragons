@@ -13,7 +13,7 @@ from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, com
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
+from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_practice, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, task_guide, validate_world_graph
 
 
@@ -206,6 +206,12 @@ class DRDataTests(SimpleTestCase):
             self.assertNotIn("recognition", " ".join(unlocked).lower())
             self.assertIn(perk_names[0], guild_circle_perk(guild_id, 1))
             self.assertIn(perk_names[-1], guild_circle_perk(guild_id, 10))
+            self.assertEqual(milestone_skill_for_guild_circle(guild_id, 1), primary_skill_for_guild(guild_id))
+            self.assertEqual(milestone_skill_for_guild_circle(guild_id, 2), GUILD_TECHNIQUES[guild_id]["skill"])
+            self.assertEqual(milestone_skill_for_guild_circle(guild_id, 3), GUILD_PASSIVES[guild_id]["skill"])
+            self.assertEqual(milestone_skill_for_guild_circle(guild_id, 4), GUILD_DRILLS[guild_id]["skill"])
+            self.assertEqual(milestone_skill_for_guild_circle(guild_id, 5), GUILD_RITES[guild_id]["skill"])
+            self.assertEqual(milestone_skill_for_guild_circle(guild_id, 10), GUILD_CAPSTONES[guild_id]["skill"])
 
 
 class DRWorldTests(SimpleTestCase):
@@ -724,6 +730,24 @@ class DRCommandSmokeTests(TestCase):
             self.assertIn("Circle 10 is the current supported cap.", capped_experience_text)
             self.assertIn("Next step: use `boon`", capped_experience_text)
             character.execute_cmd("exp")
+            milestone_skill_id = milestone_skill_for_guild_circle(guild_id, character.db.circle)
+            milestone_before = (character.db.skills[milestone_skill_id]["rank"] * 5) + character.db.skills[milestone_skill_id]["pool"]
+            milestone_text = "\n".join(
+                use_guild_milestone(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "circle": character.db.circle,
+                        "skills": character.db.skills,
+                        "room_guild_id": character.location.db.guild,
+                    }
+                )
+            )
+            self.assertIn(guild_circle_perk(guild_id, character.db.circle), milestone_text)
+            self.assertIn(character.db.skills[milestone_skill_id]["name"], milestone_text)
+            milestone_after = (character.db.skills[milestone_skill_id]["rank"] * 5) + character.db.skills[milestone_skill_id]["pool"]
+            self.assertGreater(milestone_after, milestone_before)
+            character.execute_cmd("milestone")
+            character.execute_cmd("guild lesson")
             primary_skill_id = primary_skill_for_guild(guild_id)
             focus_before = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
             character.execute_cmd("focus")

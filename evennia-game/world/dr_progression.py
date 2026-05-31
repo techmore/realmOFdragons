@@ -324,6 +324,25 @@ def guild_circle_perk(guild_id, circle):
     return GUILD_CIRCLE_PERKS.get(guild_id, {}).get(int(circle or 1), "Unaffiliated training milestone")
 
 
+def milestone_skill_for_guild_circle(guild_id, circle):
+    """Return the skill reinforced by a guild's current Circle milestone."""
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(circle or 1)))
+    if guild_id not in GUILDS:
+        return "athletics"
+    if circle >= MAX_SUPPORTED_CIRCLE and guild_id in GUILD_CAPSTONES:
+        return GUILD_CAPSTONES[guild_id]["skill"]
+    if circle >= 5 and guild_id in GUILD_RITES:
+        return GUILD_RITES[guild_id]["skill"]
+    if circle == 4 and guild_id in GUILD_DRILLS:
+        return GUILD_DRILLS[guild_id]["skill"]
+    if circle == 3 and guild_id in GUILD_PASSIVES:
+        return GUILD_PASSIVES[guild_id]["skill"]
+    if circle == 2 and guild_id in GUILD_TECHNIQUES:
+        return GUILD_TECHNIQUES[guild_id]["skill"]
+    return primary_skill_for_guild(guild_id)
+
+
 def guild_title(guild_id, circle):
     """Return a clean-room guild title for the current Circle."""
 
@@ -530,6 +549,30 @@ def use_guild_technique(character_state):
     events = apply_skill_pool_gain(skills, skill_id, pulse)
     events.append(f"{technique['name']} {technique['verb']}, feeding {skill['name']} by {pulse}.")
     events.append("Use `guild` and `abilities` to review your Circle milestones.")
+    return events
+
+
+def use_guild_milestone(character_state):
+    """Practice the current named Circle milestone at the character's own registrar."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    if guild_id == "commoner" or guild_id not in GUILDS:
+        return ["You need to join a guild before practicing guild milestones."]
+    if room_guild_id != guild_id:
+        return ["Guild milestone practice requires your own registrar. Use `guilds` or `circle status` to find the right room."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    skills = character_state.setdefault("skills", build_starter_skills())
+    skill_id = milestone_skill_for_guild_circle(guild_id, circle)
+    skill = skills.get(skill_id)
+    if not skill:
+        return [f"Your Circle {circle} milestone cannot find {skill_id} training."]
+    pulse = 1 + ((circle - 1) // 3)
+    milestone = guild_circle_perk(guild_id, circle)
+    events = apply_skill_pool_gain(skills, skill_id, pulse)
+    events.append(f"You practice {milestone}, reinforcing {skill['name']} by {pulse}.")
+    events.append("Use `guild`, `abilities`, or `title` to review your current Circle identity.")
     return events
 
 
