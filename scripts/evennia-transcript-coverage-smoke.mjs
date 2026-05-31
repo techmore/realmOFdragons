@@ -49,6 +49,7 @@ const requiredTokens = [
   '> shoot',
   '> advance',
   '> combat',
+  '> guard',
   '> kick',
   '> tend',
   '> skin corpse',

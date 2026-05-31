@@ -404,6 +404,10 @@ You advance to melee range.
 > combat
 Health, balance, roundtime, stance, wounds, target, range, and enemy vitality are shown.
 
+> guard
+You brace into a guarded stance, ready to blunt the next close press.
+Defending and Tactics gain field experience.
+
 > jab
 You jab at wolf_cub with agility and Small Edged behind the strike.
 Small Edged and Tactics gain field experience.

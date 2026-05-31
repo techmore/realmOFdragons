@@ -181,7 +181,7 @@ def engagement_suggestion(character, enemy_id=None):
         return f"Suggested next command: target {target_id}."
     if range_band != "melee":
         return "Suggested next command: advance."
-    return "Suggested next command: jab or bash."
+    return "Suggested next command: jab, guard, or bash."
 
 
 def scan_room(room):
@@ -398,6 +398,7 @@ def maneuver_guide(character):
                 "- jab / attack: fast melee strike.",
                 "- kick: brawling strike with moderate roundtime.",
                 "- bash: heavier melee strike.",
+                "- guard / brace: reduce the next close pressure without equipment.",
                 "- dodge / evade: avoid the next close pressure.",
                 "- parry: turn aside pressure with a held weapon.",
                 "- block / shield block: stop pressure with a shield.",
@@ -414,6 +415,8 @@ def maneuver_guide(character):
         lines.append("Set state: feint is ready; your next jab, kick, or bash is stronger.")
     if character.db.balance == "dodging":
         lines.append("Defensive state: ready to dodge the next close pressure.")
+    if character.db.balance == "guarding":
+        lines.append("Defensive state: braced to guard against the next close pressure.")
     if character.db.balance == "parrying":
         lines.append("Defensive state: ready to parry the next close pressure.")
     if character.db.balance == "blocking":
@@ -489,6 +492,21 @@ def apply_enemy_retaliation(character, enemy):
     if character.db.balance == "parrying":
         character.db.balance = "balanced"
         return f"You parry {enemy['name']}'s pressure aside with your weapon."
+    if character.db.balance == "guarding":
+        character.db.balance = "balanced"
+        damage = max(0, retaliation_damage(character) - 1)
+        if damage <= 0:
+            return f"You guard against {enemy['name']}'s pressure and turn it aside."
+        health = max(0, int(character.db.health or 0) - damage)
+        character.db.health = health
+        if health <= 0:
+            character.db.incapacitated = True
+            character.db.engagement = {"target": None, "range": None}
+            character.db.balance = "fallen"
+            character.db.roundtime = 0
+            stop_combat_pressure(character)
+            return f"You guard against {enemy['name']}'s pressure, but {damage} damage drops you incapacitated."
+        return f"You guard against {enemy['name']}'s pressure, taking only {damage} damage. You have {health} health remaining."
     damage = retaliation_damage(character)
     if damage <= 0:
         return f"You dodge {enemy['name']}'s pressure and avoid the hit."
@@ -1178,6 +1196,31 @@ def defend(character):
     character.db.balance = "balanced"
     character.db.roundtime = 0
     return "You set your feet, raise your guard, and recover your balance."
+
+
+def guard(character):
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot guard."
+    if int(character.db.roundtime or 0) > 0:
+        return f"You are still recovering for {character.db.roundtime} pulse."
+    engagement = dict(character.db.engagement or {})
+    if not engagement.get("target"):
+        return "Guard against what? Target an enemy first."
+    character.db.stance = "defensive"
+    character.db.balance = "guarding"
+    character.db.roundtime = 1
+    ensure_recovery(character)
+    skills = character.db.skills or build_starter_skills()
+    skill_events = apply_skill_pool_gain(skills, "defending", 2)
+    skill_events.extend(apply_skill_pool_gain(skills, "tactics", 1))
+    character.db.skills = skills
+    lines = [
+        "You brace into a guarded stance, ready to blunt the next close press.",
+        *skill_events,
+        "The next close enemy pressure against you is reduced without needing a weapon or shield.",
+    ]
+    return "\n".join(lines)
 
 
 def dodge(character):

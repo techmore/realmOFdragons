@@ -11,7 +11,7 @@ from evennia.commands.command import Command
 from evennia.utils.create import create_object
 
 from world.dr_data import ATTRIBUTES, GUILDS, RACES, SKILLSETS, build_starter_skills
-from world.dr_combat import advance, aim, appraise_enemy, bash, block, combat_status, defend, dodge, feint, flee, health_text, hurl, jab, kick, loot_corpse, maneuver_guide, parry, range_status, respawn_room_enemies, rest, retreat, revive, room_enemy_ids, scan_room, shoot, skin_corpse, stance, target_enemy, wait_recover
+from world.dr_combat import advance, aim, appraise_enemy, bash, block, combat_status, defend, dodge, feint, flee, guard, health_text, hurl, jab, kick, loot_corpse, maneuver_guide, parry, range_status, respawn_room_enemies, rest, retreat, revive, room_enemy_ids, scan_room, shoot, skin_corpse, stance, target_enemy, wait_recover
 from world.dr_economy import SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, remove_item, repair_item, request_shop_task, sell_item, shop_talk, talk_shopkeeper, task_status, use_item, wallet_text, wear_item, wield_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
@@ -40,7 +40,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Guilds/Circles: guilds, registrar, join guild, guild/perks, guild history, title, experience, abilities, guild path, guild plan, mentor, lesson, perk, signature, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
         "Movement: journey, room/exits/where, survey, routes, hunting, then use direction names or aliases like n, sw, u, d.",
         "Shops/Fieldcraft: shops, tasks, forage guide, shop, talk, ask <keeper>, ask stock, ask task, ask trade, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
-        "Combat: scan, target <enemy>, appraise target, maneuvers/combat tactics, range, advance, retreat, combat, stance, aim, shoot/fire, hurl/throw, feint, jab/attack, kick, bash, defend, dodge, parry, block, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
+        "Combat: scan, target <enemy>, appraise target, maneuvers/combat tactics, range, advance, retreat, combat, stance, aim, shoot/fire, hurl/throw, feint, jab/attack, kick, bash, defend, guard/brace, dodge, parry, block, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
         "Focused help: help progression, help room, help scan, help targets, help combat.",
     ]
 )
@@ -80,7 +80,7 @@ CHARACTER_HELP_TOPICS = {
             "aim - prepare the next ranged attack. shoot / fire - bow-style ranged maneuver from missile or pole range using practice_arrows, Bows, Missile Mastery, and reflex. hurl / throw - ranged maneuver from missile or pole range using Light Thrown and agility.",
             "feint - prepare the next melee strike. jab / attack - quick melee maneuver using Small Edged and agility.",
             "kick - moderate Brawling maneuver using agility. bash - heavier melee maneuver using Brawling and strength.",
-            "defend - defensive stance and balance recovery. dodge - prepare to avoid the next close press. parry - use a held weapon to turn aside pressure. block - use a shield to stop pressure. flee - break engagement with recovery time.",
+            "defend - defensive stance and balance recovery. guard / brace - reduce the next close press without equipment. dodge - prepare to avoid the next close press. parry - use a held weapon to turn aside pressure. block - use a shield to stop pressure. flee - break engagement with recovery time.",
             "wait / recover - tick roundtime down. rest - recover roundtime, health, or incapacitation. revive / stand - recover from incapacitation in smoke-test form.",
         ]
     ),
@@ -2182,6 +2182,24 @@ class CmdDRDefend(Command):
 
     def func(self):
         self.caller.msg(defend(self.caller))
+
+
+class CmdDRGuard(Command):
+    """
+    Brace to reduce the next close enemy pressure.
+
+    Usage:
+      guard
+      brace
+    """
+
+    key = "guard"
+    aliases = ["brace"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(guard(self.caller))
 
 
 class CmdDRDodge(Command):

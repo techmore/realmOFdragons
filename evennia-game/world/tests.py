@@ -9,7 +9,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary, parse_account_character_creation
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, health_text, hurl, jab, kick, maneuver_guide, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, shoot, skin_corpse
+from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, guard, health_text, hurl, jab, kick, maneuver_guide, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, shoot, skin_corpse
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, talk_shopkeeper, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -658,7 +658,9 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("ask stock", CHARACTER_HELP_TEXT)
         self.assertIn("ask task", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("boon", CHARACTER_HELP_TEXT)
+        self.assertIn("guard/brace", CHARACTER_HELP_TEXT)
         self.assertIn("rest", CHARACTER_HELP_TEXT)
+        self.assertIn("guard / brace", CHARACTER_HELP_TOPICS["combat"])
         self.assertIn("rest - recover roundtime", CHARACTER_HELP_TOPICS["combat"])
         self.assertIn("study", CHARACTER_HELP_TEXT)
         self.assertIn("ask <keeper>", CHARACTER_HELP_TEXT)
@@ -1818,12 +1820,13 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("retreat", pole_guide)
         character.execute_cmd("advance")
         self.assertEqual(character.db.engagement["range"], "melee")
-        self.assertIn("Suggested next command: jab or bash.", combat_status(character))
+        self.assertIn("Suggested next command: jab, guard, or bash.", combat_status(character))
         melee_guide = maneuver_guide(character)
         self.assertIn("Target: Wolf Cub at melee range.", melee_guide)
         self.assertIn("feint / fake", melee_guide)
         self.assertIn("jab / attack", melee_guide)
         self.assertIn("kick", melee_guide)
+        self.assertIn("guard / brace", melee_guide)
         self.assertIn("dodge / evade", melee_guide)
         self.assertIn("parry", melee_guide)
         self.assertIn("block / shield block", melee_guide)
@@ -2106,6 +2109,34 @@ class DRCommandSmokeTests(TestCase):
         self.assertGreater(character.db.skills["tactics"]["pool"], 0)
         character.execute_cmd("wait")
         character.execute_cmd("kick")
+
+    def test_guard_reduces_next_close_pressure_and_trains_defending(self):
+        character = self.make_character("Guard Smoke")
+        self.walk_to_room(character, "crossing-RV02-002")
+
+        self.assertIn("Target an enemy first", guard(character))
+        character.execute_cmd("target rv-wolf-cub")
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
+        engagement = dict(character.db.engagement)
+        engagement["pressure_ready"] = True
+        character.db.engagement = engagement
+        defending_before = character.db.skills["defending"]["pool"]
+        tactics_before = character.db.skills["tactics"]["pool"]
+        guard_text = guard(character)
+        self.assertIn("guarded stance", guard_text)
+        self.assertEqual(character.db.balance, "guarding")
+        self.assertEqual(character.db.stance, "defensive")
+        self.assertEqual(character.db.roundtime, 1)
+        self.assertGreater(character.db.skills["defending"]["pool"], defending_before)
+        self.assertGreater(character.db.skills["tactics"]["pool"], tactics_before)
+        self.assertIn("Defensive state: braced", maneuver_guide(character))
+        pressure_text = apply_enemy_pressure(character)
+        self.assertIn("guard against Wolf Cub", pressure_text)
+        self.assertEqual(character.db.balance, "balanced")
+        self.assertEqual(character.db.health, character.db.max_health)
+        character.execute_cmd("guard")
+        character.execute_cmd("brace")
 
     def test_skin_corpse_creates_pelt_and_trains_hunting_skills(self):
         character = self.make_character("Skinning Smoke")

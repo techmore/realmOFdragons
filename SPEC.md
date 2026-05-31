@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `guard` / `brace` as an equipment-free defensive combat maneuver that trains Defending plus Tactics, sets a guarded balance state, reduces the next close enemy pressure, and is covered by command smoke plus the generated transcript.
+
 - Added `kick` as a melee Brawling combat maneuver with feint support, roundtime/recovery, enemy pressure, command wiring, smoke coverage, and transcript coverage.
 - Added `shoot`/`fire` as a bow-style ranged combat maneuver that consumes `practice_arrows`, works at missile/pole range, benefits from `aim`, trains Bows/Missile Mastery/Tactics, and has smoke plus transcript coverage.
 - Expanded account-side race-only character creation syntax so `create character <name> as <race>`, `race <race>`, and `with race <race>` forms create unaffiliated Circle 1 starts with smoke and transcript coverage.
