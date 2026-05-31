@@ -772,6 +772,26 @@ class DRCommandSmokeTests(TestCase):
         )
         character.execute_cmd("use field_bandage")
 
+    def test_tend_defaults_to_field_bandage_and_treats_bleeding(self):
+        character = self.make_character("Tend Bandage Smoke")
+        self.walk_to_room(character, "crossing-RV02-006")
+        character.execute_cmd("buy field_bandage")
+        character.execute_cmd("target rv-ditch-rat")
+        character.execute_cmd("advance")
+        combat_pressure_scripts(character)[0].at_repeat()
+        self.assertTrue(character.db.bleeding)
+        first_aid_before = character.db.skills["first_aid"]["pool"]
+        character.execute_cmd("tend")
+        self.assertFalse(character.db.bleeding)
+        self.assertNotIn("field_bandage", character.db.inventory)
+        self.assertGreater(character.db.skills["first_aid"]["pool"], first_aid_before)
+
+        character.execute_cmd("shop refresh")
+        character.execute_cmd("buy field_bandage")
+        character.db.health = 17
+        character.execute_cmd("treat field_bandage")
+        self.assertEqual(character.db.health, 25)
+
     def test_shop_data_has_stock_and_dialogue(self):
         self.assertGreaterEqual(len(SHOPS), 4)
         self.assertIn("field_bandage", ITEMS)

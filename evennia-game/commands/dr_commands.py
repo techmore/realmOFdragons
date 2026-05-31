@@ -39,7 +39,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
         "Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, practice, train, circle, circle status.",
         "Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.",
-        "Shops: shop, shop talk, shop stock, shop refresh, buy <item>, sell <item>, use <item>, inventory, hands, equipment.",
+        "Shops: shop, shop talk, shop stock, shop refresh, buy <item>, sell <item>, use <item>, tend/treat, inventory, hands, equipment.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, revive/stand.",
         "Focused help: help progression, help room, help scan, help targets, help combat.",
     ]
@@ -88,7 +88,7 @@ CHARACTER_HELP_TOPICS = {
             "2. In Crossing: use room/exits/where, then walk with directions or aliases like n, sw, u, d.",
             "3. Join in-world: visit a guild registrar, use registrar for guidance, then use join guild. Guilds are not chosen during account creation.",
             "4. Train and circle: use train, practice, skills, circle status, circle, abilities, focus, and technique at your own guild registrar through Circle 10.",
-            "5. Gear up: use shop, shop talk, shop stock, buy <item>, sell <item>, use <item>, inventory, hands, equipment, wield, and wear.",
+            "5. Gear up: use shop, shop talk, shop stock, buy <item>, sell <item>, use <item>, tend/treat wounds, inventory, hands, equipment, wield, and wear.",
             "6. Hunt: walk to beginner hunting rooms, scan, appraise <enemy>, target <enemy>, advance to melee, then jab or bash.",
             "7. Recover: use combat/prompt, wait/recover for roundtime, defend or flee as needed, revive/stand if incapacitated, and loot corpse after a kill.",
         ]
@@ -996,6 +996,27 @@ class CmdDRUse(Command):
 
     def func(self):
         self.caller.msg(use_item(self.caller, self.args))
+
+
+class CmdDRTend(Command):
+    """
+    Tend wounds with a carried field bandage.
+
+    Usage:
+      tend
+      tend <item id>
+      treat
+      treat <item id>
+    """
+
+    key = "tend"
+    aliases = ["treat"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        item_id = self.args.strip() or "field_bandage"
+        self.caller.msg(use_item(self.caller, item_id))
 
 
 class CmdDRHealth(Command):

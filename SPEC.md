@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `tend` / `treat` as command-first wound care verbs that default to using a carried `field_bandage`.
+- Added smoke coverage proving `tend` treats bleeding, consumes the physical bandage, and advances First Aid while `treat field_bandage` preserves explicit item-use behavior.
 - Combat prompts now suggest `use field_bandage` for bleeding characters carrying one, or retreating to buy one when none is carried.
 - Added smoke coverage for bleeding response guidance with and without a field bandage.
 - Field bandage use now feeds First Aid skill progress, tying wound treatment back into Circle 1-10 skill advancement.
