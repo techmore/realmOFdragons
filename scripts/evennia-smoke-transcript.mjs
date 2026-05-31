@@ -48,7 +48,7 @@ You become Aela at Crossing Town Green.
 > drhelp
 Dragon Realms commands:
 Identity: score, attributes/stats, skills, race, reroll attributes.
-Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, practice, boon, train, circle, circle status.
+Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, passive, drill, practice, boon, study, train, circle, circle status.
 Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.
 
 > room
@@ -102,6 +102,9 @@ Roar of Readiness turns battlefield pressure into tactical clarity, feeding Tact
 
 > passive
 Battle Readiness keeps your guard braced between exchanges, reinforcing Defending by 1.
+
+> drill
+Pit Exchange turns close pressure into controlled force, training Expertise by 1 and Brawling by 1.
 
 > practice
 You practice Barbarian Guild forms before the registrar.
