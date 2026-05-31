@@ -13,7 +13,7 @@ from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, 
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_MENTORS, GUILD_PASSIVES, GUILD_RITES, GUILD_SIGNATURES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_history_summary, guild_path_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_mentor, use_guild_milestone, use_guild_passive, use_guild_perk, use_guild_practice, use_guild_signature, use_guild_technique
+from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_MENTORS, GUILD_PASSIVES, GUILD_RITES, GUILD_SIGNATURES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_history_summary, guild_path_summary, guild_plan_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_mentor, use_guild_milestone, use_guild_passive, use_guild_perk, use_guild_practice, use_guild_signature, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, task_guide, travel_guide, validate_world_graph
 
 
@@ -623,11 +623,13 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("survey", CHARACTER_HELP_TEXT)
         self.assertIn("signature", CHARACTER_HELP_TEXT)
         self.assertIn("mentor", CHARACTER_HELP_TEXT)
+        self.assertIn("guild plan", CHARACTER_HELP_TEXT)
         self.assertIn("focus", CHARACTER_HELP_TEXT)
         self.assertIn("technique", CHARACTER_HELP_TEXT)
         self.assertIn("use registrar for guidance", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("signature", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("mentor", CHARACTER_HELP_TOPICS["progression"])
+        self.assertIn("guild plan", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("abilities, focus, and technique", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("boon", CHARACTER_HELP_TEXT)
         self.assertIn("rest", CHARACTER_HELP_TEXT)
@@ -760,6 +762,23 @@ class DRCommandSmokeTests(TestCase):
             self.assertIn("Available boon", path_text)
             self.assertIn(f"Current title: {guild_title(guild_id, 1)}.", path_text)
             character.execute_cmd("path")
+            plan_text = "\n".join(
+                guild_plan_summary(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "circle": character.db.circle,
+                        "skills": character.db.skills,
+                    }
+                )
+            )
+            self.assertIn(f"{guild_name} Circle plan through Circle 10:", plan_text)
+            self.assertIn("Circle ladder:", plan_text)
+            self.assertIn("Registrar actions: train, study, perk, milestone, drill, practice, rite, boon, capstone, circle status, circle.", plan_text)
+            self.assertEqual(plan_text.count("- Circle "), 10)
+            self.assertIn(f"Circle 1: {guild_circle_perk(guild_id, 1)}", plan_text)
+            self.assertIn(f"Registrar: {registrars[guild_id]}.", plan_text)
+            character.execute_cmd("guild plan")
+            character.execute_cmd("circle plan")
             title_text = "\n".join(guild_title_ladder(guild_id, character.db.circle))
             self.assertIn(f"{guild_name} titles through Circle 1:", title_text)
             self.assertIn(f"Circle 1: {guild_title(guild_id, 1)}", title_text)
@@ -1002,6 +1021,18 @@ class DRCommandSmokeTests(TestCase):
             self.assertIn("Circle 5+ rite", circle_ten_path)
             self.assertIn("Circle 10 capstone available", circle_ten_path)
             character.execute_cmd("guild path")
+            circle_ten_plan = "\n".join(
+                guild_plan_summary(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "circle": character.db.circle,
+                        "skills": character.db.skills,
+                    }
+                )
+            )
+            self.assertIn("Circle 10 is the current supported plan cap", circle_ten_plan)
+            self.assertIn("(current)", circle_ten_plan)
+            character.execute_cmd("plan")
             boon_skill_id = GUILD_BOONS[guild_id]["skill"]
             boon_before = (character.db.skills[boon_skill_id]["rank"] * 5) + character.db.skills[boon_skill_id]["pool"]
             character.execute_cmd("boon")

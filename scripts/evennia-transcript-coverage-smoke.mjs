@@ -10,6 +10,7 @@ const requiredTokens = [
   'create character <name> = <race>',
   'puppet <name>',
   '> join guild',
+  '> guild plan',
   '> circle status',
   '> train',
   '> mentor',

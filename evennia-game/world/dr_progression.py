@@ -583,6 +583,47 @@ def guild_path_summary(character_state):
     return lines
 
 
+def guild_plan_summary(character_state):
+    """Return a full Circle 1-10 guild plan for player-facing progression."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    if guild_id == "commoner" or guild_id not in GUILDS:
+        return [
+            "You have no guild plan yet.",
+            "Next step: visit a guild registrar in Crossing and use `join guild`.",
+        ]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    registrar_room_id = registrar_room_for_guild(guild_id) or "unknown"
+    skills = character_state.setdefault("skills", build_starter_skills())
+    primary_skill_id = primary_skill_for_guild(guild_id)
+    primary_skill = skills.get(primary_skill_id, {"name": SKILLS.get(primary_skill_id, primary_skill_id), "rank": 0})
+    lines = [
+        f"{GUILDS[guild_id]} Circle plan through Circle {MAX_SUPPORTED_CIRCLE}:",
+        f"Current Circle: {circle}. Current title: {guild_title(guild_id, circle)}.",
+        f"Registrar: {registrar_room_id}. Primary training: {primary_skill['name']} rank {primary_skill.get('rank', 0)}.",
+        "Circle ladder:",
+    ]
+    for step in range(1, MAX_SUPPORTED_CIRCLE + 1):
+        skill_id = milestone_skill_for_guild_circle(guild_id, step)
+        marker = "current" if step == circle else "earned" if step < circle else "locked"
+        lines.append(f"- Circle {step}: {guild_circle_perk(guild_id, step)}; trains {SKILLS.get(skill_id, skill_id)} ({marker}).")
+
+    mentor = GUILD_MENTORS.get(guild_id)
+    signature = GUILD_SIGNATURES.get(guild_id)
+    if mentor:
+        lines.append(f"Registrar mentor: use `mentor` for {mentor['name']} ({SKILLS[mentor['skill']]}).")
+    if signature:
+        lines.append(f"Anywhere signature: use `signature` for {signature['name']} ({SKILLS[signature['skill']]}).")
+    lines.append("Registrar actions: train, study, perk, milestone, drill, practice, rite, boon, capstone, circle status, circle.")
+    if circle >= MAX_SUPPORTED_CIRCLE:
+        lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported plan cap; continue guild rewards, shops, fieldcraft, and hunting.")
+    else:
+        requirement = next_circle_requirement(circle)
+        lines.append(f"Next Circle {requirement['next_circle']}: total ranks {requirement['total_ranks']}; primary rank {requirement['primary_rank']}.")
+    return lines
+
+
 def use_guild_focus(character_state):
     """Apply the active guild focus as a small primary-skill pulse."""
 

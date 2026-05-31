@@ -48,7 +48,7 @@ You become Aela at Crossing Town Green.
 > drhelp
 Dragon Realms commands:
 Identity: score, attributes/stats, skills, race, reroll attributes.
-Guilds/Circles: registrar, join guild, guild/perks, abilities, mentor, perk, signature, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.
+Guilds/Circles: registrar, join guild, guild/perks, abilities, guild plan, mentor, perk, signature, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.
 Movement: room/exits/where, survey, then use direction names or aliases like n, sw, u, d.
 
 > room
@@ -83,6 +83,11 @@ Next commands: train, circle status, circle, abilities, focus, technique, practi
 Guild: Barbarian Guild. Circle 1.
 Unlocked milestones:
 - Barbarian Guild Circle 1: Pit Footing
+
+> guild plan
+Barbarian Guild Circle plan through Circle 10:
+Circle ladder lists every supported Circle milestone, reinforcing skill, and current locked/earned state.
+Registrar actions: train, study, perk, milestone, drill, practice, rite, boon, capstone, circle status, circle.
 
 > circle status
 You are Circle 1 in Barbarian Guild.
