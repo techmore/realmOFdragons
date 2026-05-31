@@ -8,6 +8,8 @@ full Evennia Object instances.
 
 from evennia import create_object
 
+from world.dr_progression import apply_skill_pool_gain
+
 ITEMS = {
     "torch": {
         "name": "Torch",
@@ -58,6 +60,13 @@ ITEMS = {
         "slot": "pack",
         "description": "A rough beginner pelt cleaned enough for a shop counter.",
     },
+    "wild_herbs": {
+        "name": "Wild Herbs",
+        "price": 1,
+        "sell": 3,
+        "slot": "pack",
+        "description": "A small bundle of trail herbs useful for beginner fieldcraft.",
+    },
 }
 
 SHOPS = {
@@ -65,7 +74,7 @@ SHOPS = {
         "name": "Town Green Provisioner",
         "keeper": "Marta",
         "dialogue": "Marta says, 'Roads are safer when you carry light and plan ahead.'",
-        "stock": ("torch", "travel_rations"),
+        "stock": ("torch", "travel_rations", "wild_herbs"),
     },
     "crossing-RV02-002": {
         "name": "Riverside Field Outfitter",
@@ -91,6 +100,13 @@ SHOPS = {
         "dialogue": "Oren says, 'Reeds hide more than water. Keep a wrap and light close.'",
         "stock": ("field_bandage", "torch", "travel_rations"),
     },
+}
+
+FORAGE_ROOMS = {
+    "crossing-RV02-001": {"item": "wild_herbs", "text": "You search the trailhead verge and find wild_herbs."},
+    "crossing-RV02-002": {"item": "wild_herbs", "text": "You sort through the brushline and find wild_herbs."},
+    "crossing-RV02-005": {"item": "wild_herbs", "text": "You check the low ridge grasses and find wild_herbs."},
+    "crossing-RV02-007": {"item": "wild_herbs", "text": "You part the reeds around the culvert and find wild_herbs."},
 }
 
 
@@ -308,6 +324,24 @@ def sell_item(character, item_id):
     character.db.wallet = set_coins(character.db.wallet, coins(character.db.wallet) + item["sell"])
     add_shop_stock(character.location, item_id)
     return f"You sell {item['name']} from your {source} for {item['sell']} trias."
+
+
+def forage_room(character):
+    ensure_economy_state(character)
+    room_id = character.location.db.dr_room_id if character.location else ""
+    forage = FORAGE_ROOMS.get(room_id)
+    if not forage:
+        return "You find no useful forage here. Try the trailhead, brushline, ridge, or culvert."
+    item_id = forage["item"]
+    create_item_object(item_id, character.location, character.location)
+    skills = character.db.skills or {}
+    events = apply_skill_pool_gain(skills, "outdoorsmanship", 2)
+    events.extend(apply_skill_pool_gain(skills, "perception", 1))
+    character.db.skills = skills
+    lines = [forage["text"]]
+    lines.extend(events)
+    lines.append(f"Suggested next command: get {item_id}.")
+    return "\n".join(lines)
 
 
 def get_item(character, item_id):

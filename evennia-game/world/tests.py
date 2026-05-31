@@ -8,7 +8,7 @@ from evennia.utils.create import create_account, create_object, create_script
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room, skin_corpse
-from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk, use_item
+from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOPS, buy_item, forage_room, format_shop, sell_item, shop_talk, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_TECHNIQUES, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_focus, use_guild_practice, use_guild_technique
@@ -637,24 +637,24 @@ class DRCommandSmokeTests(TestCase):
         character = self.make_character("Economy Smoke")
 
         shop_text = format_shop(character.location)
-        self.assertIn("Accepted stock: torch, travel_rations.", shop_text)
+        self.assertIn("Accepted stock: torch, travel_rations, wild_herbs.", shop_text)
         self.assertIn("buy <item>", shop_text)
         self.assertIn("sell <item>", shop_text)
-        self.assertIn("Marta trades: torch, travel_rations.", shop_talk(character.location))
-        self.assertIn("Available stock: torch, travel_rations.", buy_item(character, ""))
+        self.assertIn("Marta trades: torch, travel_rations, wild_herbs.", shop_talk(character.location))
+        self.assertIn("Available stock: torch, travel_rations, wild_herbs.", buy_item(character, ""))
         self.assertIn("I do not have small_blade for sale", buy_item(character, "small_blade"))
         character.execute_cmd("shop")
         character.execute_cmd("shop talk")
         character.execute_cmd("shop stock")
         character.execute_cmd("shop refresh")
-        self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations"))
+        self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations", "wild_herbs"))
         character.execute_cmd("shop stock")
         character.execute_cmd("buy torch")
-        self.assertEqual(character.location.db.shop_stock, ("travel_rations",))
+        self.assertEqual(character.location.db.shop_stock, ("travel_rations", "wild_herbs"))
         character.execute_cmd("buy torch")
         self.assertEqual(character.db.inventory.count("torch"), 1)
         character.execute_cmd("shop refresh")
-        self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations"))
+        self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations", "wild_herbs"))
         self.assertIn("torch", character.db.inventory)
         self.assertTrue(
             [
@@ -669,7 +669,7 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("hands")
         character.execute_cmd("sell torch")
         self.assertNotIn("torch", character.db.inventory)
-        self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations"))
+        self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations", "wild_herbs"))
         self.assertFalse(
             [
                 obj
@@ -814,6 +814,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertGreaterEqual(len(SHOPS), 4)
         self.assertIn("field_bandage", ITEMS)
         self.assertIn("rough_pelt", ITEMS)
+        self.assertIn("wild_herbs", ITEMS)
+        self.assertIn("wild_herbs", SHOPS["crossing-TG01-001"]["stock"])
         self.assertEqual(SHOPS["crossing-RV02-006"]["stock"][0], "field_bandage")
         self.assertIn("crossing-RV02-007", SHOPS)
         self.assertEqual(SHOPS["crossing-RV02-007"]["stock"][0], "field_bandage")
@@ -823,6 +825,31 @@ class DRCommandSmokeTests(TestCase):
             self.assertTrue(shop["stock"])
             for item_id in shop["stock"]:
                 self.assertIn(item_id, ITEMS)
+
+    def test_forage_creates_gatherable_and_trains_survival_skills(self):
+        character = self.make_character("Forage Smoke")
+        self.assertIn("crossing-RV02-002", FORAGE_ROOMS)
+        self.walk_to_room(character, "crossing-RV02-002")
+        outdoors_before = character.db.skills["outdoorsmanship"]["pool"]
+        perception_before = character.db.skills["perception"]["pool"]
+        forage_text = forage_room(character)
+        self.assertIn("wild_herbs", forage_text)
+        self.assertGreater(character.db.skills["outdoorsmanship"]["pool"], outdoors_before)
+        self.assertGreater(character.db.skills["perception"]["pool"], perception_before)
+        self.assertTrue(
+            [
+                obj
+                for obj in character.location.contents
+                if obj.db.object_type == "item" and obj.db.item_id == "wild_herbs"
+            ]
+        )
+        character.execute_cmd("forage")
+        character.execute_cmd("get wild_herbs")
+        self.assertIn("wild_herbs", character.db.inventory)
+        self.walk_to_room(character, START_ROOM_ID)
+        wallet_before = character.db.wallet["trias"]
+        character.execute_cmd("sell wild_herbs")
+        self.assertGreater(character.db.wallet["trias"], wallet_before)
 
     def test_scan_target_advance_range_and_retreat_commands(self):
         character = self.make_character("Combat Smoke")

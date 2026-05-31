@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `forage` / `gather` / `search` fieldcraft for beginner trail and hunting rooms, producing physical `wild_herbs` and training Outdoorsmanship plus Perception.
+- Added smoke coverage proving forage objects can be found, picked up, and sold through the shop economy while advancing survival skills.
 - Updated the generated Evennia smoke transcript so the combat loop shows `skin corpse`, `get rough_pelt`, and hunting harvest coverage.
 - Added `skin corpse` as a post-combat hunting action that prepares a `rough_pelt`, marks corpses skinned, and trains Skinning plus Outdoorsmanship.
 - Added smoke coverage proving corpse skinning creates a physical pelt, prevents duplicate skinning, supports pickup, and feeds hunting-skill progression.
