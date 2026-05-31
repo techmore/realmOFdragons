@@ -48,7 +48,7 @@ You become Aela at Crossing Town Green.
 > drhelp
 Dragon Realms commands:
 Identity: score, attributes/stats, skills, race, reroll attributes.
-Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, practice, train, circle, circle status.
+Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, practice, boon, train, circle, circle status.
 Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.
 
 > room
@@ -73,7 +73,7 @@ Barbarian Guild Circle 1 recognition.
 > ask registrar
 Barbarian Guild registrar:
 You are registered here at Circle 1.
-Next commands: train, circle status, circle, abilities, focus, technique, practice.
+Next commands: train, circle status, circle, abilities, focus, technique, practice, boon.
 
 > guild
 Guild: Barbarian Guild. Circle 1.
@@ -100,6 +100,10 @@ Roar of Readiness turns battlefield pressure into tactical clarity, feeding Tact
 > practice
 You practice Barbarian Guild forms before the registrar.
 Expertise and Tactics gain guild practice.
+
+> boon
+Battle Temper hardens your battle presence, granting a Circle 1 boon to Expertise.
+This boon is now recorded on your guild progression.
 
 > circle
 You are Circle 1 in Barbarian Guild.
@@ -197,7 +201,7 @@ You pick up the dropped item.
 - Race-only unaffiliated Circle 1 starts: \`DRAccountCreationTests.test_account_create_character_supports_all_races_as_circle_one_commoners\`.
 - Registrar-only guild joining and Circle 10 progression: \`DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands\`.
 - Registrar guidance: the all-guild command smoke invokes \`registrar\` and \`ask registrar\` before and after joining every guild.
-- Guild focus, technique, and practice behavior: the all-guild Circle 10 command smoke invokes \`focus\`, \`guild focus\`, \`technique\`, \`guild technique\`, \`practice\`, and \`guild practice\`.
+- Guild focus, technique, practice, and boon behavior: the all-guild Circle 10 command smoke invokes \`focus\`, \`guild focus\`, \`technique\`, \`guild technique\`, \`practice\`, \`guild practice\`, \`boon\`, and \`guild boon\`.
 - Crossing movement: \`DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room\`.
 - Shops/items/equipment: \`DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh\` and \`test_wield_wear_and_equipment_commands\`.
 - Wound care: \`DRCommandSmokeTests.test_tend_defaults_to_field_bandage_and_treats_bleeding\` and \`test_field_bandage_treats_combat_bleeding\`.
