@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `registrar` / `ask registrar` as an in-world guildhall guidance command, giving guild-specific registrar text, primary training, signature technique, and next commands before and after joining.
+- Expanded all-guild smoke coverage to ask every registrar for pre-join and post-join guidance while preserving registrar-gated `join guild`, `train`, and `circle` behavior.
 - Added `npm run smoke:evennia-transcript` to generate a terminal/Telnet-style Evennia command transcript covering account creation, guild joining, Circle progression, shops, equipment, and async range combat.
 - Added `EVENNIA_SMOKE_TRANSCRIPT.md` as explicit transcript evidence for the command-first user journey while keeping automated behavior proof in `npm run check:evennia`.
 - Added distinct `technique` / `guild technique` behavior for every guild, with Circle-scaled support-skill pulses tied to each guild's clean-room identity.

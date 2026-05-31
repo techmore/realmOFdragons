@@ -9,7 +9,7 @@ from commands.dr_commands import ACCOUNT_HELP_TEXT, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scripts, combat_status, corpse_objects, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
 from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk
-from world.dr_guilds import join_guild
+from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_TECHNIQUES, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks, use_guild_focus, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
@@ -405,10 +405,35 @@ class DRCommandSmokeTests(TestCase):
             character = self.make_character(f"{guild_name} Smoke")
             self.walk_to_room(character, registrars[guild_id])
 
+            pre_join_registrar_text = "\n".join(
+                registrar_text(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "guild_name": character.db.guild_name,
+                        "circle": character.db.circle,
+                    },
+                    {"guild": character.location.db.guild},
+                )
+            )
+            self.assertIn(f"{guild_name} registrar:", pre_join_registrar_text)
+            self.assertIn("Next commands: join guild", pre_join_registrar_text)
+            character.execute_cmd("registrar")
+            character.execute_cmd("ask registrar")
             character.execute_cmd("join guild")
             self.assertEqual(character.db.guild_id, guild_id)
             self.assertEqual(character.db.guild_name, guild_name)
             self.assertEqual(character.db.guild_perks, [guild_circle_perk(guild_id, 1)])
+            post_join_registrar_text = "\n".join(
+                registrar_text(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "guild_name": character.db.guild_name,
+                        "circle": character.db.circle,
+                    },
+                    {"guild": character.location.db.guild},
+                )
+            )
+            self.assertIn("Next commands: train", post_join_registrar_text)
             character.execute_cmd("guild")
             character.execute_cmd("circle status")
             status_text = "\n".join(

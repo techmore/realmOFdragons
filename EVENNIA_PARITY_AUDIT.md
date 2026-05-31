@@ -35,11 +35,12 @@ Evidence:
 - `DRWorldTests.test_all_guild_registrars_are_reachable_from_town_green` verifies each registrar is reachable.
 - `DRCommandSmokeTests.test_join_guild_requires_a_registrar_room_command` verifies `join guild` fails outside a registrar.
 - `DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands` joins every guild at its registrar.
+- The all-guild command smoke now asks every registrar for pre-join and post-join in-world guidance with `registrar` / `ask registrar`.
 - `DRCommandSmokeTests.test_joined_characters_cannot_switch_guilds_at_other_registrars` verifies existing guild affiliation cannot be overwritten at another registrar.
 - `DRGuildTests` covers registrar metadata behavior at helper level.
 
 Residual risk:
-- Registrar NPC personalities are represented by room metadata and text commands, not full conversational NPC command trees.
+- Registrar NPC personalities and next-step guidance are represented by room-aware text commands, not full branching conversational NPC trees.
 
 ### Every guild can progress to Circle 10 through normal commands
 

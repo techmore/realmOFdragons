@@ -13,7 +13,7 @@ from evennia.utils.create import create_object
 from world.dr_data import ATTRIBUTES, RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, revive, room_enemy_ids, scan_room, stance, target_enemy, wait_recover
 from world.dr_economy import buy_item, equipment_text, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, sell_item, shop_talk, wear_item, wield_item
-from world.dr_guilds import join_guild
+from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, circle_status, guild_ability_summary, train_skill, unlocked_guild_perks, use_guild_focus, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room
@@ -37,7 +37,7 @@ CHARACTER_HELP_TEXT = "\n".join(
     [
         "Dragon Realms commands:",
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
-        "Guilds/Circles: join guild, guild/perks, abilities, focus, technique, train, circle, circle status.",
+        "Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, train, circle, circle status.",
         "Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.",
         "Shops: shop, shop talk, shop stock, shop refresh, buy <item>, sell <item>, inventory, hands, equipment.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, revive/stand.",
@@ -588,6 +588,32 @@ class CmdDRJoinGuild(Command):
             character.db.circle = state["circle"]
             character.db.guild_perks = state["guild_perks"]
         character.msg("\n".join(result["events"]))
+
+
+class CmdDRRegistrar(Command):
+    """
+    Ask the current guild registrar for in-world guidance.
+
+    Usage:
+      registrar
+      ask registrar
+    """
+
+    key = "registrar"
+    aliases = ["ask registrar", "guild registrar"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        room = character.location
+        state = {
+            "guild_id": character.db.guild_id or "commoner",
+            "guild_name": character.db.guild_name or "Unaffiliated",
+            "circle": character.db.circle or 1,
+        }
+        room_state = {"guild": room.db.guild if room else None}
+        character.msg("\n".join(registrar_text(state, room_state)))
 
 
 class CmdDRGuildPerks(Command):
