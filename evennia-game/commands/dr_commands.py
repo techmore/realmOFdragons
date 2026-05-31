@@ -131,6 +131,38 @@ class CmdDRScore(Command):
         )
 
 
+class CmdDRAttributes(Command):
+    """
+    Show race-derived character attributes.
+
+    Usage:
+      attributes
+      stats
+      stat <attribute>
+    """
+
+    key = "attributes"
+    aliases = ["stats", "stat"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        attributes = character.db.attributes or {}
+        requested = self.args.strip().lower()
+        if requested:
+            attribute_id = "_".join("".join(char.lower() if char.isalnum() else " " for char in requested).split())
+            if attribute_id not in ATTRIBUTES:
+                character.msg(f'Unknown attribute "{requested}". Attributes: {", ".join(ATTRIBUTES)}.')
+                return
+            character.msg(f"{attribute_id}: {attributes.get(attribute_id, 0)}")
+            return
+        lines = ["Attributes:"]
+        for attribute_id in ATTRIBUTES:
+            lines.append(f"{attribute_id}: {attributes.get(attribute_id, 0)}")
+        character.msg("\n".join(lines))
+
+
 class CmdDRSkills(Command):
     """
     Show skill ranks and pools.

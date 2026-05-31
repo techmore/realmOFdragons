@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added text-first `attributes`, `stats`, and `stat <attribute>` commands so players can inspect race-derived stats directly from the MUD command interface.
+- Wired the attribute command into the Evennia character command set and smoke coverage for newly created characters.
 - Combat damage now derives from character attributes and weapon skill rank: `jab` uses agility plus Small Edged, while `bash` uses strength plus Brawling.
 - Combat maneuvers now feed skill pools for the relevant attack skill plus Tactics, making Crossing combat contribute to level-10 progression state instead of only mutating enemy vitality.
 - Added smoke coverage proving race attributes and weapon skill rank modify combat damage and that combat maneuvers award skill-pool progress.

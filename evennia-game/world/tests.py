@@ -243,6 +243,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.guild_id, "commoner")
         self.assertEqual(character.db.circle, 1)
         character.execute_cmd("score")
+        character.execute_cmd("attributes")
+        character.execute_cmd("stat agility")
         character.execute_cmd("join guild")
         self.assertEqual(character.db.guild_id, "barbarian")
 
