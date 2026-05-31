@@ -8,7 +8,7 @@ from evennia.utils.create import create_account, create_object, create_script
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room, skin_corpse
-from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOPS, buy_item, forage_room, format_shop, sell_item, shop_talk, use_item
+from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOPS, buy_item, forage_room, format_shop, repair_item, sell_item, shop_talk, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_TECHNIQUES, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_focus, use_guild_practice, use_guild_technique
@@ -761,6 +761,7 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("wear leather_shield")
         self.assertEqual(character.db.hands["left"], None)
         self.assertIn("leather_shield", character.db.equipment["worn"])
+        self.assertEqual(character.db.equipment_condition["leather_shield"], "scuffed")
         self.assertTrue(
             [
                 obj
@@ -768,7 +769,15 @@ class DRCommandSmokeTests(TestCase):
                 if obj.db.object_type == "item" and obj.db.item_id == "leather_shield"
             ]
         )
+        shield_before = character.db.skills["shield_usage"]["pool"]
+        armor_before = character.db.skills["light_armor"]["pool"]
+        repair_text = repair_item(character, "leather_shield")
+        self.assertIn("maintained", repair_text)
+        self.assertEqual(character.db.equipment_condition["leather_shield"], "maintained")
+        self.assertGreater(character.db.skills["shield_usage"]["pool"], shield_before)
+        self.assertGreater(character.db.skills["light_armor"]["pool"], armor_before)
         character.execute_cmd("equipment")
+        character.execute_cmd("repair leather_shield")
 
     def test_field_bandage_use_recovers_health_and_consumes_item(self):
         character = self.make_character("Bandage Smoke")

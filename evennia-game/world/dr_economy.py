@@ -135,6 +135,8 @@ def ensure_economy_state(character):
         character.db.hands = {"left": None, "right": None}
     if character.db.equipment is None:
         character.db.equipment = {"worn": []}
+    if character.db.equipment_condition is None:
+        character.db.equipment_condition = {}
 
 
 def current_shop(room):
@@ -415,10 +417,46 @@ def wear_item(character, item_id):
         return f"You are already wearing {item['name']}."
     worn.append(item_id)
     equipment["worn"] = worn
+    conditions = dict(character.db.equipment_condition or {})
+    conditions.setdefault(item_id, "scuffed")
     character.db.inventory = inventory
     character.db.hands = hands
     character.db.equipment = equipment
+    character.db.equipment_condition = conditions
     return f"You wear {item['name']} from your {source}."
+
+
+def repair_item(character, item_id):
+    ensure_economy_state(character)
+    item_id = (item_id or "").strip().lower().replace(" ", "_")
+    if not item_id:
+        return "Repair what? Try `repair <worn or held item>`."
+    item = ITEMS.get(item_id)
+    if not item:
+        return f'Unknown item "{item_id}".'
+    hands = dict(character.db.hands or {"left": None, "right": None})
+    worn = list((character.db.equipment or {}).get("worn", []))
+    carried = item_id in worn or item_id in hands.values()
+    if not carried or not carried_item_objects(character, item_id):
+        return f"You need to wear or hold {item['name']} before repairing it."
+
+    conditions = dict(character.db.equipment_condition or {})
+    before = conditions.get(item_id, "scuffed")
+    conditions[item_id] = "maintained"
+    character.db.equipment_condition = conditions
+    skills = character.db.skills or {}
+    events = []
+    if item_id == "leather_shield":
+        events.extend(apply_skill_pool_gain(skills, "shield_usage", 2))
+        events.extend(apply_skill_pool_gain(skills, "light_armor", 1))
+    else:
+        events.extend(apply_skill_pool_gain(skills, "engineering", 1))
+    character.db.skills = skills
+    lines = [f"You repair {item['name']}, improving its condition from {before} to maintained."]
+    lines.extend(events)
+    if not events:
+        lines.append("You learn a little from the maintenance work.")
+    return "\n".join(lines)
 
 
 def use_item(character, item_id):
@@ -497,5 +535,6 @@ def equipment_text(character):
         lines.append("- Nothing")
     for item_id in worn:
         item = ITEMS.get(item_id, {"name": item_id})
-        lines.append(f"- {item['name']} ({item_id})")
+        condition = (character.db.equipment_condition or {}).get(item_id, "unmaintained")
+        lines.append(f"- {item['name']} ({item_id}), condition: {condition}")
     return "\n".join(lines)

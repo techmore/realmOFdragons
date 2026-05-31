@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `repair` / `maintain` gear upkeep for worn/held beginner equipment, with condition tracking on worn shields.
+- Added smoke coverage proving shield maintenance updates equipment condition and advances Shield Usage plus Light Armor.
 - Updated the generated Evennia smoke transcript so the user journey includes `forage`, `get wild_herbs`, and selling gathered herbs.
 - Added `forage` / `gather` / `search` fieldcraft for beginner trail and hunting rooms, producing physical `wild_herbs` and training Outdoorsmanship plus Perception.
 - Added smoke coverage proving forage objects can be found, picked up, and sold through the shop economy while advancing survival skills.
