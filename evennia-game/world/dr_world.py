@@ -7,7 +7,7 @@ from collections import deque
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 
-from world.dr_data import GUILDS
+from world.dr_data import GUILDS, GUILD_PRIMARY_SKILLS, SKILLS
 from world.dr_combat import ENEMIES
 from world.dr_economy import FORAGE_ROOMS, SHOP_TASKS, SHOPS
 
@@ -326,6 +326,26 @@ def shop_guide(room):
         task_text = f"; task: {task['name']} to {task['destination']}" if task else ""
         lines.append(f"- {shop['name']} ({room_id}, {shop['keeper']}): {stock}; {route}{task_text}.")
     lines.append("Suggested loop: travel, survey, shop, shop talk, shop stock, wallet, buy <item>, sell <item>, task request/status/complete.")
+    return "\n".join(lines)
+
+
+def guild_guide(room):
+    """Return command-first guild registrar guidance from the current room."""
+
+    current_room_id = room.db.dr_room_id if room else START_ROOM_ID
+    lines = ["Crossing guild registrars:"]
+    for guild_id, room_id in sorted(guild_registrar_rooms().items(), key=lambda item: GUILDS[item[0]]):
+        path = find_path(current_room_id, room_id)
+        if room_id == current_room_id:
+            route = "here"
+        elif path:
+            route = "go " + ", ".join(path)
+        else:
+            route = "route unknown"
+        primary_skill_id = GUILD_PRIMARY_SKILLS.get(guild_id, "athletics")
+        primary_skill_name = SKILLS.get(primary_skill_id, primary_skill_id)
+        lines.append(f"- {GUILDS[guild_id]} ({room_id}): primary {primary_skill_name}; {route}.")
+    lines.append("Suggested loop: travel to a registrar, survey, registrar, join guild, guild path, train, circle status, circle.")
     return "\n".join(lines)
 
 

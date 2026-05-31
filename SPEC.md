@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `guilds` / `guild guide` / `registrars` as a command-first guide listing every guild registrar, primary skill, route from the current room, and the join/train/circle loop.
 - Added `shops` / `shop guide` / `stores` as a command-first guide listing every shop, stock, task destination, route from the current room, and the shop/task loop.
 - Added `hunting` / `hunting grounds` / `hunt` as a command-first guide listing every beginner hunting room, enemies, routes from the current room, shop/forage affordances, and the combat loop.
 - Added `wallet` / `money` / `coins` as command-first currency views for shop play, with smoke coverage proving buy/sell coin changes are visible.

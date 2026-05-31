@@ -14,7 +14,7 @@ from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_it
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
-from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, validate_world_graph
+from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, validate_world_graph
 
 
 class DRAccountCreationTests(TestCase):
@@ -442,6 +442,13 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Sluice Yard Crate", town_shops)
         self.assertIn("field_bandage, torch, travel_rations", town_shops)
         character.execute_cmd("shops")
+        town_guilds = guild_guide(character.location)
+        self.assertIn("Crossing guild registrars:", town_guilds)
+        self.assertIn("Barbarian Guild", town_guilds)
+        self.assertIn("primary Expertise", town_guilds)
+        self.assertIn("go south, east", town_guilds)
+        self.assertIn("Warrior Mage Guild", town_guilds)
+        character.execute_cmd("guilds")
         self.walk_to_room(character, "crossing-RV02-002")
         character.execute_cmd("room")
         character.execute_cmd("search room")
@@ -465,6 +472,11 @@ class DRCommandSmokeTests(TestCase):
         registrar_survey = survey_room(character.location, character)
         self.assertIn("Guild registrar: Barbarian Guild", registrar_survey)
         self.assertIn("Commands: registrar, join guild, train, circle", registrar_survey)
+        registrar_guilds = guild_guide(character.location)
+        self.assertIn("Barbarian Guild", registrar_guilds)
+        self.assertIn("here", registrar_guilds)
+        self.assertIn("Suggested loop: travel to a registrar", registrar_guilds)
+        character.execute_cmd("registrars")
 
     def test_focused_text_help_topics_cover_movement_and_combat(self):
         character = self.make_character("Focused Help Smoke")
