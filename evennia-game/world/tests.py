@@ -266,6 +266,7 @@ class DRWorldTests(SimpleTestCase):
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-014"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-015"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-016"))
+        self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-018"))
         self.assertEqual(find_path(START_ROOM_ID, "crossing-RV02-009"), ["south", "south", "west"])
 
     def test_task_guide_lists_routes_rewards_and_destinations(self):
@@ -289,6 +290,8 @@ class DRWorldTests(SimpleTestCase):
         self.assertIn("enemies: rv-bank-mink", town_guide)
         self.assertIn("Reed Bank Blind (crossing-RV02-016): go south, south, east, east, east, east, east, south, east, east, east, east, east.", town_guide)
         self.assertIn("enemies: rv-reed-heron", town_guide)
+        self.assertIn("Sunk Willow Shoal (crossing-RV02-018): go south, south, east, east, east, east, east, south, east, east, east, east, east, east, east.", town_guide)
+        self.assertIn("enemies: rv-shoal-frog", town_guide)
         self.assertIn("guild: Barbarian Guild", town_guide)
         self.assertIn("shop: Spillway Rope Hook", town_guide)
         self.assertIn("task: Spillway rope count", town_guide)
@@ -298,6 +301,8 @@ class DRWorldTests(SimpleTestCase):
         self.assertIn("task: Bank narrows count", town_guide)
         self.assertIn("shop: Reed Blind Tackle Box", town_guide)
         self.assertIn("task: Reed blind tally", town_guide)
+        self.assertIn("shop: Shoal Willow Satchel", town_guide)
+        self.assertIn("task: Shoal willow note", town_guide)
 
 
 class DRWorldBuilderTests(TestCase):
@@ -394,6 +399,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertEqual(bank.db.targets, ("rv-bank-mink",))
         blind = find_built_room("crossing-RV02-016")
         self.assertEqual(blind.db.targets, ("rv-reed-heron",))
+        shoal = find_built_room("crossing-RV02-018")
+        self.assertEqual(shoal.db.targets, ("rv-shoal-frog",))
 
     def test_built_shopkeeper_npcs(self):
         build_crossing_world()
@@ -575,6 +582,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("rv-bank-mink", town_hunting)
         self.assertIn("rv-reed-heron", town_hunting)
         self.assertIn("rv-causeway-turtle", town_hunting)
+        self.assertIn("rv-shoal-frog", town_hunting)
         character.execute_cmd("hunting")
         town_shops = shop_guide(character.location)
         self.assertIn("Crossing shops and tasks:", town_shops)
@@ -586,6 +594,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Canal Bank Supply Tin", town_shops)
         self.assertIn("Reed Blind Tackle Box", town_shops)
         self.assertIn("Causeway Reed Pack", town_shops)
+        self.assertIn("Shoal Willow Satchel", town_shops)
         character.execute_cmd("shops")
         town_guilds = guild_guide(character.location)
         self.assertIn("Crossing guild registrars:", town_guilds)
@@ -603,6 +612,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Canal Bank Narrows", town_forage)
         self.assertIn("Reed Bank Blind", town_forage)
         self.assertIn("Fallen Reed Causeway", town_forage)
+        self.assertIn("Sunk Willow Shoal", town_forage)
         self.assertIn("Suggested loop: travel, survey, forage", town_forage)
         character.execute_cmd("forage guide")
         self.walk_to_room(character, "crossing-RV02-002")
@@ -1484,6 +1494,19 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Shop task complete", bank_complete_text)
         self.assertGreater(bank_runner.db.wallet["trias"], bank_wallet_before)
         self.assertIsNone(bank_runner.db.active_task)
+
+        shoal_runner = self.make_character("Shoal Task Smoke")
+        self.walk_to_room(shoal_runner, "crossing-RV02-018")
+        shoal_text = request_shop_task(shoal_runner)
+        self.assertIn("Causeway Reed Pack", shoal_text)
+        self.assertIn("crossing-RV02-017", task_status(shoal_runner))
+        self.walk_to_room(shoal_runner, "crossing-RV02-017")
+        shoal_wallet_before = shoal_runner.db.wallet["trias"]
+        shoal_complete_text = complete_shop_task(shoal_runner)
+        self.assertIn("Shoal willow note", shoal_complete_text)
+        self.assertIn("Shop task complete", shoal_complete_text)
+        self.assertGreater(shoal_runner.db.wallet["trias"], shoal_wallet_before)
+        self.assertIsNone(shoal_runner.db.active_task)
 
     def test_shopkeepers_reject_untraded_items_and_missing_carried_items(self):
         character = self.make_character("Shop Refusal Smoke")

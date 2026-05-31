@@ -303,6 +303,29 @@ You return to the Reed Bank Blind.
 You complete Causeway shell count and earn 8 trias.
 Trading, Appraisal, and Athletics gain practical experience.
 
+> east
+You step onto the Sunk Willow Shoal.
+
+> shop
+The Shoal Willow Satchel offers field_bandage, travel_rations, and wild_herbs by the shallow water.
+
+> task request
+Noll asks you to bring a Shoal willow note back to the Causeway Reed Pack.
+
+> scan
+You scan the area.
+shoal_frog is here at missile range.
+
+> forage
+You check the sunk willow shoal and find wild_herbs.
+
+> west
+You return to the Fallen Reed Causeway.
+
+> task complete
+You complete Shoal willow note and earn 8 trias.
+Trading, Appraisal, and Athletics gain practical experience.
+
 > scan
 You scan the area.
 spillway_eel is here at missile range.

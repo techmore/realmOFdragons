@@ -164,8 +164,14 @@ ROOMS = {
     "crossing-RV02-017": {
         "title": "Fallen Reed Causeway",
         "desc": "Flattened reeds form a muddy causeway over shallow canal wash where shells scrape under the grass.",
-        "exits": {"west": "crossing-RV02-016"},
+        "exits": {"west": "crossing-RV02-016", "east": "crossing-RV02-018"},
         "targets": ("rv-causeway-turtle",),
+    },
+    "crossing-RV02-018": {
+        "title": "Sunk Willow Shoal",
+        "desc": "A sunken willow leans across a shallow shoal where green water hides sudden movement.",
+        "exits": {"west": "crossing-RV02-017"},
+        "targets": ("rv-shoal-frog",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",

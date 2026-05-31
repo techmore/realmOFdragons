@@ -122,6 +122,13 @@ ENEMIES = {
         "description": "A broad turtle scrapes through fallen reeds and snaps at boots that step too close.",
         "loot": {"trias": 5, "items": ("rough_pelt",)},
     },
+    "rv-shoal-frog": {
+        "name": "Shoal Frog",
+        "vitality": 14,
+        "aggression": "springing",
+        "description": "A mottled frog crouches on a shallow shoal, springing at ankles that disturb the water.",
+        "loot": {"trias": 3, "items": ("wild_herbs",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")

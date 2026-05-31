@@ -160,6 +160,12 @@ SHOPS = {
         "dialogue": "Iven says, 'The causeway looks solid until the reeds start moving underfoot.'",
         "stock": ("field_bandage", "torch", "wild_herbs"),
     },
+    "crossing-RV02-018": {
+        "name": "Shoal Willow Satchel",
+        "keeper": "Noll",
+        "dialogue": "Noll says, 'The willow shoal is shallow enough to tempt you and deep enough to trip you.'",
+        "stock": ("field_bandage", "travel_rations", "wild_herbs"),
+    },
 }
 
 FORAGE_ROOMS = {
@@ -177,6 +183,7 @@ FORAGE_ROOMS = {
     "crossing-RV02-015": {"item": "wild_herbs", "text": "You search the canal bank narrows and find wild_herbs."},
     "crossing-RV02-016": {"item": "wild_herbs", "text": "You part reed blind grasses and find wild_herbs."},
     "crossing-RV02-017": {"item": "wild_herbs", "text": "You search flattened causeway reeds and find wild_herbs."},
+    "crossing-RV02-018": {"item": "wild_herbs", "text": "You check the sunk willow shoal and find wild_herbs."},
 }
 
 SHOP_TASKS = {
@@ -233,6 +240,12 @@ SHOP_TASKS = {
         "destination": "crossing-RV02-016",
         "reward": 8,
         "text": "Iven asks you to bring a causeway shell count back to the Reed Blind Tackle Box.",
+    },
+    "crossing-RV02-018": {
+        "name": "Shoal willow note",
+        "destination": "crossing-RV02-017",
+        "reward": 8,
+        "text": "Noll asks you to bring a shoal willow note back to the Causeway Reed Pack.",
     },
 }
 

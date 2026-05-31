@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added the Sunk Willow Shoal beyond the Fallen Reed Causeway with a Shoal Frog enemy, Shoal Willow Satchel shop, forage support, shop task, transcript coverage, and targeted route/content smoke assertions.
+
 - Added `guard` / `brace` as an equipment-free defensive combat maneuver that trains Defending plus Tactics, sets a guarded balance state, reduces the next close enemy pressure, and is covered by command smoke plus the generated transcript.
 
 - Added `kick` as a melee Brawling combat maneuver with feint support, roundtime/recovery, enemy pressure, command wiring, smoke coverage, and transcript coverage.
