@@ -25,16 +25,23 @@ import django
 django.setup()
 
 from django.urls import resolve
+from django.test import Client
 
 match = resolve("/webclient/")
+response = Client().get("/webclient/")
+body = response.content.decode("utf-8", errors="replace").lower()
 payload = {
     "path": "/webclient/",
     "url_name": match.url_name,
     "view_name": match.view_name,
     "route": getattr(match.route, "__str__", lambda: str(match.route))(),
     "resolved": True,
+    "status_code": response.status_code,
+    "webclient_markup": "webclient" in body,
 }
 print(json.dumps(payload, sort_keys=True))
+if response.status_code >= 400 or "webclient" not in body:
+    raise SystemExit(1)
 `;
 
 const result = spawnSync(venvPython, ['-c', code], {
