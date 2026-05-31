@@ -5,7 +5,7 @@ Evennia migration smoke/unit tests for clean-room DR systems.
 from django.test import SimpleTestCase, TestCase
 from evennia.utils.create import create_account, create_object, create_script
 
-from commands.dr_commands import ACCOUNT_HELP_TEXT, account_roster_text
+from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scripts, combat_status, corpse_objects, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
 from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk
@@ -346,6 +346,11 @@ class DRCommandSmokeTests(TestCase):
 
     def test_focused_text_help_topics_cover_movement_and_combat(self):
         character = self.make_character("Focused Help Smoke")
+        self.assertIn("registrar", CHARACTER_HELP_TEXT)
+        self.assertIn("focus", CHARACTER_HELP_TEXT)
+        self.assertIn("technique", CHARACTER_HELP_TEXT)
+        self.assertIn("use registrar for guidance", CHARACTER_HELP_TOPICS["progression"])
+        self.assertIn("abilities, focus, and technique", CHARACTER_HELP_TOPICS["progression"])
         character.execute_cmd("drhelp")
         character.execute_cmd("help progression")
         character.execute_cmd("help room")

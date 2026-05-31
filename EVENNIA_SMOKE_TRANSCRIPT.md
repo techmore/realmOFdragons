@@ -41,7 +41,7 @@ You become Aela at Crossing Town Green.
 > drhelp
 Dragon Realms commands:
 Identity: score, attributes/stats, skills, race, reroll attributes.
-Guilds/Circles: join guild, guild/perks, abilities, focus, technique, train, circle, circle status.
+Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, train, circle, circle status.
 Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.
 
 > room
@@ -51,9 +51,22 @@ Exits lead deeper into Crossing's guildhalls, shops, and hunting paths.
 > n
 You walk north through Crossing.
 
+> registrar
+Barbarian Guild registrar:
+The registrar studies your stance before speaking.
+Primary training: expertise.
+Signature technique: Roar of Readiness.
+You are not registered with a guild.
+Next commands: join guild, guild, train, circle status.
+
 > join guild
 You join the Barbarian Guild.
 Barbarian Guild Circle 1 recognition.
+
+> ask registrar
+Barbarian Guild registrar:
+You are registered here at Circle 1.
+Next commands: train, circle status, circle, abilities, focus, technique.
 
 > guild
 Guild: Barbarian Guild. Circle 1.
@@ -160,6 +173,7 @@ You pick up the dropped item.
 - Account creation: `DRAccountCreationTests`.
 - Race-only unaffiliated Circle 1 starts: `DRAccountCreationTests.test_account_create_character_supports_all_races_as_circle_one_commoners`.
 - Registrar-only guild joining and Circle 10 progression: `DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands`.
+- Registrar guidance: the all-guild command smoke invokes `registrar` and `ask registrar` before and after joining every guild.
 - Guild focus and technique behavior: the all-guild Circle 10 command smoke invokes `focus`, `guild focus`, `technique`, and `guild technique`.
 - Crossing movement: `DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room`.
 - Shops/items/equipment: `DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh` and `test_wield_wear_and_equipment_commands`.

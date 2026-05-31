@@ -36,6 +36,7 @@ Evidence:
 - `DRCommandSmokeTests.test_join_guild_requires_a_registrar_room_command` verifies `join guild` fails outside a registrar.
 - `DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands` joins every guild at its registrar.
 - The all-guild command smoke now asks every registrar for pre-join and post-join in-world guidance with `registrar` / `ask registrar`.
+- Focused help and the generated terminal transcript now expose `registrar`, `focus`, and `technique` in the core guild progression path.
 - `DRCommandSmokeTests.test_joined_characters_cannot_switch_guilds_at_other_registrars` verifies existing guild affiliation cannot be overwritten at another registrar.
 - `DRGuildTests` covers registrar metadata behavior at helper level.
 
@@ -136,6 +137,6 @@ Residual risk:
 
 ## Next recommended work
 
-1. Add a small `help progression` topic summarizing the complete race -> puppet -> registrar -> train -> circle -> hunt/shop loop.
-2. Add live Evennia browser/webclient smoke if tooling is available.
-3. Expand guild-specific Circle 1-10 passive perks beyond `focus` and `technique` into deeper per-guild command behavior.
+1. Add live Evennia browser/webclient smoke if tooling is available.
+2. Expand guild-specific Circle 1-10 passive perks beyond `focus` and `technique` into deeper per-guild command behavior.
+3. Expand beginner content breadth beyond the current clean-room Crossing scaffold.
