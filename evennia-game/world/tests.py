@@ -539,6 +539,12 @@ class DRCommandSmokeTests(TestCase):
                 )
             )
             self.assertIn("Next commands: train", post_join_registrar_text)
+            self.assertIn("passive", post_join_registrar_text)
+            self.assertIn("drill", post_join_registrar_text)
+            self.assertIn("practice", post_join_registrar_text)
+            self.assertIn("rite", post_join_registrar_text)
+            self.assertIn("boon", post_join_registrar_text)
+            self.assertIn("capstone", post_join_registrar_text)
             character.execute_cmd("guild")
             character.execute_cmd("circle status")
             status_text = "\n".join(

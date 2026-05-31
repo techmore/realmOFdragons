@@ -40,6 +40,7 @@ Evidence:
 - `DRCommandSmokeTests.test_join_guild_requires_a_registrar_room_command` verifies `join guild` fails outside a registrar.
 - `DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands` joins every guild at its registrar.
 - The all-guild command smoke now asks every registrar for pre-join and post-join in-world guidance with `registrar` / `ask registrar`.
+- Registrar guidance now advertises the full implemented guild progression command set: `focus`, `technique`, `passive`, `drill`, `practice`, `rite`, `boon`, and `capstone`.
 - Focused help and the generated terminal transcript now expose `registrar`, `focus`, `technique`, `passive`, `drill`, `practice`, `rite`, `boon`, and `capstone` in the core guild progression path.
 - `DRCommandSmokeTests.test_joined_characters_cannot_switch_guilds_at_other_registrars` verifies existing guild affiliation cannot be overwritten at another registrar.
 - `DRGuildTests` covers registrar metadata behavior at helper level.
