@@ -588,6 +588,49 @@ def remove_item(character, item_id):
     return f"You remove {item['name']} from your {source} and pack it."
 
 
+def drop_item(character, item_id):
+    ensure_economy_state(character)
+    item_id = (item_id or "").strip().lower().replace(" ", "_")
+    if not item_id:
+        return "Drop what?"
+    item = ITEMS.get(item_id)
+    if not item:
+        return f'Unknown item "{item_id}".'
+
+    inventory = list(character.db.inventory or [])
+    hands = dict(character.db.hands or {"left": None, "right": None})
+    equipment = dict(character.db.equipment or {"worn": []})
+    worn = list(equipment.get("worn", []))
+    source = None
+    if item_id in inventory:
+        inventory.remove(item_id)
+        source = "pack"
+    elif item_id in worn:
+        worn.remove(item_id)
+        source = "worn gear"
+    else:
+        for hand, held_item_id in hands.items():
+            if held_item_id == item_id:
+                hands[hand] = None
+                source = f"{hand} hand"
+                break
+    if not source:
+        return f"You are not carrying {item['name']}."
+
+    objects = carried_item_objects(character, item_id)
+    if not objects:
+        return f"You cannot find {item['name']} among your carried gear."
+    obj = objects[0]
+    obj.location = character.location
+    obj.home = character.location
+    obj.save()
+    equipment["worn"] = worn
+    character.db.inventory = inventory
+    character.db.hands = hands
+    character.db.equipment = equipment
+    return f"You drop {item['name']} from your {source}."
+
+
 def repair_item(character, item_id):
     ensure_economy_state(character)
     item_id = (item_id or "").strip().lower().replace(" ", "_")

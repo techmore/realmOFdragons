@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added command-first `drop <item>` handling for carried gear, moving item objects back into the room so they can be seen and picked up again.
 - Added `remove` / `stow` / `unwear` / `unwield` equipment handling so worn or held gear can return to pack inventory, with smoke coverage for shield removal and weapon stowing.
 - Added `rest` as a command-first recovery verb for roundtime, damaged health, and incapacitation, with combat smoke coverage.
 - Updated registrar guidance so joined characters see the full implemented guild progression command set: focus, technique, passive, drill, practice, rite, boon, and capstone.

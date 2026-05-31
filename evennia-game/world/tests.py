@@ -10,7 +10,7 @@ from evennia.utils.create import create_account, create_object, create_script
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
-from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item
+from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
@@ -1066,6 +1066,20 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("stow small_blade")
         self.assertEqual(character.db.hands["right"], None)
         self.assertIn("small_blade", character.db.inventory)
+        drop_text = drop_item(character, "small_blade")
+        self.assertIn("Small Practice Blade", drop_text)
+        self.assertNotIn("small_blade", character.db.inventory)
+        self.assertTrue(
+            [
+                obj
+                for obj in character.location.contents
+                if obj.db.object_type == "item" and obj.db.item_id == "small_blade"
+            ]
+        )
+        character.execute_cmd("get small_blade")
+        self.assertIn("small_blade", character.db.inventory)
+        character.execute_cmd("drop small_blade")
+        self.assertNotIn("small_blade", character.db.inventory)
 
     def test_economy_equipment_and_fieldcraft_persist_after_reload(self):
         character = self.make_character("Economy Persistence Smoke")
