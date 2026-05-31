@@ -75,6 +75,39 @@ def scan_room(room):
     return "\n".join(lines)
 
 
+def appraise_enemy(character, requested_enemy=""):
+    """Return a command-first enemy readout for scan/target/combat decisions."""
+
+    ensure_engagement(character)
+    requested_enemy = (requested_enemy or "").strip().lower()
+    engagement = dict(character.db.engagement or {})
+    enemy_id = requested_enemy
+    if requested_enemy in ("", "target", "enemy"):
+        enemy_id = engagement.get("target")
+    if not enemy_id:
+        return "Appraise what? Use `appraise <enemy id>` or target an enemy first."
+
+    enemy = ENEMIES.get(enemy_id)
+    enemy_obj = find_enemy_object(character.location, enemy_id)
+    if not enemy or not enemy_obj:
+        return f'You do not see "{enemy_id}" here.'
+
+    current_vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 0) or 0)
+    max_vitality = int(enemy.get("vitality", current_vitality) or current_vitality)
+    range_band = engagement.get("range") if engagement.get("target") == enemy_id else "unengaged"
+    loot = enemy.get("loot", {})
+    loot_items = ", ".join(loot.get("items", ()) or ()) or "none"
+    return "\n".join(
+        [
+            f"{enemy['name']} ({enemy_id})",
+            f"Vitality: {current_vitality}/{max_vitality}. Aggression: {enemy['aggression']}.",
+            f"Range: {range_band}.",
+            f"Loot signs: {int(loot.get('trias', 0) or 0)} trias, items: {loot_items}.",
+            enemy["description"],
+        ]
+    )
+
+
 def create_enemy(room, enemy_id):
     enemy = ENEMIES[enemy_id]
     enemy_obj = create_object(

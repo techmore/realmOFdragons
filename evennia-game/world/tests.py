@@ -342,11 +342,13 @@ class DRCommandSmokeTests(TestCase):
         self.walk_to_room(character, "crossing-RV02-002")
 
         character.execute_cmd("scan")
+        character.execute_cmd("appraise rv-wolf-cub")
         character.execute_cmd("target rv-wolf-cub")
         self.assertEqual(character.db.engagement["target"], "rv-wolf-cub")
         self.assertEqual(character.db.engagement["range"], "missile")
         self.assertEqual(len(combat_pressure_scripts(character)), 1)
 
+        character.execute_cmd("appraise target")
         character.execute_cmd("range")
         character.execute_cmd("advance")
         self.assertEqual(character.db.engagement["range"], "pole")

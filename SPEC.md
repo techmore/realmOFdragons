@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added command-first combat appraisal with `appraise <enemy id>`, `appraise target`, and `assess` alias for enemy vitality, aggression, range, loot signs, and description.
+- Extended combat movement smoke to appraise visible and targeted enemies while preserving existing scan/target/range/advance/retreat behavior.
 - Added text-first `guild`, `perks`, and `milestones` commands for inspecting guild identity and unlocked Circle milestones.
 - Added all-guild command smoke that checks guild milestone display immediately after joining and again at Circle 10.
 - Added clean-room guild Circle 1-10 milestone data for every canonical guild and surfaced the current milestone in `circle` status.
