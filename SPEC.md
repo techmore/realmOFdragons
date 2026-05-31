@@ -879,6 +879,18 @@ Next priority:
 
 - Expand beginner hunting-room text feedback around enemy difficulty, engagement range, and safe recovery commands.
 
+Implementation Notes - 2026-05-31, Evennia Focused Command Help
+
+Completed in the Evennia runtime:
+
+- Added focused `help room`, `help scan`, `help targets`, `help target`, and `help combat` branches to the DR command help.
+- Help now explains text movement aliases, scan/appraise target discovery, range-band engagement, melee attack gating, roundtime recovery, stance, flee, and revive commands.
+- Added smoke coverage for the focused help topics so command-first discovery stays available without browser/UI controls.
+
+Next priority:
+
+- Add richer enemy difficulty labels and suggested next commands directly to `scan`, `appraise`, and combat prompt output.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:

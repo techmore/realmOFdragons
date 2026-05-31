@@ -39,8 +39,48 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.",
         "Shops: shop, shop talk, shop stock, shop refresh, buy <item>, sell <item>, inventory, hands, equipment.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, revive/stand.",
+        "Focused help: help room, help scan, help targets, help combat.",
     ]
 )
+
+CHARACTER_HELP_TOPICS = {
+    "room": "\n".join(
+        [
+            "Room and movement help:",
+            "room / exits / where - show the current room, room ID, exits, guild/shop markers, enemies, and visible objects.",
+            "Move with full directions or classic aliases: n, s, e, w, ne, nw, se, sw, u, d.",
+            "Guilds are joined in-world at registrar rooms; shops and hunting rooms are discovered by walking Crossing.",
+        ]
+    ),
+    "scan": "\n".join(
+        [
+            "Scan help:",
+            "scan - list enemies in the current room.",
+            "Each scan entry shows the enemy id and aggression so you can decide what to target.",
+            "Use appraise <enemy id> for vitality, aggression, current range, loot signs, and description.",
+        ]
+    ),
+    "targets": "\n".join(
+        [
+            "Target help:",
+            "target <enemy id> - begin an engagement at missile range.",
+            "range - show your current engagement range.",
+            "advance - move from missile to pole to melee range.",
+            "retreat - move back through range bands; retreat from missile breaks engagement.",
+        ]
+    ),
+    "combat": "\n".join(
+        [
+            "Combat help:",
+            "combat / prompt - show health, balance, roundtime, stance, condition, target, range, and enemy vitality.",
+            "jab / attack - quick melee maneuver using Small Edged and agility.",
+            "bash - heavier melee maneuver using Brawling and strength.",
+            "defend - defensive stance and balance recovery. flee - break engagement with recovery time.",
+            "wait / recover - tick roundtime down. revive / stand - recover from incapacitation in smoke-test form.",
+        ]
+    ),
+}
+CHARACTER_HELP_TOPICS["target"] = CHARACTER_HELP_TOPICS["targets"]
 
 
 class CmdDRAccountHelp(Command):
@@ -294,6 +334,14 @@ class CmdDRHelp(Command):
     help_category = "Dragon Realms"
 
     def func(self):
+        topic = self.args.strip().lower()
+        if topic in CHARACTER_HELP_TOPICS:
+            self.caller.msg(CHARACTER_HELP_TOPICS[topic])
+            return
+        if topic:
+            known = ", ".join(sorted(CHARACTER_HELP_TOPICS))
+            self.caller.msg(f'Unknown help topic "{topic}". Known topics: {known}.')
+            return
         self.caller.msg(CHARACTER_HELP_TEXT)
 
 

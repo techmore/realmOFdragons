@@ -285,6 +285,16 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("scan")
         self.assertEqual(character.location.db.targets, ("rv-wolf-cub",))
 
+    def test_focused_text_help_topics_cover_movement_and_combat(self):
+        character = self.make_character("Focused Help Smoke")
+        character.execute_cmd("drhelp")
+        character.execute_cmd("help room")
+        character.execute_cmd("help scan")
+        character.execute_cmd("help targets")
+        character.execute_cmd("help target")
+        character.execute_cmd("help combat")
+        character.execute_cmd("help unknown-topic")
+
     def prepare_circle_two_requirements(self, character):
         primary = primary_skill_for_guild(character.db.guild_id)
         character.db.skills[primary]["rank"] = 4
