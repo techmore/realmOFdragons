@@ -22,6 +22,7 @@ Evidence:
 - `DRDataTests.test_canonical_race_count` verifies 11 canonical races.
 - `DRAccountCreationTests.test_account_create_character_supports_all_races_as_circle_one_commoners` creates one account-side character for every race through `create character <name> = <race>`.
 - `DRAccountCreationTests.test_account_created_character_persists_core_start_state_after_reload` reloads the Evennia character object from the database and verifies race, attributes, unaffiliated Circle 1 guild state, Crossing location, roster membership, starter skills, and wallet state persist.
+- `DRAccountCreationTests.test_joined_character_progression_persists_after_reload` verifies a created character can join Barbarian Guild, train, advance to Circle 2, and reload with guild, Circle, registrar location, perks, and trained Expertise intact.
 - The all-race smoke verifies race id, race display name, race-derived attributes, `creation_complete`, `commoner` guild state, Circle 1 state, and Crossing start-room placement.
 
 Residual risk:
@@ -150,7 +151,7 @@ Residual risk:
 - Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, distinct `technique` support-skill behavior, registrar-gated `drill` and `practice`, and once-per-Circle persistent `boon` rewards, but these are clean-room mechanics rather than full original guild ability systems.
 - Study/read now gives non-combat Scholarship progress in study halls and reinforces guild primary learning at a character's own registrar.
 - Browser webclient parity: command-first runtime is Evennia-backed, a generated terminal-style transcript exists, and the Evennia `/webclient/` route/render path is smoke-tested; full live-browser login/playthrough polish may still live in the legacy frontend.
-- Persistence/security hardening: Evennia account creation now has database reload smoke for core start state, but this audit did not do a broader security review beyond command behavior.
+- Persistence/security hardening: Evennia account creation and early guild progression now have database reload smoke for core state, but this audit did not do a broader security review beyond command behavior.
 
 ## Next recommended work
 

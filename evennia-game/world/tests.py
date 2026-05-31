@@ -126,6 +126,28 @@ class DRAccountCreationTests(TestCase):
         self.assertIn("athletics", reloaded.db.skills)
         self.assertEqual(reloaded.db.wallet["trias"], 100)
 
+    def test_joined_character_progression_persists_after_reload(self):
+        account = create_account("ProgressionPersistenceAccount", None, "test-password")
+        account.execute_cmd("create character Persist Brin = human")
+        character = next(character for character in account.characters.all() if character.key == "Persist Brin")
+        registrar = find_built_room(guild_registrar_rooms()["barbarian"])
+        character.move_to(registrar, quiet=True)
+        character.execute_cmd("join guild")
+        for _ in range(30):
+            character.execute_cmd("train")
+        character.execute_cmd("circle")
+        self.assertEqual(character.db.guild_id, "barbarian")
+        self.assertEqual(character.db.circle, 2)
+
+        reloaded = ObjectDB.objects.get(id=character.id)
+        self.assertEqual(reloaded.db.guild_id, "barbarian")
+        self.assertEqual(reloaded.db.guild_name, GUILDS["barbarian"])
+        self.assertEqual(reloaded.db.circle, 2)
+        self.assertEqual(reloaded.location.db.dr_room_id, guild_registrar_rooms()["barbarian"])
+        self.assertEqual(reloaded.db.guild_perks, unlocked_guild_perks("barbarian", 2))
+        self.assertGreaterEqual(reloaded.db.skills["expertise"]["rank"], 4)
+        self.assertIn("Persist Brin: Human, Barbarian Guild, Circle 2", account_roster_text(account))
+
 
 class DRDataTests(SimpleTestCase):
     def test_canonical_race_count(self):
