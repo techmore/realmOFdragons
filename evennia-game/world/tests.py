@@ -10,7 +10,7 @@ from evennia.utils.create import create_account, create_object, create_script
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
-from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, forage_room, format_shop, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item
+from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
@@ -1026,6 +1026,13 @@ class DRCommandSmokeTests(TestCase):
                 if obj.db.object_type == "item" and obj.db.item_id == "small_blade"
             ]
         )
+        stow_text = remove_item(character, "small_blade")
+        self.assertIn("pack it", stow_text)
+        self.assertEqual(character.db.hands["right"], None)
+        self.assertIn("small_blade", character.db.inventory)
+        character.execute_cmd("wield small_blade")
+        self.assertEqual(character.db.hands["right"], "small_blade")
+        self.assertNotIn("small_blade", character.db.inventory)
 
         character.execute_cmd("buy leather_shield")
         self.assertEqual(character.db.hands["left"], "leather_shield")
@@ -1049,6 +1056,16 @@ class DRCommandSmokeTests(TestCase):
         self.assertGreater(character.db.skills["light_armor"]["pool"], armor_before)
         character.execute_cmd("equipment")
         character.execute_cmd("repair leather_shield")
+        character.execute_cmd("remove leather_shield")
+        self.assertNotIn("leather_shield", character.db.equipment["worn"])
+        self.assertIn("leather_shield", character.db.inventory)
+        self.assertEqual(character.db.equipment_condition["leather_shield"], "maintained")
+        character.execute_cmd("wear leather_shield")
+        self.assertIn("leather_shield", character.db.equipment["worn"])
+        self.assertNotIn("leather_shield", character.db.inventory)
+        character.execute_cmd("stow small_blade")
+        self.assertEqual(character.db.hands["right"], None)
+        self.assertIn("small_blade", character.db.inventory)
 
     def test_economy_equipment_and_fieldcraft_persist_after_reload(self):
         character = self.make_character("Economy Persistence Smoke")
