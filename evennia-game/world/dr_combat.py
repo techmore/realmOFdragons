@@ -423,6 +423,7 @@ def create_corpse(room, enemy_id, enemy):
     )
     corpse.db.enemy_id = enemy_id
     corpse.db.enemy_name = enemy["name"]
+    corpse.db.skinned = False
     corpse.db.loot_trias = int(loot.get("trias", 0) or 0)
     corpse.db.loot_items = tuple(loot.get("items", ()) or ())
     corpse.db.desc = f"The remains of {enemy['name']} lie here."
@@ -475,6 +476,34 @@ def loot_corpse(character):
     if not parts:
         return "You search the corpse but find no usable loot."
     return "You loot " + " and ".join(parts) + " from the corpse."
+
+
+def skin_corpse(character):
+    corpses = corpse_objects(character.location)
+    if not corpses:
+        return "There is no corpse here to skin."
+    corpse = corpses[0]
+    if corpse.db.skinned:
+        return f"The {corpse.db.enemy_name or 'corpse'} has already been skinned."
+    pelt = ITEMS["rough_pelt"]
+    pelt_obj = create_object(
+        "typeclasses.objects.Item",
+        key=pelt["name"],
+        location=character.location,
+        home=character.location,
+    )
+    pelt_obj.db.item_id = "rough_pelt"
+    pelt_obj.db.desc = pelt["description"]
+    pelt_obj.save()
+    corpse.db.skinned = True
+    skills = character.db.skills or build_starter_skills()
+    events = apply_skill_pool_gain(skills, "skinning", 3)
+    events.extend(apply_skill_pool_gain(skills, "outdoorsmanship", 1))
+    character.db.skills = skills
+    lines = [f"You skin the {corpse.db.enemy_name or 'corpse'} and prepare a rough_pelt."]
+    lines.extend(events)
+    lines.append("Suggested next command: get rough_pelt or loot corpse.")
+    return "\n".join(lines)
 
 
 def loot_preview(enemy):

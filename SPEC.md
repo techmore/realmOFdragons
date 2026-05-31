@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `skin corpse` as a post-combat hunting action that prepares a `rough_pelt`, marks corpses skinned, and trains Skinning plus Outdoorsmanship.
+- Added smoke coverage proving corpse skinning creates a physical pelt, prevents duplicate skinning, supports pickup, and feeds hunting-skill progression.
 - Updated the generated Evennia smoke transcript to include the Reed-Choked Culvert, Culvert Cache, and Reed Snake beginner path.
 - Added the Reed-Choked Culvert as another beginner Crossing hunting room branching from Muddy Beetle Bend.
 - Added the Reed Snake enemy template and a Culvert Cache supply counter, expanding all-room movement, all-shop, and all-enemy smoke coverage through existing Evennia tests.

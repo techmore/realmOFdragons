@@ -51,6 +51,13 @@ ITEMS = {
         "slot": "pack",
         "description": "A clean cloth wrap packed for quick field treatment.",
     },
+    "rough_pelt": {
+        "name": "Rough Pelt",
+        "price": 0,
+        "sell": 6,
+        "slot": "pack",
+        "description": "A rough beginner pelt cleaned enough for a shop counter.",
+    },
 }
 
 SHOPS = {

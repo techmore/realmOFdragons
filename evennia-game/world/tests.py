@@ -7,7 +7,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
+from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room, skin_corpse
 from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -813,6 +813,7 @@ class DRCommandSmokeTests(TestCase):
     def test_shop_data_has_stock_and_dialogue(self):
         self.assertGreaterEqual(len(SHOPS), 4)
         self.assertIn("field_bandage", ITEMS)
+        self.assertIn("rough_pelt", ITEMS)
         self.assertEqual(SHOPS["crossing-RV02-006"]["stock"][0], "field_bandage")
         self.assertIn("crossing-RV02-007", SHOPS)
         self.assertEqual(SHOPS["crossing-RV02-007"]["stock"][0], "field_bandage")
@@ -980,29 +981,53 @@ class DRCommandSmokeTests(TestCase):
                 if obj.db.object_type == "item" and obj.db.item_id == "torch"
             ]
         )
-        self.assertFalse(
+
+    def test_skin_corpse_creates_pelt_and_trains_hunting_skills(self):
+        character = self.make_character("Skinning Smoke")
+        self.walk_to_room(character, "crossing-RV02-005")
+        character.execute_cmd("target rv-ridge-hare")
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
+        character.execute_cmd("bash")
+        character.execute_cmd("defend")
+        character.execute_cmd("bash")
+        corpses = corpse_objects(character.location)
+        self.assertEqual(len(corpses), 1)
+        skinning_before = character.db.skills["skinning"]["pool"]
+        outdoors_before = character.db.skills["outdoorsmanship"]["pool"]
+        skin_text = skin_corpse(character)
+        self.assertIn("rough_pelt", skin_text)
+        self.assertTrue(corpses[0].db.skinned)
+        self.assertGreater(character.db.skills["skinning"]["pool"], skinning_before)
+        self.assertGreater(character.db.skills["outdoorsmanship"]["pool"], outdoors_before)
+        self.assertTrue(
             [
                 obj
                 for obj in character.location.contents
-                if obj.db.object_type == "item" and obj.db.item_id == "torch"
+                if obj.db.object_type == "item" and obj.db.item_id == "rough_pelt"
             ]
         )
+        self.assertIn("already been skinned", skin_corpse(character))
+        character.execute_cmd("skin corpse")
+        character.execute_cmd("get rough_pelt")
+        self.assertIn("rough_pelt", character.db.inventory)
+        character.execute_cmd("loot corpse")
         self.assertEqual(corpse_objects(character.location), [])
         self.assertFalse(
             [
                 obj
                 for obj in character.location.contents
-                if obj.db.npc_type == "enemy" and obj.db.enemy_id == "rv-mud-beetle"
+                if obj.db.npc_type == "enemy" and obj.db.enemy_id == "rv-ridge-hare"
             ]
         )
         self.assertEqual(room_enemy_ids(character.location), ())
         character.execute_cmd("scan")
 
         result = respawn_room_enemies(character.location)
-        self.assertIn("Respawned: Mud Beetle.", result)
-        self.assertEqual(room_enemy_ids(character.location), ("rv-mud-beetle",))
-        character.execute_cmd("target rv-mud-beetle")
-        self.assertEqual(character.db.engagement["target"], "rv-mud-beetle")
+        self.assertIn("Respawned: Ridge Hare.", result)
+        self.assertEqual(room_enemy_ids(character.location), ("rv-ridge-hare",))
+        character.execute_cmd("target rv-ridge-hare")
+        self.assertEqual(character.db.engagement["target"], "rv-ridge-hare")
         self.assertEqual(len(combat_pressure_scripts(character)), 1)
 
     def test_race_attributes_and_weapon_skill_modify_combat_damage(self):
