@@ -308,6 +308,9 @@ def maneuver_status_text(character):
 
 
 def retaliation_damage(character):
+    if character.db.balance == "dodging":
+        character.db.balance = "balanced"
+        return 0
     stance_name = character.db.stance or "balanced"
     if stance_name == "defensive":
         return 1
@@ -347,6 +350,8 @@ def apply_combat_skill_gain(character, skill_id):
 
 def apply_enemy_retaliation(character, enemy):
     damage = retaliation_damage(character)
+    if damage <= 0:
+        return f"You dodge {enemy['name']}'s pressure and avoid the hit."
     health = max(0, int(character.db.health or 0) - damage)
     character.db.health = health
     if damage >= 2:
@@ -842,6 +847,28 @@ def defend(character):
     character.db.balance = "balanced"
     character.db.roundtime = 0
     return "You set your feet, raise your guard, and recover your balance."
+
+
+def dodge(character):
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot dodge."
+    if int(character.db.roundtime or 0) > 0:
+        return f"You are still recovering for {character.db.roundtime} pulse."
+    engagement = dict(character.db.engagement or {})
+    if not engagement.get("target"):
+        return "Dodge what? Target an enemy first."
+    character.db.stance = "defensive"
+    character.db.balance = "dodging"
+    character.db.roundtime = 1
+    ensure_recovery(character)
+    skill_events = apply_combat_skill_gain(character, "evasion")
+    lines = [
+        "You shift into motion, ready to dodge the next close press.",
+        *skill_events,
+        "The next enemy pressure against you is reduced if it reaches you.",
+    ]
+    return "\n".join(lines)
 
 
 def flee(character):

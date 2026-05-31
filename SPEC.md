@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `dodge` / `evade` as a defensive combat maneuver that trains Evasion plus Tactics, sets a dodging balance state, and reduces the next close enemy pressure.
 - Added `aim` / `steady` as a ranged combat setup command that marks the next missile/pole `hurl` for bonus damage, consumes the aim state, and surfaces aimed status in combat/range feedback.
 - Added `hurl` / `throw` / `lob` as a ranged combat maneuver from missile or pole range, training Light Thrown plus Tactics and preserving melee-only restrictions for close attacks.
 - Added `guild history` / `renown` / `rewards` as a command-first Circle ledger showing earned milestones, milestone skills, and claimed/unclaimed boon and capstone rewards with all-guild Circle 10 smoke coverage.
