@@ -2,6 +2,8 @@
 Identity helpers for the Evennia Dragon Realms migration.
 """
 
+from random import Random
+
 from world.dr_data import RACES, build_starter_attributes
 
 
@@ -56,3 +58,23 @@ def choose_race(character_state, requested_race):
     character_state["guild_name"] = "Unaffiliated"
     character_state["circle"] = 1
     return {"changed": True, "events": [f"You are now recorded as {RACES[race_id]}."]}
+
+
+def roll_race_attributes(race_id, seed=None):
+    """Roll original-style starting attribute variation around a race baseline."""
+
+    base = build_starter_attributes(race_id)
+    roller = Random(seed)
+    return {attribute: max(1, value + roller.randint(-2, 2)) for attribute, value in base.items()}
+
+
+def reroll_attributes(character_state, seed=None):
+    """Reroll race attributes before guild joining or Circle advancement."""
+
+    race_id = character_state.get("race")
+    if not race_id:
+        return {"changed": False, "events": ["Choose a race before rerolling attributes."]}
+    if character_state.get("guild_id", "commoner") != "commoner" or int(character_state.get("circle") or 1) != 1:
+        return {"changed": False, "events": ["Attributes can only be rerolled before joining a guild and before advancing beyond Circle 1."]}
+    character_state["attributes"] = roll_race_attributes(race_id, seed=seed)
+    return {"changed": True, "events": [f"You reroll your {RACES.get(race_id, race_id)} starting attributes."]}

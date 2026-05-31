@@ -12,7 +12,7 @@ from world.dr_data import ATTRIBUTES, RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import advance, bash, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, scan_room, stance, target_enemy, wait_recover
 from world.dr_economy import buy_item, equipment_text, format_shop, get_item, hands_text, inventory_text, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
-from world.dr_identity import choose_race, normalize_race_token
+from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, train_skill
 from world.dr_world import START_ROOM_ID, build_crossing_world, find_built_room
 
@@ -161,6 +161,41 @@ class CmdDRAttributes(Command):
         for attribute_id in ATTRIBUTES:
             lines.append(f"{attribute_id}: {attributes.get(attribute_id, 0)}")
         character.msg("\n".join(lines))
+
+
+class CmdDRRerollAttributes(Command):
+    """
+    Reroll race-derived starting attributes before joining a guild.
+
+    Usage:
+      reroll attributes
+      reroll attributes <seed>
+
+    The optional seed is mainly for repeatable smoke tests.
+    """
+
+    key = "reroll"
+    aliases = ["roll attributes", "reroll attributes", "roll stats"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        args = self.args.strip()
+        if args.startswith("attributes"):
+            args = args[len("attributes") :].strip()
+        if args.startswith("stats"):
+            args = args[len("stats") :].strip()
+        state = {
+            "race": character.db.race,
+            "attributes": character.db.attributes or {},
+            "guild_id": character.db.guild_id or "commoner",
+            "circle": character.db.circle or 1,
+        }
+        result = reroll_attributes(state, seed=args or None)
+        if result["changed"]:
+            character.db.attributes = state["attributes"]
+        character.msg("\n".join(result["events"]))
 
 
 class CmdDRSkills(Command):

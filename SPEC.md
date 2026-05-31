@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added original-style pre-guild attribute reroll support with `reroll attributes`, `reroll attributes <seed>`, and aliases for `roll attributes` / `roll stats`.
+- Attribute rerolls vary the selected race baseline by a small deterministic range for tests and are blocked after guild joining or Circle advancement.
+- Added smoke/unit coverage for seeded race rerolls, command-level rerolling before guild joining, and reroll rejection after guild affiliation.
 - Added text-first `attributes`, `stats`, and `stat <attribute>` commands so players can inspect race-derived stats directly from the MUD command interface.
 - Wired the attribute command into the Evennia character command set and smoke coverage for newly created characters.
 - Combat damage now derives from character attributes and weapon skill rank: `jab` uses agility plus Small Edged, while `bash` uses strength plus Brawling.

@@ -9,7 +9,7 @@ from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, bu
 from world.dr_combat import ENEMIES, combat_pressure_scripts, corpse_objects, respawn_room_enemies, room_enemy_ids
 from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
-from world.dr_identity import choose_race, normalize_race_token
+from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import advance_circle, primary_skill_for_guild, resolve_skill_id, train_skill
 from world.dr_world import ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
 
@@ -245,6 +245,8 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("score")
         character.execute_cmd("attributes")
         character.execute_cmd("stat agility")
+        character.execute_cmd("reroll attributes smoke")
+        self.assertNotEqual(character.db.attributes, RACE_STARTING_ATTRIBUTES["elf"])
         character.execute_cmd("join guild")
         self.assertEqual(character.db.guild_id, "barbarian")
 
@@ -659,3 +661,18 @@ class DRIdentityTests(SimpleTestCase):
         result = choose_race(state, "elf")
         self.assertFalse(result["changed"])
         self.assertIn("Race can only be chosen before joining a guild", result["events"][0])
+
+    def test_race_attribute_reroll_is_seeded_and_pre_guild_only(self):
+        first = roll_race_attributes("elf", seed="smoke")
+        second = roll_race_attributes("elf", seed="smoke")
+        self.assertEqual(first, second)
+        self.assertNotEqual(first, RACE_STARTING_ATTRIBUTES["elf"])
+
+        state = {"race": "elf", "guild_id": "commoner", "circle": 1, "attributes": RACE_STARTING_ATTRIBUTES["elf"]}
+        result = reroll_attributes(state, seed="smoke")
+        self.assertTrue(result["changed"])
+        self.assertEqual(state["attributes"], first)
+
+        state["guild_id"] = "barbarian"
+        result = reroll_attributes(state, seed="again")
+        self.assertFalse(result["changed"])
