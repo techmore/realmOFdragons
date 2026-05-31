@@ -62,6 +62,7 @@ Evidence:
 - `DRCommandSmokeTests.test_circle_requires_own_guild_registrar_room_command` verifies circling is registrar-gated.
 - `DRCommandSmokeTests.test_joined_training_requires_own_guild_registrar_room_command` verifies training is own-registrar-gated.
 - `DRCommandSmokeTests.test_circle_status_guides_unaffiliated_and_ready_characters` verifies status guidance for unaffiliated and ready-to-circle states.
+- `DRCommandSmokeTests.test_circle_ten_status_guides_unclaimed_boon_and_capstone` verifies capped characters are guided to claim unclaimed Circle 10 boon and capstone rewards before generic post-cap activities.
 
 Residual risk:
 - Requirements and ability themes are clean-room/prototype requirements, not a full recreation of every original guild-specific DR requirement.

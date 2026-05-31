@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Updated Circle 10 status guidance so capped guild characters are directed to unclaimed `boon` and `capstone` rewards before generic post-cap activities.
 - Added the Ruined Lockworks south of the Flooded Towpath with a Lockwork Crab enemy, dry-box shop, forage support, and smoke assertions.
 - Added Circle 10 `capstone` / `guild capstone` registrar rewards for every guild, with all-guild smoke proving distinct skill gains and reload-persistent capstone records.
 - Added account reload smoke proving roster membership and roster text persist after character creation and after Barbarian Circle 2 progression.

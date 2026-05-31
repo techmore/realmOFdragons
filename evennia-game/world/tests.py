@@ -637,6 +637,8 @@ class DRCommandSmokeTests(TestCase):
                         "guild_name": character.db.guild_name,
                         "circle": character.db.circle,
                         "skills": character.db.skills,
+                        "guild_boons": character.db.guild_boons,
+                        "guild_capstones": character.db.guild_capstones,
                         "room_guild_id": character.location.db.guild,
                     }
                 )
@@ -644,6 +646,25 @@ class DRCommandSmokeTests(TestCase):
             self.assertIn("Circle 10 is the current supported cap", capped_status_text)
             self.assertIn("Next step: continue training skills", capped_status_text)
             self.assertEqual(character.db.circle, 10)
+
+    def test_circle_ten_status_guides_unclaimed_boon_and_capstone(self):
+        state = {
+            "guild_id": "barbarian",
+            "guild_name": GUILDS["barbarian"],
+            "circle": 10,
+            "skills": build_starter_skills(),
+            "room_guild_id": "barbarian",
+            "guild_boons": [],
+            "guild_capstones": [],
+        }
+        boon_status = "\n".join(circle_status(state))
+        self.assertIn("Next step: stand before your guild registrar and use `boon`.", boon_status)
+        state["guild_boons"] = ["barbarian:10"]
+        capstone_status = "\n".join(circle_status(state))
+        self.assertIn("Next step: stand before your guild registrar and use `capstone`.", capstone_status)
+        state["guild_capstones"] = ["barbarian:10"]
+        done_status = "\n".join(circle_status(state))
+        self.assertIn("Next step: continue training skills", done_status)
 
     def test_circle_status_guides_unaffiliated_and_ready_characters(self):
         character = self.make_character("Circle Guidance Smoke")

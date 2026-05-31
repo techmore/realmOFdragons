@@ -989,6 +989,8 @@ class CmdDRCircle(Command):
             "circle": character.db.circle or 1,
             "skills": character.db.skills or build_starter_skills(),
             "guild_perks": character.db.guild_perks or [],
+            "guild_boons": character.db.guild_boons or [],
+            "guild_capstones": character.db.guild_capstones or [],
             "room_guild_id": character.location.db.guild if character.location else None,
         }
         if self.args.strip().lower() in ("status", "check", "requirements", "reqs"):

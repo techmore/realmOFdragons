@@ -512,12 +512,22 @@ def circle_status(character_state):
     room_guild_id = character_state.get("room_guild_id")
     location_hint = f"Registrar: {registrar_room_id}." if registrar_room_id else "Registrar: unknown."
     if circle >= MAX_SUPPORTED_CIRCLE:
+        boon_key = f"{guild_id}:{MAX_SUPPORTED_CIRCLE}"
+        capstone_key = f"{guild_id}:{MAX_SUPPORTED_CIRCLE}"
+        claimed_boons = set(character_state.get("guild_boons") or [])
+        claimed_capstones = set(character_state.get("guild_capstones") or [])
+        if boon_key not in claimed_boons:
+            next_step = "Next step: stand before your guild registrar and use `boon`."
+        elif capstone_key not in claimed_capstones:
+            next_step = "Next step: stand before your guild registrar and use `capstone`."
+        else:
+            next_step = "Next step: continue training skills or test Crossing shops and hunting rooms."
         return [
             f"You are Circle {circle} in {guild_name}.",
             f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported cap for this Evennia port.",
             f"Current milestone: {guild_circle_perk(guild_id, circle)}.",
             location_hint,
-            "Next step: continue training skills or test Crossing shops and hunting rooms.",
+            next_step,
         ]
     requirement = next_circle_requirement(circle)
     primary_skill_id = primary_skill_for_guild(guild_id)
