@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Circle advancement now requires standing at the character's own guild registrar room; non-registrar rooms and other guild registrars report clear command feedback.
+- Added command smoke proving a Barbarian cannot circle from Town Green or a Bard registrar, then can advance at the Barbarian registrar.
+- Added progression unit coverage for missing and mismatched registrar metadata during Circle advancement.
 - Added text-first `combat` / `prompt` status command summarizing health, balance, roundtime, stance, engagement range, and enemy vitality.
 - Extended combat movement smoke to display combat prompt state during and after engagement.
 - Added command-first combat appraisal with `appraise <enemy id>`, `appraise target`, and `assess` alias for enemy vitality, aggression, range, loot signs, and description.

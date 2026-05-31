@@ -138,12 +138,30 @@ def can_circle(character_state):
     return total_skill_ranks(skills) >= requirement["total_ranks"] and int(primary.get("rank", 0)) >= requirement["primary_rank"]
 
 
+def circle_location_error(character_state):
+    """Return an error if the character is not at their own guild registrar."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    if guild_id == "commoner":
+        return ""
+    room_guild_id = character_state.get("room_guild_id")
+    if not room_guild_id:
+        return "You must stand before your guild registrar to advance circles."
+    if room_guild_id != guild_id:
+        return "This registrar cannot advance your guild."
+    return ""
+
+
 def advance_circle(character_state):
     """Advance one Circle if possible and return output events."""
 
     events = circle_status(character_state)
     if character_state.get("guild_id") == "commoner":
         events.append("You need to join a guild before you can advance circles.")
+        return events
+    location_error = circle_location_error(character_state)
+    if location_error:
+        events.append(location_error)
         return events
     if can_circle(character_state):
         character_state["circle"] = int(character_state.get("circle") or 1) + 1

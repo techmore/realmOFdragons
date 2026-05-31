@@ -429,6 +429,7 @@ class CmdDRCircle(Command):
             "circle": character.db.circle or 1,
             "skills": character.db.skills or build_starter_skills(),
             "guild_perks": character.db.guild_perks or [],
+            "room_guild_id": character.location.db.guild if character.location else None,
         }
         events = advance_circle(state)
         character.db.circle = state["circle"]

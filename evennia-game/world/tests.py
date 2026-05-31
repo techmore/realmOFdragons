@@ -214,6 +214,11 @@ class DRCommandSmokeTests(TestCase):
             f"{character.key} did not reach Circle {target_circle}",
         )
 
+    def prepare_circle_two_requirements(self, character):
+        primary = primary_skill_for_guild(character.db.guild_id)
+        character.db.skills[primary]["rank"] = 4
+        character.db.skills["athletics"]["rank"] = 2
+
     def test_join_guild_requires_a_registrar_room_command(self):
         character = self.make_character("Registrar Gate Smoke")
         character.execute_cmd("join guild")
@@ -267,6 +272,26 @@ class DRCommandSmokeTests(TestCase):
             self.assertEqual(len(character.db.guild_perks), 10)
             self.assertEqual(character.db.guild_perks[-1], guild_circle_perk(guild_id, 10))
             character.execute_cmd("perks")
+
+    def test_circle_requires_own_guild_registrar_room_command(self):
+        registrars = guild_registrar_rooms()
+        character = self.make_character("Circle Registrar Smoke")
+        self.walk_to_room(character, registrars["barbarian"])
+        character.execute_cmd("join guild")
+        self.prepare_circle_two_requirements(character)
+
+        town_green = find_built_room(START_ROOM_ID)
+        character.move_to(town_green, quiet=True)
+        character.execute_cmd("circle")
+        self.assertEqual(character.db.circle, 1)
+
+        self.walk_to_room(character, registrars["bard"])
+        character.execute_cmd("circle")
+        self.assertEqual(character.db.circle, 1)
+
+        self.walk_to_room(character, registrars["barbarian"])
+        character.execute_cmd("circle")
+        self.assertEqual(character.db.circle, 2)
 
     def test_shop_buy_sell_inventory_and_hands_commands(self):
         character = self.make_character("Economy Smoke")
@@ -630,12 +655,25 @@ class DRProgressionTests(SimpleTestCase):
         skills = build_starter_skills()
         skills["expertise"]["rank"] = 4
         skills["athletics"]["rank"] = 2
-        state = {"guild_id": "barbarian", "guild_name": "Barbarian Guild", "circle": 1, "skills": skills}
+        state = {"guild_id": "barbarian", "guild_name": "Barbarian Guild", "circle": 1, "skills": skills, "room_guild_id": "barbarian"}
         events = advance_circle(state)
         self.assertIn("You advance to Circle 2.", events)
         self.assertIn("Milestone unlocked: Barbarian Guild Circle 2 recognition.", events)
         self.assertEqual(state["circle"], 2)
         self.assertEqual(state["guild_perks"], unlocked_guild_perks("barbarian", 2))
+
+    def test_circle_requires_matching_guild_registrar_metadata(self):
+        skills = build_starter_skills()
+        skills["expertise"]["rank"] = 4
+        skills["athletics"]["rank"] = 2
+        state = {"guild_id": "barbarian", "guild_name": "Barbarian Guild", "circle": 1, "skills": skills, "room_guild_id": None}
+        events = advance_circle(state)
+        self.assertIn("You must stand before your guild registrar to advance circles.", events)
+        self.assertEqual(state["circle"], 1)
+        state["room_guild_id"] = "bard"
+        events = advance_circle(state)
+        self.assertIn("This registrar cannot advance your guild.", events)
+        self.assertEqual(state["circle"], 1)
 
 
 class DRIdentityTests(SimpleTestCase):
