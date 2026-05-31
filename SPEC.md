@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added text-first `guild`, `perks`, and `milestones` commands for inspecting guild identity and unlocked Circle milestones.
+- Added all-guild command smoke that checks guild milestone display immediately after joining and again at Circle 10.
 - Added clean-room guild Circle 1-10 milestone data for every canonical guild and surfaced the current milestone in `circle` status.
 - Joining a guild now unlocks the Circle 1 guild milestone, and advancing Circles persists unlocked guild milestones through Circle 10.
 - Expanded all-guild Circle 10 command smoke to verify each guild accumulates ten milestone unlocks by Circle 10.

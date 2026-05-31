@@ -13,7 +13,7 @@ from world.dr_combat import advance, bash, defend, flee, health_text, jab, loot_
 from world.dr_economy import buy_item, equipment_text, format_shop, get_item, hands_text, inventory_text, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
-from world.dr_progression import advance_circle, train_skill
+from world.dr_progression import advance_circle, train_skill, unlocked_guild_perks
 from world.dr_world import START_ROOM_ID, build_crossing_world, find_built_room
 
 
@@ -354,6 +354,35 @@ class CmdDRJoinGuild(Command):
             character.db.circle = state["circle"]
             character.db.guild_perks = state["guild_perks"]
         character.msg("\n".join(result["events"]))
+
+
+class CmdDRGuildPerks(Command):
+    """
+    Show guild identity and unlocked Circle milestones.
+
+    Usage:
+      guild
+      perks
+    """
+
+    key = "guild"
+    aliases = ["perks", "milestones"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        guild_id = character.db.guild_id or "commoner"
+        guild_name = character.db.guild_name or "Unaffiliated"
+        circle = int(character.db.circle or 1)
+        if guild_id == "commoner":
+            character.msg("You are unaffiliated. Visit a guild registrar and use `join guild`.")
+            return
+        perks = character.db.guild_perks or unlocked_guild_perks(guild_id, circle)
+        character.db.guild_perks = perks
+        lines = [f"Guild: {guild_name}. Circle {circle}.", "Unlocked milestones:"]
+        lines.extend(f"- {perk}" for perk in perks)
+        character.msg("\n".join(lines))
 
 
 class CmdDRTrain(Command):

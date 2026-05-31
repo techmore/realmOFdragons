@@ -261,10 +261,12 @@ class DRCommandSmokeTests(TestCase):
             self.assertEqual(character.db.guild_id, guild_id)
             self.assertEqual(character.db.guild_name, guild_name)
             self.assertEqual(character.db.guild_perks, [guild_circle_perk(guild_id, 1)])
+            character.execute_cmd("guild")
 
             self.train_and_circle_to(character, 10)
             self.assertEqual(len(character.db.guild_perks), 10)
             self.assertEqual(character.db.guild_perks[-1], guild_circle_perk(guild_id, 10))
+            character.execute_cmd("perks")
 
     def test_shop_buy_sell_inventory_and_hands_commands(self):
         character = self.make_character("Economy Smoke")
