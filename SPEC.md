@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `routes` / `travel guide` / `map` as a command-first all-room Crossing route guide listing every configured room, path from the current room, and guild/shop/task/forage/enemy markers.
 - Added an automated Evennia transcript freshness smoke to `npm run check:evennia`, preventing the terminal/Telnet evidence artifact from drifting behind implemented commands and content.
 - Refreshed the generated Evennia command transcript so the documented terminal/Telnet path includes named milestones, `milestone`, Circle 10 `capstone`, Mossy Spillway Steps, Spillway Rope Hook, Spillway Eel, and spillway task coverage.
 - Added the Mossy Spillway Steps beyond the Canal Sluice Yard with a Spillway Eel enemy, Spillway Rope Hook shop, forage support, shop task, and smoke assertions.

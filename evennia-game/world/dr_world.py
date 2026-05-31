@@ -285,6 +285,36 @@ def find_built_room(room_id):
     return None
 
 
+def travel_guide(room):
+    """Return command-first route guidance to every configured Crossing room."""
+
+    current_room_id = room.db.dr_room_id if room else START_ROOM_ID
+    lines = ["Crossing travel routes:"]
+    for room_id, data in ROOMS.items():
+        path = find_path(current_room_id, room_id)
+        if room_id == current_room_id:
+            route = "here"
+        elif path:
+            route = "go " + ", ".join(path)
+        else:
+            route = "route unknown"
+        markers = []
+        if data.get("guild"):
+            markers.append(f"guild: {GUILDS.get(data['guild'], data['guild'])}")
+        if room_id in SHOPS:
+            markers.append(f"shop: {SHOPS[room_id]['name']}")
+        if room_id in SHOP_TASKS:
+            markers.append(f"task: {SHOP_TASKS[room_id]['name']}")
+        if room_id in FORAGE_ROOMS:
+            markers.append(f"forage: {FORAGE_ROOMS[room_id]['item']}")
+        if data.get("targets"):
+            markers.append("enemies: " + ", ".join(data["targets"]))
+        marker_text = f" ({'; '.join(markers)})" if markers else ""
+        lines.append(f"- {data['title']} ({room_id}): {route}.{marker_text}")
+    lines.append("Suggested loop: routes, travel with directions or aliases, survey, then use guilds/shops/tasks/hunting/forage guide for focused next steps.")
+    return "\n".join(lines)
+
+
 def hunting_guide(room):
     """Return command-first hunting ground guidance from the current room."""
 

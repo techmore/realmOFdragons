@@ -14,7 +14,7 @@ from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_it
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_practice, use_guild_technique
-from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, task_guide, validate_world_graph
+from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, task_guide, travel_guide, validate_world_graph
 
 
 class DRAccountCreationTests(TestCase):
@@ -246,6 +246,17 @@ class DRWorldTests(SimpleTestCase):
         self.assertIn("Towpath wrap bundle from Towpath Supply Shelf", town_guide)
         self.assertIn("Suggested loop: travel to a task shop, survey, task request", town_guide)
 
+    def test_travel_guide_lists_every_room_with_routes_and_markers(self):
+        town_guide = travel_guide(None)
+        self.assertIn("Crossing travel routes:", town_guide)
+        self.assertEqual(town_guide.count("- "), len(ROOMS))
+        self.assertIn("Crossing Town Green (crossing-TG01-001): here.", town_guide)
+        self.assertIn("Mossy Spillway Steps (crossing-RV02-013): go south, south, east, east, east, east, east, south, east, east.", town_guide)
+        self.assertIn("enemies: rv-spillway-eel", town_guide)
+        self.assertIn("guild: Barbarian Guild", town_guide)
+        self.assertIn("shop: Spillway Rope Hook", town_guide)
+        self.assertIn("task: Spillway rope count", town_guide)
+
 
 class DRWorldBuilderTests(TestCase):
     def test_task_guide_command_lists_local_routes_rewards_and_destinations(self):
@@ -260,6 +271,19 @@ class DRWorldBuilderTests(TestCase):
         character.execute_cmd("task guide")
         character.execute_cmd("jobs")
         character.execute_cmd("job guide")
+
+    def test_travel_guide_command_lists_local_route_context(self):
+        build_crossing_world()
+        spillway = find_built_room("crossing-RV02-013")
+        local_guide = travel_guide(spillway)
+        self.assertIn("Mossy Spillway Steps (crossing-RV02-013): here.", local_guide)
+        self.assertIn("Canal Sluice Yard (crossing-RV02-012): go west.", local_guide)
+        self.assertIn("Crossing Town Green", local_guide)
+
+        character = create_object("typeclasses.characters.Character", key="Route Guide Smoke", location=spillway, home=spillway)
+        character.execute_cmd("routes")
+        character.execute_cmd("travel guide")
+        character.execute_cmd("map")
 
     def test_build_crossing_world_creates_rooms_and_exits(self):
         result = build_crossing_world()

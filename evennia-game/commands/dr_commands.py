@@ -16,7 +16,7 @@ from world.dr_economy import appraise_item, buy_item, complete_shop_task, drop_i
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, circle_status, experience_summary, guild_ability_summary, guild_path_summary, guild_title, guild_title_ladder, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_capstone, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_practice, use_guild_rite, use_guild_technique
-from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room, forage_guide, guild_guide, hunting_guide, shop_guide, survey_room, task_guide
+from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room, forage_guide, guild_guide, hunting_guide, shop_guide, survey_room, task_guide, travel_guide
 
 
 CHARACTER_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z '-]{2,29}$")
@@ -38,7 +38,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Dragon Realms commands:",
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
         "Guilds/Circles: guilds, registrar, join guild, guild/perks, title, experience, abilities, guild path, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
-        "Movement: room/exits/where, survey, hunting, then use direction names or aliases like n, sw, u, d.",
+        "Movement: room/exits/where, survey, routes, hunting, then use direction names or aliases like n, sw, u, d.",
         "Shops/Fieldcraft: shops, tasks, forage guide, shop, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
         "Focused help: help progression, help room, help scan, help targets, help combat.",
@@ -86,7 +86,7 @@ CHARACTER_HELP_TOPICS = {
         [
             "Progression path:",
             "1. From the account prompt: create character <name> = <race>, then puppet <name>.",
-            "2. In Crossing: use room/exits/where and survey, then walk with directions or aliases like n, sw, u, d.",
+            "2. In Crossing: use room/exits/where, survey, and routes, then walk with directions or aliases like n, sw, u, d.",
             "3. Join in-world: visit a guild registrar, use registrar for guidance, then use join guild. Guilds are not chosen during account creation.",
             "4. Train and circle: use guild path, title, experience, train, study, milestone, passive, drill, practice, boon, capstone, skills, circle status, circle, abilities, focus, and technique at your own guild registrar through Circle 10.",
             "5. Gear up and work: use shop, task request/status/complete, appraise <item>, shop talk, shop stock, buy <item>, sell <item>, get/drop, use <item>, tend/treat wounds, inventory, hands, equipment, wield, wear, remove/stow, and repair.",
@@ -492,6 +492,25 @@ class CmdDRHunting(Command):
 
     def func(self):
         self.caller.msg(hunting_guide(self.caller.location))
+
+
+class CmdDRRoutes(Command):
+    """
+    Show routes to every configured Crossing room from here.
+
+    Usage:
+      routes
+      travel guide
+      map
+    """
+
+    key = "routes"
+    aliases = ["travel guide", "map", "directions"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(travel_guide(self.caller.location))
 
 
 class CmdDRSkills(Command):
