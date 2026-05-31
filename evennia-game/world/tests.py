@@ -370,7 +370,7 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("hands")
         character.execute_cmd("sell torch")
         self.assertNotIn("torch", character.db.inventory)
-        self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations", "torch"))
+        self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations"))
         self.assertFalse(
             [
                 obj

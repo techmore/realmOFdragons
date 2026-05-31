@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Shop sell restocking now avoids duplicate stock entries, keeping `shop stock` as a clean catalog-style listing.
+- Updated economy smoke to prove selling an already-listed torch preserves unique stock order.
 - Selling an item now returns it to the current room-backed shop stock when that shop normally carries the item.
 - Expanded economy smoke to prove selling a torch restocks the provisioner counter after the item object is removed from the character.
 - Shop purchases now decrement room-backed shop stock, and empty/missing stock blocks repeat purchases until `shop refresh` restocks the counter.

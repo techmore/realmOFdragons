@@ -130,6 +130,8 @@ def add_shop_stock(room, item_id):
     if not shop or item_id not in shop["stock"]:
         return
     stock = list(current_stock(room))
+    if item_id in stock:
+        return
     stock.append(item_id)
     room.db.shop_stock = tuple(stock)
 
