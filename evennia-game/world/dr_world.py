@@ -134,8 +134,14 @@ ROOMS = {
     "crossing-RV02-012": {
         "title": "Canal Sluice Yard",
         "desc": "A narrow sluice yard collects old rope, damp crates, and quick movement under the canal wall.",
-        "exits": {"west": "crossing-RV02-011"},
+        "exits": {"west": "crossing-RV02-011", "east": "crossing-RV02-013"},
         "targets": ("rv-sluice-rat",),
+    },
+    "crossing-RV02-013": {
+        "title": "Mossy Spillway Steps",
+        "desc": "Slippery spillway steps descend beside green stone, tangled rope, and dark canal runoff.",
+        "exits": {"west": "crossing-RV02-012"},
+        "targets": ("rv-spillway-eel",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",

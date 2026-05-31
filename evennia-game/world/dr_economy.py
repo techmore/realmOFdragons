@@ -130,6 +130,12 @@ SHOPS = {
         "dialogue": "Tovin says, 'The sluice rats pull gear into the cracks. Buy what you need before stepping east.'",
         "stock": ("field_bandage", "torch", "travel_rations"),
     },
+    "crossing-RV02-013": {
+        "name": "Spillway Rope Hook",
+        "keeper": "Brakka",
+        "dialogue": "Brakka says, 'The spillway steps are slick. Keep a light high and a wrap dry.'",
+        "stock": ("field_bandage", "wild_herbs", "torch"),
+    },
 }
 
 FORAGE_ROOMS = {
@@ -142,6 +148,7 @@ FORAGE_ROOMS = {
     "crossing-RV02-010": {"item": "wild_herbs", "text": "You check moss along the flooded towpath and find wild_herbs."},
     "crossing-RV02-011": {"item": "wild_herbs", "text": "You pry useful greens from cracks in the ruined lockworks and find wild_herbs."},
     "crossing-RV02-012": {"item": "wild_herbs", "text": "You search damp crate seams in the sluice yard and find wild_herbs."},
+    "crossing-RV02-013": {"item": "wild_herbs", "text": "You search moss between spillway stones and find wild_herbs."},
 }
 
 SHOP_TASKS = {
@@ -168,6 +175,12 @@ SHOP_TASKS = {
         "destination": "crossing-RV02-011",
         "reward": 8,
         "text": "Tovin asks you to bring a crate tally back to the Lockworks Dry Box.",
+    },
+    "crossing-RV02-013": {
+        "name": "Spillway rope count",
+        "destination": "crossing-RV02-012",
+        "reward": 8,
+        "text": "Brakka asks you to carry a rope count back to the Sluice Yard Crate.",
     },
 }
 

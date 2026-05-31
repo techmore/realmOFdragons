@@ -87,6 +87,13 @@ ENEMIES = {
         "description": "A heavy canal rat drags wet rope scraps through the sluice yard and snaps at boots.",
         "loot": {"trias": 5, "items": ("field_bandage",)},
     },
+    "rv-spillway-eel": {
+        "name": "Spillway Eel",
+        "vitality": 20,
+        "aggression": "slippery",
+        "description": "A dark eel twists through spillway runoff and lashes at movement near the steps.",
+        "loot": {"trias": 5, "items": ("wild_herbs",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")

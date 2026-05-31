@@ -235,6 +235,7 @@ class DRWorldTests(SimpleTestCase):
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-005"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-006"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-008"))
+        self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-013"))
         self.assertEqual(find_path(START_ROOM_ID, "crossing-RV02-009"), ["south", "south", "west"])
 
     def test_task_guide_lists_routes_rewards_and_destinations(self):
@@ -319,6 +320,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertEqual(lockworks.db.targets, ("rv-lockwork-crab",))
         sluice = find_built_room("crossing-RV02-012")
         self.assertEqual(sluice.db.targets, ("rv-sluice-rat",))
+        spillway = find_built_room("crossing-RV02-013")
+        self.assertEqual(spillway.db.targets, ("rv-spillway-eel",))
 
     def test_built_shopkeeper_npcs(self):
         build_crossing_world()
@@ -1147,6 +1150,19 @@ class DRCommandSmokeTests(TestCase):
         self.assertGreater(sluice_runner.db.wallet["trias"], sluice_wallet_before)
         self.assertIsNone(sluice_runner.db.active_task)
 
+        spillway_runner = self.make_character("Spillway Task Smoke")
+        self.walk_to_room(spillway_runner, "crossing-RV02-013")
+        spillway_text = request_shop_task(spillway_runner)
+        self.assertIn("Sluice Yard Crate", spillway_text)
+        self.assertIn("crossing-RV02-012", task_status(spillway_runner))
+        self.walk_to_room(spillway_runner, "crossing-RV02-012")
+        spillway_wallet_before = spillway_runner.db.wallet["trias"]
+        spillway_complete_text = complete_shop_task(spillway_runner)
+        self.assertIn("Spillway rope count", spillway_complete_text)
+        self.assertIn("Shop task complete", spillway_complete_text)
+        self.assertGreater(spillway_runner.db.wallet["trias"], spillway_wallet_before)
+        self.assertIsNone(spillway_runner.db.active_task)
+
     def test_shopkeepers_reject_untraded_items_and_missing_carried_items(self):
         character = self.make_character("Shop Refusal Smoke")
         self.walk_to_room(character, "crossing-RV02-002")
@@ -1367,6 +1383,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(SHOPS["crossing-RV02-011"]["stock"][0], "field_bandage")
         self.assertIn("crossing-RV02-012", SHOPS)
         self.assertEqual(SHOPS["crossing-RV02-012"]["stock"][0], "field_bandage")
+        self.assertIn("crossing-RV02-013", SHOPS)
+        self.assertEqual(SHOPS["crossing-RV02-013"]["stock"][0], "field_bandage")
         for shop in SHOPS.values():
             self.assertTrue(shop["keeper"])
             self.assertTrue(shop["dialogue"])
@@ -1380,6 +1398,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("crossing-RV02-010", FORAGE_ROOMS)
         self.assertIn("crossing-RV02-011", FORAGE_ROOMS)
         self.assertIn("crossing-RV02-012", FORAGE_ROOMS)
+        self.assertIn("crossing-RV02-013", FORAGE_ROOMS)
         self.walk_to_room(character, "crossing-RV02-002")
         outdoors_before = character.db.skills["outdoorsmanship"]["pool"]
         perception_before = character.db.skills["perception"]["pool"]
