@@ -970,6 +970,18 @@ Next priority:
 
 - Continue the SPEC completion audit by checking whether remaining success criteria are proven broadly enough or need additional command-level smoke coverage.
 
+Implementation Notes - 2026-05-31, Evennia Full Crossing Command Walk Coverage
+
+Completed in the Evennia runtime:
+
+- Added command-level smoke proving a player can walk from Town Green to every configured Crossing room using actual exit commands.
+- The smoke resets to Town Green, follows the graph path to each room, executes each direction as a command, and verifies the final room id.
+- This strengthens evidence for the SPEC success criterion "Crossing can be walked room-to-room" beyond static graph reachability.
+
+Next priority:
+
+- Continue the SPEC completion audit by checking enemy spawn and async combat criteria for broad enough command/script coverage.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:

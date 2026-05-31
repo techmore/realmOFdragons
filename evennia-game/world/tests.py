@@ -320,6 +320,19 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("sw")
         self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
 
+    def test_command_exits_can_walk_to_every_crossing_room(self):
+        character = self.make_character("Full Crossing Walk Smoke")
+        start = find_built_room(START_ROOM_ID)
+        for destination_room_id in ROOMS:
+            character.move_to(start, quiet=True)
+            for direction in find_path(START_ROOM_ID, destination_room_id):
+                character.execute_cmd(direction)
+            self.assertEqual(
+                character.location.db.dr_room_id,
+                destination_room_id,
+                f"Expected command movement to reach {destination_room_id}",
+            )
+
     def test_room_status_commands_describe_text_navigation_context(self):
         character = self.make_character("Room Status Smoke")
         character.execute_cmd("room")
