@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Enemy pressure and retaliation now incapacitate characters at zero health, clear engagement, stop combat pressure, and prevent targeting, advancing, attacking, defending, or fleeing while down.
+- Added `revive` / `stand` command to recover from incapacitation at half health with balanced posture.
+- Added async combat smoke proving enemy pressure can incapacitate a character, stop pressure scripts, block retargeting, and recover through `revive`.
 - `RecoveryScript` now stops and deletes itself once roundtime reaches zero, preventing stale async recovery tickers from accumulating on balanced characters.
 - Added smoke coverage for both direct recovery ticks and command-created recovery scripts cleaning themselves up after recovery.
 - Combat maneuvers now attach a deduplicated persistent `RecoveryScript` whenever `jab`, `bash`, or `flee` creates roundtime.

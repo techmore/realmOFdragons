@@ -157,11 +157,14 @@ def ensure_engagement(character):
         character.db.max_health = 30
     if character.db.health is None:
         character.db.health = character.db.max_health
+    if character.db.incapacitated is None:
+        character.db.incapacitated = False
 
 
 def health_text(character):
     ensure_engagement(character)
-    return f"Health: {character.db.health}/{character.db.max_health}. Balance: {character.db.balance}. Stance: {character.db.stance}."
+    condition = "incapacitated" if character.db.incapacitated else "standing"
+    return f"Health: {character.db.health}/{character.db.max_health}. Balance: {character.db.balance}. Stance: {character.db.stance}. Condition: {condition}."
 
 
 def combat_status(character):
@@ -173,6 +176,7 @@ def combat_status(character):
     lines = [
         f"Health: {character.db.health}/{character.db.max_health}.",
         f"Balance: {character.db.balance}. Roundtime: {character.db.roundtime}. Stance: {character.db.stance}.",
+        f"Condition: {'incapacitated' if character.db.incapacitated else 'standing'}.",
     ]
     if not target_id:
         lines.append("Engagement: none.")
@@ -227,11 +231,21 @@ def apply_enemy_retaliation(character, enemy):
     damage = retaliation_damage(character)
     health = max(0, int(character.db.health or 0) - damage)
     character.db.health = health
+    if health <= 0:
+        character.db.incapacitated = True
+        character.db.engagement = {"target": None, "range": None}
+        character.db.balance = "fallen"
+        character.db.roundtime = 0
+        stop_combat_pressure(character)
+        return f"{enemy['name']} presses back for {damage} damage. You collapse, incapacitated."
     return f"{enemy['name']} presses back for {damage} damage. You have {health} health remaining."
 
 
 def apply_enemy_pressure(character):
     ensure_engagement(character)
+    if character.db.incapacitated:
+        stop_combat_pressure(character)
+        return "No enemy pressure: you are incapacitated."
     engagement = dict(character.db.engagement or {})
     target_id = engagement.get("target")
     range_band = engagement.get("range")
@@ -368,6 +382,8 @@ def loot_preview(enemy):
 
 def target_enemy(character, enemy_id):
     ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot target enemies."
     enemy_id = (enemy_id or "").strip().lower()
     if not enemy_id:
         return "Target what?"
@@ -394,6 +410,8 @@ def range_status(character):
 
 def advance(character):
     ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot advance."
     engagement = dict(character.db.engagement or {})
     target_id = engagement.get("target")
     if not target_id:
@@ -428,6 +446,8 @@ def retreat(character):
 
 def jab(character):
     ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot attack."
     if int(character.db.roundtime or 0) > 0:
         return f"You are still recovering for {character.db.roundtime} pulse."
     engagement = dict(character.db.engagement or {})
@@ -467,6 +487,8 @@ def jab(character):
 
 def bash(character):
     ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot attack."
     if int(character.db.roundtime or 0) > 0:
         return f"You are still recovering for {character.db.roundtime} pulse."
     engagement = dict(character.db.engagement or {})
@@ -517,6 +539,8 @@ def stance(character, requested):
 
 def defend(character):
     ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot defend."
     character.db.stance = "defensive"
     character.db.balance = "balanced"
     character.db.roundtime = 0
@@ -525,6 +549,8 @@ def defend(character):
 
 def flee(character):
     ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot flee."
     engagement = dict(character.db.engagement or {})
     if not engagement.get("target"):
         return "You are not engaged."
@@ -548,3 +574,15 @@ def wait_recover(character):
         character.db.balance = "balanced"
         return "You recover your balance."
     return f"You wait. Roundtime: {roundtime}."
+
+
+def revive(character):
+    ensure_engagement(character)
+    if not character.db.incapacitated:
+        return "You are already standing."
+    character.db.incapacitated = False
+    character.db.health = max(1, int(character.db.max_health or 30) // 2)
+    character.db.balance = "balanced"
+    character.db.roundtime = 0
+    character.db.engagement = {"target": None, "range": None}
+    return f"You recover enough to stand. Health: {character.db.health}/{character.db.max_health}."

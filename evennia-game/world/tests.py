@@ -599,6 +599,25 @@ class DRCommandSmokeTests(TestCase):
         pressure_script.at_repeat()
         self.assertEqual(character.db.health, 25)
 
+    def test_enemy_pressure_incapacitation_and_revive(self):
+        character = self.make_character("Incapacitation Smoke")
+        character.db.health = 1
+        self.walk_to_room(character, "crossing-RV02-002")
+        character.execute_cmd("target rv-wolf-cub")
+        character.execute_cmd("advance")
+        pressure_script = combat_pressure_scripts(character)[0]
+        pressure_script.at_repeat()
+        self.assertEqual(character.db.health, 0)
+        self.assertTrue(character.db.incapacitated)
+        self.assertEqual(character.db.engagement["target"], None)
+        self.assertEqual(len(combat_pressure_scripts(character)), 0)
+        character.execute_cmd("target rv-wolf-cub")
+        self.assertEqual(character.db.engagement["target"], None)
+        character.execute_cmd("revive")
+        self.assertFalse(character.db.incapacitated)
+        self.assertEqual(character.db.health, 15)
+        character.execute_cmd("stand")
+
     def test_bash_defend_and_flee_commands(self):
         character = self.make_character("Maneuver Smoke")
         self.walk_to_room(character, "crossing-RV02-003")
