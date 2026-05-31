@@ -891,6 +891,19 @@ Next priority:
 
 - Add richer enemy difficulty labels and suggested next commands directly to `scan`, `appraise`, and combat prompt output.
 
+Implementation Notes - 2026-05-31, Evennia Combat Guidance Output
+
+Completed in the Evennia runtime:
+
+- `scan` now labels enemies with beginner difficulty bands and suggests `appraise <enemy id>` or `target <enemy id>`.
+- `appraise` now reports enemy difficulty and suggests the next command based on whether the enemy is unengaged, at range, in melee, recovering, or the player is incapacitated.
+- `combat`/`prompt` now includes suggested next commands for idle, ranged, melee, recovering, gone-target, and incapacitated states.
+- Smoke coverage now asserts the guidance appears during scan, appraise, ranged engagement, and melee engagement.
+
+Next priority:
+
+- Continue tightening combat parity by adding a command-level way to inspect active enemy stats and recovery state after each maneuver.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:

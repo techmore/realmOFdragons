@@ -65,6 +65,35 @@ def find_enemy_object(room, enemy_id):
     return None
 
 
+def enemy_difficulty(enemy_id):
+    enemy = ENEMIES.get(enemy_id, {})
+    vitality = int(enemy.get("vitality", 0) or 0)
+    if vitality <= 14:
+        return "easy"
+    if vitality <= 18:
+        return "fair"
+    return "sturdy"
+
+
+def engagement_suggestion(character, enemy_id=None):
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return "Suggested next command: revive."
+    if int(character.db.roundtime or 0) > 0:
+        return "Suggested next command: wait."
+
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target") or enemy_id
+    range_band = engagement.get("range") if engagement.get("target") == target_id else None
+    if not target_id:
+        return "Suggested next command: scan."
+    if not range_band:
+        return f"Suggested next command: target {target_id}."
+    if range_band != "melee":
+        return "Suggested next command: advance."
+    return "Suggested next command: jab or bash."
+
+
 def scan_room(room):
     enemy_ids = room_enemy_ids(room)
     if not enemy_ids:
@@ -72,7 +101,10 @@ def scan_room(room):
     lines = ["You scan the area:"]
     for enemy_id in enemy_ids:
         enemy = ENEMIES.get(enemy_id, {"name": enemy_id, "aggression": "unknown"})
-        lines.append(f"- {enemy['name']} ({enemy_id}), {enemy['aggression']}")
+        lines.append(
+            f"- {enemy['name']} ({enemy_id}), {enemy['aggression']}, {enemy_difficulty(enemy_id)} difficulty."
+        )
+    lines.append("Suggested next command: appraise <enemy id> or target <enemy id>.")
     return "\n".join(lines)
 
 
@@ -104,7 +136,9 @@ def appraise_enemy(character, requested_enemy=""):
             f"Vitality: {current_vitality}/{max_vitality}. Aggression: {enemy['aggression']}.",
             f"Range: {range_band}.",
             f"Loot signs: {int(loot.get('trias', 0) or 0)} trias, items: {loot_items}.",
+            f"Difficulty: {enemy_difficulty(enemy_id)}.",
             enemy["description"],
+            engagement_suggestion(character, enemy_id),
         ]
     )
 
@@ -180,14 +214,17 @@ def combat_status(character):
     ]
     if not target_id:
         lines.append("Engagement: none.")
+        lines.append(engagement_suggestion(character))
         return "\n".join(lines)
     enemy = ENEMIES.get(target_id, {"name": target_id})
     enemy_obj = find_enemy_object(character.location, target_id)
     if not enemy_obj:
         lines.append(f"Engagement: {enemy['name']} is gone.")
+        lines.append("Suggested next command: scan.")
         return "\n".join(lines)
     lines.append(f"Engagement: {enemy['name']} at {engagement.get('range') or 'unknown'} range.")
     lines.append(f"Enemy vitality: {int(enemy_obj.db.vitality or 0)}/{int(enemy.get('vitality', 0) or 0)}.")
+    lines.append(engagement_suggestion(character))
     return "\n".join(lines)
 
 

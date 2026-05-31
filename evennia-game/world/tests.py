@@ -6,7 +6,7 @@ from django.test import SimpleTestCase, TestCase
 from evennia.utils.create import create_account, create_object, create_script
 
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, combat_pressure_scripts, corpse_objects, recovery_scripts, respawn_room_enemies, room_enemy_ids
+from world.dr_combat import ENEMIES, appraise_enemy, combat_pressure_scripts, combat_status, corpse_objects, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
 from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -482,12 +482,19 @@ class DRCommandSmokeTests(TestCase):
         character = self.make_character("Combat Smoke")
         self.walk_to_room(character, "crossing-RV02-002")
 
+        scan_text = scan_room(character.location)
+        self.assertIn("fair difficulty", scan_text)
+        self.assertIn("Suggested next command", scan_text)
         character.execute_cmd("scan")
+        appraise_text = appraise_enemy(character, "rv-wolf-cub")
+        self.assertIn("Difficulty: fair.", appraise_text)
+        self.assertIn("Suggested next command: target rv-wolf-cub.", appraise_text)
         character.execute_cmd("appraise rv-wolf-cub")
         character.execute_cmd("target rv-wolf-cub")
         self.assertEqual(character.db.engagement["target"], "rv-wolf-cub")
         self.assertEqual(character.db.engagement["range"], "missile")
         self.assertEqual(len(combat_pressure_scripts(character)), 1)
+        self.assertIn("Suggested next command: advance.", combat_status(character))
 
         character.execute_cmd("appraise target")
         character.execute_cmd("combat")
@@ -496,6 +503,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.engagement["range"], "pole")
         character.execute_cmd("advance")
         self.assertEqual(character.db.engagement["range"], "melee")
+        self.assertIn("Suggested next command: jab or bash.", combat_status(character))
         character.execute_cmd("retreat")
         self.assertEqual(character.db.engagement["range"], "pole")
         character.execute_cmd("retreat")
