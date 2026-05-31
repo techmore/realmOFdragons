@@ -252,6 +252,11 @@ def build_crossing_world():
         room.db.guild = data.get("guild")
         room.db.targets = tuple(data.get("targets", ()))
         room.db.shop = SHOPS.get(room_id)
+        if room.db.shop:
+            if room.db.shop_stock is None:
+                room.db.shop_stock = tuple(room.db.shop["stock"])
+            if room.db.shop_last_refresh is None:
+                room.db.shop_last_refresh = "builder"
         if room_id not in room.aliases.all():
             room.aliases.add(room_id)
         room.save()

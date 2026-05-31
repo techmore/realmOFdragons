@@ -150,6 +150,17 @@ class DRWorldBuilderTests(TestCase):
             self.assertEqual(len(shopkeepers), 1)
             self.assertEqual(shopkeepers[0].key, shop["keeper"])
             self.assertEqual(shopkeepers[0].db.shop_name, shop["name"])
+            self.assertEqual(room.db.shop_stock, tuple(shop["stock"]))
+            self.assertEqual(room.db.shop_last_refresh, "builder")
+
+    def test_build_crossing_world_preserves_mutated_shop_stock(self):
+        build_crossing_world()
+        room = find_built_room(START_ROOM_ID)
+        room.db.shop_stock = ("travel_rations",)
+        room.db.shop_last_refresh = "manual"
+        build_crossing_world()
+        self.assertEqual(room.db.shop_stock, ("travel_rations",))
+        self.assertEqual(room.db.shop_last_refresh, "manual")
 
     def test_built_enemy_npcs(self):
         build_crossing_world()
