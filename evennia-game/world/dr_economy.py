@@ -143,6 +143,12 @@ SHOP_TASKS = {
         "reward": 9,
         "text": "Oren asks you to report a culvert stock tally back to the Town Green Provisioner.",
     },
+    "crossing-RV02-010": {
+        "name": "Towpath wrap bundle",
+        "destination": "crossing-RV02-008",
+        "reward": 7,
+        "text": "Jarik asks you to carry a dry wrap bundle back to the Canal Edge Pack Stand.",
+    },
 }
 
 

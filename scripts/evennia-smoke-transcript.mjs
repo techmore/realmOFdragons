@@ -192,6 +192,10 @@ You walk into the Flooded Towpath.
 > shop
 The Towpath Supply Shelf offers field_bandage, torch, and wild_herbs along the old canal.
 
+> task request
+Jarik asks you to carry a dry wrap bundle back to the Canal Edge Pack Stand.
+Travel to the Silted Canal Edge and complete the task there.
+
 > scan
 You scan the area.
 canal_newt is here at missile range.
@@ -199,6 +203,13 @@ canal_newt is here at missile range.
 > forage
 You check moss along the flooded towpath and find wild_herbs.
 Outdoorsmanship and Perception gain field experience.
+
+> west
+You return to the Silted Canal Edge.
+
+> task complete
+You complete Towpath wrap bundle and earn 7 trias.
+Trading, Appraisal, and Athletics gain practical experience.
 
 > get wild_herbs
 You pick up the wild_herbs.

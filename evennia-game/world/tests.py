@@ -844,6 +844,21 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("task request")
         character.execute_cmd("task complete")
 
+        towpath_runner = self.make_character("Towpath Task Smoke")
+        self.walk_to_room(towpath_runner, "crossing-RV02-010")
+        towpath_text = request_shop_task(towpath_runner)
+        self.assertIn("Canal Edge Pack Stand", towpath_text)
+        self.assertIn("crossing-RV02-008", task_status(towpath_runner))
+        self.walk_to_room(towpath_runner, "crossing-RV02-008")
+        towpath_wallet_before = towpath_runner.db.wallet["trias"]
+        towpath_trading_before = towpath_runner.db.skills["trading"]["pool"]
+        towpath_complete_text = complete_shop_task(towpath_runner)
+        self.assertIn("Towpath wrap bundle", towpath_complete_text)
+        self.assertIn("Shop task complete", towpath_complete_text)
+        self.assertGreater(towpath_runner.db.wallet["trias"], towpath_wallet_before)
+        self.assertGreater(towpath_runner.db.skills["trading"]["pool"], towpath_trading_before)
+        self.assertIsNone(towpath_runner.db.active_task)
+
     def test_shopkeepers_reject_untraded_items_and_missing_carried_items(self):
         character = self.make_character("Shop Refusal Smoke")
         self.walk_to_room(character, "crossing-RV02-002")
