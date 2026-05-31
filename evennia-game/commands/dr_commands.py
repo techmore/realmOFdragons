@@ -11,7 +11,7 @@ from evennia.commands.command import Command
 from evennia.utils.create import create_object
 
 from world.dr_data import ATTRIBUTES, GUILDS, RACES, SKILLSETS, build_starter_skills
-from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, rest, retreat, revive, room_enemy_ids, scan_room, skin_corpse, stance, target_enemy, wait_recover
+from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, hurl, jab, loot_corpse, range_status, respawn_room_enemies, rest, retreat, revive, room_enemy_ids, scan_room, skin_corpse, stance, target_enemy, wait_recover
 from world.dr_economy import SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text, wear_item, wield_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
@@ -40,7 +40,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Guilds/Circles: guilds, registrar, join guild, guild/perks, guild history, title, experience, abilities, guild path, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
         "Movement: journey, room/exits/where, survey, routes, hunting, then use direction names or aliases like n, sw, u, d.",
         "Shops/Fieldcraft: shops, tasks, forage guide, shop, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
-        "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
+        "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, hurl/throw, jab/attack, bash, defend, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
         "Focused help: help progression, help room, help scan, help targets, help combat.",
     ]
 )
@@ -76,6 +76,7 @@ CHARACTER_HELP_TOPICS = {
         [
             "Combat help:",
             "combat / prompt - show health, balance, roundtime, stance, condition, target, range, and enemy vitality.",
+            "hurl / throw - ranged maneuver from missile or pole range using Light Thrown and agility.",
             "jab / attack - quick melee maneuver using Small Edged and agility.",
             "bash - heavier melee maneuver using Brawling and strength.",
             "defend - defensive stance and balance recovery. flee - break engagement with recovery time.",
@@ -1868,6 +1869,24 @@ class CmdDRBash(Command):
 
     def func(self):
         self.caller.msg(bash(self.caller))
+
+
+class CmdDRHurl(Command):
+    """
+    Hurl a quick ranged attack at missile or pole range.
+
+    Usage:
+      hurl
+      throw
+    """
+
+    key = "hurl"
+    aliases = ["throw", "lob"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(hurl(self.caller))
 
 
 class CmdDRStance(Command):

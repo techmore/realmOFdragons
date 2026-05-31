@@ -330,6 +330,8 @@ def maneuver_damage(character, maneuver):
         return 4 + attribute_value(character, "agility") // 5 + skill_rank(character, "small_edged") // 10
     if maneuver == "bash":
         return 8 + attribute_value(character, "strength") // 5 + skill_rank(character, "brawling") // 10
+    if maneuver == "hurl":
+        return 3 + attribute_value(character, "agility") // 6 + skill_rank(character, "light_thrown") // 10
     return 1
 
 
@@ -732,6 +734,59 @@ def bash(character):
         pressure,
         maneuver_status_text(character),
     ]
+    return "\n".join(parts)
+
+
+def hurl(character):
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot hurl."
+    if int(character.db.roundtime or 0) > 0:
+        return f"You are still recovering for {character.db.roundtime} pulse."
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target")
+    if not target_id:
+        return "Hurl at what? Target an enemy first."
+    if engagement.get("range") not in ("missile", "pole"):
+        return "You need missile or pole range to hurl."
+
+    enemy = ENEMIES.get(target_id, {"name": target_id})
+    enemy_obj = find_enemy_object(character.location, target_id)
+    if not enemy_obj:
+        character.db.engagement = {"target": None, "range": None}
+        stop_combat_pressure(character)
+        return f"{enemy['name']} is no longer here."
+
+    damage = maneuver_damage(character, "hurl")
+    vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
+    character.db.balance = "recovering"
+    character.db.roundtime = 1
+    ensure_recovery(character)
+    skill_events = apply_combat_skill_gain(character, "light_thrown")
+    if vitality <= 0:
+        enemy_obj.delete()
+        create_corpse(character.location, target_id, enemy)
+        character.db.engagement = {"target": None, "range": None}
+        stop_combat_pressure(character)
+        loot_text = loot_preview(enemy)
+        parts = [
+            f"You hurl at {enemy['name']} for {damage} damage. {enemy['name']} collapses.",
+            *skill_events,
+            loot_text,
+            "Suggested next command: loot corpse.",
+        ]
+        return "\n".join(parts)
+
+    enemy_obj.db.vitality = vitality
+    parts = [
+        f"You hurl at {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.",
+        *skill_events,
+    ]
+    if engagement.get("range") == "pole":
+        parts.append(apply_enemy_retaliation(character, enemy))
+    else:
+        parts.append(f"{enemy['name']} is still too far away to press back.")
+    parts.append(maneuver_status_text(character))
     return "\n".join(parts)
 
 
