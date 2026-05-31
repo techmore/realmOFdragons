@@ -39,7 +39,7 @@ Evidence:
 - `DRCommandSmokeTests.test_join_guild_requires_a_registrar_room_command` verifies `join guild` fails outside a registrar.
 - `DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands` joins every guild at its registrar.
 - The all-guild command smoke now asks every registrar for pre-join and post-join in-world guidance with `registrar` / `ask registrar`.
-- Focused help and the generated terminal transcript now expose `registrar`, `focus`, `technique`, `passive`, `drill`, `practice`, `rite`, and `boon` in the core guild progression path.
+- Focused help and the generated terminal transcript now expose `registrar`, `focus`, `technique`, `passive`, `drill`, `practice`, `rite`, `boon`, and `capstone` in the core guild progression path.
 - `DRCommandSmokeTests.test_joined_characters_cannot_switch_guilds_at_other_registrars` verifies existing guild affiliation cannot be overwritten at another registrar.
 - `DRGuildTests` covers registrar metadata behavior at helper level.
 
@@ -58,6 +58,7 @@ Evidence:
 - The all-guild smoke verifies `passive` / `guild passive` for every guild, with distinct passive identities and Circle-scaled skill progress.
 - The all-guild smoke verifies `drill` / `guild drill` at each guild registrar, training both guild primary and distinct support skills through Circle-scaled practice.
 - The all-guild smoke verifies Circle 5+ `rite` / `guild rite` at each guild registrar, adding another distinct per-guild ability layer with reload-proven skill persistence.
+- The all-guild smoke verifies Circle 10 `capstone` / `guild capstone` at each guild registrar, including distinct capstone skill gains and reload-persistent claimed capstone records.
 - `DRCommandSmokeTests.test_circle_requires_own_guild_registrar_room_command` verifies circling is registrar-gated.
 - `DRCommandSmokeTests.test_joined_training_requires_own_guild_registrar_room_command` verifies training is own-registrar-gated.
 - `DRCommandSmokeTests.test_circle_status_guides_unaffiliated_and_ready_characters` verifies status guidance for unaffiliated and ready-to-circle states.
@@ -159,7 +160,7 @@ Residual risk:
 ## Highest remaining parity risks
 
 - Original-map fidelity: current Crossing is an expanding clean-room scaffold with canonical-style districts, hunting/shop/guild affordances, and beginner supply placement, not a full original Crossing clone.
-- Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, distinct `technique` support-skill behavior, passive training, registrar-gated `drill`, `practice`, Circle 5+ `rite`, and once-per-Circle persistent `boon` rewards, but these are clean-room mechanics rather than full original guild ability systems.
+- Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, distinct `technique` support-skill behavior, passive training, registrar-gated `drill`, `practice`, Circle 5+ `rite`, once-per-Circle persistent `boon` rewards, and Circle 10 persistent `capstone` rewards, but these are clean-room mechanics rather than full original guild ability systems.
 - Study/read now gives non-combat Scholarship progress in study halls and reinforces guild primary learning at a character's own registrar.
 - Browser webclient parity: command-first runtime is Evennia-backed, a generated terminal-style transcript exists, and the Evennia `/webclient/` route/render path is smoke-tested; full live-browser login/playthrough polish may still live in the legacy frontend.
 - Persistence/security hardening: Evennia account creation, early guild progression, all-guild Circle 10 milestones/boons, engaged combat/bleeding, and economy/equipment state now have database reload smoke for core state, but this audit did not do a broader security review beyond command behavior.

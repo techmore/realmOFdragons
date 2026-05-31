@@ -99,6 +99,20 @@ GUILD_RITES = {
     "warrior_mage": {"name": "Elemental Binding", "skill": "summoning", "text": "contains force before directing it outward"},
 }
 
+GUILD_CAPSTONES = {
+    "barbarian": {"name": "Tenth-Circle Roar", "skill": "tactics", "text": "sets battlefield authority into a finished Circle 10 form"},
+    "bard": {"name": "Master Refrain", "skill": "bardic_lore", "text": "braids performance and remembered lore into a finished refrain"},
+    "cleric": {"name": "Consecrated Charge", "skill": "scholarship", "text": "binds doctrine and devotion into a durable charge"},
+    "empath": {"name": "Whole-Patient Vigil", "skill": "first_aid", "text": "joins care, diagnosis, and resolve into a complete practice"},
+    "moon_mage": {"name": "Tenth Sign", "skill": "perception", "text": "ties prediction to the visible moment with careful certainty"},
+    "necromancer": {"name": "Closed Thesis", "skill": "sorcery", "text": "seals dangerous theory behind a disciplined final proof"},
+    "paladin": {"name": "Shielded Charge", "skill": "defending", "text": "anchors oath, shield, and line discipline into one form"},
+    "ranger": {"name": "Known Trail", "skill": "outdoorsmanship", "text": "turns every sign along the trail into practiced certainty"},
+    "thief": {"name": "Perfect Angle", "skill": "backstab", "text": "sets silence, timing, and escape into one clean approach"},
+    "trader": {"name": "Master Ledger", "skill": "appraisal", "text": "balances risk, value, and route memory into expert judgment"},
+    "warrior_mage": {"name": "Elemental Line", "skill": "targeted_magic", "text": "joins summoned force to aimed battle control"},
+}
+
 STUDY_ROOMS = {
     "crossing-GU02-001": {"name": "Arcane Study Hall", "skill": "arcana", "text": "You study public notes on basic magical theory"},
     "crossing-GU12-001": {"name": "Moon Mage Observatory", "skill": "astrology", "text": "You study careful star tables and timing marks"},
@@ -178,6 +192,9 @@ def guild_ability_summary(guild_id, circle):
     if guild_id in GUILD_RITES and max_circle >= 5:
         rite = GUILD_RITES[guild_id]
         lines.append(f"Circle rite: {rite['name']} supports {SKILLS[rite['skill']]}. Use `rite` at your registrar from Circle 5.")
+    if guild_id in GUILD_CAPSTONES and max_circle >= MAX_SUPPORTED_CIRCLE:
+        capstone = GUILD_CAPSTONES[guild_id]
+        lines.append(f"Circle 10 capstone: {capstone['name']} supports {SKILLS[capstone['skill']]}. Use `capstone` at your registrar.")
     if max_circle >= MAX_SUPPORTED_CIRCLE:
         lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported ability cap.")
     else:
@@ -357,6 +374,47 @@ def use_guild_boon(character_state):
     character_state["guild_boons"] = claimed
     events.append(f"{boon['name']} {boon['text']}, granting a Circle {circle} boon to {skill['name']} by {pulse}.")
     events.append("This boon is now recorded on your guild progression.")
+    return events
+
+
+def use_guild_capstone(character_state):
+    """Claim a persistent Circle 10 guild capstone at the character's own registrar."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    capstone = GUILD_CAPSTONES.get(guild_id)
+    if not capstone:
+        return ["You need to join a guild before claiming a guild capstone."]
+    if room_guild_id != guild_id:
+        return ["Guild capstones require your own registrar. Use `circle status` to find the right room."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    if circle < MAX_SUPPORTED_CIRCLE:
+        return [f"Guild capstones open at Circle {MAX_SUPPORTED_CIRCLE}. Keep training and circling with your registrar."]
+
+    capstone_key = f"{guild_id}:{MAX_SUPPORTED_CIRCLE}"
+    claimed = list(character_state.get("guild_capstones") or [])
+    if capstone_key in claimed:
+        return [f"{capstone['name']} for Circle {MAX_SUPPORTED_CIRCLE} is already claimed."]
+
+    skills = character_state.setdefault("skills", build_starter_skills())
+    primary_skill_id = primary_skill_for_guild(guild_id)
+    capstone_skill_id = capstone["skill"]
+    primary_skill = skills.get(primary_skill_id)
+    capstone_skill = skills.get(capstone_skill_id)
+    if not primary_skill:
+        return [f"{capstone['name']} cannot find {primary_skill_id} training."]
+    if not capstone_skill:
+        return [f"{capstone['name']} cannot find {capstone_skill_id} training."]
+
+    events = apply_skill_pool_gain(skills, primary_skill_id, 3)
+    events.extend(apply_skill_pool_gain(skills, capstone_skill_id, 4))
+    claimed.append(capstone_key)
+    character_state["guild_capstones"] = claimed
+    events.append(
+        f"{capstone['name']} {capstone['text']}, completing Circle {MAX_SUPPORTED_CIRCLE} practice for {primary_skill['name']} and {capstone_skill['name']}."
+    )
+    events.append("This capstone is now recorded on your guild progression.")
     return events
 
 
