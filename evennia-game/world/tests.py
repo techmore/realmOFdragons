@@ -814,6 +814,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertGreaterEqual(len(SHOPS), 4)
         self.assertIn("field_bandage", ITEMS)
         self.assertEqual(SHOPS["crossing-RV02-006"]["stock"][0], "field_bandage")
+        self.assertIn("crossing-RV02-007", SHOPS)
+        self.assertEqual(SHOPS["crossing-RV02-007"]["stock"][0], "field_bandage")
         for shop in SHOPS.values():
             self.assertTrue(shop["keeper"])
             self.assertTrue(shop["dialogue"])
@@ -1162,6 +1164,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(len(recovery_scripts(character)), 1)
 
     def test_enemy_loot_tables_are_defined(self):
+        self.assertIn("rv-reed-snake", ENEMIES)
+        self.assertEqual(ROOMS["crossing-RV02-007"]["targets"], ("rv-reed-snake",))
         for enemy in ENEMIES.values():
             self.assertIn("loot", enemy)
             self.assertIn("trias", enemy["loot"])

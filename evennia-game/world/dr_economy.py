@@ -78,6 +78,12 @@ SHOPS = {
         "dialogue": "Sella says, 'The low cuts are wet, quick, and mean to unprepared hands.'",
         "stock": ("field_bandage", "travel_rations", "torch"),
     },
+    "crossing-RV02-007": {
+        "name": "Culvert Cache",
+        "keeper": "Oren",
+        "dialogue": "Oren says, 'Reeds hide more than water. Keep a wrap and light close.'",
+        "stock": ("field_bandage", "torch", "travel_rations"),
+    },
 }
 
 

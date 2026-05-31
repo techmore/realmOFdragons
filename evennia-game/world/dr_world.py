@@ -86,7 +86,7 @@ ROOMS = {
     "crossing-RV02-004": {
         "title": "Muddy Beetle Bend",
         "desc": "Wet stones and roots mark a shallow bend where small vermin pick through mud.",
-        "exits": {"west": "crossing-RV02-002"},
+        "exits": {"west": "crossing-RV02-002", "east": "crossing-RV02-007"},
         "targets": ("rv-mud-beetle",),
     },
     "crossing-RV02-005": {
@@ -100,6 +100,12 @@ ROOMS = {
         "desc": "A damp drainage cut winds through roots, stones, and discarded trail scraps.",
         "exits": {"west": "crossing-RV02-005"},
         "targets": ("rv-ditch-rat",),
+    },
+    "crossing-RV02-007": {
+        "title": "Reed-Choked Culvert",
+        "desc": "Tall reeds hide a stone culvert where shallow water carries scraps from the south road.",
+        "exits": {"west": "crossing-RV02-004"},
+        "targets": ("rv-reed-snake",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",

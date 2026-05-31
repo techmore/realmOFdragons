@@ -85,7 +85,7 @@ Evidence:
 
 Residual risk:
 - Shop inventories are intentionally small beginner inventories.
-- Beginner economy breadth now includes a Drainage Trail Peddler near the expanded hunting path and field bandage stock, but shops remain starter-scale.
+- Beginner economy breadth now includes a Drainage Trail Peddler and Culvert Cache near the expanded hunting path with field bandage stock, but shops remain starter-scale.
 - `field_bandage` now has command-level `use` behavior that restores health and consumes the physical item object.
 - `tend` / `treat` now provide command-first wound care aliases that default to a carried `field_bandage`.
 - Enemy pressure can now inflict a visible bleeding wound state with its own async ticker, and `field_bandage` stops it while restoring health and feeding First Aid progress.
@@ -103,7 +103,7 @@ Evidence:
 
 Residual risk:
 - Spawn variety is limited to the current beginner enemy set.
-- Beginner combat breadth now includes an added Root-Tangled Drainage room and Ditch Rat enemy, but Crossing remains a compact clean-room scaffold.
+- Beginner combat breadth now includes Root-Tangled Drainage, Reed-Choked Culvert, Ditch Rat, and Reed Snake additions, but Crossing remains a compact clean-room scaffold.
 
 ### Combat is asynchronous, range-based, and skill-driven
 

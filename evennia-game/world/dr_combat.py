@@ -45,6 +45,13 @@ ENEMIES = {
         "description": "A muddy rat darts between roots and broken stones.",
         "loot": {"trias": 2, "items": ("travel_rations",)},
     },
+    "rv-reed-snake": {
+        "name": "Reed Snake",
+        "vitality": 16,
+        "aggression": "coiled",
+        "description": "A thin snake coils beneath reeds and strikes at careless ankles.",
+        "loot": {"trias": 3, "items": ("field_bandage",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")
