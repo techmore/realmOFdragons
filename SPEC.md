@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added race-derived starting attributes for all 11 canonical races using the public DR attribute order: strength, reflex, agility, charisma, discipline, wisdom, intelligence, and stamina.
+- Race selection now applies mechanical starting attributes during both account-prompt creation and in-character creation, and `score` displays the current attribute spread.
+- Added smoke coverage proving account-created characters receive race-specific attributes and that all canonical race choices populate the expected starting attributes.
 - Added account-prompt `create character <name> = <race>` support for creating a playable Evennia character before entering the world.
 - Account-side creation builds Crossing if needed, places the new character at Town Green, selects one canonical race, marks creation complete, and keeps the character unaffiliated at Circle 1.
 - Added Evennia database smoke proving account-level character creation attaches a race-selected commoner to the account roster at the Crossing start room.

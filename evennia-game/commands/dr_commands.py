@@ -8,7 +8,7 @@ first migration bridge from the Node prototype into Evennia's command loop.
 from evennia.commands.command import Command
 from evennia.utils.create import create_object
 
-from world.dr_data import RACES, SKILLSETS, build_starter_skills
+from world.dr_data import ATTRIBUTES, RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import advance, bash, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, scan_room, stance, target_enemy, wait_recover
 from world.dr_economy import buy_item, equipment_text, format_shop, get_item, hands_text, inventory_text, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
@@ -66,6 +66,7 @@ class CmdDRAccountCreateCharacter(Command):
         state = {
             "race": character.db.race,
             "race_name": character.db.race_name or "Unchosen",
+            "attributes": character.db.attributes or {},
             "guild_id": character.db.guild_id or "commoner",
             "guild_name": character.db.guild_name or "Unaffiliated",
             "circle": character.db.circle or 1,
@@ -78,6 +79,7 @@ class CmdDRAccountCreateCharacter(Command):
 
         character.db.race = state["race"]
         character.db.race_name = state["race_name"]
+        character.db.attributes = state["attributes"]
         character.db.guild_id = state["guild_id"]
         character.db.guild_name = state["guild_name"]
         character.db.circle = state["circle"]
@@ -112,12 +114,15 @@ class CmdDRScore(Command):
         guild_name = character.db.guild_name or "Unaffiliated"
         circle = character.db.circle or 1
         wallet = character.db.wallet or {"plat": 0, "trias": 0, "lucan": 0, "silk": 0}
+        attributes = character.db.attributes or {}
+        attribute_line = ", ".join(f"{attribute} {attributes.get(attribute, 0)}" for attribute in ATTRIBUTES)
 
         character.msg(
             "\n".join(
                 [
                     f"You are {character.key}, race {race_name}.",
                     f"Guild: {guild_name}. Circle {circle}.",
+                    f"Attributes: {attribute_line}.",
                     "Wallet: "
                     f"{wallet.get('plat', 0)} plat, {wallet.get('trias', 0)} trias, "
                     f"{wallet.get('lucan', 0)} lucan, {wallet.get('silk', 0)} silk.",
@@ -190,6 +195,7 @@ class CmdDRRace(Command):
         state = {
             "race": character.db.race,
             "race_name": character.db.race_name or "Unchosen",
+            "attributes": character.db.attributes or {},
             "guild_id": character.db.guild_id or "commoner",
             "guild_name": character.db.guild_name or "Unaffiliated",
             "circle": character.db.circle or 1,
@@ -198,6 +204,7 @@ class CmdDRRace(Command):
         if result["changed"]:
             character.db.race = state["race"]
             character.db.race_name = state["race_name"]
+            character.db.attributes = state["attributes"]
             character.db.guild_id = state["guild_id"]
             character.db.guild_name = state["guild_name"]
             character.db.circle = state["circle"]
@@ -229,6 +236,7 @@ class CmdDRCreateCharacter(Command):
         state = {
             "race": character.db.race,
             "race_name": character.db.race_name or "Unchosen",
+            "attributes": character.db.attributes or {},
             "guild_id": character.db.guild_id or "commoner",
             "guild_name": character.db.guild_name or "Unaffiliated",
             "circle": character.db.circle or 1,
@@ -237,6 +245,7 @@ class CmdDRCreateCharacter(Command):
         if result["changed"]:
             character.db.race = state["race"]
             character.db.race_name = state["race_name"]
+            character.db.attributes = state["attributes"]
             character.db.guild_id = state["guild_id"]
             character.db.guild_name = state["guild_name"]
             character.db.circle = state["circle"]

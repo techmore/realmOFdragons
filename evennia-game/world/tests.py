@@ -5,7 +5,7 @@ Evennia migration smoke/unit tests for clean-room DR systems.
 from django.test import SimpleTestCase, TestCase
 from evennia.utils.create import create_account, create_object, create_script
 
-from world.dr_data import GUILDS, RACES, SKILLSETS, build_starter_skills
+from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, combat_pressure_scripts, corpse_objects, respawn_room_enemies, room_enemy_ids
 from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
@@ -24,6 +24,7 @@ class DRAccountCreationTests(TestCase):
         self.assertEqual(character.key, "Aela")
         self.assertEqual(character.db.race, "elf")
         self.assertEqual(character.db.race_name, "Elf")
+        self.assertEqual(character.db.attributes, RACE_STARTING_ATTRIBUTES["elf"])
         self.assertTrue(character.db.creation_complete)
         self.assertEqual(character.db.guild_id, "commoner")
         self.assertEqual(character.db.guild_name, "Unaffiliated")
@@ -241,6 +242,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.race, "elf")
         self.assertEqual(character.db.guild_id, "commoner")
         self.assertEqual(character.db.circle, 1)
+        character.execute_cmd("score")
         character.execute_cmd("join guild")
         self.assertEqual(character.db.guild_id, "barbarian")
 
@@ -611,6 +613,7 @@ class DRIdentityTests(SimpleTestCase):
             self.assertTrue(result["changed"])
             self.assertEqual(state["race"], race_id)
             self.assertEqual(state["race_name"], race_name)
+            self.assertEqual(state["attributes"], RACE_STARTING_ATTRIBUTES[race_id])
             self.assertEqual(state["guild_id"], "commoner")
             self.assertEqual(state["guild_name"], "Unaffiliated")
             self.assertEqual(state["circle"], 1)

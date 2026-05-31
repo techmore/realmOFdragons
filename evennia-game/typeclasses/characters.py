@@ -10,6 +10,8 @@ creation commands.
 
 from evennia.objects.objects import DefaultCharacter
 
+from world.dr_data import build_starter_attributes
+
 from .objects import ObjectParent
 
 
@@ -39,6 +41,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.guild_id = "commoner"
         self.db.guild_name = "Unaffiliated"
         self.db.circle = 1
+        self.db.attributes = build_starter_attributes()
         self.db.skills = {}
         self.db.wallet = {"plat": 0, "trias": 100, "lucan": 0, "silk": 0}
         self.db.inventory = []

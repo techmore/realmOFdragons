@@ -2,7 +2,7 @@
 Identity helpers for the Evennia Dragon Realms migration.
 """
 
-from world.dr_data import RACES
+from world.dr_data import RACES, build_starter_attributes
 
 
 def normalize_race_token(value):
@@ -51,6 +51,7 @@ def choose_race(character_state, requested_race):
 
     character_state["race"] = race_id
     character_state["race_name"] = RACES[race_id]
+    character_state["attributes"] = build_starter_attributes(race_id)
     character_state["guild_id"] = "commoner"
     character_state["guild_name"] = "Unaffiliated"
     character_state["circle"] = 1

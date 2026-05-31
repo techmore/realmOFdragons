@@ -21,6 +21,31 @@ RACES = {
     "s_raeth": "S'Kra Mur",
 }
 
+ATTRIBUTES = (
+    "strength",
+    "reflex",
+    "agility",
+    "charisma",
+    "discipline",
+    "wisdom",
+    "intelligence",
+    "stamina",
+)
+
+RACE_STARTING_ATTRIBUTES = {
+    "dwarf": {"strength": 10, "reflex": 8, "agility": 8, "charisma": 10, "discipline": 12, "wisdom": 10, "intelligence": 10, "stamina": 12},
+    "elf": {"strength": 8, "reflex": 12, "agility": 12, "charisma": 12, "discipline": 8, "wisdom": 10, "intelligence": 10, "stamina": 8},
+    "elothean": {"strength": 8, "reflex": 12, "agility": 10, "charisma": 10, "discipline": 10, "wisdom": 12, "intelligence": 12, "stamina": 6},
+    "gnome": {"strength": 4, "reflex": 14, "agility": 12, "charisma": 10, "discipline": 10, "wisdom": 10, "intelligence": 14, "stamina": 6},
+    "gor_tog": {"strength": 16, "reflex": 8, "agility": 10, "charisma": 10, "discipline": 10, "wisdom": 6, "intelligence": 6, "stamina": 14},
+    "halfling": {"strength": 6, "reflex": 12, "agility": 14, "charisma": 10, "discipline": 8, "wisdom": 8, "intelligence": 10, "stamina": 12},
+    "human": {"strength": 10, "reflex": 10, "agility": 10, "charisma": 10, "discipline": 10, "wisdom": 10, "intelligence": 10, "stamina": 10},
+    "kaldar": {"strength": 12, "reflex": 10, "agility": 10, "charisma": 12, "discipline": 10, "wisdom": 8, "intelligence": 8, "stamina": 10},
+    "prydaen": {"strength": 10, "reflex": 14, "agility": 10, "charisma": 12, "discipline": 8, "wisdom": 6, "intelligence": 10, "stamina": 10},
+    "rakash": {"strength": 10, "reflex": 12, "agility": 8, "charisma": 10, "discipline": 12, "wisdom": 8, "intelligence": 6, "stamina": 14},
+    "s_raeth": {"strength": 12, "reflex": 12, "agility": 10, "charisma": 10, "discipline": 10, "wisdom": 8, "intelligence": 8, "stamina": 10},
+}
+
 GUILDS = {
     "barbarian": "Barbarian Guild",
     "bard": "Bard Guild",
@@ -205,3 +230,10 @@ def build_starter_skills():
     """Return a fresh Evennia-Attribute-safe skill mapping."""
 
     return {skill_id: {"name": name, "rank": 0, "pool": 0} for skill_id, name in SKILLS.items()}
+
+
+def build_starter_attributes(race_id=None):
+    """Return a fresh attribute mapping for the selected race or neutral human baseline."""
+
+    source = RACE_STARTING_ATTRIBUTES.get(race_id, RACE_STARTING_ATTRIBUTES["human"])
+    return dict(source)
