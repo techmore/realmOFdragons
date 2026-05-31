@@ -12,6 +12,7 @@ const requiredTokens = [
   '> join guild',
   '> circle status',
   '> train',
+  '> mentor',
   '> perk',
   '> signature',
   '> milestone',

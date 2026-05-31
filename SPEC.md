@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added registrar-gated `mentor` / `ask mentor` guild NPC guidance for every guild, with Circle-aware advice, milestone/mentor skill training, all-guild reload smoke coverage, help text, and transcript coverage.
 - Added the Reed Bank Blind beyond Canal Bank Narrows with a Reed Heron enemy, Reed Blind Tackle Box shop, forage support, shop task, transcript coverage, and targeted route/content smoke assertions.
 - Strengthened the Evennia webclient smoke to verify the auth login route, create and authenticate a smoke account with a standalone session-handler stub, and render the authenticated webclient with websocket, command input, and connect affordances.
 - Added `signature` / `guild signature` as an always-available Circle-scaled guild identity action for every guild, training primary plus distinct support skills with all-guild reload smoke coverage.

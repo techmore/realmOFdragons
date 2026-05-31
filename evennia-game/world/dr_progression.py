@@ -219,6 +219,20 @@ GUILD_SIGNATURES = {
     "warrior_mage": {"name": "Elemental Line", "skill": "targeted_magic", "text": "aligns aimed force with battle focus"},
 }
 
+GUILD_MENTORS = {
+    "barbarian": {"name": "Pit Mentor", "skill": "tactics", "advice": "measures your stance and demands cleaner pressure before the next charge"},
+    "bard": {"name": "Conservatory Mentor", "skill": "bardic_lore", "advice": "sets your current Circle lesson into a sharper story and cadence"},
+    "cleric": {"name": "Votive Mentor", "skill": "theurgy", "advice": "checks your doctrine, posture, and resolve before releasing you back to practice"},
+    "empath": {"name": "Clinic Mentor", "skill": "empathy", "advice": "walks you through a calmer read of pain, breath, and triage order"},
+    "moon_mage": {"name": "Observatory Mentor", "skill": "astrology", "advice": "marks your timing errors against a careful pattern ledger"},
+    "necromancer": {"name": "Lower Study Mentor", "skill": "thanatology", "advice": "keeps your dangerous questions disciplined and quietly indexed"},
+    "paladin": {"name": "Yard Mentor", "skill": "conviction", "advice": "tests whether your oath survives practical pressure and imperfect footing"},
+    "ranger": {"name": "Field Mentor", "skill": "instinct", "advice": "turns trail mistakes into a clearer route, sign, and weather read"},
+    "thief": {"name": "Quiet Mentor", "skill": "backstab", "advice": "points out missed corners, exits, and timing without raising their voice"},
+    "trader": {"name": "Exchange Mentor", "skill": "trading", "advice": "reviews your route risk, counter manners, and price memory"},
+    "warrior_mage": {"name": "Range Mentor", "skill": "attunement", "advice": "forces your battle focus back into stable elemental control"},
+}
+
 GUILD_BOONS = {
     "barbarian": {"name": "Battle Temper", "skill": "expertise", "text": "hardens your battle presence"},
     "bard": {"name": "Resonant Memory", "skill": "bardic_lore", "text": "sets guild lore into practiced recall"},
@@ -449,6 +463,9 @@ def guild_ability_summary(guild_id, circle):
     if guild_id in GUILD_SIGNATURES:
         signature = GUILD_SIGNATURES[guild_id]
         lines.append(f"Guild signature: {signature['name']} supports {SKILLS[signature['skill']]}. Use `signature` anywhere after joining.")
+    if guild_id in GUILD_MENTORS:
+        mentor = GUILD_MENTORS[guild_id]
+        lines.append(f"Registrar mentor: {mentor['name']} supports {SKILLS[mentor['skill']]}. Use `mentor` at your registrar.")
     if guild_id in GUILD_BOONS:
         boon = GUILD_BOONS[guild_id]
         lines.append(f"Registrar boon: {boon['name']} supports {SKILLS[boon['skill']]}. Use `boon` at your registrar once per Circle.")
@@ -535,7 +552,7 @@ def guild_path_summary(character_state):
         f"Current title: {guild_title(guild_id, circle)}.",
         f"Current milestone: {milestone}.",
         f"Primary training: {primary_skill['name']} rank {primary_skill.get('rank', 0)}.",
-        "Core loop: train, study, signature, focus, technique, passive, drill, circle status, circle.",
+        "Core loop: train, study, mentor, signature, focus, technique, passive, drill, circle status, circle.",
     ]
     if circle >= 5:
         rite = GUILD_RITES.get(guild_id)
@@ -632,6 +649,39 @@ def use_guild_signature(character_state):
         f"{signature['name']} {signature['text']}, training {primary_skill['name']} by {primary_pulse} and {support_skill['name']} by {support_pulse}."
     )
     events.append("Guild signatures are always-available Circle-scaled identity practice; use `abilities` for the full Circle list.")
+    return events
+
+
+def use_guild_mentor(character_state):
+    """Ask a guild mentor for registrar-gated Circle-aware guidance and training."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    mentor = GUILD_MENTORS.get(guild_id)
+    if not mentor:
+        return ["You need to join a guild before asking a guild mentor."]
+    if room_guild_id != guild_id:
+        return ["Guild mentors work from your own registrar. Use `guilds` or `circle status` to find the right room."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    skills = character_state.setdefault("skills", build_starter_skills())
+    milestone_skill_id = milestone_skill_for_guild_circle(guild_id, circle)
+    mentor_skill_id = mentor["skill"]
+    milestone_skill = skills.get(milestone_skill_id)
+    mentor_skill = skills.get(mentor_skill_id)
+    if not milestone_skill:
+        return [f"{mentor['name']} cannot find {milestone_skill_id} training."]
+    if not mentor_skill:
+        return [f"{mentor['name']} cannot find {mentor_skill_id} training."]
+
+    milestone_pulse = 1 + ((circle - 1) // 4)
+    mentor_pulse = 1 + ((circle - 1) // 5)
+    events = apply_skill_pool_gain(skills, milestone_skill_id, milestone_pulse)
+    events.extend(apply_skill_pool_gain(skills, mentor_skill_id, mentor_pulse))
+    events.append(
+        f"{mentor['name']} {mentor['advice']}, reinforcing Circle {circle} {milestone_skill['name']} by {milestone_pulse} and {mentor_skill['name']} by {mentor_pulse}."
+    )
+    events.append("Guild mentors are registrar NPC guidance for the current Circle band; use `guild path` for the full loop.")
     return events
 
 

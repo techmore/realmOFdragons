@@ -15,7 +15,7 @@ from world.dr_combat import advance, aim, appraise_enemy, bash, block, combat_st
 from world.dr_economy import SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text, wear_item, wield_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
-from world.dr_progression import advance_circle, circle_status, experience_summary, guild_ability_summary, guild_history_summary, guild_path_summary, guild_title, guild_title_ladder, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_capstone, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_perk, use_guild_practice, use_guild_rite, use_guild_signature, use_guild_technique
+from world.dr_progression import advance_circle, circle_status, experience_summary, guild_ability_summary, guild_history_summary, guild_path_summary, guild_title, guild_title_ladder, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_capstone, use_guild_drill, use_guild_focus, use_guild_mentor, use_guild_milestone, use_guild_passive, use_guild_perk, use_guild_practice, use_guild_rite, use_guild_signature, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, hunting_guide, shop_guide, survey_room, task_guide, travel_guide
 
 
@@ -37,7 +37,7 @@ CHARACTER_HELP_TEXT = "\n".join(
     [
         "Dragon Realms commands:",
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
-        "Guilds/Circles: guilds, registrar, join guild, guild/perks, guild history, title, experience, abilities, guild path, perk, signature, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
+        "Guilds/Circles: guilds, registrar, join guild, guild/perks, guild history, title, experience, abilities, guild path, mentor, perk, signature, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
         "Movement: journey, room/exits/where, survey, routes, hunting, then use direction names or aliases like n, sw, u, d.",
         "Shops/Fieldcraft: shops, tasks, forage guide, shop, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
         "Combat: scan, target <enemy>, appraise target, maneuvers/combat tactics, range, advance, retreat, combat, stance, aim, hurl/throw, feint, jab/attack, bash, defend, dodge, parry, block, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
@@ -90,7 +90,7 @@ CHARACTER_HELP_TOPICS = {
             "1. From the account prompt: create character <name> = <race>, then puppet <name>.",
             "2. In Crossing: use journey, room/exits/where, survey, and routes, then walk with directions or aliases like n, sw, u, d.",
             "3. Join in-world: visit a guild registrar, use registrar for guidance, then use join guild. Guilds are not chosen during account creation.",
-            "4. Train and circle: use guild path, title, experience, train, study, perk, signature, milestone, passive, drill, practice, boon, capstone, skills, circle status, circle, abilities, focus, and technique at your own guild registrar through Circle 10.",
+            "4. Train and circle: use guild path, title, experience, train, study, mentor, perk, signature, milestone, passive, drill, practice, boon, capstone, skills, circle status, circle, abilities, focus, and technique at your own guild registrar through Circle 10.",
             "5. Gear up and work: use shop, task request/status/complete, appraise <item>, shop talk, shop stock, buy <item>, sell <item>, get/drop, use <item>, tend/treat wounds, inventory, hands, equipment, wield, wear, remove/stow, and repair.",
             "6. Hunt and forage: walk to beginner hunting rooms, forage, scan, appraise <enemy>, target <enemy>, advance to melee, then jab or bash.",
             "7. Recover and harvest: use combat/prompt, wait/recover/rest for roundtime, defend or flee as needed, revive/stand/rest if incapacitated, then skin corpse, loot corpse, and get dropped items after a kill.",
@@ -1085,6 +1085,34 @@ class CmdDRGuildSignature(Command):
             "skills": character.db.skills or build_starter_skills(),
         }
         events = use_guild_signature(state)
+        character.db.skills = state["skills"]
+        character.msg("\n".join(events))
+
+
+class CmdDRGuildMentor(Command):
+    """
+    Ask your guild mentor for Circle-aware registrar guidance.
+
+    Usage:
+      mentor
+      ask mentor
+      guild mentor
+    """
+
+    key = "mentor"
+    aliases = ["ask mentor", "guild mentor"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        state = {
+            "guild_id": character.db.guild_id or "commoner",
+            "circle": character.db.circle or 1,
+            "skills": character.db.skills or build_starter_skills(),
+            "room_guild_id": character.location.db.guild if character.location else None,
+        }
+        events = use_guild_mentor(state)
         character.db.skills = state["skills"]
         character.msg("\n".join(events))
 

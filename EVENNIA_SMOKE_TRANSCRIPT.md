@@ -41,7 +41,7 @@ You become Aela at Crossing Town Green.
 > drhelp
 Dragon Realms commands:
 Identity: score, attributes/stats, skills, race, reroll attributes.
-Guilds/Circles: registrar, join guild, guild/perks, abilities, perk, signature, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.
+Guilds/Circles: registrar, join guild, guild/perks, abilities, mentor, perk, signature, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.
 Movement: room/exits/where, survey, then use direction names or aliases like n, sw, u, d.
 
 > room
@@ -90,6 +90,9 @@ You drill Expertise.
 
 > study
 You study Barbarian Guild registrar notes, reinforcing Scholarship and Expertise.
+
+> mentor
+Pit Mentor measures your stance and demands cleaner pressure before the next charge, reinforcing Circle 1 Expertise and Tactics.
 
 > focus
 You center your Barbarian Guild focus through Circle 1, feeding Expertise by 1.

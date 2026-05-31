@@ -13,7 +13,7 @@ from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, 
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_SIGNATURES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_history_summary, guild_path_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_perk, use_guild_practice, use_guild_signature, use_guild_technique
+from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_MENTORS, GUILD_PASSIVES, GUILD_RITES, GUILD_SIGNATURES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_history_summary, guild_path_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_mentor, use_guild_milestone, use_guild_passive, use_guild_perk, use_guild_practice, use_guild_signature, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, task_guide, travel_guide, validate_world_graph
 
 
@@ -199,12 +199,16 @@ class DRDataTests(SimpleTestCase):
     def test_all_guilds_have_named_circle_one_to_ten_milestones(self):
         self.assertEqual(set(GUILD_CIRCLE_PERK_NAMES), set(GUILDS))
         self.assertEqual(set(GUILD_SIGNATURES), set(GUILDS))
+        self.assertEqual(set(GUILD_MENTORS), set(GUILDS))
         for guild_id, perk_names in GUILD_CIRCLE_PERK_NAMES.items():
             self.assertEqual(len(perk_names), 10)
             self.assertEqual(len(set(perk_names)), 10)
             self.assertIn(GUILD_SIGNATURES[guild_id]["skill"], build_starter_skills())
             self.assertTrue(GUILD_SIGNATURES[guild_id]["name"])
             self.assertTrue(GUILD_SIGNATURES[guild_id]["text"])
+            self.assertIn(GUILD_MENTORS[guild_id]["skill"], build_starter_skills())
+            self.assertTrue(GUILD_MENTORS[guild_id]["name"])
+            self.assertTrue(GUILD_MENTORS[guild_id]["advice"])
             unlocked = unlocked_guild_perks(guild_id, 10)
             self.assertEqual(len(unlocked), 10)
             self.assertNotIn("recognition", " ".join(unlocked).lower())
@@ -618,10 +622,12 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("registrar", CHARACTER_HELP_TEXT)
         self.assertIn("survey", CHARACTER_HELP_TEXT)
         self.assertIn("signature", CHARACTER_HELP_TEXT)
+        self.assertIn("mentor", CHARACTER_HELP_TEXT)
         self.assertIn("focus", CHARACTER_HELP_TEXT)
         self.assertIn("technique", CHARACTER_HELP_TEXT)
         self.assertIn("use registrar for guidance", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("signature", CHARACTER_HELP_TOPICS["progression"])
+        self.assertIn("mentor", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("abilities, focus, and technique", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("boon", CHARACTER_HELP_TEXT)
         self.assertIn("rest", CHARACTER_HELP_TEXT)
@@ -749,7 +755,7 @@ class DRCommandSmokeTests(TestCase):
                     }
                 )
             )
-            self.assertIn("Core loop: train, study, signature, focus, technique, passive, drill, circle status, circle.", path_text)
+            self.assertIn("Core loop: train, study, mentor, signature, focus, technique, passive, drill, circle status, circle.", path_text)
             self.assertIn("Circle 5 rite is not open yet", path_text)
             self.assertIn("Available boon", path_text)
             self.assertIn(f"Current title: {guild_title(guild_id, 1)}.", path_text)
@@ -793,6 +799,8 @@ class DRCommandSmokeTests(TestCase):
             self.assertIn("Registrar boon:", ability_text)
             self.assertIn("Guild signature:", ability_text)
             self.assertIn("Use `signature`", ability_text)
+            self.assertIn("Registrar mentor:", ability_text)
+            self.assertIn("Use `mentor`", ability_text)
             self.assertIn("Passive training:", ability_text)
             self.assertIn("Registrar drill:", ability_text)
             self.assertIn("Circle rite:", ability_text)
@@ -912,6 +920,29 @@ class DRCommandSmokeTests(TestCase):
             reloaded_signature = ObjectDB.objects.get(id=character.id)
             reloaded_signature_after = (reloaded_signature.db.skills[signature_skill_id]["rank"] * 5) + reloaded_signature.db.skills[signature_skill_id]["pool"]
             self.assertGreaterEqual(reloaded_signature_after, signature_command_after)
+            mentor_skill_id = GUILD_MENTORS[guild_id]["skill"]
+            mentor_before = (character.db.skills[mentor_skill_id]["rank"] * 5) + character.db.skills[mentor_skill_id]["pool"]
+            mentor_text = "\n".join(
+                use_guild_mentor(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "circle": character.db.circle,
+                        "skills": character.db.skills,
+                        "room_guild_id": character.location.db.guild,
+                    }
+                )
+            )
+            self.assertIn(GUILD_MENTORS[guild_id]["name"], mentor_text)
+            self.assertIn("Circle 10", mentor_text)
+            mentor_after = (character.db.skills[mentor_skill_id]["rank"] * 5) + character.db.skills[mentor_skill_id]["pool"]
+            self.assertGreater(mentor_after, mentor_before)
+            character.execute_cmd("mentor")
+            character.execute_cmd("ask mentor")
+            mentor_command_after = (character.db.skills[mentor_skill_id]["rank"] * 5) + character.db.skills[mentor_skill_id]["pool"]
+            self.assertGreater(mentor_command_after, mentor_after)
+            reloaded_mentor = ObjectDB.objects.get(id=character.id)
+            reloaded_mentor_after = (reloaded_mentor.db.skills[mentor_skill_id]["rank"] * 5) + reloaded_mentor.db.skills[mentor_skill_id]["pool"]
+            self.assertGreaterEqual(reloaded_mentor_after, mentor_command_after)
             technique_skill_id = GUILD_TECHNIQUES[guild_id]["skill"]
             technique_before = (character.db.skills[technique_skill_id]["rank"] * 5) + character.db.skills[technique_skill_id]["pool"]
             character.execute_cmd("technique")
@@ -1072,6 +1103,15 @@ class DRCommandSmokeTests(TestCase):
             }
         )
         self.assertIn("join guild", "\n".join(unaffiliated_technique))
+        unaffiliated_mentor = use_guild_mentor(
+            {
+                "guild_id": character.db.guild_id,
+                "circle": character.db.circle,
+                "skills": character.db.skills,
+                "room_guild_id": character.location.db.guild,
+            }
+        )
+        self.assertIn("join a guild", "\n".join(unaffiliated_mentor))
         unaffiliated_signature = use_guild_signature(
             {
                 "guild_id": character.db.guild_id,
