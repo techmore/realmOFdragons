@@ -100,6 +100,12 @@ SHOPS = {
         "dialogue": "Oren says, 'Reeds hide more than water. Keep a wrap and light close.'",
         "stock": ("field_bandage", "torch", "travel_rations"),
     },
+    "crossing-RV02-008": {
+        "name": "Canal Edge Pack Stand",
+        "keeper": "Vessa",
+        "dialogue": "Vessa says, 'Past the culvert, everything is wet enough to slow you down.'",
+        "stock": ("field_bandage", "travel_rations", "wild_herbs"),
+    },
 }
 
 FORAGE_ROOMS = {
@@ -107,6 +113,7 @@ FORAGE_ROOMS = {
     "crossing-RV02-002": {"item": "wild_herbs", "text": "You sort through the brushline and find wild_herbs."},
     "crossing-RV02-005": {"item": "wild_herbs", "text": "You check the low ridge grasses and find wild_herbs."},
     "crossing-RV02-007": {"item": "wild_herbs", "text": "You part the reeds around the culvert and find wild_herbs."},
+    "crossing-RV02-008": {"item": "wild_herbs", "text": "You search the canal edge silt and find wild_herbs."},
 }
 
 SHOP_TASKS = {

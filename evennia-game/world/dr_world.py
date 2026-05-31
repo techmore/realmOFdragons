@@ -104,8 +104,14 @@ ROOMS = {
     "crossing-RV02-007": {
         "title": "Reed-Choked Culvert",
         "desc": "Tall reeds hide a stone culvert where shallow water carries scraps from the south road.",
-        "exits": {"west": "crossing-RV02-004"},
+        "exits": {"west": "crossing-RV02-004", "east": "crossing-RV02-008"},
         "targets": ("rv-reed-snake",),
+    },
+    "crossing-RV02-008": {
+        "title": "Silted Canal Edge",
+        "desc": "A slow canal edge gathers silt, broken reeds, and skittering shapes beyond the culvert.",
+        "exits": {"west": "crossing-RV02-007"},
+        "targets": ("rv-marsh-spider",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",

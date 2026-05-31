@@ -52,6 +52,13 @@ ENEMIES = {
         "description": "A thin snake coils beneath reeds and strikes at careless ankles.",
         "loot": {"trias": 3, "items": ("field_bandage",)},
     },
+    "rv-marsh-spider": {
+        "name": "Marsh Spider",
+        "vitality": 18,
+        "aggression": "skittering",
+        "description": "A hand-sized spider skitters over wet silt and broken reeds.",
+        "loot": {"trias": 4, "items": ("wild_herbs",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")

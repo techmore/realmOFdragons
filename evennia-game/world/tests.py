@@ -145,6 +145,7 @@ class DRWorldTests(SimpleTestCase):
         self.assertEqual(find_path(START_ROOM_ID, "crossing-RV02-002"), ["south", "south", "east"])
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-005"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-006"))
+        self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-008"))
 
 
 class DRWorldBuilderTests(TestCase):
@@ -199,6 +200,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertEqual(room.db.targets, ("rv-wolf-cub",))
         drainage = find_built_room("crossing-RV02-006")
         self.assertEqual(drainage.db.targets, ("rv-ditch-rat",))
+        canal_edge = find_built_room("crossing-RV02-008")
+        self.assertEqual(canal_edge.db.targets, ("rv-marsh-spider",))
 
     def test_built_shopkeeper_npcs(self):
         build_crossing_world()
@@ -894,6 +897,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(SHOPS["crossing-RV02-006"]["stock"][0], "field_bandage")
         self.assertIn("crossing-RV02-007", SHOPS)
         self.assertEqual(SHOPS["crossing-RV02-007"]["stock"][0], "field_bandage")
+        self.assertIn("crossing-RV02-008", SHOPS)
+        self.assertEqual(SHOPS["crossing-RV02-008"]["stock"][0], "field_bandage")
         for shop in SHOPS.values():
             self.assertTrue(shop["keeper"])
             self.assertTrue(shop["dialogue"])
@@ -1298,6 +1303,8 @@ class DRCommandSmokeTests(TestCase):
     def test_enemy_loot_tables_are_defined(self):
         self.assertIn("rv-reed-snake", ENEMIES)
         self.assertEqual(ROOMS["crossing-RV02-007"]["targets"], ("rv-reed-snake",))
+        self.assertIn("rv-marsh-spider", ENEMIES)
+        self.assertEqual(ROOMS["crossing-RV02-008"]["targets"], ("rv-marsh-spider",))
         for enemy in ENEMIES.values():
             self.assertIn("loot", enemy)
             self.assertIn("trias", enemy["loot"])

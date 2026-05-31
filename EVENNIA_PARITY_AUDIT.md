@@ -105,10 +105,11 @@ Evidence:
 - `DRCommandSmokeTests.test_room_status_commands_describe_text_navigation_context` verifies hunting room target metadata.
 - `DRCommandSmokeTests.test_all_crossing_enemies_can_be_fought_through_command_loop` walks to every hunting room and fights every configured enemy.
 - `DRCommandSmokeTests.test_recovery_and_respawn_scripts_tick_existing_helpers` verifies respawn script behavior.
+- The Silted Canal Edge and Marsh Spider extend the beginner culvert path and are covered by all-room movement, all-enemy combat, respawn, shop, and forage smoke.
 
 Residual risk:
 - Spawn variety is limited to the current beginner enemy set.
-- Beginner combat breadth now includes Root-Tangled Drainage, Reed-Choked Culvert, Ditch Rat, and Reed Snake additions, but Crossing remains a compact clean-room scaffold.
+- Beginner combat breadth now includes Root-Tangled Drainage, Reed-Choked Culvert, Silted Canal Edge, Ditch Rat, Reed Snake, and Marsh Spider additions, but Crossing remains a compact clean-room scaffold.
 
 ### Combat is asynchronous, range-based, and skill-driven
 
