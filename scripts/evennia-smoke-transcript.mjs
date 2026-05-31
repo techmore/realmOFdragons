@@ -127,11 +127,20 @@ The shopkeeper explains the counter's trade goods and beginner supplies.
 > shop stock
 Current stock lists carried room-backed inventory.
 
+> task request
+Marta gives you the South road supply note task.
+Travel to Culvert Cache and complete the task there.
+
 > east
 You walk into the Reed-Choked Culvert.
 
 > shop
 The Culvert Cache offers field_bandage, torch, and travel_rations for the deeper brush path.
+
+> task complete
+You deliver South road supply note for the shopkeepers.
+You earn 9 trias.
+Trading, Appraisal, and Athletics gain practical experience.
 
 > forage
 You part the reeds around the culvert and find wild_herbs.

@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Updated the generated Evennia smoke transcript so the shop path includes `task request`, travel, `task complete`, coin reward, and trade-skill training.
 - Added `task` / `job` shopkeeper work with request/status/complete flow, travel destination checks, coin rewards, and Trading/Appraisal/Athletics training.
 - Added smoke coverage proving shop tasks persist while traveling, reject wrong-room completion, reward completion, and clear active task state.
 - Updated the generated Evennia smoke transcript so registrar progression includes `study`.
