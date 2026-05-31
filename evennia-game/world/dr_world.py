@@ -9,7 +9,7 @@ from evennia.objects.models import ObjectDB
 
 from world.dr_data import GUILDS
 from world.dr_combat import ENEMIES
-from world.dr_economy import SHOPS
+from world.dr_economy import FORAGE_ROOMS, SHOP_TASKS, SHOPS
 
 START_ROOM_ID = "crossing-TG01-001"
 
@@ -265,6 +265,61 @@ def find_built_room(room_id):
         if match.db.dr_room_id == room_id:
             return match
     return None
+
+
+def survey_room(room, viewer=None):
+    """Return command-first room affordances for movement, shops, guilds, forage, and targets."""
+
+    if not room:
+        return "You are nowhere."
+
+    room_id = room.db.dr_room_id or "unknown"
+    lines = [
+        f"Survey: {room.key}",
+        f"Room ID: {room_id}.",
+    ]
+
+    exits = []
+    for exit_obj in sorted(room.exits, key=lambda candidate: candidate.key):
+        alias = DIRECTION_ALIASES.get(exit_obj.key)
+        exits.append(f"{exit_obj.key} ({alias})" if alias else exit_obj.key)
+    lines.append("Exits: " + (", ".join(exits) if exits else "none."))
+
+    guild_id = room.db.guild
+    if guild_id:
+        lines.append(f"Guild registrar: {GUILDS.get(guild_id, guild_id)}. Commands: registrar, join guild, train, circle.")
+    else:
+        lines.append("Guild registrar: none.")
+
+    shop = SHOPS.get(room_id)
+    if shop:
+        lines.append(f"Shop: {shop['name']} ({shop['keeper']}). Commands: shop, shop talk, shop stock, buy, sell.")
+        if room_id in SHOP_TASKS:
+            task = SHOP_TASKS[room_id]
+            lines.append(f"Shop task: {task['name']} to {task['destination']}. Command: task request.")
+    else:
+        lines.append("Shop: none.")
+
+    forage = FORAGE_ROOMS.get(room_id)
+    if forage:
+        lines.append(f"Forage: {forage['item']}. Command: forage.")
+    else:
+        lines.append("Forage: none.")
+
+    targets = tuple(room.db.targets or ())
+    if targets:
+        lines.append("Enemies: " + ", ".join(targets) + ". Commands: scan, appraise <enemy>, target <enemy>.")
+    else:
+        lines.append("Enemies: none.")
+
+    visible = [
+        obj.key
+        for obj in room.contents
+        if obj is not viewer and not obj.destination and not obj.db.enemy_id
+    ]
+    if visible:
+        lines.append("Visible objects: " + ", ".join(sorted(visible)) + ". Command: get <item>.")
+    return "\n".join(lines)
 
 
 def build_crossing_world():

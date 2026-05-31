@@ -75,6 +75,7 @@ Evidence:
 - `DRWorldBuilderTests.test_built_crossing_exits_have_mud_direction_aliases` verifies direction aliases.
 - `DRCommandSmokeTests.test_direction_alias_commands_move_through_crossing` verifies alias command movement.
 - `DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room` walks from Town Green to every configured Crossing room using actual exit commands.
+- `DRCommandSmokeTests.test_room_status_commands_describe_text_navigation_context` now covers `survey` / `search room` output for shop tasks, forage, enemies, shops, and guild registrar affordances.
 
 Residual risk:
 - The Crossing graph is a clean-room scaffold, not a complete original Crossing map.

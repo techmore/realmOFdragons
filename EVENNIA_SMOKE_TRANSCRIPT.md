@@ -42,11 +42,15 @@ You become Aela at Crossing Town Green.
 Dragon Realms commands:
 Identity: score, attributes/stats, skills, race, reroll attributes.
 Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, passive, drill, practice, rite, boon, study, train, circle, circle status.
-Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.
+Movement: room/exits/where, survey, then use direction names or aliases like n, sw, u, d.
 
 > room
 Crossing Town Green [crossing-TG-001]
 Exits lead deeper into Crossing's guildhalls, shops, and hunting paths.
+
+> survey
+Survey: Crossing Town Green
+Exits, shop, shop task, forage, enemies, and visible objects are summarized for command-first play.
 
 > n
 You walk north through Crossing.
@@ -310,7 +314,7 @@ You pick up the dropped item.
 - Registrar-only guild joining and Circle 10 progression: `DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands`.
 - Registrar guidance: the all-guild command smoke invokes `registrar` and `ask registrar` before and after joining every guild.
 - Guild focus, technique, passive, drill, practice, Circle 5+ rite, study, and boon behavior: the all-guild Circle 10 command smoke invokes progression commands and dedicated study smoke covers public study rooms plus registrar reading.
-- Crossing movement: `DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room`.
+- Crossing movement and room discovery: `DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room` and `test_room_status_commands_describe_text_navigation_context`.
 - Shops/items/equipment: `DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh` and `test_wield_wear_and_equipment_commands`.
 - Gear upkeep: `DRCommandSmokeTests.test_wield_wear_and_equipment_commands` covers repair and equipment condition.
 - Beginner content breadth: all-room, all-shop, and all-enemy smoke covers the Reed-Choked Culvert, Culvert Cache, Reed Snake, Silted Canal Edge, Old Orchard Verge, Flooded Towpath, Marsh Spider, Orchard Crow, and Canal Newt.

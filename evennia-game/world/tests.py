@@ -13,7 +13,7 @@ from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_it
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
-from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
+from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, survey_room, validate_world_graph
 
 
 class DRAccountCreationTests(TestCase):
@@ -391,15 +391,30 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("room")
         character.execute_cmd("exits")
         character.execute_cmd("where")
+        character.execute_cmd("survey")
         self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
+        town_survey = survey_room(character.location, character)
+        self.assertIn("Survey: Crossing Town Green", town_survey)
+        self.assertIn("Shop: Town Green Provisioner", town_survey)
+        self.assertIn("Shop task: South road supply note", town_survey)
         self.walk_to_room(character, "crossing-RV02-002")
         character.execute_cmd("room")
+        character.execute_cmd("search room")
         character.execute_cmd("scan")
+        hunting_survey = survey_room(character.location, character)
+        self.assertIn("Forage: wild_herbs", hunting_survey)
+        self.assertIn("Enemies: rv-wolf-cub", hunting_survey)
+        self.assertIn("Shop: Riverside Field Outfitter", hunting_survey)
         self.assertEqual(character.location.db.targets, ("rv-wolf-cub",))
+        self.walk_to_room(character, "crossing-GU10-001")
+        registrar_survey = survey_room(character.location, character)
+        self.assertIn("Guild registrar: Barbarian Guild", registrar_survey)
+        self.assertIn("Commands: registrar, join guild, train, circle", registrar_survey)
 
     def test_focused_text_help_topics_cover_movement_and_combat(self):
         character = self.make_character("Focused Help Smoke")
         self.assertIn("registrar", CHARACTER_HELP_TEXT)
+        self.assertIn("survey", CHARACTER_HELP_TEXT)
         self.assertIn("focus", CHARACTER_HELP_TEXT)
         self.assertIn("technique", CHARACTER_HELP_TEXT)
         self.assertIn("use registrar for guidance", CHARACTER_HELP_TOPICS["progression"])

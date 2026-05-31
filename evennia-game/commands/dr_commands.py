@@ -10,13 +10,13 @@ import re
 from evennia.commands.command import Command
 from evennia.utils.create import create_object
 
-from world.dr_data import ATTRIBUTES, RACES, SKILLSETS, build_starter_skills
+from world.dr_data import ATTRIBUTES, GUILDS, RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, revive, room_enemy_ids, scan_room, skin_corpse, stance, target_enemy, wait_recover
 from world.dr_economy import appraise_item, buy_item, complete_shop_task, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wear_item, wield_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, circle_status, guild_ability_summary, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_rite, use_guild_technique
-from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room
+from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room, survey_room
 
 
 CHARACTER_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z '-]{2,29}$")
@@ -38,7 +38,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Dragon Realms commands:",
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
         "Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, passive, drill, practice, rite, boon, study, train, circle, circle status.",
-        "Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.",
+        "Movement: room/exits/where, survey, then use direction names or aliases like n, sw, u, d.",
         "Shops/Fieldcraft: shop, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, use <item>, tend/treat, inventory, hands, equipment, repair.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, skin corpse, loot corpse, revive/stand.",
         "Focused help: help progression, help room, help scan, help targets, help combat.",
@@ -50,6 +50,7 @@ CHARACTER_HELP_TOPICS = {
         [
             "Room and movement help:",
             "room / exits / where - show the current room, room ID, exits, guild/shop markers, enemies, and visible objects.",
+            "survey - summarize room affordances: exits, registrar, shop, task, forage, enemies, and visible objects.",
             "Move with full directions or classic aliases: n, s, e, w, ne, nw, se, sw, u, d.",
             "Guilds are joined in-world at registrar rooms; shops and hunting rooms are discovered by walking Crossing.",
         ]
@@ -85,7 +86,7 @@ CHARACTER_HELP_TOPICS = {
         [
             "Progression path:",
             "1. From the account prompt: create character <name> = <race>, then puppet <name>.",
-            "2. In Crossing: use room/exits/where, then walk with directions or aliases like n, sw, u, d.",
+            "2. In Crossing: use room/exits/where and survey, then walk with directions or aliases like n, sw, u, d.",
             "3. Join in-world: visit a guild registrar, use registrar for guidance, then use join guild. Guilds are not chosen during account creation.",
             "4. Train and circle: use train, study, passive, drill, practice, boon, skills, circle status, circle, abilities, focus, and technique at your own guild registrar through Circle 10.",
             "5. Gear up and work: use shop, task request/status/complete, appraise <item>, shop talk, shop stock, buy <item>, sell <item>, use <item>, tend/treat wounds, inventory, hands, equipment, wield, wear, and repair.",
@@ -444,6 +445,24 @@ class CmdDRRoom(Command):
             lines.append("Also here: " + ", ".join(sorted(visible)) + ".")
 
         character.msg("\n".join(lines))
+
+
+class CmdDRSurvey(Command):
+    """
+    Survey current room affordances.
+
+    Usage:
+      survey
+      search room
+    """
+
+    key = "survey"
+    aliases = ["search room", "look around"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(survey_room(self.caller.location, self.caller))
 
 
 class CmdDRSkills(Command):
