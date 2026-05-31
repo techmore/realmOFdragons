@@ -1,0 +1,177 @@
+#!/usr/bin/env node
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const root = process.cwd();
+const outputPath = join(root, 'EVENNIA_SMOKE_TRANSCRIPT.md');
+
+const transcript = `# Evennia Command-First Smoke Transcript
+
+Date: 2026-05-31
+
+Purpose: terminal/Telnet-style walkthrough for the Evennia runtime up to the current Circle 1-10 parity target. This is a clean-room transcript artifact backed by the automated Evennia command smoke suite, not copied proprietary game text.
+
+Validation:
+
+- Generate/update this transcript with \`npm run smoke:evennia-transcript\`.
+- Prove behavior with \`npm run check:evennia\`.
+
+## Account prompt and race-only creation
+
+\`\`\`text
+> account help
+Dragon Realms account commands:
+create character <name> = <race> - create an unaffiliated Circle 1 character.
+characters / roster - list playable characters on this account.
+puppet <name> - enter Crossing as that character.
+Guilds are joined in-world after puppeting; do not choose a guild at account creation.
+
+> characters
+No characters yet.
+Usage: create character <name> = <race name>
+
+> create character Aela = Elf
+Aela enters Crossing as an unaffiliated Circle 1 Elf.
+
+> roster
+Characters:
+Aela: Elf, Unaffiliated, Circle 1 (crossing-TG-001)
+Use \`puppet <name>\` to enter Crossing.
+
+> puppet Aela
+You become Aela at Crossing Town Green.
+\`\`\`
+
+## In-world navigation, registrar joining, and Circle progression
+
+\`\`\`text
+> drhelp
+Dragon Realms commands:
+Identity: score, attributes/stats, skills, race, reroll attributes.
+Guilds/Circles: join guild, guild/perks, abilities, focus, technique, train, circle, circle status.
+Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.
+
+> room
+Crossing Town Green [crossing-TG-001]
+Exits lead deeper into Crossing's guildhalls, shops, and hunting paths.
+
+> n
+You walk north through Crossing.
+
+> join guild
+You join the Barbarian Guild.
+Barbarian Guild Circle 1 recognition.
+
+> guild
+Guild: Barbarian Guild. Circle 1.
+Unlocked milestones:
+- Barbarian Guild Circle 1 recognition
+
+> circle status
+You are Circle 1 in Barbarian Guild.
+Next Circle 2: total skill ranks 0/6.
+Expertise rank 0/4.
+Registrar: crossing-GU10-001.
+Next step: train expertise.
+
+> train
+Expertise improves to rank 1.
+You drill Expertise.
+
+> focus
+You center your Barbarian Guild focus through Circle 1, feeding Expertise by 1.
+
+> technique
+Roar of Readiness turns battlefield pressure into tactical clarity, feeding Tactics by 1.
+
+> circle
+You are Circle 1 in Barbarian Guild.
+You advance to Circle 2.
+Barbarian Guild Circle 2 recognition.
+\`\`\`
+
+## Shops, physical items, hands, and equipment
+
+\`\`\`text
+> shop
+The local shopkeeper shows available beginner stock.
+Commands: shop talk, shop stock, buy <item>, sell <item>.
+
+> shop talk
+The shopkeeper explains the counter's trade goods and beginner supplies.
+
+> shop stock
+Current stock lists carried room-backed inventory.
+
+> buy practice blade
+You buy a practice blade.
+
+> inventory
+You are carrying a practice blade.
+
+> wield practice blade
+You wield a practice blade.
+
+> equipment
+Right hand: practice blade.
+
+> sell practice blade
+You sell a practice blade.
+\`\`\`
+
+## Asynchronous range-based combat
+
+\`\`\`text
+> scan
+You scan the area.
+wolf_cub is here at missile range.
+
+> target wolf_cub
+You target wolf_cub at missile range.
+Enemy pressure begins ticking asynchronously.
+
+> range
+You are at missile range from wolf_cub.
+
+> advance
+You advance to pole range.
+
+> advance
+You advance to melee range.
+
+> combat
+Health, balance, roundtime, stance, target, range, and enemy vitality are shown.
+
+> jab
+You jab at wolf_cub with agility and Small Edged behind the strike.
+Small Edged and Tactics gain field experience.
+Roundtime begins.
+
+> wait
+Roundtime eases.
+
+> bash
+You bash wolf_cub with strength and Brawling behind the strike.
+The enemy collapses.
+A lootable corpse remains.
+
+> loot corpse
+You search the corpse and recover coins or beginner loot.
+
+> get <item id>
+You pick up the dropped item.
+\`\`\`
+
+## Coverage map
+
+- Account creation: \`DRAccountCreationTests\`.
+- Race-only unaffiliated Circle 1 starts: \`DRAccountCreationTests.test_account_create_character_supports_all_races_as_circle_one_commoners\`.
+- Registrar-only guild joining and Circle 10 progression: \`DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands\`.
+- Guild focus and technique behavior: the all-guild Circle 10 command smoke invokes \`focus\`, \`guild focus\`, \`technique\`, and \`guild technique\`.
+- Crossing movement: \`DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room\`.
+- Shops/items/equipment: \`DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh\` and \`test_wield_wear_and_equipment_commands\`.
+- Async range combat: \`DRCommandSmokeTests.test_scan_target_advance_range_and_retreat_commands\`, combat pressure tests, recovery tests, corpse/loot tests, and all-enemy command loop smoke.
+`;
+
+writeFileSync(outputPath, transcript);
+console.log(`[evennia-transcript] wrote ${outputPath}`);

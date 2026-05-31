@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `npm run smoke:evennia-transcript` to generate a terminal/Telnet-style Evennia command transcript covering account creation, guild joining, Circle progression, shops, equipment, and async range combat.
+- Added `EVENNIA_SMOKE_TRANSCRIPT.md` as explicit transcript evidence for the command-first user journey while keeping automated behavior proof in `npm run check:evennia`.
 - Added distinct `technique` / `guild technique` behavior for every guild, with Circle-scaled support-skill pulses tied to each guild's clean-room identity.
 - Expanded all-guild Circle 10 smoke coverage to invoke each guild technique and prove it advances that guild's configured support skill.
 - Added a concrete `focus` / `guild focus` command for joined characters, turning guild ability unlocks into a Circle-scaled primary-skill pulse instead of purely descriptive text.

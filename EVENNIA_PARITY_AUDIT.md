@@ -24,7 +24,7 @@ Evidence:
 - The all-race smoke verifies race id, race display name, race-derived attributes, `creation_complete`, `commoner` guild state, Circle 1 state, and Crossing start-room placement.
 
 Residual risk:
-- The smoke proves the account command path, not an interactive telnet session transcript.
+- `EVENNIA_SMOKE_TRANSCRIPT.md` now provides a terminal/Telnet-style account and in-world command transcript. A live socket-level telnet client is still not part of automation.
 
 ### All 11 guilds can be joined only by visiting their registrar
 
@@ -124,17 +124,17 @@ Evidence:
 - The current suite contains command and builder smoke for all criteria above.
 
 Residual risk:
-- Browser webclient smoke for Evennia itself is not represented in this audit; the command-first Evennia runtime is covered.
+- `EVENNIA_SMOKE_TRANSCRIPT.md` covers the terminal-style command path, and `npm run check:evennia` proves command behavior. Browser webclient smoke for Evennia itself is still not represented in this audit.
 
 ## Highest remaining parity risks
 
 - Original-map fidelity: current Crossing is a clean-room scaffold with canonical-style districts and hunting/shop/guild affordances, not a full original Crossing clone.
 - Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, and distinct `technique` support-skill behavior, but these are clean-room mechanics rather than full original guild ability systems.
-- Browser webclient parity: command-first runtime is Evennia-backed; current browser-specific polish may still live in the legacy frontend.
+- Browser webclient parity: command-first runtime is Evennia-backed and a generated terminal-style transcript exists; browser-specific polish may still live in the legacy frontend.
 - Persistence/security hardening: Evennia account persistence exists, but this audit did not do a security review beyond command behavior.
 
 ## Next recommended work
 
 1. Add a small `help progression` topic summarizing the complete race -> puppet -> registrar -> train -> circle -> hunt/shop loop.
-2. Add an Evennia browser/telnet smoke transcript if tooling is available.
+2. Add live Evennia browser/webclient smoke if tooling is available.
 3. Expand guild-specific Circle 1-10 passive perks beyond `focus` and `technique` into deeper per-guild command behavior.
