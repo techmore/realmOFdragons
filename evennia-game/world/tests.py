@@ -293,6 +293,25 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("circle")
         self.assertEqual(character.db.circle, 2)
 
+    def test_joined_training_requires_own_guild_registrar_room_command(self):
+        registrars = guild_registrar_rooms()
+        character = self.make_character("Train Registrar Smoke")
+        self.walk_to_room(character, registrars["barbarian"])
+        character.execute_cmd("join guild")
+
+        town_green = find_built_room(START_ROOM_ID)
+        character.move_to(town_green, quiet=True)
+        character.execute_cmd("train")
+        self.assertEqual(character.db.skills["expertise"]["rank"], 0)
+
+        self.walk_to_room(character, registrars["bard"])
+        character.execute_cmd("train")
+        self.assertEqual(character.db.skills["expertise"]["rank"], 0)
+
+        self.walk_to_room(character, registrars["barbarian"])
+        character.execute_cmd("train")
+        self.assertEqual(character.db.skills["expertise"]["rank"], 1)
+
     def test_shop_buy_sell_inventory_and_hands_commands(self):
         character = self.make_character("Economy Smoke")
 
@@ -639,11 +658,19 @@ class DRProgressionTests(SimpleTestCase):
         self.assertEqual(resolve_skill_id(skills, "scouting"), "instinct")
 
     def test_train_primary_skill_ranks_up(self):
-        state = {"guild_id": "barbarian", "skills": build_starter_skills()}
+        state = {"guild_id": "barbarian", "skills": build_starter_skills(), "room_guild_id": "barbarian"}
         events = train_skill(state)
         self.assertIn("Expertise improves to rank 1.", events)
         self.assertIn("You drill Expertise.", events)
         self.assertEqual(state["skills"]["expertise"]["rank"], 1)
+
+    def test_train_requires_matching_guild_training_room(self):
+        state = {"guild_id": "barbarian", "skills": build_starter_skills(), "room_guild_id": None}
+        events = train_skill(state)
+        self.assertEqual(events, ["You need a suitable training room or your guild registrar to train here."])
+        state["room_guild_id"] = "bard"
+        events = train_skill(state)
+        self.assertEqual(events, ["This guildhall will not train your guild."])
 
     def test_circle_requires_guild(self):
         state = {"guild_id": "commoner", "guild_name": "Unaffiliated", "circle": 1, "skills": build_starter_skills()}

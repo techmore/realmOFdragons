@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Guild training is now room-aware: joined characters must train at their own guild registrar, with clear rejection from ordinary rooms or other guildhalls.
+- Added command smoke proving Barbarian training fails from Town Green and a Bard registrar, then succeeds at the Barbarian registrar.
+- Added progression unit coverage for matching and mismatched guild training room metadata.
 - Circle advancement now requires standing at the character's own guild registrar room; non-registrar rooms and other guild registrars report clear command feedback.
 - Added command smoke proving a Barbarian cannot circle from Town Green or a Bard registrar, then can advance at the Barbarian registrar.
 - Added progression unit coverage for missing and mismatched registrar metadata during Circle advancement.

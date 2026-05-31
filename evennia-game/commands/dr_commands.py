@@ -403,6 +403,7 @@ class CmdDRTrain(Command):
         state = {
             "guild_id": character.db.guild_id or "commoner",
             "skills": character.db.skills or build_starter_skills(),
+            "room_guild_id": character.location.db.guild if character.location else None,
         }
         events = train_skill(state, self.args.strip())
         character.db.skills = state["skills"]

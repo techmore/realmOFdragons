@@ -93,6 +93,11 @@ def train_skill(character_state, requested_skill=""):
 
     skills = character_state.setdefault("skills", build_starter_skills())
     guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    if guild_id != "commoner" and room_guild_id != guild_id:
+        if not room_guild_id:
+            return ["You need a suitable training room or your guild registrar to train here."]
+        return ["This guildhall will not train your guild."]
     primary_skill = primary_skill_for_guild(guild_id)
     skill_id = resolve_skill_id(skills, requested_skill) if requested_skill else primary_skill
     skill = skills.get(skill_id)
