@@ -650,6 +650,39 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(len(combat_pressure_scripts(character)), 0)
         character.execute_cmd("combat")
 
+    def test_all_crossing_enemies_can_be_fought_through_command_loop(self):
+        for room_id, data in ROOMS.items():
+            for enemy_id in data.get("targets", ()):
+                character = self.make_character(f"{ENEMIES[enemy_id]['name']} Loop Smoke")
+                character.db.health = 50
+                character.db.max_health = 50
+                self.walk_to_room(character, room_id)
+
+                scan_text = scan_room(character.location)
+                self.assertIn(enemy_id, scan_text)
+                character.execute_cmd("scan")
+                character.execute_cmd(f"target {enemy_id}")
+                self.assertEqual(character.db.engagement["target"], enemy_id)
+                self.assertEqual(character.db.engagement["range"], "missile")
+                self.assertEqual(len(combat_pressure_scripts(character)), 1)
+                character.execute_cmd("advance")
+                character.execute_cmd("advance")
+                self.assertEqual(character.db.engagement["range"], "melee")
+
+                attempts = 0
+                while enemy_id in room_enemy_ids(character.location) and attempts < 10:
+                    attempts += 1
+                    character.execute_cmd("bash")
+                    character.execute_cmd("wait")
+                    character.execute_cmd("wait")
+
+                self.assertNotIn(enemy_id, room_enemy_ids(character.location))
+                self.assertEqual(character.db.engagement["target"], None)
+                self.assertEqual(len(combat_pressure_scripts(character)), 0)
+                self.assertEqual(len(corpse_objects(character.location)), 1)
+                self.assertGreater(character.db.skills["brawling"]["pool"], 0)
+                self.assertGreater(character.db.skills["tactics"]["pool"], 0)
+
     def test_jab_requires_melee_and_defeats_enemy(self):
         character = self.make_character("Jab Smoke")
         self.walk_to_room(character, "crossing-RV02-004")

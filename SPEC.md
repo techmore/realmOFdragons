@@ -982,6 +982,18 @@ Next priority:
 
 - Continue the SPEC completion audit by checking enemy spawn and async combat criteria for broad enough command/script coverage.
 
+Implementation Notes - 2026-05-31, Evennia All-Enemy Command Combat Coverage
+
+Completed in the Evennia runtime:
+
+- Added command-level smoke that walks to every configured Crossing hunting room and fights every configured enemy spawn through `scan`, `target`, `advance`, `bash`, and `wait`.
+- The smoke verifies targeting, missile-to-melee range movement, active combat pressure scripts, enemy defeat, corpse creation, pressure cleanup, and combat skill-pool gains.
+- This strengthens evidence for the SPEC success criteria "Enemies spawn in Crossing hunting rooms" and "Combat is asynchronous, range-based, and skill-driven."
+
+Next priority:
+
+- Continue the SPEC completion audit by checking whether shop/NPC coverage exercises every configured shop, not just representative shops.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:
