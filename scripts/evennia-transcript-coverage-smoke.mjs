@@ -46,6 +46,7 @@ const requiredTokens = [
   '> appraise wild_herbs',
   '> target reed_snake',
   '> maneuvers',
+  '> shoot',
   '> advance',
   '> combat',
   '> tend',

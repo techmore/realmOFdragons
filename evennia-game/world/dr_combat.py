@@ -374,7 +374,8 @@ def maneuver_guide(character):
     if range_band == "missile":
         lines.extend(
             [
-                "- aim: set up a stronger hurl.",
+                "- aim: set up a stronger hurl or shot.",
+                "- shoot / fire: spend practice_arrows for a bow-style ranged attack.",
                 "- hurl / throw: attack now from range.",
                 "- advance: close to pole range.",
                 "- retreat: break engagement from missile range.",
@@ -383,7 +384,8 @@ def maneuver_guide(character):
     elif range_band == "pole":
         lines.extend(
             [
-                "- aim: set up a stronger hurl before the enemy is fully close.",
+                "- aim: set up a stronger hurl or shot before the enemy is fully close.",
+                "- shoot / fire: spend practice_arrows at close range, but expect pressure.",
                 "- hurl / throw: attack from pole range, but expect close pressure.",
                 "- advance: close to melee range for jab, bash, feint, and defenses.",
                 "- retreat: step back to missile range.",
@@ -406,7 +408,7 @@ def maneuver_guide(character):
         lines.append("- advance or retreat: recover a known range band.")
 
     if engagement.get("aimed"):
-        lines.append("Set state: aim is ready; your next hurl is stronger.")
+        lines.append("Set state: aim is ready; your next hurl or shot is stronger.")
     if engagement.get("feinted"):
         lines.append("Set state: feint is ready; your next jab or bash is stronger.")
     if character.db.balance == "dodging":
@@ -464,6 +466,8 @@ def maneuver_damage(character, maneuver):
         return 8 + attribute_value(character, "strength") // 5 + skill_rank(character, "brawling") // 10
     if maneuver == "hurl":
         return 3 + attribute_value(character, "agility") // 6 + skill_rank(character, "light_thrown") // 10
+    if maneuver == "shoot":
+        return 4 + attribute_value(character, "reflex") // 6 + skill_rank(character, "bows") // 10 + skill_rank(character, "missile_mastery") // 12
     return 1
 
 
@@ -775,7 +779,7 @@ def aim(character):
     character.db.balance = "aiming"
     character.db.roundtime = 1
     ensure_recovery(character)
-    return f"You take careful aim at {enemy['name']}. Your next hurl will strike harder."
+    return f"You take careful aim at {enemy['name']}. Your next hurl or shot will strike harder."
 
 
 def feint(character):
@@ -1011,6 +1015,82 @@ def hurl(character):
     ]
     if aimed:
         parts.append("Your careful aim adds force to the throw.")
+    if engagement.get("range") == "pole":
+        parts.append(apply_enemy_retaliation(character, enemy))
+    else:
+        parts.append(f"{enemy['name']} is still too far away to press back.")
+    parts.append(maneuver_status_text(character))
+    return "\n".join(parts)
+
+
+def consume_carried_item(character, item_id):
+    inventory = list(character.db.inventory or [])
+    if item_id not in inventory:
+        return False
+    inventory.remove(item_id)
+    character.db.inventory = inventory
+    for obj in list(character.contents):
+        if obj.db.object_type == "item" and obj.db.item_id == item_id:
+            obj.delete()
+            break
+    return True
+
+
+def shoot(character):
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot shoot."
+    if int(character.db.roundtime or 0) > 0:
+        return f"You are still recovering for {character.db.roundtime} pulse."
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target")
+    if not target_id:
+        return "Shoot at what? Target an enemy first."
+    if engagement.get("range") not in ("missile", "pole"):
+        return "You need missile or pole range to shoot."
+    if "practice_arrows" not in tuple(character.db.inventory or ()):
+        return "You need practice_arrows in your pack to shoot."
+
+    enemy = ENEMIES.get(target_id, {"name": target_id})
+    enemy_obj = find_enemy_object(character.location, target_id)
+    if not enemy_obj:
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
+        stop_combat_pressure(character)
+        return f"{enemy['name']} is no longer here."
+
+    consume_carried_item(character, "practice_arrows")
+    aimed = bool(engagement.get("aimed"))
+    damage = maneuver_damage(character, "shoot") + (2 if aimed else 0)
+    vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
+    character.db.balance = "recovering"
+    character.db.roundtime = 1
+    ensure_recovery(character)
+    engagement["aimed"] = False
+    character.db.engagement = engagement
+    skill_events = apply_combat_skill_gain(character, "bows")
+    skill_events.extend(apply_skill_pool_gain(character.db.skills, "missile_mastery", 1))
+    if vitality <= 0:
+        enemy_obj.delete()
+        create_corpse(character.location, target_id, enemy)
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
+        stop_combat_pressure(character)
+        loot_text = loot_preview(enemy)
+        parts = [
+            f"You shoot {enemy['name']} for {damage} damage. {enemy['name']} collapses.",
+            *skill_events,
+            loot_text,
+            "Suggested next command: loot corpse.",
+        ]
+        return "\n".join(parts)
+
+    enemy_obj.db.vitality = vitality
+    parts = [
+        f"You shoot {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.",
+        *skill_events,
+        "You spend a bundle of practice_arrows.",
+    ]
+    if aimed:
+        parts.append("Your careful aim adds force to the shot.")
     if engagement.get("range") == "pole":
         parts.append(apply_enemy_retaliation(character, enemy))
     else:

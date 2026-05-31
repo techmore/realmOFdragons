@@ -391,6 +391,10 @@ You are at missile range from reed_snake.
 > maneuvers
 Combat maneuvers list range-appropriate attacks, setup moves, defenses, and equipment hints.
 
+> shoot
+You shoot reed_snake from missile range using practice_arrows.
+Bows, Missile Mastery, and Tactics gain field experience.
+
 > advance
 You advance to pole range.
 
