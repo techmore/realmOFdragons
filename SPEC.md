@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added registrar-gated `boon` / `guild boon` rewards: each guild now has a distinct once-per-Circle persistent boon that feeds its guild skill and records claimed Circle rewards.
+- Expanded all-guild Circle 10 smoke coverage to claim every guild boon, prove the relevant guild skill advances, and prove duplicate claims do not stack.
 - Updated the generated Evennia smoke transcript to show registrar `practice`, field bandage purchase, bleeding prompts, `tend`, and First Aid wound-care coverage.
 - Added `tend` / `treat` as command-first wound care verbs that default to using a carried `field_bandage`.
 - Added smoke coverage proving `tend` treats bleeding, consumes the physical bandage, and advances First Aid while `treat field_bandage` preserves explicit item-use behavior.

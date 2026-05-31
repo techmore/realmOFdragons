@@ -11,7 +11,7 @@ from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, com
 from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_TECHNIQUES, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks, use_guild_focus, use_guild_practice, use_guild_technique
+from world.dr_progression import GUILD_BOONS, GUILD_TECHNIQUES, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_focus, use_guild_practice, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
 
 
@@ -354,6 +354,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("technique", CHARACTER_HELP_TEXT)
         self.assertIn("use registrar for guidance", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("abilities, focus, and technique", CHARACTER_HELP_TOPICS["progression"])
+        self.assertIn("boon", CHARACTER_HELP_TEXT)
         character.execute_cmd("drhelp")
         character.execute_cmd("help progression")
         character.execute_cmd("help room")
@@ -468,6 +469,7 @@ class DRCommandSmokeTests(TestCase):
             ability_text = "\n".join(guild_ability_summary(guild_id, character.db.circle))
             self.assertIn(f"{guild_name} abilities through Circle 10:", ability_text)
             self.assertIn("Circle 10 is the current supported ability cap.", ability_text)
+            self.assertIn("Registrar boon:", ability_text)
             self.assertEqual(ability_text.count("- Circle "), 10)
             primary_skill_id = primary_skill_for_guild(guild_id)
             focus_before = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
@@ -486,6 +488,13 @@ class DRCommandSmokeTests(TestCase):
             character.execute_cmd("guild practice")
             practice_after = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
             self.assertGreater(practice_after, practice_before)
+            boon_skill_id = GUILD_BOONS[guild_id]["skill"]
+            boon_before = (character.db.skills[boon_skill_id]["rank"] * 5) + character.db.skills[boon_skill_id]["pool"]
+            character.execute_cmd("boon")
+            character.execute_cmd("guild boon")
+            boon_after = (character.db.skills[boon_skill_id]["rank"] * 5) + character.db.skills[boon_skill_id]["pool"]
+            self.assertGreater(boon_after, boon_before)
+            self.assertEqual(character.db.guild_boons, [f"{guild_id}:10"])
             character.execute_cmd("circle")
             capped_status_text = "\n".join(
                 circle_status(
@@ -541,6 +550,15 @@ class DRCommandSmokeTests(TestCase):
             }
         )
         self.assertIn("join a guild", "\n".join(unaffiliated_practice))
+        unaffiliated_boon = use_guild_boon(
+            {
+                "guild_id": character.db.guild_id,
+                "circle": character.db.circle,
+                "skills": character.db.skills,
+                "room_guild_id": character.location.db.guild,
+            }
+        )
+        self.assertIn("join a guild", "\n".join(unaffiliated_boon))
 
         self.walk_to_room(character, guild_registrar_rooms()["barbarian"])
         character.execute_cmd("join guild")

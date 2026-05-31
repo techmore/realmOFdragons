@@ -43,6 +43,20 @@ GUILD_TECHNIQUES = {
     "warrior_mage": {"name": "Elemental Vector", "skill": "targeted_magic", "verb": "aligns aggression with targeted magic"},
 }
 
+GUILD_BOONS = {
+    "barbarian": {"name": "Battle Temper", "skill": "expertise", "text": "hardens your battle presence"},
+    "bard": {"name": "Resonant Memory", "skill": "bardic_lore", "text": "sets guild lore into practiced recall"},
+    "cleric": {"name": "Devotional Reserve", "skill": "theurgy", "text": "steadies your devotional reserves"},
+    "empath": {"name": "Gentle Hands", "skill": "empathy", "text": "turns careful attention into steadier care"},
+    "moon_mage": {"name": "Measured Fate", "skill": "astrology", "text": "marks a clearer pattern in your observations"},
+    "necromancer": {"name": "Hidden Discipline", "skill": "thanatology", "text": "locks dangerous study behind discipline"},
+    "paladin": {"name": "Oath-Bound Guard", "skill": "conviction", "text": "sets your oath into durable habit"},
+    "ranger": {"name": "Trail Memory", "skill": "instinct", "text": "binds trail signs into reflex"},
+    "thief": {"name": "Quiet Advantage", "skill": "backstab", "text": "banks a practical edge from silence"},
+    "trader": {"name": "Market Poise", "skill": "trading", "text": "turns negotiation into steadier judgment"},
+    "warrior_mage": {"name": "Elemental Reserve", "skill": "summoning", "text": "stores battlefield force in elemental focus"},
+}
+
 
 def normalize_skill_token(value):
     """Normalize player-entered skill names to internal ids."""
@@ -102,6 +116,9 @@ def guild_ability_summary(guild_id, circle):
     lines = [f"{guild_name} abilities through Circle {max_circle}:"]
     for step in range(1, max_circle + 1):
         lines.append(f"- Circle {step}: {theme}; {guild_circle_perk(guild_id, step)}.")
+    if guild_id in GUILD_BOONS:
+        boon = GUILD_BOONS[guild_id]
+        lines.append(f"Registrar boon: {boon['name']} supports {SKILLS[boon['skill']]}. Use `boon` at your registrar once per Circle.")
     if max_circle >= MAX_SUPPORTED_CIRCLE:
         lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported ability cap.")
     else:
@@ -161,6 +178,37 @@ def use_guild_practice(character_state):
     events = [f"You practice before the {GUILDS[guild_id]} registrar."]
     events.extend(use_guild_focus(character_state))
     events.extend(use_guild_technique(character_state))
+    return events
+
+
+def use_guild_boon(character_state):
+    """Claim a persistent once-per-Circle guild boon at the character's own registrar."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    boon = GUILD_BOONS.get(guild_id)
+    if not boon:
+        return ["You need to join a guild before claiming a guild boon."]
+    if room_guild_id != guild_id:
+        return ["Guild boons are granted only by your own registrar. Use `circle status` to find the right room."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    boon_key = f"{guild_id}:{circle}"
+    claimed = list(character_state.get("guild_boons") or [])
+    if boon_key in claimed:
+        return [f"{boon['name']} for Circle {circle} is already claimed."]
+
+    skills = character_state.setdefault("skills", build_starter_skills())
+    skill_id = boon["skill"]
+    skill = skills.get(skill_id)
+    if not skill:
+        return [f"{boon['name']} cannot find {skill_id} training."]
+    pulse = 2 + (circle // 2)
+    events = apply_skill_pool_gain(skills, skill_id, pulse)
+    claimed.append(boon_key)
+    character_state["guild_boons"] = claimed
+    events.append(f"{boon['name']} {boon['text']}, granting a Circle {circle} boon to {skill['name']} by {pulse}.")
+    events.append("This boon is now recorded on your guild progression.")
     return events
 
 
