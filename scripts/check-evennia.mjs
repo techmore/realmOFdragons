@@ -27,3 +27,4 @@ if (!existsSync(venvPython) || !existsSync(venvEvennia)) {
 run('compile', venvPython, ['-m', 'compileall', 'evennia-game/commands', 'evennia-game/typeclasses', 'evennia-game/world']);
 run('tests', venvEvennia, ['test', '--settings', 'settings.py', 'world'], { cwd: join(root, 'evennia-game') });
 run('webclient route smoke', 'node', ['scripts/evennia-webclient-smoke.mjs']);
+run('transcript freshness smoke', 'node', ['scripts/evennia-transcript-fresh-smoke.mjs']);

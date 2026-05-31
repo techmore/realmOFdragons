@@ -3,7 +3,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const root = process.cwd();
-const outputPath = join(root, 'EVENNIA_SMOKE_TRANSCRIPT.md');
+const outputPath = process.env.EVENNIA_TRANSCRIPT_OUTPUT || join(root, 'EVENNIA_SMOKE_TRANSCRIPT.md');
 
 const transcript = `# Evennia Command-First Smoke Transcript
 
