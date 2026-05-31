@@ -274,6 +274,17 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("sw")
         self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
 
+    def test_room_status_commands_describe_text_navigation_context(self):
+        character = self.make_character("Room Status Smoke")
+        character.execute_cmd("room")
+        character.execute_cmd("exits")
+        character.execute_cmd("where")
+        self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
+        self.walk_to_room(character, "crossing-RV02-002")
+        character.execute_cmd("room")
+        character.execute_cmd("scan")
+        self.assertEqual(character.location.db.targets, ("rv-wolf-cub",))
+
     def prepare_circle_two_requirements(self, character):
         primary = primary_skill_for_guild(character.db.guild_id)
         character.db.skills[primary]["rank"] = 4

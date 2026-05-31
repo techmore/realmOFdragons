@@ -11,12 +11,12 @@ from evennia.commands.command import Command
 from evennia.utils.create import create_object
 
 from world.dr_data import ATTRIBUTES, RACES, SKILLSETS, build_starter_skills
-from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, revive, scan_room, stance, target_enemy, wait_recover
+from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, revive, room_enemy_ids, scan_room, stance, target_enemy, wait_recover
 from world.dr_economy import buy_item, equipment_text, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, circle_status, train_skill, unlocked_guild_perks
-from world.dr_world import START_ROOM_ID, build_crossing_world, find_built_room
+from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room
 
 
 CHARACTER_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z '-]{2,29}$")
@@ -36,7 +36,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Dragon Realms commands:",
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
         "Guilds/Circles: join guild, guild/perks, train, circle, circle status.",
-        "Movement: use Evennia exits by direction; guilds and shops are in Crossing rooms.",
+        "Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.",
         "Shops: shop, shop talk, shop stock, shop refresh, buy <item>, sell <item>, inventory, hands, equipment.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, revive/stand.",
     ]
@@ -295,6 +295,63 @@ class CmdDRHelp(Command):
 
     def func(self):
         self.caller.msg(CHARACTER_HELP_TEXT)
+
+
+class CmdDRRoom(Command):
+    """
+    Show DR-oriented room and navigation status.
+
+    Usage:
+      room
+      exits
+      where
+    """
+
+    key = "room"
+    aliases = ["exits", "where"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        room = character.location
+        if not room:
+            character.msg("You are nowhere.")
+            return
+
+        exits = []
+        for exit_obj in sorted(room.exits, key=lambda candidate: candidate.key):
+            alias = DIRECTION_ALIASES.get(exit_obj.key)
+            exits.append(f"{exit_obj.key} ({alias})" if alias else exit_obj.key)
+
+        lines = [
+            room.key,
+            room.db.desc or "There is nothing notable here.",
+            f"Room ID: {room.db.dr_room_id or 'unknown'}.",
+            "Exits: " + (", ".join(exits) if exits else "none."),
+        ]
+
+        guild_id = room.db.guild
+        if guild_id:
+            lines.append(f"Guild registrar: {GUILDS.get(guild_id, guild_id)}.")
+
+        shop = room.db.shop
+        if shop:
+            lines.append(f"Shop: {shop['name']} ({shop['keeper']}).")
+
+        enemies = room_enemy_ids(room)
+        if enemies:
+            lines.append("Enemies: " + ", ".join(enemies) + ".")
+
+        visible = [
+            obj.key
+            for obj in room.contents
+            if obj is not character and not obj.destination and not obj.db.enemy_id
+        ]
+        if visible:
+            lines.append("Also here: " + ", ".join(sorted(visible)) + ".")
+
+        character.msg("\n".join(lines))
 
 
 class CmdDRSkills(Command):

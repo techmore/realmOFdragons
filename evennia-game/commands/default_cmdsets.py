@@ -16,7 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 
-from commands.dr_commands import CmdDRAccountCharacters, CmdDRAccountCreateCharacter, CmdDRAccountHelp, CmdDRAdvance, CmdDRAppraise, CmdDRAttributes, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCombat, CmdDRCreateCharacter, CmdDRDefend, CmdDREquipment, CmdDRFlee, CmdDRGet, CmdDRGuildPerks, CmdDRHands, CmdDRHealth, CmdDRHelp, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRerollAttributes, CmdDRRespawn, CmdDRRetreat, CmdDRRevive, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRStance, CmdDRTarget, CmdDRTrain, CmdDRWait, CmdDRWear, CmdDRWield
+from commands.dr_commands import CmdDRAccountCharacters, CmdDRAccountCreateCharacter, CmdDRAccountHelp, CmdDRAdvance, CmdDRAppraise, CmdDRAttributes, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCombat, CmdDRCreateCharacter, CmdDRDefend, CmdDREquipment, CmdDRFlee, CmdDRGet, CmdDRGuildPerks, CmdDRHands, CmdDRHealth, CmdDRHelp, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRerollAttributes, CmdDRRespawn, CmdDRRetreat, CmdDRRevive, CmdDRRoom, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRStance, CmdDRTarget, CmdDRTrain, CmdDRWait, CmdDRWear, CmdDRWield
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -60,6 +60,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDRRespawn())
         self.add(CmdDRRetreat())
         self.add(CmdDRRevive())
+        self.add(CmdDRRoom())
         self.add(CmdDRScan())
         self.add(CmdDRScore())
         self.add(CmdDRSell())

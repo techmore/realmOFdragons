@@ -867,6 +867,18 @@ Next priority:
 
 - Continue command-first Evennia parity by expanding text movement/status feedback and reducing any remaining browser-first assumptions.
 
+Implementation Notes - 2026-05-31, Evennia Room Status Command
+
+Completed in the Evennia runtime:
+
+- Added a DR-specific `room` command with `exits` and `where` aliases for command-first room context.
+- Room status now reports room title, description, room ID, exits with MUD aliases, guild registrar metadata, shop metadata, enemies, and visible non-exit objects.
+- Updated help text and smoke coverage so text navigation context is exercised from Town Green and a beginner hunting room.
+
+Next priority:
+
+- Expand beginner hunting-room text feedback around enemy difficulty, engagement range, and safe recovery commands.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:
