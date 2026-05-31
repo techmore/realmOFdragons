@@ -15,6 +15,20 @@ GUILD_CIRCLE_PERKS = {
     for guild_id, guild_name in GUILDS.items()
 }
 
+GUILD_ABILITY_THEMES = {
+    "barbarian": "martial focus and combat presence",
+    "bard": "performance, lore, and group inspiration",
+    "cleric": "devotion, recovery, and holy resolve",
+    "empath": "care, diagnostics, and survival support",
+    "moon_mage": "prediction, perception, and careful timing",
+    "necromancer": "forbidden study and hidden resilience",
+    "paladin": "oaths, defense, and steady protection",
+    "ranger": "trailcraft, scouting, and wilderness movement",
+    "thief": "stealth, misdirection, and urban awareness",
+    "trader": "appraisal, negotiation, and logistics",
+    "warrior_mage": "battle magic, elemental focus, and aggression",
+}
+
 
 def normalize_skill_token(value):
     """Normalize player-entered skill names to internal ids."""
@@ -61,6 +75,24 @@ def unlocked_guild_perks(guild_id, circle):
 
     max_circle = min(10, max(1, int(circle or 1)))
     return [guild_circle_perk(guild_id, step) for step in range(1, max_circle + 1)]
+
+
+def guild_ability_summary(guild_id, circle):
+    """Return user-visible clean-room ability text unlocked through the current Circle."""
+
+    if guild_id == "commoner" or guild_id not in GUILDS:
+        return ["You have no guild abilities yet. Visit a registrar and use `join guild`."]
+    max_circle = min(10, max(1, int(circle or 1)))
+    guild_name = GUILDS[guild_id]
+    theme = GUILD_ABILITY_THEMES.get(guild_id, "guild training")
+    lines = [f"{guild_name} abilities through Circle {max_circle}:"]
+    for step in range(1, max_circle + 1):
+        lines.append(f"- Circle {step}: {theme}; {guild_circle_perk(guild_id, step)}.")
+    if max_circle >= MAX_SUPPORTED_CIRCLE:
+        lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported ability cap.")
+    else:
+        lines.append("Use `circle status` to see what is needed for the next unlock.")
+    return lines
 
 
 def next_circle_requirement(circle):

@@ -15,7 +15,7 @@ from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend
 from world.dr_economy import buy_item, equipment_text, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
-from world.dr_progression import advance_circle, circle_status, train_skill, unlocked_guild_perks
+from world.dr_progression import advance_circle, circle_status, guild_ability_summary, train_skill, unlocked_guild_perks
 from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room
 
 
@@ -37,7 +37,7 @@ CHARACTER_HELP_TEXT = "\n".join(
     [
         "Dragon Realms commands:",
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
-        "Guilds/Circles: join guild, guild/perks, train, circle, circle status.",
+        "Guilds/Circles: join guild, guild/perks, abilities, train, circle, circle status.",
         "Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.",
         "Shops: shop, shop talk, shop stock, shop refresh, buy <item>, sell <item>, inventory, hands, equipment.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, revive/stand.",
@@ -617,6 +617,27 @@ class CmdDRGuildPerks(Command):
         lines = [f"Guild: {guild_name}. Circle {circle}.", "Unlocked milestones:"]
         lines.extend(f"- {perk}" for perk in perks)
         character.msg("\n".join(lines))
+
+
+class CmdDRGuildAbilities(Command):
+    """
+    Show guild ability flavor unlocked through the current Circle.
+
+    Usage:
+      abilities
+      guild abilities
+    """
+
+    key = "abilities"
+    aliases = ["guild abilities", "ability"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        guild_id = character.db.guild_id or "commoner"
+        circle = int(character.db.circle or 1)
+        character.msg("\n".join(guild_ability_summary(guild_id, circle)))
 
 
 class CmdDRTrain(Command):

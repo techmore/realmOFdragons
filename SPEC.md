@@ -868,6 +868,20 @@ Next priority:
 
 - Add an Evennia terminal/telnet transcript or command-runner smoke if tooling is available; otherwise continue guild-specific flavor/perk work.
 
+Implementation Notes - 2026-05-31, Evennia Guild Ability Summaries
+
+Completed in the Evennia runtime:
+
+- Added clean-room guild ability summary data for every guild, themed by guild identity and unlocked through Circle 10.
+- Added `abilities`, `guild abilities`, and `ability` commands so players can inspect current guild ability flavor separately from milestone text.
+- General help now advertises `abilities` alongside guild/perk/training/circling commands.
+- All-guild Circle 10 smoke now exercises `abilities` and `guild abilities`, verifying ten Circle ability entries and the Circle 10 ability cap for every guild.
+- Updated the parity audit residual risk from "milestone text only" to "clean-room thematic ability surfaces, not full original guild ability systems."
+
+Next priority:
+
+- Add an Evennia terminal/telnet transcript or command-runner smoke if tooling is available; otherwise expand one guild ability into concrete command behavior.
+
 Implementation Notes - 2026-05-31, Evennia Direction Aliases
 
 Completed in the Evennia runtime:

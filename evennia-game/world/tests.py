@@ -11,7 +11,7 @@ from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scrip
 from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import advance_circle, circle_status, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks
+from world.dr_progression import advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
 
 
@@ -430,6 +430,12 @@ class DRCommandSmokeTests(TestCase):
             self.assertEqual(len(character.db.guild_perks), 10)
             self.assertEqual(character.db.guild_perks[-1], guild_circle_perk(guild_id, 10))
             character.execute_cmd("perks")
+            character.execute_cmd("abilities")
+            character.execute_cmd("guild abilities")
+            ability_text = "\n".join(guild_ability_summary(guild_id, character.db.circle))
+            self.assertIn(f"{guild_name} abilities through Circle 10:", ability_text)
+            self.assertIn("Circle 10 is the current supported ability cap.", ability_text)
+            self.assertEqual(ability_text.count("- Circle "), 10)
             character.execute_cmd("circle")
             capped_status_text = "\n".join(
                 circle_status(
