@@ -575,6 +575,52 @@ class DRCommandSmokeTests(TestCase):
             sell_item(character, "small_blade"),
         )
 
+    def test_all_configured_shops_support_dialogue_buy_sell_and_refresh(self):
+        for room_id, shop in SHOPS.items():
+            character = self.make_character(f"{shop['keeper']} Shop Loop Smoke")
+            character.db.wallet = {"plat": 0, "trias": 500, "lucan": 0, "silk": 0}
+            self.walk_to_room(character, room_id)
+
+            shop_text = format_shop(character.location)
+            self.assertIn(shop["name"], shop_text)
+            self.assertIn(shop["keeper"], shop_text)
+            self.assertIn("buy <item>", shop_text)
+            self.assertIn("sell <item>", shop_text)
+            talk_text = shop_talk(character.location)
+            self.assertIn(shop["dialogue"], talk_text)
+            self.assertIn("trades:", talk_text)
+            character.execute_cmd("shop")
+            character.execute_cmd("shop talk")
+            character.execute_cmd("shop stock")
+
+            for item_id in shop["stock"]:
+                character.execute_cmd("shop refresh")
+                self.assertEqual(character.location.db.shop_stock, tuple(shop["stock"]))
+                before_wallet = character.db.wallet["trias"]
+                character.execute_cmd(f"buy {item_id}")
+                self.assertLess(character.db.wallet["trias"], before_wallet)
+                self.assertNotIn(item_id, character.location.db.shop_stock)
+                self.assertTrue(
+                    [
+                        obj
+                        for obj in character.contents
+                        if obj.db.object_type == "item" and obj.db.item_id == item_id
+                    ]
+                )
+
+                character.execute_cmd(f"sell {item_id}")
+                self.assertIn(item_id, character.location.db.shop_stock)
+                self.assertFalse(
+                    [
+                        obj
+                        for obj in character.contents
+                        if obj.db.object_type == "item" and obj.db.item_id == item_id
+                    ]
+                )
+
+            character.execute_cmd("shop refresh")
+            self.assertEqual(character.location.db.shop_stock, tuple(shop["stock"]))
+
     def test_wield_wear_and_equipment_commands(self):
         character = self.make_character("Equipment Smoke")
         self.walk_to_room(character, "crossing-RV02-002")

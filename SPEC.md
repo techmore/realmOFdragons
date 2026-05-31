@@ -994,6 +994,18 @@ Next priority:
 
 - Continue the SPEC completion audit by checking whether shop/NPC coverage exercises every configured shop, not just representative shops.
 
+Implementation Notes - 2026-05-31, Evennia All-Shop Transaction Coverage
+
+Completed in the Evennia runtime:
+
+- Added command/economy smoke that visits every configured Crossing shop room.
+- The smoke verifies shop overview affordances, keeper dialogue, stock display, buying every stocked item, stock depletion, physical carried item objects, selling every stocked item, restock behavior, and manual refresh back to canonical stock.
+- This strengthens evidence for the SPEC success criterion "Shops/NPCs work with buy/sell/dialogue" across all configured shops rather than one representative shop.
+
+Next priority:
+
+- Continue the SPEC completion audit by checking whether guild join/progression coverage is strong enough to mark Circle 1-10 parity complete.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:
