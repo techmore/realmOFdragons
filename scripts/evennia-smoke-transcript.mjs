@@ -149,8 +149,19 @@ You are carrying a practice blade.
 > wield practice blade
 You wield a practice blade.
 
+> buy leather_shield
+You buy a leather shield and hold it in your left hand.
+
+> wear leather_shield
+You wear the leather shield from your left hand.
+
+> repair leather_shield
+You repair the leather shield, improving its condition to maintained.
+Shield Usage and Light Armor gain maintenance practice.
+
 > equipment
 Right hand: practice blade.
+Worn: leather shield, condition: maintained.
 
 > sell practice blade
 You sell a practice blade.
@@ -227,6 +238,7 @@ You pick up the dropped item.
 - Guild focus, technique, practice, and boon behavior: the all-guild Circle 10 command smoke invokes \`focus\`, \`guild focus\`, \`technique\`, \`guild technique\`, \`practice\`, \`guild practice\`, \`boon\`, and \`guild boon\`.
 - Crossing movement: \`DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room\`.
 - Shops/items/equipment: \`DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh\` and \`test_wield_wear_and_equipment_commands\`.
+- Gear upkeep: \`DRCommandSmokeTests.test_wield_wear_and_equipment_commands\` covers repair and equipment condition.
 - Beginner content breadth: all-room, all-shop, and all-enemy smoke covers the Reed-Choked Culvert, Culvert Cache, and Reed Snake.
 - Fieldcraft: \`DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills\`.
 - Wound care: \`DRCommandSmokeTests.test_tend_defaults_to_field_bandage_and_treats_bleeding\` and \`test_field_bandage_treats_combat_bleeding\`.

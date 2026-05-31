@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Updated the generated Evennia smoke transcript so the equipment path includes buying, wearing, and repairing a leather shield.
 - Added `repair` / `maintain` gear upkeep for worn/held beginner equipment, with condition tracking on worn shields.
 - Added smoke coverage proving shield maintenance updates equipment condition and advances Shield Usage plus Light Armor.
 - Updated the generated Evennia smoke transcript so the user journey includes `forage`, `get wild_herbs`, and selling gathered herbs.
