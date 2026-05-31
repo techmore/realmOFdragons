@@ -113,6 +113,7 @@ Evidence:
 - `DRCommandSmokeTests.test_jab_requires_melee_and_defeats_enemy` verifies melee gating, roundtime, recovery, skill-pool gains, corpse creation, loot, and cleanup.
 - `DRCommandSmokeTests.test_race_attributes_and_weapon_skill_modify_combat_damage` verifies attribute and skill-rank damage effects.
 - `DRCommandSmokeTests.test_combat_pressure_script_damages_engaged_character` verifies async enemy pressure.
+- `DRCommandSmokeTests.test_field_bandage_treats_combat_bleeding` and bleeding guidance smoke verify wound response suggestions and treatment.
 - `DRCommandSmokeTests.test_enemy_pressure_incapacitation_and_revive` verifies incapacitation/revive behavior.
 - `DRCommandSmokeTests.test_bash_defend_and_flee_commands` verifies bash, defend, flee, roundtime, and pressure cleanup.
 - `DRCommandSmokeTests.test_combat_maneuvers_deduplicate_recovery_scripts` verifies recovery script deduplication.

@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Combat prompts now suggest `use field_bandage` for bleeding characters carrying one, or retreating to buy one when none is carried.
+- Added smoke coverage for bleeding response guidance with and without a field bandage.
 - Field bandage use now feeds First Aid skill progress, tying wound treatment back into Circle 1-10 skill advancement.
 - Expanded bleeding treatment smoke coverage to prove bandage use reports First Aid practice and mutates the First Aid skill pool.
 - Added a persistent `BleedingScript` so untreated bleeding wounds tick asynchronously after enemy pressure.

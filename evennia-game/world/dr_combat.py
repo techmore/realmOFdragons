@@ -89,6 +89,11 @@ def engagement_suggestion(character, enemy_id=None):
         return "Suggested next command: revive."
     if int(character.db.roundtime or 0) > 0:
         return "Suggested next command: wait."
+    if character.db.bleeding:
+        inventory = tuple(character.db.inventory or ())
+        if "field_bandage" in inventory:
+            return "Suggested next command: use field_bandage."
+        return "Suggested next command: retreat and buy field_bandage."
 
     engagement = dict(character.db.engagement or {})
     target_id = engagement.get("target") or enemy_id

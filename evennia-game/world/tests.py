@@ -1031,6 +1031,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertTrue(character.db.bleeding)
         self.assertEqual(len(bleeding_scripts(character)), 1)
         self.assertIn("Wounds: bleeding", health_text(character))
+        self.assertIn("Suggested next command: use field_bandage.", combat_status(character))
         bleeding_scripts(character)[0].at_repeat()
         self.assertEqual(character.db.health, 27)
         first_aid_before = character.db.skills["first_aid"]["pool"]
@@ -1041,6 +1042,16 @@ class DRCommandSmokeTests(TestCase):
         self.assertFalse(character.db.bleeding)
         self.assertEqual(len(bleeding_scripts(character)), 0)
         self.assertIn("Wounds: not bleeding", health_text(character))
+
+    def test_bleeding_without_bandage_suggests_buying_one(self):
+        character = self.make_character("Bleeding Guidance Smoke")
+        self.walk_to_room(character, "crossing-RV02-006")
+        character.execute_cmd("target rv-ditch-rat")
+        character.execute_cmd("advance")
+        pressure_script = combat_pressure_scripts(character)[0]
+        pressure_script.at_repeat()
+        self.assertTrue(character.db.bleeding)
+        self.assertIn("Suggested next command: retreat and buy field_bandage.", combat_status(character))
 
     def test_enemy_pressure_incapacitation_and_revive(self):
         character = self.make_character("Incapacitation Smoke")
