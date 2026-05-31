@@ -514,6 +514,12 @@ class DRCommandSmokeTests(TestCase):
             self.train_and_circle_to(character, 10)
             self.assertEqual(len(character.db.guild_perks), 10)
             self.assertEqual(character.db.guild_perks[-1], guild_circle_perk(guild_id, 10))
+            reloaded_circle_ten = ObjectDB.objects.get(id=character.id)
+            self.assertEqual(reloaded_circle_ten.db.guild_id, guild_id)
+            self.assertEqual(reloaded_circle_ten.db.guild_name, guild_name)
+            self.assertEqual(reloaded_circle_ten.db.circle, 10)
+            self.assertEqual(reloaded_circle_ten.db.guild_perks, unlocked_guild_perks(guild_id, 10))
+            self.assertEqual(reloaded_circle_ten.location.db.dr_room_id, registrars[guild_id])
             character.execute_cmd("perks")
             character.execute_cmd("abilities")
             character.execute_cmd("guild abilities")
@@ -560,6 +566,8 @@ class DRCommandSmokeTests(TestCase):
             boon_after = (character.db.skills[boon_skill_id]["rank"] * 5) + character.db.skills[boon_skill_id]["pool"]
             self.assertGreater(boon_after, boon_before)
             self.assertEqual(character.db.guild_boons, [f"{guild_id}:10"])
+            reloaded_boon = ObjectDB.objects.get(id=character.id)
+            self.assertEqual(reloaded_boon.db.guild_boons, [f"{guild_id}:10"])
             character.execute_cmd("circle")
             capped_status_text = "\n".join(
                 circle_status(
