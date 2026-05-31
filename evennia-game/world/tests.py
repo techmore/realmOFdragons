@@ -7,7 +7,7 @@ from evennia.accounts.models import AccountDB
 from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_account, create_object, create_script
 
-from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary
+from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary, parse_account_character_creation
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, health_text, hurl, jab, maneuver_guide, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, talk_shopkeeper, task_status, use_item, wallet_text
@@ -83,6 +83,8 @@ class DRAccountCreationTests(TestCase):
         self.assertIn("create character <name> = <race name>", empty_roster_text)
         self.assertIn("Guilds are joined in-world", empty_roster_text)
         self.assertIn("puppet <name>", ACCOUNT_HELP_TEXT)
+        self.assertIn("as <race>", ACCOUNT_HELP_TEXT)
+        self.assertIn("with race <race>", ACCOUNT_HELP_TEXT)
         self.assertIn("do not choose a guild at account creation", ACCOUNT_HELP_TEXT)
 
     def test_account_roster_lists_multiple_characters(self):
@@ -91,6 +93,23 @@ class DRAccountCreationTests(TestCase):
         account.execute_cmd("create character Brin = human")
         self.assertEqual(len(list(account.characters.all())), 2)
         account.execute_cmd("characters")
+
+    def test_account_create_character_accepts_natural_race_syntax(self):
+        self.assertEqual(parse_account_character_creation("Aela as Elf"), ("Aela", "Elf"))
+        self.assertEqual(parse_account_character_creation("Brin race Human"), ("Brin", "Human"))
+        self.assertEqual(parse_account_character_creation("character Cora with race Dwarf"), ("Cora", "Dwarf"))
+        account = create_account("NaturalCreateAccount", None, "test-password")
+        account.execute_cmd("create character Aela as elf")
+        account.execute_cmd("create character Brin race human")
+        account.execute_cmd("create character Cora with race dwarf")
+        characters = {character.key: character for character in account.characters.all()}
+        self.assertEqual(characters["Aela"].db.race, "elf")
+        self.assertEqual(characters["Brin"].db.race, "human")
+        self.assertEqual(characters["Cora"].db.race, "dwarf")
+        for character in characters.values():
+            self.assertEqual(character.db.guild_id, "commoner")
+            self.assertEqual(character.db.circle, 1)
+            self.assertTrue(character.db.creation_complete)
 
     def test_account_create_character_rejects_duplicate_roster_name(self):
         account = create_account("DuplicateAccount", None, "test-password")

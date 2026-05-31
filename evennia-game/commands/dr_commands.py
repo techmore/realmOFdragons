@@ -25,7 +25,7 @@ CHARACTER_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z '-]{2,29}$")
 ACCOUNT_HELP_TEXT = "\n".join(
     [
         "Dragon Realms account commands:",
-        "create character <name> = <race> - create an unaffiliated Circle 1 character.",
+        "create character <name> = <race> - create an unaffiliated Circle 1 character. Also accepts `as <race>` or `with race <race>`.",
         "characters / roster - list playable characters on this account.",
         "puppet <name> - enter Crossing as that character.",
         "Guilds are joined in-world after puppeting; do not choose a guild at account creation.",
@@ -107,6 +107,25 @@ def format_route(current_room_id, destination_room_id):
     if not path:
         return "route unknown"
     return "go " + ", ".join(path)
+
+
+def parse_account_character_creation(args):
+    """Parse account-side race-only character creation syntax."""
+
+    args = (args or "").strip()
+    if args.startswith("character"):
+        args = args[len("character") :].strip()
+    if not args:
+        return "", ""
+    if "=" in args:
+        return [part.strip() for part in args.split("=", 1)]
+
+    lowered = args.lower()
+    for separator in (" with race ", " race ", " as "):
+        index = lowered.rfind(separator)
+        if index > 0:
+            return args[:index].strip(), args[index + len(separator) :].strip()
+    return args, ""
 
 
 def journey_summary(character):
@@ -226,6 +245,8 @@ class CmdDRAccountCreateCharacter(Command):
     Usage:
       create character
       create character <name> = <race name>
+      create character <name> as <race name>
+      create character <name> with race <race name>
 
     Guilds are not chosen here; new characters enter Crossing unaffiliated.
     """
@@ -239,16 +260,11 @@ class CmdDRAccountCreateCharacter(Command):
         account = self.account or self.caller
         args = self.args.strip()
         races = ", ".join(RACES.values())
-        if args.startswith("character"):
-            args = args[len("character") :].strip()
-        if not args:
-            account.msg(f"Usage: create character <name> = <race name>\nRaces: {races}.")
-            return
-        if "=" not in args:
-            account.msg(f"Usage: create character <name> = <race name>\nRaces: {races}.")
+        name, race_name = parse_account_character_creation(args)
+        if not name or not race_name:
+            account.msg(f"Usage: create character <name> = <race name> | create character <name> as <race name> | create character <name> with race <race name>\nRaces: {races}.")
             return
 
-        name, race_name = [part.strip() for part in args.split("=", 1)]
         race_id = normalize_race_token(race_name)
         if not name:
             account.msg("Name is required. Usage: create character <name> = <race name>")

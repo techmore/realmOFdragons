@@ -21,7 +21,7 @@ Validation:
 \`\`\`text
 > account help
 Dragon Realms account commands:
-create character <name> = <race> - create an unaffiliated Circle 1 character.
+create character <name> = <race> - create an unaffiliated Circle 1 character. Also accepts \`as <race>\` or \`with race <race>\`.
 characters / roster - list playable characters on this account.
 puppet <name> - enter Crossing as that character.
 Guilds are joined in-world after puppeting; do not choose a guild at account creation.
@@ -32,6 +32,9 @@ Usage: create character <name> = <race name>
 
 > create character Aela = Elf
 Aela enters Crossing as an unaffiliated Circle 1 Elf.
+
+> create character Brin as Human
+Brin enters Crossing as an unaffiliated Circle 1 Human.
 
 > roster
 Characters:

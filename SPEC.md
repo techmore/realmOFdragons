@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Expanded account-side race-only character creation syntax so `create character <name> as <race>`, `race <race>`, and `with race <race>` forms create unaffiliated Circle 1 starts with smoke and transcript coverage.
 - Added registrar-gated `lesson`/`guild lesson` instruction for every guild, with Circle-scaled lesson skill training, help/plan/registrar guidance, all-guild Circle 10 smoke, and transcript coverage.
 - Added the Fallen Reed Causeway beyond the Reed Bank Blind with a Causeway Turtle enemy, Causeway Reed Pack shop, forage support, shop task, and transcript coverage.
 - Expanded direct shopkeeper dialogue topics so `ask stock`, `ask task`, and `ask trade` return focused NPC responses with all-shop smoke and transcript coverage.

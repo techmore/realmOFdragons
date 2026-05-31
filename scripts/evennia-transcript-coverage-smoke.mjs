@@ -8,6 +8,7 @@ const transcript = readFileSync(transcriptPath, 'utf8');
 
 const requiredTokens = [
   'create character <name> = <race>',
+  '> create character Brin as Human',
   'puppet <name>',
   '> join guild',
   '> guild plan',
