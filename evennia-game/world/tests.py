@@ -1033,8 +1033,11 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Wounds: bleeding", health_text(character))
         bleeding_scripts(character)[0].at_repeat()
         self.assertEqual(character.db.health, 27)
+        first_aid_before = character.db.skills["first_aid"]["pool"]
         bandage_text = use_item(character, "field_bandage")
         self.assertIn("bleeding stops", bandage_text)
+        self.assertIn("First Aid", bandage_text)
+        self.assertGreater(character.db.skills["first_aid"]["pool"], first_aid_before)
         self.assertFalse(character.db.bleeding)
         self.assertEqual(len(bleeding_scripts(character)), 0)
         self.assertIn("Wounds: not bleeding", health_text(character))

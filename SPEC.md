@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Field bandage use now feeds First Aid skill progress, tying wound treatment back into Circle 1-10 skill advancement.
+- Expanded bleeding treatment smoke coverage to prove bandage use reports First Aid practice and mutates the First Aid skill pool.
 - Added a persistent `BleedingScript` so untreated bleeding wounds tick asynchronously after enemy pressure.
 - Extended field bandage smoke coverage to prove bleeding tick damage starts after pressure and stops when the bandage is used.
 - Added a visible `bleeding` wound state from enemy pressure and combat status/health output.

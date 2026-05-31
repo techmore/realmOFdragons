@@ -410,7 +410,13 @@ def use_item(character, item_id):
     if objects:
         objects[0].delete()
     bleeding_text = " The bleeding stops." if was_bleeding else ""
-    return f"You bind the worst cuts with {item['name']} and recover {healed} health.{bleeding_text}"
+    from world.dr_progression import apply_skill_pool_gain
+
+    skills = character.db.skills or {}
+    skill_events = apply_skill_pool_gain(skills, "first_aid", 2)
+    character.db.skills = skills
+    training_text = (" " + " ".join(skill_events)) if skill_events else " First Aid practice improves."
+    return f"You bind the worst cuts with {item['name']} and recover {healed} health.{bleeding_text}{training_text}"
 
 
 def inventory_text(character):
