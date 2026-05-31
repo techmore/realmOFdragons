@@ -12,7 +12,7 @@ from evennia.utils.create import create_object
 
 from world.dr_data import ATTRIBUTES, RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, revive, scan_room, stance, target_enemy, wait_recover
-from world.dr_economy import buy_item, equipment_text, format_shop, get_item, hands_text, inventory_text, sell_item, shop_talk, wear_item, wield_item
+from world.dr_economy import buy_item, equipment_text, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, circle_status, train_skill, unlocked_guild_perks
@@ -493,6 +493,8 @@ class CmdDRShop(Command):
     Usage:
       shop
       shop talk
+      shop stock
+      shop refresh
     """
 
     key = "shop"
@@ -503,6 +505,12 @@ class CmdDRShop(Command):
         action = self.args.strip().lower()
         if action == "talk":
             self.caller.msg(shop_talk(self.caller.location))
+            return
+        if action == "stock":
+            self.caller.msg(format_shop_stock(self.caller.location))
+            return
+        if action == "refresh":
+            self.caller.msg(refresh_shop_stock(self.caller.location))
             return
         self.caller.msg(format_shop(self.caller.location))
 

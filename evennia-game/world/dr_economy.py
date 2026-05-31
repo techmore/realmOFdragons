@@ -101,6 +101,40 @@ def current_shop(room):
     return SHOPS.get(room.db.dr_room_id)
 
 
+def current_stock(room):
+    shop = current_shop(room)
+    if not shop:
+        return ()
+    stock = room.db.shop_stock if room and room.db.shop_stock else shop["stock"]
+    return tuple(item_id for item_id in stock if item_id in ITEMS)
+
+
+def refresh_shop_stock(room):
+    shop = current_shop(room)
+    if not shop:
+        return "There is no shop counter here."
+    room.db.shop_stock = tuple(shop["stock"])
+    room.db.shop_last_refresh = "manual"
+    return f"{shop['keeper']} refreshes the stock at {shop['name']}."
+
+
+def format_shop_stock(room):
+    shop = current_shop(room)
+    if not shop:
+        return "There is no shop counter here."
+    stock = current_stock(room)
+    lines = [
+        f"{shop['name']} stock:",
+        f"Refresh: {room.db.shop_last_refresh or 'initial'}.",
+    ]
+    for item_id in stock:
+        item = ITEMS[item_id]
+        lines.append(f"- {item_id}: {item['name']} ({item['price']} trias)")
+    if not stock:
+        lines.append("- empty")
+    return "\n".join(lines)
+
+
 def create_item_object(item_id, location, home=None):
     item = ITEMS[item_id]
     item_obj = create_object(
@@ -134,7 +168,7 @@ def format_shop(room):
         f"{shop['name']} is watched by {shop['keeper']}.",
         "Goods for sale:",
     ]
-    for item_id in shop["stock"]:
+    for item_id in current_stock(room):
         item = ITEMS[item_id]
         lines.append(f"{item_id}: {item['name']} - {item['price']} trias")
     return "\n".join(lines)
@@ -155,7 +189,7 @@ def buy_item(character, item_id):
         return "There is no shop counter here."
     if not item_id:
         return "Buy what?"
-    if item_id not in shop["stock"] or item_id not in ITEMS:
+    if item_id not in current_stock(character.location) or item_id not in ITEMS:
         return f'The shop does not stock "{item_id}".'
     item = ITEMS[item_id]
     wallet = character.db.wallet

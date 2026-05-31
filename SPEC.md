@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added room-backed shop stock helpers plus `shop stock` and `shop refresh` commands for explicit NPC shop inventory/refresh state.
+- Shop listings and purchases now read current room stock metadata, with smoke coverage proving stock display, manual refresh, and buy/sell flow continue to work.
 - Enemy pressure and retaliation now incapacitate characters at zero health, clear engagement, stop combat pressure, and prevent targeting, advancing, attacking, defending, or fleeing while down.
 - Added `revive` / `stand` command to recover from incapacitation at half health with balanced posture.
 - Added async combat smoke proving enemy pressure can incapacitate a character, stop pressure scripts, block retargeting, and recover through `revive`.
