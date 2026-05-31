@@ -13,7 +13,7 @@ from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, com
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_practice, use_guild_technique
+from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_history_summary, guild_path_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_practice, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, task_guide, travel_guide, validate_world_graph
 
 
@@ -776,6 +776,23 @@ class DRCommandSmokeTests(TestCase):
             self.assertIn(f"Circle 10: {guild_title(guild_id, 10)}", circle_ten_title_text)
             self.assertIn("current supported title cap", circle_ten_title_text)
             character.execute_cmd("guild title")
+            pre_reward_history = "\n".join(
+                guild_history_summary(
+                    {
+                        "guild_id": guild_id,
+                        "circle": character.db.circle,
+                        "guild_boons": character.db.guild_boons or [],
+                        "guild_capstones": character.db.guild_capstones or [],
+                    }
+                )
+            )
+            self.assertIn(f"{guild_name} history through Circle 10:", pre_reward_history)
+            self.assertIn(guild_circle_perk(guild_id, 10), pre_reward_history)
+            self.assertIn(f"Circle 10 boon: {GUILD_BOONS[guild_id]['name']}", pre_reward_history)
+            self.assertIn("is unclaimed", pre_reward_history)
+            self.assertIn(f"Circle 10 capstone: {GUILD_CAPSTONES[guild_id]['name']}", pre_reward_history)
+            character.execute_cmd("guild history")
+            character.execute_cmd("renown")
             capped_experience_text = "\n".join(
                 experience_summary(
                     {
@@ -902,6 +919,20 @@ class DRCommandSmokeTests(TestCase):
             reloaded_capstone_after = (reloaded_capstone.db.skills[capstone_skill_id]["rank"] * 5) + reloaded_capstone.db.skills[capstone_skill_id]["pool"]
             self.assertGreaterEqual(reloaded_capstone_after, capstone_after)
             self.assertEqual(reloaded_capstone.db.guild_capstones, [f"{guild_id}:10"])
+            post_reward_history = "\n".join(
+                guild_history_summary(
+                    {
+                        "guild_id": guild_id,
+                        "circle": character.db.circle,
+                        "guild_boons": character.db.guild_boons or [],
+                        "guild_capstones": character.db.guild_capstones or [],
+                    }
+                )
+            )
+            self.assertIn(f"Circle 10 boon: {GUILD_BOONS[guild_id]['name']}", post_reward_history)
+            self.assertIn(f"Circle 10 capstone: {GUILD_CAPSTONES[guild_id]['name']}", post_reward_history)
+            self.assertIn("is claimed", post_reward_history)
+            character.execute_cmd("rewards")
             character.execute_cmd("circle")
             capped_status_text = "\n".join(
                 circle_status(

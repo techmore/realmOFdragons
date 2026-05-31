@@ -454,6 +454,42 @@ def guild_ability_summary(guild_id, circle):
     return lines
 
 
+def guild_history_summary(character_state):
+    """Return earned Circle milestones and claimed guild rewards for a character."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    if guild_id == "commoner" or guild_id not in GUILDS:
+        return ["You have no guild history yet. Visit a registrar and use `join guild`."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    claimed_boons = set(character_state.get("guild_boons") or [])
+    claimed_capstones = set(character_state.get("guild_capstones") or [])
+    lines = [
+        f"{GUILDS[guild_id]} history through Circle {circle}:",
+        f"Current title: {guild_title(guild_id, circle)}.",
+        "Earned Circle milestones:",
+    ]
+    for step in range(1, circle + 1):
+        skill_id = milestone_skill_for_guild_circle(guild_id, step)
+        skill_name = SKILLS.get(skill_id, skill_id)
+        lines.append(f"- Circle {step}: {guild_circle_perk(guild_id, step)}; reinforces {skill_name}.")
+
+    if guild_id in GUILD_BOONS:
+        boon = GUILD_BOONS[guild_id]
+        for step in range(1, circle + 1):
+            reward_key = f"{guild_id}:{step}"
+            marker = "claimed" if reward_key in claimed_boons else "unclaimed"
+            lines.append(f"- Circle {step} boon: {boon['name']} ({SKILLS[boon['skill']]}) is {marker}.")
+    if circle >= MAX_SUPPORTED_CIRCLE and guild_id in GUILD_CAPSTONES:
+        capstone = GUILD_CAPSTONES[guild_id]
+        reward_key = f"{guild_id}:{MAX_SUPPORTED_CIRCLE}"
+        marker = "claimed" if reward_key in claimed_capstones else "unclaimed"
+        lines.append(f"- Circle {MAX_SUPPORTED_CIRCLE} capstone: {capstone['name']} ({SKILLS[capstone['skill']]}) is {marker}.")
+
+    lines.append("Use `guild path`, `abilities`, `title`, and `experience` for next-step guidance.")
+    return lines
+
+
 def guild_path_summary(character_state):
     """Return a concise Circle-aware guild action plan for the current character."""
 

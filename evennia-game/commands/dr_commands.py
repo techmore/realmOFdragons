@@ -15,7 +15,7 @@ from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend
 from world.dr_economy import SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text, wear_item, wield_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
-from world.dr_progression import advance_circle, circle_status, experience_summary, guild_ability_summary, guild_path_summary, guild_title, guild_title_ladder, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_capstone, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_practice, use_guild_rite, use_guild_technique
+from world.dr_progression import advance_circle, circle_status, experience_summary, guild_ability_summary, guild_history_summary, guild_path_summary, guild_title, guild_title_ladder, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_capstone, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_practice, use_guild_rite, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, hunting_guide, shop_guide, survey_room, task_guide, travel_guide
 
 
@@ -37,7 +37,7 @@ CHARACTER_HELP_TEXT = "\n".join(
     [
         "Dragon Realms commands:",
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
-        "Guilds/Circles: guilds, registrar, join guild, guild/perks, title, experience, abilities, guild path, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
+        "Guilds/Circles: guilds, registrar, join guild, guild/perks, guild history, title, experience, abilities, guild path, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
         "Movement: journey, room/exits/where, survey, routes, hunting, then use direction names or aliases like n, sw, u, d.",
         "Shops/Fieldcraft: shops, tasks, forage guide, shop, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
@@ -849,6 +849,32 @@ class CmdDRGuildTitle(Command):
         guild_id = character.db.guild_id or "commoner"
         circle = int(character.db.circle or 1)
         character.msg("\n".join(guild_title_ladder(guild_id, circle)))
+
+
+class CmdDRGuildHistory(Command):
+    """
+    Show earned guild milestones and claimed rewards.
+
+    Usage:
+      guild history
+      renown
+      rewards
+    """
+
+    key = "guild history"
+    aliases = ["renown", "rewards", "reward history"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        state = {
+            "guild_id": character.db.guild_id or "commoner",
+            "circle": character.db.circle or 1,
+            "guild_boons": character.db.guild_boons or [],
+            "guild_capstones": character.db.guild_capstones or [],
+        }
+        character.msg("\n".join(guild_history_summary(state)))
 
 
 class CmdDRExperience(Command):
