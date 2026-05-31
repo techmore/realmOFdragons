@@ -59,8 +59,8 @@ Custom systems still required:
    - Race selection only at creation.
    - Multiple characters per account.
    - Score output mirrors current prototype.
-   - Current status: new characters start with unchosen race and incomplete creation state; `race <race>` completes creation as unaffiliated Circle 1, and `join guild` is blocked until creation is complete.
-   - Current next blocker: race choice is still command-driven after default Evennia character creation, not a dedicated first-login/account creation menu.
+   - Current status: new characters start with unchosen race and incomplete creation state; `create character <race>` / `race <race>` completes creation as unaffiliated Circle 1, and `join guild` is blocked until creation is complete.
+   - Current next blocker: race choice is still command-driven after default Evennia object creation, not a dedicated account-level character creation menu.
 
 3. `Crossing`
    - Port room graph and exits.

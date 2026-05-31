@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added command-first `create character` flow for first-login character creation: it lists canonical races or completes race selection with `create character <race>`.
+- `create character <race>` keeps the character unaffiliated at Circle 1 and explicitly reports entry into Crossing before any guild joining.
+- Updated creation smoke to use `create character`, prove incomplete creation cannot join guilds, and prove registrar joining works after creation.
 - Made Evennia character creation state explicit: new characters start with race unchosen and `creation_complete = False`.
 - `race <race>` now completes creation for one of the 11 canonical races, while keeping the character unaffiliated and Circle 1.
 - `join guild` now rejects incomplete characters until race creation is complete; smoke coverage proves race must be chosen before registrar joining.

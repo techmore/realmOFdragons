@@ -215,11 +215,15 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.race, None)
         self.walk_to_room(character, guild_registrar_rooms()["barbarian"])
 
+        character.execute_cmd("create character")
+        self.assertFalse(character.db.creation_complete)
         character.execute_cmd("join guild")
         self.assertEqual(character.db.guild_id, "commoner")
-        character.execute_cmd("race elf")
+        character.execute_cmd("create character elf")
         self.assertTrue(character.db.creation_complete)
         self.assertEqual(character.db.race, "elf")
+        self.assertEqual(character.db.guild_id, "commoner")
+        self.assertEqual(character.db.circle, 1)
         character.execute_cmd("join guild")
         self.assertEqual(character.db.guild_id, "barbarian")
 

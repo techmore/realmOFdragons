@@ -128,6 +128,47 @@ class CmdDRRace(Command):
         character.msg("\n".join(result["events"]))
 
 
+class CmdDRCreateCharacter(Command):
+    """
+    Complete initial character creation.
+
+    Usage:
+      create character
+      create character <race name>
+
+    Guilds are not chosen here; they must be joined in-world at registrars.
+    """
+
+    key = "create character"
+    aliases = ["create"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        args = self.args.strip()
+        if args.startswith("character"):
+            args = args[len("character") :].strip()
+        character = self.caller
+        state = {
+            "race": character.db.race,
+            "race_name": character.db.race_name or "Unchosen",
+            "guild_id": character.db.guild_id or "commoner",
+            "guild_name": character.db.guild_name or "Unaffiliated",
+            "circle": character.db.circle or 1,
+        }
+        result = choose_race(state, args)
+        if result["changed"]:
+            character.db.race = state["race"]
+            character.db.race_name = state["race_name"]
+            character.db.guild_id = state["guild_id"]
+            character.db.guild_name = state["guild_name"]
+            character.db.circle = state["circle"]
+            character.db.creation_complete = True
+            character.msg("\n".join([*result["events"], "You enter Crossing as an unaffiliated Circle 1 character."]))
+            return
+        character.msg("\n".join(result["events"]))
+
+
 class CmdDRJoinGuild(Command):
     """
     Join the guild registrar in the current room.
