@@ -23,6 +23,7 @@ const requiredTokens = [
   '> drill',
   '> practice',
   '> rite',
+  '> challenge',
   '> boon',
   '> capstone',
   '> mastery',

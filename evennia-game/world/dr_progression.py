@@ -303,6 +303,20 @@ GUILD_RITES = {
     "warrior_mage": {"name": "Elemental Binding", "skill": "summoning", "text": "contains force before directing it outward"},
 }
 
+GUILD_CHALLENGES = {
+    "barbarian": {"name": "Pit Trial", "skill": "tactics", "text": "tests fury against footing, breath, and field judgment"},
+    "bard": {"name": "Public Measure", "skill": "bardic_lore", "text": "tests memory, audience control, and carried cadence under pressure"},
+    "cleric": {"name": "Pilgrim Trial", "skill": "scholarship", "text": "tests doctrine, resolve, and practical devotion together"},
+    "empath": {"name": "Crisis Round", "skill": "first_aid", "text": "tests calm hands, diagnosis, and triage order under strain"},
+    "moon_mage": {"name": "Forecast Trial", "skill": "perception", "text": "tests timing marks against visible pattern shifts"},
+    "necromancer": {"name": "Sealed Examination", "skill": "sorcery", "text": "tests forbidden method without letting it spill into public view"},
+    "paladin": {"name": "Standard Trial", "skill": "defending", "text": "tests oath, line discipline, and guarded judgment"},
+    "ranger": {"name": "Long-Path Trial", "skill": "outdoorsmanship", "text": "tests route memory, weather read, and wilderness patience"},
+    "thief": {"name": "Silent Trial", "skill": "backstab", "text": "tests timing, exit memory, and hidden angle control"},
+    "trader": {"name": "Contract Trial", "skill": "appraisal", "text": "tests route risk, counter memory, and value judgment"},
+    "warrior_mage": {"name": "Battle Vector Trial", "skill": "targeted_magic", "text": "tests elemental reserve against target line and battlefield pressure"},
+}
+
 GUILD_CAPSTONES = {
     "barbarian": {"name": "Tenth-Circle Roar", "skill": "tactics", "text": "sets battlefield authority into a finished Circle 10 form"},
     "bard": {"name": "Master Refrain", "skill": "bardic_lore", "text": "braids performance and remembered lore into a finished refrain"},
@@ -388,6 +402,8 @@ def milestone_skill_for_guild_circle(guild_id, circle):
         return "athletics"
     if circle >= MAX_SUPPORTED_CIRCLE and guild_id in GUILD_CAPSTONES:
         return GUILD_CAPSTONES[guild_id]["skill"]
+    if circle >= 7 and guild_id in GUILD_CHALLENGES:
+        return GUILD_CHALLENGES[guild_id]["skill"]
     if circle >= 5 and guild_id in GUILD_RITES:
         return GUILD_RITES[guild_id]["skill"]
     if circle == 4 and guild_id in GUILD_DRILLS:
@@ -509,6 +525,9 @@ def guild_ability_summary(guild_id, circle):
     if guild_id in GUILD_RITES and max_circle >= 5:
         rite = GUILD_RITES[guild_id]
         lines.append(f"Circle rite: {rite['name']} supports {SKILLS[rite['skill']]}. Use `rite` at your registrar from Circle 5.")
+    if guild_id in GUILD_CHALLENGES and max_circle >= 7:
+        challenge = GUILD_CHALLENGES[guild_id]
+        lines.append(f"Circle challenge: {challenge['name']} supports {SKILLS[challenge['skill']]}. Use `challenge` at your registrar from Circle 7.")
     if guild_id in GUILD_CAPSTONES and max_circle >= MAX_SUPPORTED_CIRCLE:
         capstone = GUILD_CAPSTONES[guild_id]
         lines.append(f"Circle 10 capstone: {capstone['name']} supports {SKILLS[capstone['skill']]}. Use `capstone` at your registrar.")
@@ -586,7 +605,7 @@ def guild_path_summary(character_state):
         f"Current title: {guild_title(guild_id, circle)}.",
         f"Current milestone: {milestone}.",
         f"Primary training: {primary_skill['name']} rank {primary_skill.get('rank', 0)}.",
-        "Core loop: train, study, mentor, lesson, signature, focus, technique, passive, drill, circle status, circle.",
+        "Core loop: train, study, mentor, lesson, signature, focus, technique, passive, drill, challenge, circle status, circle.",
     ]
     if circle >= 5:
         rite = GUILD_RITES.get(guild_id)
@@ -594,6 +613,12 @@ def guild_path_summary(character_state):
             lines.append(f"Circle 5+ rite: use `rite` for {rite['name']} ({SKILLS[rite['skill']]}).")
     else:
         lines.append("Circle 5 rite is not open yet; keep training and circling.")
+    if circle >= 7:
+        challenge = GUILD_CHALLENGES.get(guild_id)
+        if challenge:
+            lines.append(f"Circle 7+ challenge: use `challenge` for {challenge['name']} ({SKILLS[challenge['skill']]}).")
+    else:
+        lines.append("Circle 7 challenge is not open yet; keep training and circling.")
 
     boon_key = f"{guild_id}:{circle}"
     claimed_boons = set(character_state.get("guild_boons") or [])
@@ -655,7 +680,7 @@ def guild_plan_summary(character_state):
         lines.append(f"Registrar lesson: use `lesson` for {lesson['name']} ({SKILLS[lesson['skill']]}).")
     if signature:
         lines.append(f"Anywhere signature: use `signature` for {signature['name']} ({SKILLS[signature['skill']]}).")
-    lines.append("Registrar actions: train, study, mentor, lesson, perk, milestone, drill, practice, rite, boon, capstone, mastery, circle status, circle.")
+    lines.append("Registrar actions: train, study, mentor, lesson, perk, milestone, drill, practice, rite, challenge, boon, capstone, mastery, circle status, circle.")
     if circle >= MAX_SUPPORTED_CIRCLE:
         lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported plan cap; continue guild rewards, shops, fieldcraft, and hunting.")
     else:
@@ -950,6 +975,42 @@ def use_guild_rite(character_state):
         f"{rite['name']} {rite['text']}, training {primary_skill['name']} by {primary_pulse} and {rite_skill['name']} by {rite_pulse}."
     )
     events.append("Guild rites are Circle 5+ registrar exercises for deeper guild identity.")
+    return events
+
+
+def use_guild_challenge(character_state):
+    """Perform a Circle 7+ guild challenge at the character's own registrar."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    challenge = GUILD_CHALLENGES.get(guild_id)
+    if not challenge:
+        return ["You need to join a guild before attempting a guild challenge."]
+    if room_guild_id != guild_id:
+        return ["Guild challenges require your own registrar. Use `circle status` to find the right room."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    if circle < 7:
+        return ["Guild challenges open at Circle 7. Keep training and circling with your registrar."]
+
+    skills = character_state.setdefault("skills", build_starter_skills())
+    milestone_skill_id = milestone_skill_for_guild_circle(guild_id, circle)
+    challenge_skill_id = challenge["skill"]
+    milestone_skill = skills.get(milestone_skill_id)
+    challenge_skill = skills.get(challenge_skill_id)
+    if not milestone_skill:
+        return [f"{challenge['name']} cannot find {milestone_skill_id} training."]
+    if not challenge_skill:
+        return [f"{challenge['name']} cannot find {challenge_skill_id} training."]
+
+    milestone_pulse = 1 + ((circle - 1) // 6)
+    challenge_pulse = 2 + ((circle - 1) // 3)
+    events = apply_skill_pool_gain(skills, milestone_skill_id, milestone_pulse)
+    events.extend(apply_skill_pool_gain(skills, challenge_skill_id, challenge_pulse))
+    events.append(
+        f"{challenge['name']} {challenge['text']}, testing Circle {circle} {milestone_skill['name']} by {milestone_pulse} and {challenge_skill['name']} by {challenge_pulse}."
+    )
+    events.append("Guild challenges are Circle 7+ registrar trials for late beginner guild identity.")
     return events
 
 

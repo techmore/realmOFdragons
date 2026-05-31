@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added Circle 7+ `challenge` / `guild challenge` registrar trials for every guild, with distinct challenge names, late-beginner skill reinforcement, command help, all-guild Circle 10 smoke coverage, transcript coverage, and persistence validation.
+
 - Added `slice` / `cut` as a held-blade melee combat maneuver using Small Edged plus reflex, with feint interaction, command help, smoke tests, transcript coverage, and skill-driven combat validation.
 
 - Added repeatable Circle 10 `mastery` / `guild mastery` registrar practice for every guild, with distinct mastery identities, skill pulses, registrar guidance, ability/plan help, all-guild persistence smoke, and transcript coverage.
