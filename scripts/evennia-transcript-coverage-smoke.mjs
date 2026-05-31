@@ -25,6 +25,7 @@ const requiredTokens = [
   '> rite',
   '> boon',
   '> capstone',
+  '> mastery',
   'Canal Bank Narrows',
   'Canal Bank Supply Tin',
   'Bank narrows count',

@@ -317,6 +317,20 @@ GUILD_CAPSTONES = {
     "warrior_mage": {"name": "Elemental Line", "skill": "targeted_magic", "text": "joins summoned force to aimed battle control"},
 }
 
+GUILD_MASTERIES = {
+    "barbarian": {"name": "Roar-Keeper Mastery", "skill": "expertise", "text": "turns fury, footing, and field command into sustained mastery"},
+    "bard": {"name": "Masterwork Cadence", "skill": "performance", "text": "carries story, timing, and audience control through a finished form"},
+    "cleric": {"name": "Benediction Mastery", "skill": "theurgy", "text": "sets doctrine, resolve, and charge into repeatable devotion"},
+    "empath": {"name": "Vigil Mastery", "skill": "empathy", "text": "keeps care, diagnosis, and crisis poise ordered under pressure"},
+    "moon_mage": {"name": "Tenth Sign Mastery", "skill": "astrology", "text": "holds forecast, timing, and visible pattern in one practiced read"},
+    "necromancer": {"name": "Black Thesis Mastery", "skill": "thanatology", "text": "keeps dangerous proof contained inside disciplined study"},
+    "paladin": {"name": "Oath-Forged Mastery", "skill": "conviction", "text": "binds oath, line, shield, and judgment into durable command"},
+    "ranger": {"name": "Trailmaster Practice", "skill": "instinct", "text": "joins sign, route, weather, and movement into one field habit"},
+    "thief": {"name": "Unseen Mastery", "skill": "stealth", "text": "balances silence, timing, exit, and angle without breaking cover"},
+    "trader": {"name": "Master Ledger Practice", "skill": "trading", "text": "keeps risk, price, route, and contract memory in active balance"},
+    "warrior_mage": {"name": "Vector Mastery", "skill": "summoning", "text": "stabilizes elemental reserve, target line, and battlefield force"},
+}
+
 STUDY_ROOMS = {
     "crossing-GU02-001": {"name": "Arcane Study Hall", "skill": "arcana", "text": "You study public notes on basic magical theory"},
     "crossing-GU12-001": {"name": "Moon Mage Observatory", "skill": "astrology", "text": "You study careful star tables and timing marks"},
@@ -498,6 +512,9 @@ def guild_ability_summary(guild_id, circle):
     if guild_id in GUILD_CAPSTONES and max_circle >= MAX_SUPPORTED_CIRCLE:
         capstone = GUILD_CAPSTONES[guild_id]
         lines.append(f"Circle 10 capstone: {capstone['name']} supports {SKILLS[capstone['skill']]}. Use `capstone` at your registrar.")
+    if guild_id in GUILD_MASTERIES and max_circle >= MAX_SUPPORTED_CIRCLE:
+        mastery = GUILD_MASTERIES[guild_id]
+        lines.append(f"Circle 10 mastery: {mastery['name']} supports {SKILLS[mastery['skill']]}. Use `mastery` at your registrar after reaching Circle 10.")
     if max_circle >= MAX_SUPPORTED_CIRCLE:
         lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported ability cap.")
     else:
@@ -594,6 +611,9 @@ def guild_path_summary(character_state):
         if capstone_key not in claimed_capstones and capstone:
             lines.append(f"Circle 10 capstone available: use `capstone` for {capstone['name']} ({SKILLS[capstone['skill']]}).")
         else:
+            mastery = GUILD_MASTERIES.get(guild_id)
+            if mastery:
+                lines.append(f"Circle 10 mastery practice: use `mastery` for {mastery['name']} ({SKILLS[mastery['skill']]}).")
             lines.append("Circle 10 capstone claimed; continue shops, hunting, fieldcraft, and skill training.")
     else:
         lines.append("Next step: use `circle status` to check requirements, then `train` and `circle`.")
@@ -635,7 +655,7 @@ def guild_plan_summary(character_state):
         lines.append(f"Registrar lesson: use `lesson` for {lesson['name']} ({SKILLS[lesson['skill']]}).")
     if signature:
         lines.append(f"Anywhere signature: use `signature` for {signature['name']} ({SKILLS[signature['skill']]}).")
-    lines.append("Registrar actions: train, study, mentor, lesson, perk, milestone, drill, practice, rite, boon, capstone, circle status, circle.")
+    lines.append("Registrar actions: train, study, mentor, lesson, perk, milestone, drill, practice, rite, boon, capstone, mastery, circle status, circle.")
     if circle >= MAX_SUPPORTED_CIRCLE:
         lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported plan cap; continue guild rewards, shops, fieldcraft, and hunting.")
     else:
@@ -1002,6 +1022,40 @@ def use_guild_capstone(character_state):
         f"{capstone['name']} {capstone['text']}, completing Circle {MAX_SUPPORTED_CIRCLE} practice for {primary_skill['name']} and {capstone_skill['name']}."
     )
     events.append("This capstone is now recorded on your guild progression.")
+    return events
+
+
+def use_guild_mastery(character_state):
+    """Practice a repeatable Circle 10 guild mastery at the character's own registrar."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    mastery = GUILD_MASTERIES.get(guild_id)
+    if not mastery:
+        return ["You need to join a guild before practicing guild mastery."]
+    if room_guild_id != guild_id:
+        return ["Guild mastery practice requires your own registrar. Use `circle status` to find the right room."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    if circle < MAX_SUPPORTED_CIRCLE:
+        return [f"Guild mastery opens at Circle {MAX_SUPPORTED_CIRCLE}. Keep training and circling with your registrar."]
+
+    skills = character_state.setdefault("skills", build_starter_skills())
+    primary_skill_id = primary_skill_for_guild(guild_id)
+    mastery_skill_id = mastery["skill"]
+    primary_skill = skills.get(primary_skill_id)
+    mastery_skill = skills.get(mastery_skill_id)
+    if not primary_skill:
+        return [f"{mastery['name']} cannot find {primary_skill_id} training."]
+    if not mastery_skill:
+        return [f"{mastery['name']} cannot find {mastery_skill_id} training."]
+
+    events = apply_skill_pool_gain(skills, primary_skill_id, 2)
+    events.extend(apply_skill_pool_gain(skills, mastery_skill_id, 3))
+    events.append(
+        f"{mastery['name']} {mastery['text']}, reinforcing Circle {MAX_SUPPORTED_CIRCLE} {primary_skill['name']} and {mastery_skill['name']}."
+    )
+    events.append("Guild mastery is repeatable Circle 10 registrar practice after the supported cap.")
     return events
 
 

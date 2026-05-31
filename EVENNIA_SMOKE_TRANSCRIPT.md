@@ -44,7 +44,7 @@ You become Aela at Crossing Town Green.
 > drhelp
 Dragon Realms commands:
 Identity: score, attributes/stats, skills, race, reroll attributes.
-Guilds/Circles: registrar, join guild, guild/perks, abilities, guild plan, mentor, perk, signature, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.
+Guilds/Circles: registrar, join guild, guild/perks, abilities, guild plan, mentor, perk, signature, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, mastery, study, train, circle, circle status.
 Movement: room/exits/where, survey, then use direction names or aliases like n, sw, u, d.
 
 > room
@@ -83,7 +83,7 @@ Unlocked milestones:
 > guild plan
 Barbarian Guild Circle plan through Circle 10:
 Circle ladder lists every supported Circle milestone, reinforcing skill, and current locked/earned state.
-Registrar actions: train, study, perk, milestone, drill, practice, rite, boon, capstone, circle status, circle.
+Registrar actions: train, study, perk, milestone, drill, practice, rite, boon, capstone, mastery, circle status, circle.
 
 > circle status
 You are Circle 1 in Barbarian Guild.
@@ -149,6 +149,10 @@ Circle 10 is the current supported ability cap.
 > capstone
 Tenth-Circle Roar sets battlefield authority into a finished Circle 10 form.
 This capstone is now recorded on your guild progression.
+
+> mastery
+Roar-Keeper Mastery turns fury, footing, and field command into sustained mastery.
+Circle 10 mastery remains repeatable registrar practice after the supported cap.
 ```
 
 ## Shops, physical items, hands, and equipment

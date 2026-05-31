@@ -69,7 +69,7 @@ def registrar_text(character_state, room_state):
         lines.extend(
             [
                 f"You are registered here at Circle {circle}.",
-                "Next commands: train, circle status, circle, abilities, focus, technique, mentor, lesson, passive, drill, practice, rite, boon, capstone.",
+                "Next commands: train, circle status, circle, abilities, focus, technique, mentor, lesson, passive, drill, practice, rite, boon, capstone, mastery.",
             ]
         )
     else:
