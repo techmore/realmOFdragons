@@ -128,6 +128,7 @@ Evidence:
 - `DRCommandSmokeTests.test_enemy_pressure_incapacitation_and_revive` verifies incapacitation/revive behavior.
 - `DRCommandSmokeTests.test_bash_defend_and_flee_commands` verifies bash, defend, flee, roundtime, and pressure cleanup.
 - `DRCommandSmokeTests.test_combat_maneuvers_deduplicate_recovery_scripts` verifies recovery script deduplication.
+- `DRCommandSmokeTests.test_engaged_combat_state_persists_after_reload` reloads an engaged character and verifies target/range, stance, balance, roundtime, damaged health, combat pressure script, and recovery script state persist.
 - `DRCommandSmokeTests.test_all_crossing_enemies_can_be_fought_through_command_loop` verifies every enemy can be fought through range-based command combat and awards skill pools.
 
 Residual risk:
@@ -151,7 +152,7 @@ Residual risk:
 - Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, distinct `technique` support-skill behavior, registrar-gated `drill` and `practice`, and once-per-Circle persistent `boon` rewards, but these are clean-room mechanics rather than full original guild ability systems.
 - Study/read now gives non-combat Scholarship progress in study halls and reinforces guild primary learning at a character's own registrar.
 - Browser webclient parity: command-first runtime is Evennia-backed, a generated terminal-style transcript exists, and the Evennia `/webclient/` route/render path is smoke-tested; full live-browser login/playthrough polish may still live in the legacy frontend.
-- Persistence/security hardening: Evennia account creation and early guild progression now have database reload smoke for core state, but this audit did not do a broader security review beyond command behavior.
+- Persistence/security hardening: Evennia account creation, early guild progression, and engaged combat now have database reload smoke for core state, but this audit did not do a broader security review beyond command behavior.
 
 ## Next recommended work
 

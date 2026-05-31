@@ -1034,6 +1034,31 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(len(combat_pressure_scripts(character)), 0)
         character.execute_cmd("combat")
 
+    def test_engaged_combat_state_persists_after_reload(self):
+        character = self.make_character("Combat Persistence Smoke")
+        self.walk_to_room(character, "crossing-RV02-002")
+        character.execute_cmd("stance defensive")
+        character.execute_cmd("target rv-wolf-cub")
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
+        character.execute_cmd("jab")
+        self.assertEqual(character.db.engagement["target"], "rv-wolf-cub")
+        self.assertEqual(character.db.engagement["range"], "melee")
+        self.assertEqual(len(combat_pressure_scripts(character)), 1)
+        self.assertEqual(len(recovery_scripts(character)), 1)
+
+        reloaded = ObjectDB.objects.get(id=character.id)
+        self.assertEqual(reloaded.location.db.dr_room_id, "crossing-RV02-002")
+        self.assertEqual(reloaded.db.engagement["target"], "rv-wolf-cub")
+        self.assertEqual(reloaded.db.engagement["range"], "melee")
+        self.assertEqual(reloaded.db.stance, "defensive")
+        self.assertEqual(reloaded.db.balance, "recovering")
+        self.assertEqual(reloaded.db.roundtime, 1)
+        self.assertLess(reloaded.db.health, reloaded.db.max_health)
+        self.assertEqual(len(combat_pressure_scripts(reloaded)), 1)
+        self.assertEqual(len(recovery_scripts(reloaded)), 1)
+        self.assertIn("Engagement: Wolf Cub at melee range.", combat_status(reloaded))
+
     def test_all_crossing_enemies_can_be_fought_through_command_loop(self):
         for room_id, data in ROOMS.items():
             for enemy_id in data.get("targets", ()):
