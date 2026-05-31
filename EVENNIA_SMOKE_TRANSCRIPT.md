@@ -93,6 +93,9 @@ You center your Barbarian Guild focus through Circle 1, feeding Expertise by 1.
 > technique
 Roar of Readiness turns battlefield pressure into tactical clarity, feeding Tactics by 1.
 
+> passive
+Battle Readiness keeps your guard braced between exchanges, reinforcing Defending by 1.
+
 > practice
 You practice Barbarian Guild forms before the registrar.
 Expertise and Tactics gain guild practice.

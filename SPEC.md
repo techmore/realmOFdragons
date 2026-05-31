@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Updated the generated Evennia smoke transcript so the guild progression path includes `passive` guild training before registrar practice.
 - Added `passive` / `guild passive` as a per-guild Circle-scaled training command with distinct passive identities and smoke coverage across all 11 guilds.
 - Updated the generated Evennia smoke transcript so the shop path includes `task request`, travel, `task complete`, coin reward, and trade-skill training.
 - Added `task` / `job` shopkeeper work with request/status/complete flow, travel destination checks, coin rewards, and Trading/Appraisal/Athletics training.
