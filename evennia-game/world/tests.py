@@ -476,6 +476,24 @@ class DRCommandSmokeTests(TestCase):
         )
         self.assertIn("Next step: use `circle` to advance.", ready_status)
 
+    def test_joined_characters_cannot_switch_guilds_at_other_registrars(self):
+        registrars = guild_registrar_rooms()
+        for first_guild_id, first_guild_name in GUILDS.items():
+            second_guild_id = next(
+                guild_id for guild_id in GUILDS if guild_id != first_guild_id
+            )
+            character = self.make_character(f"{first_guild_name} Switch Smoke")
+            self.walk_to_room(character, registrars[first_guild_id])
+            character.execute_cmd("join guild")
+            self.assertEqual(character.db.guild_id, first_guild_id)
+            self.assertEqual(character.db.guild_name, first_guild_name)
+
+            self.walk_to_room(character, registrars[second_guild_id])
+            character.execute_cmd("join guild")
+            self.assertEqual(character.db.guild_id, first_guild_id)
+            self.assertEqual(character.db.guild_name, first_guild_name)
+            self.assertEqual(character.db.guild_perks, [guild_circle_perk(first_guild_id, 1)])
+
     def test_circle_requires_own_guild_registrar_room_command(self):
         registrars = guild_registrar_rooms()
         character = self.make_character("Circle Registrar Smoke")

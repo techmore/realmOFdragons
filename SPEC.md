@@ -1006,6 +1006,18 @@ Next priority:
 
 - Continue the SPEC completion audit by checking whether guild join/progression coverage is strong enough to mark Circle 1-10 parity complete.
 
+Implementation Notes - 2026-05-31, Evennia Guild Affiliation Lock Coverage
+
+Completed in the Evennia runtime:
+
+- Added command-level smoke proving every guild can be joined at its registrar and then resists switching when the character visits another registrar and runs `join guild`.
+- The smoke verifies the original guild id, display name, and Circle 1 milestone remain intact after the attempted second registration.
+- This strengthens evidence for the SPEC success criterion "All 11 guilds can be joined only by visiting their registrar" and protects stable in-world guild affiliation before Circle 1-10 progression.
+
+Next priority:
+
+- Continue the SPEC completion audit by collecting the remaining success-criteria evidence into a concise audit note and fixing any last concrete gap found.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:
