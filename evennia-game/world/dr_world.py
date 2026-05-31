@@ -308,6 +308,27 @@ def hunting_guide(room):
     return "\n".join(lines)
 
 
+def shop_guide(room):
+    """Return command-first shop and shop-task guidance from the current room."""
+
+    current_room_id = room.db.dr_room_id if room else START_ROOM_ID
+    lines = ["Crossing shops and tasks:"]
+    for room_id, shop in SHOPS.items():
+        path = find_path(current_room_id, room_id)
+        if room_id == current_room_id:
+            route = "here"
+        elif path:
+            route = "go " + ", ".join(path)
+        else:
+            route = "route unknown"
+        stock = ", ".join(shop.get("stock", ())) or "nothing"
+        task = SHOP_TASKS.get(room_id)
+        task_text = f"; task: {task['name']} to {task['destination']}" if task else ""
+        lines.append(f"- {shop['name']} ({room_id}, {shop['keeper']}): {stock}; {route}{task_text}.")
+    lines.append("Suggested loop: travel, survey, shop, shop talk, shop stock, wallet, buy <item>, sell <item>, task request/status/complete.")
+    return "\n".join(lines)
+
+
 def survey_room(room, viewer=None):
     """Return command-first room affordances for movement, shops, guilds, forage, and targets."""
 
