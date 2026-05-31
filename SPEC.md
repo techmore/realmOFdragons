@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added the Fallen Reed Causeway beyond the Reed Bank Blind with a Causeway Turtle enemy, Causeway Reed Pack shop, forage support, shop task, and transcript coverage.
 - Expanded direct shopkeeper dialogue topics so `ask stock`, `ask task`, and `ask trade` return focused NPC responses with all-shop smoke and transcript coverage.
 - Added direct shopkeeper NPC dialogue with `talk` / `ask <keeper>`, routing to current shop dialogue, stock/task guidance, all-shop command smoke coverage, help text, and transcript coverage.
 - Added `guild plan` / `circle plan` as a full Circle 1-10 guild ladder view, showing registrar, current title, milestone skill mapping, mentor/signature actions, next requirements, command smoke, and transcript coverage.

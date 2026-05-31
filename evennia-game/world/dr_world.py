@@ -158,8 +158,14 @@ ROOMS = {
     "crossing-RV02-016": {
         "title": "Reed Bank Blind",
         "desc": "A low blind of river reeds overlooks still canal water where long-legged shapes stalk the mud.",
-        "exits": {"west": "crossing-RV02-015"},
+        "exits": {"west": "crossing-RV02-015", "east": "crossing-RV02-017"},
         "targets": ("rv-reed-heron",),
+    },
+    "crossing-RV02-017": {
+        "title": "Fallen Reed Causeway",
+        "desc": "Flattened reeds form a muddy causeway over shallow canal wash where shells scrape under the grass.",
+        "exits": {"west": "crossing-RV02-016"},
+        "targets": ("rv-causeway-turtle",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",

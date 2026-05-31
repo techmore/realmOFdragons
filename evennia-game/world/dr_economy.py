@@ -154,6 +154,12 @@ SHOPS = {
         "dialogue": "Haska says, 'Past the narrows, birds and mud both wait for loose steps.'",
         "stock": ("field_bandage", "wild_herbs", "travel_rations"),
     },
+    "crossing-RV02-017": {
+        "name": "Causeway Reed Pack",
+        "keeper": "Iven",
+        "dialogue": "Iven says, 'The causeway looks solid until the reeds start moving underfoot.'",
+        "stock": ("field_bandage", "torch", "wild_herbs"),
+    },
 }
 
 FORAGE_ROOMS = {
@@ -170,6 +176,7 @@ FORAGE_ROOMS = {
     "crossing-RV02-014": {"item": "wild_herbs", "text": "You check the damp planks of the weir platform and find wild_herbs."},
     "crossing-RV02-015": {"item": "wild_herbs", "text": "You search the canal bank narrows and find wild_herbs."},
     "crossing-RV02-016": {"item": "wild_herbs", "text": "You part reed blind grasses and find wild_herbs."},
+    "crossing-RV02-017": {"item": "wild_herbs", "text": "You search flattened causeway reeds and find wild_herbs."},
 }
 
 SHOP_TASKS = {
@@ -220,6 +227,12 @@ SHOP_TASKS = {
         "destination": "crossing-RV02-015",
         "reward": 8,
         "text": "Haska asks you to bring a reed blind tally back to the Canal Bank Supply Tin.",
+    },
+    "crossing-RV02-017": {
+        "name": "Causeway shell count",
+        "destination": "crossing-RV02-016",
+        "reward": 8,
+        "text": "Iven asks you to bring a causeway shell count back to the Reed Blind Tackle Box.",
     },
 }
 

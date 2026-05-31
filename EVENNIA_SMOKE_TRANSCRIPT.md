@@ -267,6 +267,29 @@ reed_heron is here at missile range.
 > forage
 You part reed blind grasses and find wild_herbs.
 
+> east
+You push through to the Fallen Reed Causeway.
+
+> shop
+The Causeway Reed Pack offers field_bandage, torch, and wild_herbs over the flattened reeds.
+
+> task request
+Iven asks you to bring a Causeway shell count back to the Reed Blind Tackle Box.
+
+> scan
+You scan the area.
+causeway_turtle is here at missile range.
+
+> forage
+You search flattened causeway reeds and find wild_herbs.
+
+> west
+You return to the Reed Bank Blind.
+
+> task complete
+You complete Causeway shell count and earn 8 trias.
+Trading, Appraisal, and Athletics gain practical experience.
+
 > scan
 You scan the area.
 spillway_eel is here at missile range.

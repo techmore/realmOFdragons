@@ -115,6 +115,13 @@ ENEMIES = {
         "description": "A tall heron stalks the reed blind and jabs its beak at anything that crowds the mud.",
         "loot": {"trias": 4, "items": ("field_bandage",)},
     },
+    "rv-causeway-turtle": {
+        "name": "Causeway Turtle",
+        "vitality": 22,
+        "aggression": "stubborn",
+        "description": "A broad turtle scrapes through fallen reeds and snaps at boots that step too close.",
+        "loot": {"trias": 5, "items": ("rough_pelt",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")
