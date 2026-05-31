@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added account-prompt `create character <name> = <race>` support for creating a playable Evennia character before entering the world.
+- Account-side creation builds Crossing if needed, places the new character at Town Green, selects one canonical race, marks creation complete, and keeps the character unaffiliated at Circle 1.
+- Added Evennia database smoke proving account-level character creation attaches a race-selected commoner to the account roster at the Crossing start room.
 - Added command-first `create character` flow for first-login character creation: it lists canonical races or completes race selection with `create character <race>`.
 - `create character <race>` keeps the character unaffiliated at Circle 1 and explicitly reports entry into Crossing before any guild joining.
 - Updated creation smoke to use `create character`, prove incomplete creation cannot join guilds, and prove registrar joining works after creation.

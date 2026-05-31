@@ -3,7 +3,7 @@ Evennia migration smoke/unit tests for clean-room DR systems.
 """
 
 from django.test import SimpleTestCase, TestCase
-from evennia.utils.create import create_object, create_script
+from evennia.utils.create import create_account, create_object, create_script
 
 from world.dr_data import GUILDS, RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, combat_pressure_scripts, corpse_objects, respawn_room_enemies, room_enemy_ids
@@ -12,6 +12,23 @@ from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token
 from world.dr_progression import advance_circle, primary_skill_for_guild, resolve_skill_id, train_skill
 from world.dr_world import ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
+
+
+class DRAccountCreationTests(TestCase):
+    def test_account_create_character_command_creates_race_selected_commoner(self):
+        account = create_account("CreationAccount", None, "test-password")
+        account.execute_cmd("create character Aela = elf")
+        characters = list(account.characters.all())
+        self.assertEqual(len(characters), 1)
+        character = characters[0]
+        self.assertEqual(character.key, "Aela")
+        self.assertEqual(character.db.race, "elf")
+        self.assertEqual(character.db.race_name, "Elf")
+        self.assertTrue(character.db.creation_complete)
+        self.assertEqual(character.db.guild_id, "commoner")
+        self.assertEqual(character.db.guild_name, "Unaffiliated")
+        self.assertEqual(character.db.circle, 1)
+        self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
 
 
 class DRDataTests(SimpleTestCase):

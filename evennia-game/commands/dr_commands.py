@@ -6,14 +6,91 @@ first migration bridge from the Node prototype into Evennia's command loop.
 """
 
 from evennia.commands.command import Command
+from evennia.utils.create import create_object
 
-from world.dr_data import SKILLSETS, build_starter_skills
+from world.dr_data import RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import advance, bash, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, scan_room, stance, target_enemy, wait_recover
 from world.dr_economy import buy_item, equipment_text, format_shop, get_item, hands_text, inventory_text, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
-from world.dr_identity import choose_race
+from world.dr_identity import choose_race, normalize_race_token
 from world.dr_progression import advance_circle, train_skill
-from world.dr_world import build_crossing_world
+from world.dr_world import START_ROOM_ID, build_crossing_world, find_built_room
+
+
+class CmdDRAccountCreateCharacter(Command):
+    """
+    Create a playable character from the account prompt.
+
+    Usage:
+      create character
+      create character <name> = <race name>
+
+    Guilds are not chosen here; new characters enter Crossing unaffiliated.
+    """
+
+    key = "create character"
+    aliases = ["create"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        account = self.account or self.caller
+        args = self.args.strip()
+        races = ", ".join(RACES.values())
+        if args.startswith("character"):
+            args = args[len("character") :].strip()
+        if not args:
+            account.msg(f"Usage: create character <name> = <race name>\nRaces: {races}.")
+            return
+        if "=" not in args:
+            account.msg(f"Usage: create character <name> = <race name>\nRaces: {races}.")
+            return
+
+        name, race_name = [part.strip() for part in args.split("=", 1)]
+        race_id = normalize_race_token(race_name)
+        if not name:
+            account.msg("Name is required. Usage: create character <name> = <race name>")
+            return
+        if race_id not in RACES:
+            account.msg(f'Unknown race "{race_name}". Races: {races}.')
+            return
+
+        build_crossing_world()
+        start_room = find_built_room(START_ROOM_ID)
+        character = create_object(
+            "typeclasses.characters.Character",
+            key=name,
+            location=start_room,
+            home=start_room,
+        )
+        state = {
+            "race": character.db.race,
+            "race_name": character.db.race_name or "Unchosen",
+            "guild_id": character.db.guild_id or "commoner",
+            "guild_name": character.db.guild_name or "Unaffiliated",
+            "circle": character.db.circle or 1,
+        }
+        result = choose_race(state, race_id)
+        if not result["changed"]:
+            character.delete()
+            account.msg("\n".join(result["events"]))
+            return
+
+        character.db.race = state["race"]
+        character.db.race_name = state["race_name"]
+        character.db.guild_id = state["guild_id"]
+        character.db.guild_name = state["guild_name"]
+        character.db.circle = state["circle"]
+        character.db.creation_complete = True
+        account.characters.add(character)
+        account.msg(
+            "\n".join(
+                [
+                    f"Created {character.key}, a {state['race_name']} unaffiliated Circle 1 character.",
+                    "Puppet this character to enter Crossing.",
+                ]
+            )
+        )
 
 
 class CmdDRScore(Command):

@@ -16,7 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 
-from commands.dr_commands import CmdDRAdvance, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCreateCharacter, CmdDRDefend, CmdDREquipment, CmdDRFlee, CmdDRGet, CmdDRHands, CmdDRHealth, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRespawn, CmdDRRetreat, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRStance, CmdDRTarget, CmdDRTrain, CmdDRWait, CmdDRWear, CmdDRWield
+from commands.dr_commands import CmdDRAccountCreateCharacter, CmdDRAdvance, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCreateCharacter, CmdDRDefend, CmdDREquipment, CmdDRFlee, CmdDRGet, CmdDRHands, CmdDRHealth, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRespawn, CmdDRRetreat, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRStance, CmdDRTarget, CmdDRTrain, CmdDRWait, CmdDRWear, CmdDRWield
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -81,9 +81,7 @@ class AccountCmdSet(default_cmds.AccountCmdSet):
         Populates the cmdset
         """
         super().at_cmdset_creation()
-        #
-        # any commands you add below will overload the default ones.
-        #
+        self.add(CmdDRAccountCreateCharacter())
 
 
 class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
