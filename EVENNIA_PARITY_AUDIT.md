@@ -140,7 +140,8 @@ Evidence:
 - `DRCommandSmokeTests.test_field_bandage_treats_combat_bleeding` and bleeding guidance smoke verify wound response suggestions and treatment.
 - `DRCommandSmokeTests.test_bleeding_state_and_script_persist_after_reload` reloads an untreated bleeding character and verifies bleeding flag, health, engagement target, prompt guidance, persistent bleeding script, and subsequent bleeding tick behavior survive.
 - `DRCommandSmokeTests.test_enemy_pressure_incapacitation_and_revive` verifies incapacitation/revive behavior.
-- `DRCommandSmokeTests.test_bash_defend_and_flee_commands` verifies bash, defend, flee, roundtime, and pressure cleanup.
+- `DRCommandSmokeTests.test_enemy_pressure_incapacitation_and_revive` also verifies `rest` can recover an incapacitated character.
+- `DRCommandSmokeTests.test_bash_defend_and_flee_commands` verifies bash, defend, flee, roundtime, pressure cleanup, and `rest` recovery for roundtime plus damaged health.
 - `DRCommandSmokeTests.test_combat_maneuvers_deduplicate_recovery_scripts` verifies recovery script deduplication.
 - `DRCommandSmokeTests.test_engaged_combat_state_persists_after_reload` reloads an engaged character and verifies target/range, stance, balance, roundtime, damaged health, combat pressure script, and recovery script state persist.
 - `DRCommandSmokeTests.test_all_crossing_enemies_can_be_fought_through_command_loop` verifies every enemy can be fought through range-based command combat and awards skill pools.

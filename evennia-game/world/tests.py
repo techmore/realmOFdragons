@@ -9,7 +9,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room, skin_corpse
+from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, forage_room, format_shop, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -450,6 +450,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("use registrar for guidance", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("abilities, focus, and technique", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("boon", CHARACTER_HELP_TEXT)
+        self.assertIn("rest", CHARACTER_HELP_TEXT)
+        self.assertIn("rest - recover roundtime", CHARACTER_HELP_TOPICS["combat"])
         self.assertIn("study", CHARACTER_HELP_TEXT)
         character.execute_cmd("drhelp")
         character.execute_cmd("help progression")
@@ -1536,9 +1538,10 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(len(combat_pressure_scripts(character)), 0)
         character.execute_cmd("target rv-wolf-cub")
         self.assertEqual(character.db.engagement["target"], None)
-        character.execute_cmd("revive")
+        character.execute_cmd("rest")
         self.assertFalse(character.db.incapacitated)
         self.assertEqual(character.db.health, 15)
+        self.assertEqual(character.db.roundtime, 0)
         character.execute_cmd("stand")
 
     def test_bash_defend_and_flee_commands(self):
@@ -1571,6 +1574,14 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.balance, "recovering")
         self.assertEqual(len(combat_pressure_scripts(character)), 0)
         self.assertEqual(len(recovery_scripts(character)), 1)
+        character.execute_cmd("rest")
+        self.assertEqual(character.db.roundtime, 0)
+        self.assertEqual(character.db.balance, "balanced")
+
+        character.db.health = 20
+        rest_text = rest(character)
+        self.assertIn("recover 3 health", rest_text)
+        self.assertEqual(character.db.health, 23)
 
     def test_combat_maneuvers_deduplicate_recovery_scripts(self):
         character = self.make_character("Recovery Dedup Smoke")

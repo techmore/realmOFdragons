@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `rest` as a command-first recovery verb for roundtime, damaged health, and incapacitation, with combat smoke coverage.
 - Updated registrar guidance so joined characters see the full implemented guild progression command set: focus, technique, passive, drill, practice, rite, boon, and capstone.
 - Improved account roster guidance with per-character next steps for joining a guild, training/circling, claiming Circle 10 `boon`, claiming `capstone`, or continuing post-cap play.
 - Updated Circle 10 status guidance so capped guild characters are directed to unclaimed `boon` and `capstone` rewards before generic post-cap activities.

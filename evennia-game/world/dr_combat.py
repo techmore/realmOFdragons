@@ -774,3 +774,20 @@ def revive(character):
     character.db.roundtime = 0
     character.db.engagement = {"target": None, "range": None}
     return f"You recover enough to stand. Health: {character.db.health}/{character.db.max_health}."
+
+
+def rest(character):
+    """Rest as a command-first recovery verb for roundtime or incapacitation."""
+
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return revive(character)
+    if int(character.db.roundtime or 0) > 0:
+        return wait_recover(character)
+    if int(character.db.health or 0) < int(character.db.max_health or 30):
+        healed = min(3, int(character.db.max_health or 30) - int(character.db.health or 0))
+        character.db.health = int(character.db.health or 0) + healed
+        character.db.balance = "balanced"
+        return f"You rest and recover {healed} health. Health: {character.db.health}/{character.db.max_health}."
+    character.db.balance = "balanced"
+    return "You rest, already balanced and healthy."
