@@ -15,7 +15,7 @@ from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend
 from world.dr_economy import buy_item, equipment_text, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, sell_item, shop_talk, use_item, wear_item, wield_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
-from world.dr_progression import advance_circle, circle_status, guild_ability_summary, train_skill, unlocked_guild_perks, use_guild_focus, use_guild_technique
+from world.dr_progression import advance_circle, circle_status, guild_ability_summary, train_skill, unlocked_guild_perks, use_guild_focus, use_guild_practice, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room
 
 
@@ -37,7 +37,7 @@ CHARACTER_HELP_TEXT = "\n".join(
     [
         "Dragon Realms commands:",
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
-        "Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, train, circle, circle status.",
+        "Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, practice, train, circle, circle status.",
         "Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.",
         "Shops: shop, shop talk, shop stock, shop refresh, buy <item>, sell <item>, use <item>, inventory, hands, equipment.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, revive/stand.",
@@ -87,7 +87,7 @@ CHARACTER_HELP_TOPICS = {
             "1. From the account prompt: create character <name> = <race>, then puppet <name>.",
             "2. In Crossing: use room/exits/where, then walk with directions or aliases like n, sw, u, d.",
             "3. Join in-world: visit a guild registrar, use registrar for guidance, then use join guild. Guilds are not chosen during account creation.",
-            "4. Train and circle: use train, skills, circle status, circle, abilities, focus, and technique at your own guild registrar through Circle 10.",
+            "4. Train and circle: use train, practice, skills, circle status, circle, abilities, focus, and technique at your own guild registrar through Circle 10.",
             "5. Gear up: use shop, shop talk, shop stock, buy <item>, sell <item>, use <item>, inventory, hands, equipment, wield, and wear.",
             "6. Hunt: walk to beginner hunting rooms, scan, appraise <enemy>, target <enemy>, advance to melee, then jab or bash.",
             "7. Recover: use combat/prompt, wait/recover for roundtime, defend or flee as needed, revive/stand if incapacitated, and loot corpse after a kill.",
@@ -714,6 +714,33 @@ class CmdDRGuildTechnique(Command):
             "skills": character.db.skills or build_starter_skills(),
         }
         events = use_guild_technique(state)
+        character.db.skills = state["skills"]
+        character.msg("\n".join(events))
+
+
+class CmdDRGuildPractice(Command):
+    """
+    Practice guild forms at your own registrar.
+
+    Usage:
+      practice
+      guild practice
+    """
+
+    key = "practice"
+    aliases = ["guild practice"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        state = {
+            "guild_id": character.db.guild_id or "commoner",
+            "circle": character.db.circle or 1,
+            "skills": character.db.skills or build_starter_skills(),
+            "room_guild_id": character.location.db.guild if character.location else None,
+        }
+        events = use_guild_practice(state)
         character.db.skills = state["skills"]
         character.msg("\n".join(events))
 

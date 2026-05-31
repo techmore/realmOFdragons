@@ -148,6 +148,22 @@ def use_guild_technique(character_state):
     return events
 
 
+def use_guild_practice(character_state):
+    """Practice guild forms at the character's own registrar."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    if guild_id == "commoner" or guild_id not in GUILDS:
+        return ["You need to join a guild before using guild practice."]
+    if room_guild_id != guild_id:
+        return ["Guild practice requires your own registrar. Use `circle status` to find the right room."]
+
+    events = [f"You practice before the {GUILDS[guild_id]} registrar."]
+    events.extend(use_guild_focus(character_state))
+    events.extend(use_guild_technique(character_state))
+    return events
+
+
 def next_circle_requirement(circle):
     """Return the prototype Circle requirement for the next Circle."""
 

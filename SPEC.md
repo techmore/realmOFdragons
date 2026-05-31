@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added registrar-gated `practice` / `guild practice`, combining guild focus and technique pulses only at the character's own guild registrar.
+- Expanded all-guild Circle 10 smoke coverage to invoke guild practice for every guild and prove it advances guild primary skill progress.
 - Added `use <item>` for carried consumables, starting with `field_bandage` healing and item consumption.
 - Added smoke coverage proving a bought field bandage restores health, leaves pack inventory, and deletes its carried item object.
 - Added a Drainage Trail Peddler shop counter to the new Root-Tangled Drainage hunting room.

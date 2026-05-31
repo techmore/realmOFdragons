@@ -11,7 +11,7 @@ from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scrip
 from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_TECHNIQUES, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks, use_guild_focus, use_guild_technique
+from world.dr_progression import GUILD_TECHNIQUES, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks, use_guild_focus, use_guild_practice, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
 
 
@@ -481,6 +481,11 @@ class DRCommandSmokeTests(TestCase):
             character.execute_cmd("guild technique")
             technique_after = (character.db.skills[technique_skill_id]["rank"] * 5) + character.db.skills[technique_skill_id]["pool"]
             self.assertGreater(technique_after, technique_before)
+            practice_before = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
+            character.execute_cmd("practice")
+            character.execute_cmd("guild practice")
+            practice_after = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
+            self.assertGreater(practice_after, practice_before)
             character.execute_cmd("circle")
             capped_status_text = "\n".join(
                 circle_status(
@@ -527,6 +532,15 @@ class DRCommandSmokeTests(TestCase):
             }
         )
         self.assertIn("join guild", "\n".join(unaffiliated_technique))
+        unaffiliated_practice = use_guild_practice(
+            {
+                "guild_id": character.db.guild_id,
+                "circle": character.db.circle,
+                "skills": character.db.skills,
+                "room_guild_id": character.location.db.guild,
+            }
+        )
+        self.assertIn("join a guild", "\n".join(unaffiliated_practice))
 
         self.walk_to_room(character, guild_registrar_rooms()["barbarian"])
         character.execute_cmd("join guild")
