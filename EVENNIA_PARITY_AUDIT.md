@@ -142,6 +142,7 @@ Residual risk:
 
 - Original-map fidelity: current Crossing is an expanding clean-room scaffold with canonical-style districts, hunting/shop/guild affordances, and beginner supply placement, not a full original Crossing clone.
 - Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, distinct `technique` support-skill behavior, registrar-gated `practice`, and once-per-Circle persistent `boon` rewards, but these are clean-room mechanics rather than full original guild ability systems.
+- Study/read now gives non-combat Scholarship progress in study halls and reinforces guild primary learning at a character's own registrar.
 - Browser webclient parity: command-first runtime is Evennia-backed and a generated terminal-style transcript exists; browser-specific polish may still live in the legacy frontend.
 - Persistence/security hardening: Evennia account persistence exists, but this audit did not do a security review beyond command behavior.
 

@@ -11,7 +11,7 @@ from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, com
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOPS, appraise_item, buy_item, forage_room, format_shop, repair_item, sell_item, shop_talk, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_BOONS, GUILD_TECHNIQUES, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_focus, use_guild_practice, use_guild_technique
+from world.dr_progression import GUILD_BOONS, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_focus, use_guild_practice, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
 
 
@@ -355,6 +355,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("use registrar for guidance", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("abilities, focus, and technique", CHARACTER_HELP_TOPICS["progression"])
         self.assertIn("boon", CHARACTER_HELP_TEXT)
+        self.assertIn("study", CHARACTER_HELP_TEXT)
         character.execute_cmd("drhelp")
         character.execute_cmd("help progression")
         character.execute_cmd("help room")
@@ -575,6 +576,34 @@ class DRCommandSmokeTests(TestCase):
             )
         )
         self.assertIn("Next step: use `circle` to advance.", ready_status)
+
+    def test_study_rooms_and_registrars_train_scholarship(self):
+        character = self.make_character("Study Smoke")
+        self.assertIn("crossing-GU02-001", STUDY_ROOMS)
+        self.walk_to_room(character, "crossing-GU02-001")
+        scholarship_before = character.db.skills["scholarship"]["pool"]
+        arcana_before = character.db.skills["arcana"]["pool"]
+        study_text = "\n".join(
+            study_room(
+                {
+                    "guild_id": character.db.guild_id,
+                    "skills": character.db.skills,
+                    "room_id": character.location.db.dr_room_id,
+                    "room_guild_id": character.location.db.guild,
+                }
+            )
+        )
+        self.assertIn("Arcana", study_text)
+        self.assertGreater(character.db.skills["scholarship"]["pool"], scholarship_before)
+        self.assertGreater(character.db.skills["arcana"]["pool"], arcana_before)
+        character.execute_cmd("study")
+
+        self.walk_to_room(character, guild_registrar_rooms()["barbarian"])
+        character.execute_cmd("join guild")
+        primary_skill_id = primary_skill_for_guild(character.db.guild_id)
+        primary_before = character.db.skills[primary_skill_id]["pool"]
+        character.execute_cmd("read")
+        self.assertGreater(character.db.skills[primary_skill_id]["pool"], primary_before)
 
     def test_joined_characters_cannot_switch_guilds_at_other_registrars(self):
         registrars = guild_registrar_rooms()

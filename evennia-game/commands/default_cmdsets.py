@@ -16,7 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 
-from commands.dr_commands import CmdDRAccountCharacters, CmdDRAccountCreateCharacter, CmdDRAccountHelp, CmdDRAdvance, CmdDRAppraise, CmdDRAttributes, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCombat, CmdDRCreateCharacter, CmdDRDefend, CmdDREquipment, CmdDRFlee, CmdDRForage, CmdDRGet, CmdDRGuildAbilities, CmdDRGuildBoon, CmdDRGuildFocus, CmdDRGuildPerks, CmdDRGuildPractice, CmdDRGuildTechnique, CmdDRHands, CmdDRHealth, CmdDRHelp, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRegistrar, CmdDRRepair, CmdDRRerollAttributes, CmdDRRespawn, CmdDRRetreat, CmdDRRevive, CmdDRRoom, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRSkin, CmdDRStance, CmdDRTarget, CmdDRTend, CmdDRTrain, CmdDRUse, CmdDRWait, CmdDRWear, CmdDRWield
+from commands.dr_commands import CmdDRAccountCharacters, CmdDRAccountCreateCharacter, CmdDRAccountHelp, CmdDRAdvance, CmdDRAppraise, CmdDRAttributes, CmdDRBash, CmdDRBuildCrossing, CmdDRBuy, CmdDRCircle, CmdDRCombat, CmdDRCreateCharacter, CmdDRDefend, CmdDREquipment, CmdDRFlee, CmdDRForage, CmdDRGet, CmdDRGuildAbilities, CmdDRGuildBoon, CmdDRGuildFocus, CmdDRGuildPerks, CmdDRGuildPractice, CmdDRGuildTechnique, CmdDRHands, CmdDRHealth, CmdDRHelp, CmdDRInventory, CmdDRJab, CmdDRJoinGuild, CmdDRLoot, CmdDRRace, CmdDRRange, CmdDRRegistrar, CmdDRRepair, CmdDRRerollAttributes, CmdDRRespawn, CmdDRRetreat, CmdDRRevive, CmdDRRoom, CmdDRScan, CmdDRScore, CmdDRSell, CmdDRShop, CmdDRSkills, CmdDRSkin, CmdDRStance, CmdDRStudy, CmdDRTarget, CmdDRTend, CmdDRTrain, CmdDRUse, CmdDRWait, CmdDRWear, CmdDRWield
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -76,6 +76,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDRSkills())
         self.add(CmdDRSkin())
         self.add(CmdDRStance())
+        self.add(CmdDRStudy())
         self.add(CmdDRTarget())
         self.add(CmdDRTend())
         self.add(CmdDRTrain())

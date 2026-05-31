@@ -57,6 +57,14 @@ GUILD_BOONS = {
     "warrior_mage": {"name": "Elemental Reserve", "skill": "summoning", "text": "stores battlefield force in elemental focus"},
 }
 
+STUDY_ROOMS = {
+    "crossing-GU02-001": {"name": "Arcane Study Hall", "skill": "arcana", "text": "You study public notes on basic magical theory"},
+    "crossing-GU12-001": {"name": "Moon Mage Observatory", "skill": "astrology", "text": "You study careful star tables and timing marks"},
+    "crossing-GU13-001": {"name": "Lower Study", "skill": "thanatology", "text": "You study coded marginalia in the secluded lower study"},
+    "crossing-GU06-001": {"name": "Bard Guild Conservatory", "skill": "performance", "text": "You study cadence marks and performance notation"},
+    "crossing-GU08-001": {"name": "Empath Guild Clinic", "skill": "first_aid", "text": "You study triage notes and careful diagnostic examples"},
+}
+
 
 def normalize_skill_token(value):
     """Normalize player-entered skill names to internal ids."""
@@ -209,6 +217,32 @@ def use_guild_boon(character_state):
     character_state["guild_boons"] = claimed
     events.append(f"{boon['name']} {boon['text']}, granting a Circle {circle} boon to {skill['name']} by {pulse}.")
     events.append("This boon is now recorded on your guild progression.")
+    return events
+
+
+def study_room(character_state):
+    """Study notes in public study rooms or at a character's own registrar."""
+
+    room_id = character_state.get("room_id") or ""
+    room_guild_id = character_state.get("room_guild_id")
+    guild_id = character_state.get("guild_id") or "commoner"
+    skills = character_state.setdefault("skills", build_starter_skills())
+    if room_guild_id and room_guild_id == guild_id and guild_id in GUILDS:
+        skill_id = primary_skill_for_guild(guild_id)
+        skill = skills.get(skill_id, {"name": SKILLS.get(skill_id, skill_id)})
+        events = apply_skill_pool_gain(skills, "scholarship", 2)
+        events.extend(apply_skill_pool_gain(skills, skill_id, 1))
+        events.append(f"You study {GUILDS[guild_id]} registrar notes, reinforcing Scholarship and {skill['name']}.")
+        return events
+
+    study = STUDY_ROOMS.get(room_id)
+    if not study:
+        return ["There is nothing structured to study here. Try a study hall, observatory, clinic, conservatory, or your own registrar."]
+    skill_id = study["skill"]
+    skill = skills.get(skill_id, {"name": SKILLS.get(skill_id, skill_id)})
+    events = apply_skill_pool_gain(skills, "scholarship", 2)
+    events.extend(apply_skill_pool_gain(skills, skill_id, 1))
+    events.append(f"{study['text']}, reinforcing Scholarship and {skill['name']}.")
     return events
 
 
