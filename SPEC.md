@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added an Evennia webclient route smoke script and wired it into `npm run check:evennia`, proving the Django `/webclient/` route resolves through the local Evennia web configuration.
 - Updated the generated Evennia smoke transcript so the shop/fieldcraft path reaches Silted Canal Edge, shows its pack stand, and scans the Marsh Spider.
 - Added the Silted Canal Edge as a new beginner hunting/shop/forage room beyond the Reed-Choked Culvert, with a Marsh Spider enemy covered by existing all-room/all-enemy smoke.
 - Updated the generated Evennia smoke transcript so the guild progression path includes `passive` guild training before registrar practice.

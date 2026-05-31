@@ -136,21 +136,22 @@ Status: Proven by automated test command.
 
 Evidence:
 - `npm run check:evennia` compiles Evennia command/typeclass/world modules and runs `evennia test --settings settings.py world`.
+- `npm run check:evennia` also runs `scripts/evennia-webclient-smoke.mjs`, proving the Evennia Django `/webclient/` route resolves through the local webclient URL configuration.
 - The current suite contains command and builder smoke for all criteria above.
 
 Residual risk:
-- `EVENNIA_SMOKE_TRANSCRIPT.md` covers the terminal-style command path, and `npm run check:evennia` proves command behavior. Browser webclient smoke for Evennia itself is still not represented in this audit.
+- `EVENNIA_SMOKE_TRANSCRIPT.md` covers the terminal-style command path, and `npm run check:evennia` proves command behavior plus webclient route availability. Full live-browser login/playthrough automation is still not represented in this audit.
 
 ## Highest remaining parity risks
 
 - Original-map fidelity: current Crossing is an expanding clean-room scaffold with canonical-style districts, hunting/shop/guild affordances, and beginner supply placement, not a full original Crossing clone.
 - Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, distinct `technique` support-skill behavior, registrar-gated `practice`, and once-per-Circle persistent `boon` rewards, but these are clean-room mechanics rather than full original guild ability systems.
 - Study/read now gives non-combat Scholarship progress in study halls and reinforces guild primary learning at a character's own registrar.
-- Browser webclient parity: command-first runtime is Evennia-backed and a generated terminal-style transcript exists; browser-specific polish may still live in the legacy frontend.
+- Browser webclient parity: command-first runtime is Evennia-backed, a generated terminal-style transcript exists, and the Evennia `/webclient/` route is smoke-tested; full live-browser login/playthrough polish may still live in the legacy frontend.
 - Persistence/security hardening: Evennia account persistence exists, but this audit did not do a security review beyond command behavior.
 
 ## Next recommended work
 
-1. Add live Evennia browser/webclient smoke if tooling is available.
+1. Add live Evennia browser login/playthrough smoke if tooling is available.
 2. Expand guild-specific Circle 1-10 passive perks beyond the first `boon` implementation into deeper per-guild command behavior.
 3. Expand beginner content breadth beyond the current clean-room Crossing scaffold.

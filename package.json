@@ -10,6 +10,7 @@
     "smoke:browser": "npm --prefix frontend run smoke:browser",
     "smoke:api": "npm --prefix server run smoke:api",
     "check:evennia": "node scripts/check-evennia.mjs",
+    "smoke:evennia-webclient": "node scripts/evennia-webclient-smoke.mjs",
     "smoke:evennia-transcript": "node scripts/evennia-smoke-transcript.mjs",
     "smoke:agent-prompt": "node scripts/smoke-agent-prompt.mjs",
     "ci:check": "node scripts/run-checks.mjs ci",
