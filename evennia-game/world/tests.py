@@ -911,6 +911,38 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("equipment")
         character.execute_cmd("repair leather_shield")
 
+    def test_economy_equipment_and_fieldcraft_persist_after_reload(self):
+        character = self.make_character("Economy Persistence Smoke")
+        character.db.wallet = {"plat": 0, "trias": 500, "lucan": 0, "silk": 0}
+        self.walk_to_room(character, "crossing-RV02-002")
+        character.execute_cmd("buy small_blade")
+        character.execute_cmd("wield small_blade")
+        character.execute_cmd("shop refresh")
+        character.execute_cmd("buy leather_shield")
+        character.execute_cmd("wear leather_shield")
+        character.execute_cmd("repair leather_shield")
+        character.execute_cmd("forage")
+        character.execute_cmd("get wild_herbs")
+
+        reloaded = ObjectDB.objects.get(id=character.id)
+        self.assertEqual(reloaded.location.db.dr_room_id, "crossing-RV02-002")
+        self.assertEqual(reloaded.db.hands["right"], "small_blade")
+        self.assertEqual(reloaded.db.hands["left"], None)
+        self.assertIn("leather_shield", reloaded.db.equipment["worn"])
+        self.assertEqual(reloaded.db.equipment_condition["leather_shield"], "maintained")
+        self.assertIn("wild_herbs", reloaded.db.inventory)
+        self.assertLess(reloaded.db.wallet["trias"], 500)
+        carried_item_ids = sorted(
+            obj.db.item_id
+            for obj in reloaded.contents
+            if obj.db.object_type == "item" and obj.db.item_id
+        )
+        self.assertIn("small_blade", carried_item_ids)
+        self.assertIn("leather_shield", carried_item_ids)
+        self.assertIn("wild_herbs", carried_item_ids)
+        self.assertGreater(reloaded.db.skills["shield_usage"]["pool"], 0)
+        self.assertGreater(reloaded.db.skills["outdoorsmanship"]["pool"], 0)
+
     def test_field_bandage_use_recovers_health_and_consumes_item(self):
         character = self.make_character("Bandage Smoke")
         self.walk_to_room(character, "crossing-RV02-006")

@@ -90,6 +90,7 @@ Evidence:
 - `DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills` also verifies item appraisal for gathered goods and Appraisal progress.
 - `DRCommandSmokeTests.test_wield_wear_and_equipment_commands` verifies bought gear can be wielded/worn.
 - `DRCommandSmokeTests.test_wield_wear_and_equipment_commands` also verifies gear repair condition tracking and Shield Usage/Light Armor progress.
+- `DRCommandSmokeTests.test_economy_equipment_and_fieldcraft_persist_after_reload` reloads a character after buying, wielding, wearing, repairing, foraging, and picking up goods, then verifies wallet, hands, worn gear, gear condition, inventory, physical item objects, and trained skill pools persist.
 
 Residual risk:
 - Shop inventories are intentionally small beginner inventories.
@@ -152,7 +153,7 @@ Residual risk:
 - Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, distinct `technique` support-skill behavior, registrar-gated `drill` and `practice`, and once-per-Circle persistent `boon` rewards, but these are clean-room mechanics rather than full original guild ability systems.
 - Study/read now gives non-combat Scholarship progress in study halls and reinforces guild primary learning at a character's own registrar.
 - Browser webclient parity: command-first runtime is Evennia-backed, a generated terminal-style transcript exists, and the Evennia `/webclient/` route/render path is smoke-tested; full live-browser login/playthrough polish may still live in the legacy frontend.
-- Persistence/security hardening: Evennia account creation, early guild progression, and engaged combat now have database reload smoke for core state, but this audit did not do a broader security review beyond command behavior.
+- Persistence/security hardening: Evennia account creation, early guild progression, engaged combat, and economy/equipment state now have database reload smoke for core state, but this audit did not do a broader security review beyond command behavior.
 
 ## Next recommended work
 

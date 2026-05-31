@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added economy/equipment persistence smoke proving wallet, hands, worn gear, maintained condition, inventory, physical item objects, and fieldcraft skill gains survive database reload after buying, wearing, repairing, foraging, and pickup.
 - Added engaged combat persistence smoke proving target/range, stance, balance, roundtime, damaged health, combat pressure script, and recovery script state survive database reload.
 - Added progression persistence smoke proving an account-created character can join a guild, train, advance to Circle 2, and reload with guild, Circle, registrar location, perks, and trained skill state intact.
 - Added account-created character persistence smoke proving race, attributes, unaffiliated Circle 1 state, Crossing location, roster membership, starter skills, and wallet survive database reload.
