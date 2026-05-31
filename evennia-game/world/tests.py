@@ -7,7 +7,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scripts, combat_status, corpse_objects, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
-from world.dr_economy import ITEMS, SHOPS
+from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import advance_circle, circle_status, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks
@@ -459,6 +459,13 @@ class DRCommandSmokeTests(TestCase):
     def test_shop_buy_sell_inventory_and_hands_commands(self):
         character = self.make_character("Economy Smoke")
 
+        shop_text = format_shop(character.location)
+        self.assertIn("Accepted stock: torch, travel_rations.", shop_text)
+        self.assertIn("buy <item>", shop_text)
+        self.assertIn("sell <item>", shop_text)
+        self.assertIn("Marta trades: torch, travel_rations.", shop_talk(character.location))
+        self.assertIn("Available stock: torch, travel_rations.", buy_item(character, ""))
+        self.assertIn("I do not have small_blade for sale", buy_item(character, "small_blade"))
         character.execute_cmd("shop")
         character.execute_cmd("shop talk")
         character.execute_cmd("shop stock")
@@ -494,6 +501,20 @@ class DRCommandSmokeTests(TestCase):
             ]
         )
         self.assertEqual(character.db.wallet["trias"], 97)
+
+    def test_shopkeepers_reject_untraded_items_and_missing_carried_items(self):
+        character = self.make_character("Shop Refusal Smoke")
+        self.walk_to_room(character, "crossing-RV02-002")
+        self.assertIn(
+            "I do not trade in torch",
+            sell_item(character, "torch"),
+        )
+        character.execute_cmd("buy small_blade")
+        character.execute_cmd("sell small_blade")
+        self.assertIn(
+            "You are not carrying Small Practice Blade",
+            sell_item(character, "small_blade"),
+        )
 
     def test_wield_wear_and_equipment_commands(self):
         character = self.make_character("Equipment Smoke")

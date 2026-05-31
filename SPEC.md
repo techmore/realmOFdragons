@@ -930,6 +930,20 @@ Next priority:
 
 - Improve shop/NPC interaction parity by adding clearer text affordances for shopkeepers, dialogue, accepted stock, and failed transactions.
 
+Implementation Notes - 2026-05-31, Evennia Shopkeeper Affordances
+
+Completed in the Evennia runtime:
+
+- Shop overview now advertises `shop talk`, `shop stock`, `buy <item>`, and `sell <item>` directly in text.
+- Shopkeepers now list accepted stock in both shop overview and dialogue output.
+- Empty/unknown buy attempts now report available stock instead of only a terse failure.
+- Selling is now shop-specific: keepers reject items outside their accepted stock and failed sell attempts point players back to inventory, hands, and equipment.
+- Smoke coverage now verifies shop affordances, stock guidance, dialogue trade lists, unavailable buy feedback, and shopkeeper sell refusal.
+
+Next priority:
+
+- Audit account/character flow parity around roster use, puppeting expectations, and clean-room login documentation.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:

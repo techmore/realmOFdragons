@@ -153,6 +153,10 @@ def format_shop_stock(room):
     return "\n".join(lines)
 
 
+def accepted_stock_text(shop):
+    return ", ".join(shop["stock"]) if shop and shop.get("stock") else "nothing"
+
+
 def create_item_object(item_id, location, home=None):
     item = ITEMS[item_id]
     item_obj = create_object(
@@ -184,11 +188,16 @@ def format_shop(room):
         return "There is no shop counter here."
     lines = [
         f"{shop['name']} is watched by {shop['keeper']}.",
+        f"{shop['keeper']} can `shop talk`, `shop stock`, `buy <item>`, and `sell <item>`.",
+        f"Accepted stock: {accepted_stock_text(shop)}.",
         "Goods for sale:",
     ]
-    for item_id in current_stock(room):
+    stock = current_stock(room)
+    for item_id in stock:
         item = ITEMS[item_id]
         lines.append(f"{item_id}: {item['name']} - {item['price']} trias")
+    if not stock:
+        lines.append("- empty; use `shop refresh` if the keeper should restock.")
     return "\n".join(lines)
 
 
@@ -196,7 +205,12 @@ def shop_talk(room):
     shop = current_shop(room)
     if not shop:
         return "There is no shopkeeper here."
-    return shop["dialogue"]
+    return "\n".join(
+        [
+            shop["dialogue"],
+            f"{shop['keeper']} trades: {accepted_stock_text(shop)}.",
+        ]
+    )
 
 
 def buy_item(character, item_id):
@@ -206,9 +220,9 @@ def buy_item(character, item_id):
     if not shop:
         return "There is no shop counter here."
     if not item_id:
-        return "Buy what?"
+        return f"Buy what? Available stock: {', '.join(current_stock(character.location)) or 'nothing'}."
     if item_id not in current_stock(character.location) or item_id not in ITEMS:
-        return f'The shop does not stock "{item_id}".'
+        return f'{shop["keeper"]} says, "I do not have {item_id} for sale." Available stock: {", ".join(current_stock(character.location)) or "nothing"}.'
     item = ITEMS[item_id]
     wallet = character.db.wallet
     if coins(wallet) < item["price"]:
@@ -235,9 +249,11 @@ def sell_item(character, item_id):
     if not shop:
         return "There is no shop counter here."
     if not item_id:
-        return "Sell what?"
+        return f"Sell what? {shop['keeper']} buys: {accepted_stock_text(shop)}."
     if item_id not in ITEMS:
         return f'Unknown item "{item_id}".'
+    if item_id not in shop["stock"]:
+        return f'{shop["keeper"]} says, "I do not trade in {item_id}." Accepted stock: {accepted_stock_text(shop)}.'
 
     inventory = list(character.db.inventory or [])
     hands = dict(character.db.hands or {"left": None, "right": None})
@@ -258,7 +274,7 @@ def sell_item(character, item_id):
                     objects[0].delete()
                 break
     if not source:
-        return f"You are not carrying {ITEMS[item_id]['name']}."
+        return f"You are not carrying {ITEMS[item_id]['name']}. Check `inventory`, `hands`, and `equipment`."
 
     item = ITEMS[item_id]
     character.db.inventory = inventory
