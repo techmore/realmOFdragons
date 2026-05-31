@@ -3,6 +3,7 @@ Evennia migration smoke/unit tests for clean-room DR systems.
 """
 
 from django.test import SimpleTestCase, TestCase
+from evennia.accounts.models import AccountDB
 from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_account, create_object, create_script
 
@@ -123,6 +124,9 @@ class DRAccountCreationTests(TestCase):
         self.assertEqual(reloaded.location.db.dr_room_id, START_ROOM_ID)
         self.assertIn(reloaded, list(account.characters.all()))
         self.assertIn("Persist Aela: Elf, Unaffiliated, Circle 1", account_roster_text(account))
+        reloaded_account = AccountDB.objects.get(id=account.id)
+        self.assertIn(reloaded, list(reloaded_account.characters.all()))
+        self.assertIn("Persist Aela: Elf, Unaffiliated, Circle 1", account_roster_text(reloaded_account))
         self.assertIn("athletics", reloaded.db.skills)
         self.assertEqual(reloaded.db.wallet["trias"], 100)
 
@@ -147,6 +151,9 @@ class DRAccountCreationTests(TestCase):
         self.assertEqual(reloaded.db.guild_perks, unlocked_guild_perks("barbarian", 2))
         self.assertGreaterEqual(reloaded.db.skills["expertise"]["rank"], 4)
         self.assertIn("Persist Brin: Human, Barbarian Guild, Circle 2", account_roster_text(account))
+        reloaded_account = AccountDB.objects.get(id=account.id)
+        self.assertIn(reloaded, list(reloaded_account.characters.all()))
+        self.assertIn("Persist Brin: Human, Barbarian Guild, Circle 2", account_roster_text(reloaded_account))
 
 
 class DRDataTests(SimpleTestCase):
