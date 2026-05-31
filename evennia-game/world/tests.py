@@ -279,6 +279,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertEqual(orchard.db.targets, ("rv-orchard-crow",))
         lockworks = find_built_room("crossing-RV02-011")
         self.assertEqual(lockworks.db.targets, ("rv-lockwork-crab",))
+        sluice = find_built_room("crossing-RV02-012")
+        self.assertEqual(sluice.db.targets, ("rv-sluice-rat",))
 
     def test_built_shopkeeper_npcs(self):
         build_crossing_world()
@@ -981,6 +983,19 @@ class DRCommandSmokeTests(TestCase):
         self.assertGreater(towpath_runner.db.skills["trading"]["pool"], towpath_trading_before)
         self.assertIsNone(towpath_runner.db.active_task)
 
+        sluice_runner = self.make_character("Sluice Task Smoke")
+        self.walk_to_room(sluice_runner, "crossing-RV02-012")
+        sluice_text = request_shop_task(sluice_runner)
+        self.assertIn("Lockworks Dry Box", sluice_text)
+        self.assertIn("crossing-RV02-011", task_status(sluice_runner))
+        self.walk_to_room(sluice_runner, "crossing-RV02-011")
+        sluice_wallet_before = sluice_runner.db.wallet["trias"]
+        sluice_complete_text = complete_shop_task(sluice_runner)
+        self.assertIn("Sluice crate tally", sluice_complete_text)
+        self.assertIn("Shop task complete", sluice_complete_text)
+        self.assertGreater(sluice_runner.db.wallet["trias"], sluice_wallet_before)
+        self.assertIsNone(sluice_runner.db.active_task)
+
     def test_shopkeepers_reject_untraded_items_and_missing_carried_items(self):
         character = self.make_character("Shop Refusal Smoke")
         self.walk_to_room(character, "crossing-RV02-002")
@@ -1199,6 +1214,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(SHOPS["crossing-RV02-010"]["stock"][0], "field_bandage")
         self.assertIn("crossing-RV02-011", SHOPS)
         self.assertEqual(SHOPS["crossing-RV02-011"]["stock"][0], "field_bandage")
+        self.assertIn("crossing-RV02-012", SHOPS)
+        self.assertEqual(SHOPS["crossing-RV02-012"]["stock"][0], "field_bandage")
         for shop in SHOPS.values():
             self.assertTrue(shop["keeper"])
             self.assertTrue(shop["dialogue"])
@@ -1211,6 +1228,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("crossing-RV02-002", FORAGE_ROOMS)
         self.assertIn("crossing-RV02-010", FORAGE_ROOMS)
         self.assertIn("crossing-RV02-011", FORAGE_ROOMS)
+        self.assertIn("crossing-RV02-012", FORAGE_ROOMS)
         self.walk_to_room(character, "crossing-RV02-002")
         outdoors_before = character.db.skills["outdoorsmanship"]["pool"]
         perception_before = character.db.skills["perception"]["pool"]

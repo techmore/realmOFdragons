@@ -124,6 +124,12 @@ SHOPS = {
         "dialogue": "Nera says, 'If you hear claws on stone, keep your boots out of the pools.'",
         "stock": ("field_bandage", "travel_rations", "torch"),
     },
+    "crossing-RV02-012": {
+        "name": "Sluice Yard Crate",
+        "keeper": "Tovin",
+        "dialogue": "Tovin says, 'The sluice rats pull gear into the cracks. Buy what you need before stepping east.'",
+        "stock": ("field_bandage", "torch", "travel_rations"),
+    },
 }
 
 FORAGE_ROOMS = {
@@ -135,6 +141,7 @@ FORAGE_ROOMS = {
     "crossing-RV02-008": {"item": "wild_herbs", "text": "You search the canal edge silt and find wild_herbs."},
     "crossing-RV02-010": {"item": "wild_herbs", "text": "You check moss along the flooded towpath and find wild_herbs."},
     "crossing-RV02-011": {"item": "wild_herbs", "text": "You pry useful greens from cracks in the ruined lockworks and find wild_herbs."},
+    "crossing-RV02-012": {"item": "wild_herbs", "text": "You search damp crate seams in the sluice yard and find wild_herbs."},
 }
 
 SHOP_TASKS = {
@@ -155,6 +162,12 @@ SHOP_TASKS = {
         "destination": "crossing-RV02-008",
         "reward": 7,
         "text": "Jarik asks you to carry a dry wrap bundle back to the Canal Edge Pack Stand.",
+    },
+    "crossing-RV02-012": {
+        "name": "Sluice crate tally",
+        "destination": "crossing-RV02-011",
+        "reward": 8,
+        "text": "Tovin asks you to bring a crate tally back to the Lockworks Dry Box.",
     },
 }
 

@@ -128,8 +128,14 @@ ROOMS = {
     "crossing-RV02-011": {
         "title": "Ruined Lockworks",
         "desc": "Broken lock gates and algae-dark stonework mark an old water control point beyond the towpath.",
-        "exits": {"north": "crossing-RV02-010"},
+        "exits": {"north": "crossing-RV02-010", "east": "crossing-RV02-012"},
         "targets": ("rv-lockwork-crab",),
+    },
+    "crossing-RV02-012": {
+        "title": "Canal Sluice Yard",
+        "desc": "A narrow sluice yard collects old rope, damp crates, and quick movement under the canal wall.",
+        "exits": {"west": "crossing-RV02-011"},
+        "targets": ("rv-sluice-rat",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",

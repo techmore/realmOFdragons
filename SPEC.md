@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added the Canal Sluice Yard beyond the Ruined Lockworks with a Sluice Rat enemy, Sluice Yard Crate shop, forage support, shop task, and smoke assertions.
 - Added `guild path` / `path` / `next` as a Circle-aware registrar guidance command, with all-guild smoke coverage for early-Circle, Circle 5+ rite, boon, and Circle 10 capstone guidance.
 - Added command-first `drop <item>` handling for carried gear, moving item objects back into the room so they can be seen and picked up again.
 - Added `remove` / `stow` / `unwear` / `unwield` equipment handling so worn or held gear can return to pack inventory, with smoke coverage for shield removal and weapon stowing.

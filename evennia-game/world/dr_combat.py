@@ -80,6 +80,13 @@ ENEMIES = {
         "description": "A hard-shelled crab clacks through broken lock stones and guards a shallow pool.",
         "loot": {"trias": 4, "items": ("rough_pelt",)},
     },
+    "rv-sluice-rat": {
+        "name": "Sluice Rat",
+        "vitality": 19,
+        "aggression": "waterlogged",
+        "description": "A heavy canal rat drags wet rope scraps through the sluice yard and snaps at boots.",
+        "loot": {"trias": 5, "items": ("field_bandage",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")
