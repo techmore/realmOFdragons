@@ -298,6 +298,8 @@ def combat_status(character):
     lines.append(f"Engagement: {enemy['name']} at {engagement.get('range') or 'unknown'} range.")
     if engagement.get("aimed"):
         lines.append("Aim: set for your next ranged attack.")
+    if engagement.get("feinted"):
+        lines.append("Feint: set for your next melee attack.")
     lines.append(f"Enemy vitality: {int(enemy_obj.db.vitality or 0)}/{int(enemy.get('vitality', 0) or 0)}.")
     lines.append(engagement_suggestion(character))
     return "\n".join(lines)
@@ -610,7 +612,8 @@ def range_status(character):
         return "You are not engaged."
     enemy = ENEMIES.get(target_id, {"name": target_id})
     aimed = " Aim is set." if engagement.get("aimed") else ""
-    return f"You are engaged with {enemy['name']} at {range_band or 'unknown'} range.{aimed}"
+    feinted = " Feint is set." if engagement.get("feinted") else ""
+    return f"You are engaged with {enemy['name']} at {range_band or 'unknown'} range.{aimed}{feinted}"
 
 
 def aim(character):
@@ -636,6 +639,39 @@ def aim(character):
     character.db.roundtime = 1
     ensure_recovery(character)
     return f"You take careful aim at {enemy['name']}. Your next hurl will strike harder."
+
+
+def feint(character):
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot feint."
+    if int(character.db.roundtime or 0) > 0:
+        return f"You are still recovering for {character.db.roundtime} pulse."
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target")
+    if not target_id:
+        return "Feint at what? Target an enemy first."
+    if engagement.get("range") != "melee":
+        return "You need melee range to feint."
+    enemy = ENEMIES.get(target_id, {"name": target_id})
+    if not find_enemy_object(character.location, target_id):
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
+        stop_combat_pressure(character)
+        return f"{enemy['name']} is no longer here."
+    engagement["feinted"] = True
+    character.db.engagement = engagement
+    character.db.balance = "feinting"
+    character.db.roundtime = 1
+    ensure_recovery(character)
+    skills = character.db.skills or build_starter_skills()
+    skill_events = apply_skill_pool_gain(skills, "tactics", 2)
+    character.db.skills = skills
+    lines = [
+        f"You feint at {enemy['name']}, opening a line for your next melee strike.",
+        *skill_events,
+        "Your next jab or bash will strike harder.",
+    ]
+    return "\n".join(lines)
 
 
 def advance(character):
@@ -694,11 +730,15 @@ def jab(character):
         stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
-    damage = maneuver_damage(character, "jab")
+    feinted = bool(engagement.get("feinted"))
+    damage = maneuver_damage(character, "jab") + (1 if feinted else 0)
     vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
     character.db.balance = "recovering"
     character.db.roundtime = 1
     ensure_recovery(character)
+    if feinted:
+        engagement["feinted"] = False
+        character.db.engagement = engagement
     skill_events = apply_combat_skill_gain(character, "small_edged")
     if vitality <= 0:
         enemy_obj.delete()
@@ -722,6 +762,8 @@ def jab(character):
         pressure,
         maneuver_status_text(character),
     ]
+    if feinted:
+        parts.insert(1, "Your feint opens the strike.")
     return "\n".join(parts)
 
 
@@ -745,11 +787,15 @@ def bash(character):
         stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
-    damage = maneuver_damage(character, "bash")
+    feinted = bool(engagement.get("feinted"))
+    damage = maneuver_damage(character, "bash") + (1 if feinted else 0)
     vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
     character.db.balance = "recovering"
     character.db.roundtime = 2
     ensure_recovery(character)
+    if feinted:
+        engagement["feinted"] = False
+        character.db.engagement = engagement
     skill_events = apply_combat_skill_gain(character, "brawling")
     if vitality <= 0:
         enemy_obj.delete()
@@ -773,6 +819,8 @@ def bash(character):
         pressure,
         maneuver_status_text(character),
     ]
+    if feinted:
+        parts.insert(1, "Your feint opens the strike.")
     return "\n".join(parts)
 
 

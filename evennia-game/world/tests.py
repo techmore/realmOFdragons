@@ -9,7 +9,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, health_text, hurl, jab, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
+from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, health_text, hurl, jab, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -1626,29 +1626,40 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("advance")
         character.execute_cmd("advance")
         self.assertEqual(character.db.engagement["range"], "melee")
+        feint_text = feint(character)
+        self.assertIn("opening a line", feint_text)
+        self.assertTrue(character.db.engagement["feinted"])
+        self.assertEqual(character.db.balance, "feinting")
+        self.assertEqual(character.db.roundtime, 1)
+        self.assertEqual(character.db.skills["tactics"]["pool"], 2)
+        self.assertIn("Feint: set for your next melee attack.", combat_status(character))
+        character.execute_cmd("range")
+        character.execute_cmd("wait")
 
         character.execute_cmd("stance offensive")
         self.assertEqual(character.db.stance, "offensive")
         jab_text = jab(character)
+        self.assertIn("Your feint opens the strike.", jab_text)
         self.assertIn("Combat state:", jab_text)
         self.assertIn("Roundtime: 1", jab_text)
-        self.assertIn("Enemy vitality: 8/14.", jab_text)
+        self.assertIn("Enemy vitality: 7/14.", jab_text)
         self.assertIn("Suggested next command: wait.", jab_text)
+        self.assertFalse(character.db.engagement["feinted"])
         self.assertEqual(character.db.balance, "recovering")
         self.assertEqual(character.db.roundtime, 1)
         self.assertEqual(character.db.health, 27)
         self.assertEqual(len(recovery_scripts(character)), 1)
         self.assertEqual(character.db.skills["small_edged"]["pool"], 2)
-        self.assertEqual(character.db.skills["tactics"]["pool"], 1)
+        self.assertEqual(character.db.skills["tactics"]["pool"], 3)
         beetle = next(
             obj
             for obj in character.location.contents
             if obj.db.npc_type == "enemy" and obj.db.enemy_id == "rv-mud-beetle"
         )
-        self.assertEqual(beetle.db.vitality, 8)
+        self.assertEqual(beetle.db.vitality, 7)
 
         character.execute_cmd("attack")
-        self.assertEqual(beetle.db.vitality, 8)
+        self.assertEqual(beetle.db.vitality, 7)
         self.assertEqual(character.db.roundtime, 1)
         character.execute_cmd("wait")
         self.assertEqual(character.db.balance, "balanced")
@@ -1660,6 +1671,9 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.health, 26)
         character.execute_cmd("health")
         character.execute_cmd("defend")
+        character.execute_cmd("fake")
+        self.assertTrue(character.db.engagement["feinted"])
+        character.execute_cmd("wait")
         bash_text = bash(character)
         self.assertIn("collapses", bash_text)
         self.assertIn("Suggested next command: loot corpse.", bash_text)
