@@ -328,6 +328,40 @@ def sell_item(character, item_id):
     return f"You sell {item['name']} from your {source} for {item['sell']} trias."
 
 
+def appraise_item(character, item_id):
+    ensure_economy_state(character)
+    item_id = (item_id or "").strip().lower().replace(" ", "_")
+    if not item_id:
+        return "Appraise what? Try `appraise <item id>` or `appraise target`."
+    item = ITEMS.get(item_id)
+    if not item:
+        return f'Unknown item "{item_id}".'
+
+    inventory = list(character.db.inventory or [])
+    hands = dict(character.db.hands or {"left": None, "right": None})
+    worn = list((character.db.equipment or {}).get("worn", []))
+    in_room = any(obj.db.object_type == "item" and obj.db.item_id == item_id for obj in character.location.contents)
+    in_shop = item_id in current_stock(character.location)
+    visible = item_id in inventory or item_id in hands.values() or item_id in worn or in_room or in_shop
+    if not visible:
+        return f'You do not see or carry "{item_id}" to appraise.'
+
+    skills = character.db.skills or {}
+    events = apply_skill_pool_gain(skills, "appraisal", 2)
+    character.db.skills = skills
+    condition = (character.db.equipment_condition or {}).get(item_id)
+    lines = [
+        f"{item['name']} ({item_id})",
+        f"Shop price: {item['price']} trias. Resale value: {item['sell']} trias.",
+        f"Use: {item['description']}",
+    ]
+    if condition:
+        lines.append(f"Condition: {condition}.")
+    lines.extend(events)
+    lines.append("Suggested next command: buy, sell, get, wear, wield, use, or repair as appropriate.")
+    return "\n".join(lines)
+
+
 def forage_room(character):
     ensure_economy_state(character)
     room_id = character.location.db.dr_room_id if character.location else ""

@@ -82,6 +82,7 @@ Evidence:
 - `DRCommandSmokeTests.test_shopkeepers_reject_untraded_items_and_missing_carried_items` verifies keeper refusal behavior.
 - `DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh` visits every configured shop and verifies overview, dialogue, stock display, buy, sell, stock depletion, carried item objects, restock, and refresh.
 - `DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills` verifies trail foraging creates physical `wild_herbs`, supports pickup/sale, and feeds Outdoorsmanship/Perception.
+- `DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills` also verifies item appraisal for gathered goods and Appraisal progress.
 - `DRCommandSmokeTests.test_wield_wear_and_equipment_commands` verifies bought gear can be wielded/worn.
 - `DRCommandSmokeTests.test_wield_wear_and_equipment_commands` also verifies gear repair condition tracking and Shield Usage/Light Armor progress.
 

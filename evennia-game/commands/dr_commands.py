@@ -12,7 +12,7 @@ from evennia.utils.create import create_object
 
 from world.dr_data import ATTRIBUTES, RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, retreat, revive, room_enemy_ids, scan_room, skin_corpse, stance, target_enemy, wait_recover
-from world.dr_economy import buy_item, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, repair_item, sell_item, shop_talk, use_item, wear_item, wield_item
+from world.dr_economy import appraise_item, buy_item, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, repair_item, sell_item, shop_talk, use_item, wear_item, wield_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, circle_status, guild_ability_summary, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_focus, use_guild_practice, use_guild_technique
@@ -39,7 +39,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
         "Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, practice, boon, train, circle, circle status.",
         "Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.",
-        "Shops/Fieldcraft: shop, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, use <item>, tend/treat, inventory, hands, equipment, repair.",
+        "Shops/Fieldcraft: shop, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, use <item>, tend/treat, inventory, hands, equipment, repair.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, skin corpse, loot corpse, revive/stand.",
         "Focused help: help progression, help room, help scan, help targets, help combat.",
     ]
@@ -88,7 +88,7 @@ CHARACTER_HELP_TOPICS = {
             "2. In Crossing: use room/exits/where, then walk with directions or aliases like n, sw, u, d.",
             "3. Join in-world: visit a guild registrar, use registrar for guidance, then use join guild. Guilds are not chosen during account creation.",
             "4. Train and circle: use train, practice, boon, skills, circle status, circle, abilities, focus, and technique at your own guild registrar through Circle 10.",
-            "5. Gear up: use shop, shop talk, shop stock, buy <item>, sell <item>, use <item>, tend/treat wounds, inventory, hands, equipment, wield, wear, and repair.",
+            "5. Gear up: use shop, appraise <item>, shop talk, shop stock, buy <item>, sell <item>, use <item>, tend/treat wounds, inventory, hands, equipment, wield, wear, and repair.",
             "6. Hunt and forage: walk to beginner hunting rooms, forage, scan, appraise <enemy>, target <enemy>, advance to melee, then jab or bash.",
             "7. Recover and harvest: use combat/prompt, wait/recover for roundtime, defend or flee as needed, revive/stand if incapacitated, then skin corpse, loot corpse, and get dropped items after a kill.",
         ]
@@ -1172,10 +1172,11 @@ class CmdDRTarget(Command):
 
 class CmdDRAppraise(Command):
     """
-    Appraise an enemy in the current room.
+    Appraise an enemy or visible item.
 
     Usage:
       appraise <enemy id>
+      appraise <item id>
       appraise target
     """
 
@@ -1185,7 +1186,11 @@ class CmdDRAppraise(Command):
     help_category = "Dragon Realms"
 
     def func(self):
-        self.caller.msg(appraise_enemy(self.caller, self.args))
+        enemy_text = appraise_enemy(self.caller, self.args)
+        if not enemy_text.startswith('You do not see "'):
+            self.caller.msg(enemy_text)
+            return
+        self.caller.msg(appraise_item(self.caller, self.args))
 
 
 class CmdDRRange(Command):
