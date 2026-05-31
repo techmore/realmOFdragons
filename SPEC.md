@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Account-side character creation now validates names before object creation: names must be 3-30 characters, start with a letter, and use only letters, spaces, apostrophes, or hyphens.
+- Added account smoke coverage proving too-short, non-letter-starting, and punctuation-invalid character names are rejected.
 - Account-side character creation now rejects duplicate playable character names on the same account case-insensitively before creating an Evennia object.
 - Added account smoke coverage proving duplicate roster creation does not add a second character or mutate the original race.
 - Added account-prompt `characters` / `roster` command for listing all playable characters on an account with race, guild, Circle, and location.

@@ -5,6 +5,8 @@ These commands intentionally keep the text-first interface. They are the
 first migration bridge from the Node prototype into Evennia's command loop.
 """
 
+import re
+
 from evennia.commands.command import Command
 from evennia.utils.create import create_object
 
@@ -15,6 +17,9 @@ from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, circle_status, train_skill, unlocked_guild_perks
 from world.dr_world import START_ROOM_ID, build_crossing_world, find_built_room
+
+
+CHARACTER_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z '-]{2,29}$")
 
 
 class CmdDRAccountCreateCharacter(Command):
@@ -50,6 +55,9 @@ class CmdDRAccountCreateCharacter(Command):
         race_id = normalize_race_token(race_name)
         if not name:
             account.msg("Name is required. Usage: create character <name> = <race name>")
+            return
+        if not CHARACTER_NAME_PATTERN.match(name):
+            account.msg("Character names must be 3-30 characters, start with a letter, and use only letters, spaces, apostrophes, or hyphens.")
             return
         existing_names = {character.key.lower() for character in account.characters.all()}
         if name.lower() in existing_names:
