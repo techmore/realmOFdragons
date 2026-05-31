@@ -13,6 +13,7 @@ const requiredTokens = [
   '> circle status',
   '> train',
   '> perk',
+  '> signature',
   '> milestone',
   '> passive',
   '> drill',

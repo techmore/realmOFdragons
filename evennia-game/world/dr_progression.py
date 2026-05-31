@@ -205,6 +205,20 @@ GUILD_TECHNIQUES = {
     "warrior_mage": {"name": "Elemental Vector", "skill": "targeted_magic", "verb": "aligns aggression with targeted magic"},
 }
 
+GUILD_SIGNATURES = {
+    "barbarian": {"name": "Roar Line", "skill": "tactics", "text": "sets battlefield presence into a quick command"},
+    "bard": {"name": "Carried Refrain", "skill": "performance", "text": "carries a useful phrase through movement and work"},
+    "cleric": {"name": "Votive Mark", "skill": "scholarship", "text": "sets doctrine into a practical remembered sign"},
+    "empath": {"name": "Clinic Read", "skill": "first_aid", "text": "turns patient attention into immediate triage"},
+    "moon_mage": {"name": "Moment Thread", "skill": "perception", "text": "catches a small pattern before it passes"},
+    "necromancer": {"name": "Veiled Formula", "skill": "sorcery", "text": "keeps forbidden theory ordered and quiet"},
+    "paladin": {"name": "Oath Line", "skill": "defending", "text": "sets protection into a visible stance"},
+    "ranger": {"name": "Trail Mark", "skill": "outdoorsmanship", "text": "reads the next sign in terrain and habit"},
+    "thief": {"name": "Shadow Pass", "skill": "stealth", "text": "finds a quiet angle through ordinary motion"},
+    "trader": {"name": "Ledger Mark", "skill": "appraisal", "text": "turns a quick value read into practiced judgment"},
+    "warrior_mage": {"name": "Elemental Line", "skill": "targeted_magic", "text": "aligns aimed force with battle focus"},
+}
+
 GUILD_BOONS = {
     "barbarian": {"name": "Battle Temper", "skill": "expertise", "text": "hardens your battle presence"},
     "bard": {"name": "Resonant Memory", "skill": "bardic_lore", "text": "sets guild lore into practiced recall"},
@@ -432,6 +446,9 @@ def guild_ability_summary(guild_id, circle):
     lines = [f"{guild_name} abilities through Circle {max_circle}:", f"Current title: {guild_title(guild_id, max_circle)}."]
     for step in range(1, max_circle + 1):
         lines.append(f"- Circle {step}: {theme}; {guild_circle_perk(guild_id, step)}.")
+    if guild_id in GUILD_SIGNATURES:
+        signature = GUILD_SIGNATURES[guild_id]
+        lines.append(f"Guild signature: {signature['name']} supports {SKILLS[signature['skill']]}. Use `signature` anywhere after joining.")
     if guild_id in GUILD_BOONS:
         boon = GUILD_BOONS[guild_id]
         lines.append(f"Registrar boon: {boon['name']} supports {SKILLS[boon['skill']]}. Use `boon` at your registrar once per Circle.")
@@ -518,7 +535,7 @@ def guild_path_summary(character_state):
         f"Current title: {guild_title(guild_id, circle)}.",
         f"Current milestone: {milestone}.",
         f"Primary training: {primary_skill['name']} rank {primary_skill.get('rank', 0)}.",
-        "Core loop: train, study, focus, technique, passive, drill, circle status, circle.",
+        "Core loop: train, study, signature, focus, technique, passive, drill, circle status, circle.",
     ]
     if circle >= 5:
         rite = GUILD_RITES.get(guild_id)
@@ -585,6 +602,36 @@ def use_guild_technique(character_state):
     events = apply_skill_pool_gain(skills, skill_id, pulse)
     events.append(f"{technique['name']} {technique['verb']}, feeding {skill['name']} by {pulse}.")
     events.append("Use `guild` and `abilities` to review your Circle milestones.")
+    return events
+
+
+def use_guild_signature(character_state):
+    """Apply an always-available Circle-scaled guild identity action."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    signature = GUILD_SIGNATURES.get(guild_id)
+    if not signature:
+        return ["You need to join a guild before using a guild signature."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    skills = character_state.setdefault("skills", build_starter_skills())
+    primary_skill_id = primary_skill_for_guild(guild_id)
+    support_skill_id = signature["skill"]
+    primary_skill = skills.get(primary_skill_id)
+    support_skill = skills.get(support_skill_id)
+    if not primary_skill:
+        return [f"{signature['name']} cannot find {primary_skill_id} training."]
+    if not support_skill:
+        return [f"{signature['name']} cannot find {support_skill_id} training."]
+
+    primary_pulse = 1 + ((circle - 1) // 5)
+    support_pulse = 1 + ((circle - 1) // 3)
+    events = apply_skill_pool_gain(skills, primary_skill_id, primary_pulse)
+    events.extend(apply_skill_pool_gain(skills, support_skill_id, support_pulse))
+    events.append(
+        f"{signature['name']} {signature['text']}, training {primary_skill['name']} by {primary_pulse} and {support_skill['name']} by {support_pulse}."
+    )
+    events.append("Guild signatures are always-available Circle-scaled identity practice; use `abilities` for the full Circle list.")
     return events
 
 
