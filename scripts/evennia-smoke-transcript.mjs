@@ -133,6 +133,23 @@ The shopkeeper explains the counter's trade goods and beginner supplies.
 > shop stock
 Current stock lists carried room-backed inventory.
 
+> west
+You walk into the Old Orchard Verge.
+
+> shop
+The Orchard Verge Basket offers travel_rations, wild_herbs, and torch near the old trees.
+
+> scan
+You scan the area.
+orchard_crow is here at missile range.
+
+> forage
+You search under the old orchard verge and find wild_herbs.
+Outdoorsmanship and Perception gain field experience.
+
+> east
+You return to the South Gate Trailhead.
+
 > task request
 Marta gives you the South road supply note task.
 Travel to Culvert Cache and complete the task there.
