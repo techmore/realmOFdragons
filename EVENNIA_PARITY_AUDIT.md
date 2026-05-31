@@ -24,6 +24,7 @@ Evidence:
 - `DRAccountCreationTests.test_account_created_character_persists_core_start_state_after_reload` reloads the Evennia character object from the database and verifies race, attributes, unaffiliated Circle 1 guild state, Crossing location, roster membership, starter skills, and wallet state persist.
 - `DRAccountCreationTests.test_joined_character_progression_persists_after_reload` verifies a created character can join Barbarian Guild, train, advance to Circle 2, and reload with guild, Circle, registrar location, perks, and trained Expertise intact.
 - Both account persistence smokes now reload the owning account and verify the account roster relationship still lists the created or progressed character with current race, guild, Circle, and location text.
+- Account roster smoke now verifies per-character next-step guidance for unaffiliated characters, Circle-progressing characters, unclaimed Circle 10 boon/capstone rewards, and post-cap play.
 - The all-race smoke verifies race id, race display name, race-derived attributes, `creation_complete`, `commoner` guild state, Circle 1 state, and Crossing start-room placement.
 
 Residual risk:

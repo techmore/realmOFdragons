@@ -38,6 +38,7 @@ class DRAccountCreationTests(TestCase):
         self.assertIn("Use `puppet <name>` to enter Crossing.", roster_text)
         self.assertIn("Aela: Elf, Unaffiliated, Circle 1", roster_text)
         self.assertIn(f"({START_ROOM_ID})", roster_text)
+        self.assertIn("puppet, use `survey`, then walk to a registrar and `join guild`", roster_text)
         self.assertIn("join guild", roster_text)
         account.execute_cmd("characters")
         account.execute_cmd("roster")
@@ -151,9 +152,29 @@ class DRAccountCreationTests(TestCase):
         self.assertEqual(reloaded.db.guild_perks, unlocked_guild_perks("barbarian", 2))
         self.assertGreaterEqual(reloaded.db.skills["expertise"]["rank"], 4)
         self.assertIn("Persist Brin: Human, Barbarian Guild, Circle 2", account_roster_text(account))
+        self.assertIn("return to your guild registrar, then `train` and `circle`", account_roster_text(account))
         reloaded_account = AccountDB.objects.get(id=account.id)
         self.assertIn(reloaded, list(reloaded_account.characters.all()))
         self.assertIn("Persist Brin: Human, Barbarian Guild, Circle 2", account_roster_text(reloaded_account))
+        self.assertIn("return to your guild registrar, then `train` and `circle`", account_roster_text(reloaded_account))
+
+    def test_account_roster_guides_circle_ten_rewards(self):
+        account = create_account("RosterGuidanceAccount", None, "test-password")
+        account.execute_cmd("create character Reward Brin = human")
+        character = next(character for character in account.characters.all() if character.key == "Reward Brin")
+        character.db.guild_id = "barbarian"
+        character.db.guild_name = GUILDS["barbarian"]
+        character.db.circle = 10
+        character.db.guild_boons = []
+        character.db.guild_capstones = []
+        boon_roster = account_roster_text(account)
+        self.assertIn("claim `boon`", boon_roster)
+        character.db.guild_boons = ["barbarian:10"]
+        capstone_roster = account_roster_text(account)
+        self.assertIn("claim `capstone`", capstone_roster)
+        character.db.guild_capstones = ["barbarian:10"]
+        complete_roster = account_roster_text(account)
+        self.assertIn("continue training, shops, survey, or hunting", complete_roster)
 
 
 class DRDataTests(SimpleTestCase):

@@ -120,7 +120,17 @@ def account_roster_text(account):
         location = character.location.key if character.location else "nowhere"
         room_id = character.location.db.dr_room_id if character.location else "unknown"
         lines.append(f"- {character.key}: {race_name}, {guild_name}, Circle {circle}, at {location} ({room_id}).")
-    lines.append("Next step: puppet a character, use `room`, then walk to a registrar and `join guild`.")
+        if character.db.guild_id in (None, "commoner"):
+            lines.append(f"  Next for {character.key}: puppet, use `survey`, then walk to a registrar and `join guild`.")
+        elif int(circle or 1) < 10:
+            lines.append(f"  Next for {character.key}: puppet, return to your guild registrar, then `train` and `circle`.")
+        elif f"{character.db.guild_id}:10" not in tuple(character.db.guild_boons or ()):
+            lines.append(f"  Next for {character.key}: puppet, return to your guild registrar, then claim `boon`.")
+        elif f"{character.db.guild_id}:10" not in tuple(character.db.guild_capstones or ()):
+            lines.append(f"  Next for {character.key}: puppet, return to your guild registrar, then claim `capstone`.")
+        else:
+            lines.append(f"  Next for {character.key}: puppet, then continue training, shops, survey, or hunting.")
+    lines.append("Use `puppet <name>` to enter a listed character.")
     return "\n".join(lines)
 
 
