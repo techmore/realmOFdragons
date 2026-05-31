@@ -1348,6 +1348,27 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(len(bleeding_scripts(character)), 0)
         self.assertIn("Wounds: not bleeding", health_text(character))
 
+    def test_bleeding_state_and_script_persist_after_reload(self):
+        character = self.make_character("Bleeding Persistence Smoke")
+        self.walk_to_room(character, "crossing-RV02-006")
+        character.execute_cmd("target rv-ditch-rat")
+        character.execute_cmd("advance")
+        pressure_script = combat_pressure_scripts(character)[0]
+        pressure_script.at_repeat()
+        self.assertTrue(character.db.bleeding)
+        self.assertEqual(len(bleeding_scripts(character)), 1)
+        health_after_pressure = character.db.health
+
+        reloaded = ObjectDB.objects.get(id=character.id)
+        self.assertTrue(reloaded.db.bleeding)
+        self.assertEqual(reloaded.db.health, health_after_pressure)
+        self.assertEqual(reloaded.db.engagement["target"], "rv-ditch-rat")
+        self.assertEqual(len(bleeding_scripts(reloaded)), 1)
+        self.assertIn("Wounds: bleeding", health_text(reloaded))
+        self.assertIn("Suggested next command: retreat and buy field_bandage.", combat_status(reloaded))
+        bleeding_scripts(reloaded)[0].at_repeat()
+        self.assertEqual(reloaded.db.health, health_after_pressure - 1)
+
     def test_bleeding_without_bandage_suggests_buying_one(self):
         character = self.make_character("Bleeding Guidance Smoke")
         self.walk_to_room(character, "crossing-RV02-006")
