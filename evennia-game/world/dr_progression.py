@@ -202,6 +202,64 @@ def guild_ability_summary(guild_id, circle):
     return lines
 
 
+def guild_path_summary(character_state):
+    """Return a concise Circle-aware guild action plan for the current character."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    if guild_id == "commoner" or guild_id not in GUILDS:
+        return [
+            "You have no guild path yet.",
+            "Next step: visit a guild registrar in Crossing and use `join guild`.",
+        ]
+    room_guild_id = character_state.get("room_guild_id")
+    registrar_room_id = registrar_room_for_guild(guild_id)
+    if room_guild_id != guild_id:
+        return [
+            f"{GUILDS[guild_id]} path guidance is clearest at your own registrar.",
+            f"Registrar: {registrar_room_id or 'unknown'}.",
+            "Next step: return to your guild registrar, then use `guild path` again.",
+        ]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    skills = character_state.setdefault("skills", build_starter_skills())
+    primary_skill_id = primary_skill_for_guild(guild_id)
+    primary_skill = skills.get(primary_skill_id, {"name": SKILLS.get(primary_skill_id, primary_skill_id), "rank": 0})
+    milestone = guild_circle_perk(guild_id, circle)
+    lines = [
+        f"{GUILDS[guild_id]} path at Circle {circle}.",
+        f"Current milestone: {milestone}.",
+        f"Primary training: {primary_skill['name']} rank {primary_skill.get('rank', 0)}.",
+        "Core loop: train, study, focus, technique, passive, drill, circle status, circle.",
+    ]
+    if circle >= 5:
+        rite = GUILD_RITES.get(guild_id)
+        if rite:
+            lines.append(f"Circle 5+ rite: use `rite` for {rite['name']} ({SKILLS[rite['skill']]}).")
+    else:
+        lines.append("Circle 5 rite is not open yet; keep training and circling.")
+
+    boon_key = f"{guild_id}:{circle}"
+    claimed_boons = set(character_state.get("guild_boons") or [])
+    if boon_key not in claimed_boons:
+        boon = GUILD_BOONS.get(guild_id)
+        if boon:
+            lines.append(f"Available boon: use `boon` for {boon['name']} ({SKILLS[boon['skill']]}).")
+    elif circle < MAX_SUPPORTED_CIRCLE:
+        lines.append("Circle boon claimed; continue training toward the next Circle.")
+
+    capstone_key = f"{guild_id}:{MAX_SUPPORTED_CIRCLE}"
+    claimed_capstones = set(character_state.get("guild_capstones") or [])
+    if circle >= MAX_SUPPORTED_CIRCLE:
+        capstone = GUILD_CAPSTONES.get(guild_id)
+        if capstone_key not in claimed_capstones and capstone:
+            lines.append(f"Circle 10 capstone available: use `capstone` for {capstone['name']} ({SKILLS[capstone['skill']]}).")
+        else:
+            lines.append("Circle 10 capstone claimed; continue shops, hunting, fieldcraft, and skill training.")
+    else:
+        lines.append("Next step: use `circle status` to check requirements, then `train` and `circle`.")
+    return lines
+
+
 def use_guild_focus(character_state):
     """Apply the active guild focus as a small primary-skill pulse."""
 

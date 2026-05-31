@@ -13,7 +13,7 @@ from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, com
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
+from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, guild_path_summary, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, survey_room, validate_world_graph
 
 
@@ -563,6 +563,22 @@ class DRCommandSmokeTests(TestCase):
             self.assertIn(f"Registrar: {registrars[guild_id]}.", status_text)
             self.assertIn("Next step: train", status_text)
             self.assertEqual(character.db.circle, 1)
+            path_text = "\n".join(
+                guild_path_summary(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "circle": character.db.circle,
+                        "skills": character.db.skills,
+                        "guild_boons": character.db.guild_boons or [],
+                        "guild_capstones": character.db.guild_capstones or [],
+                        "room_guild_id": character.location.db.guild,
+                    }
+                )
+            )
+            self.assertIn("Core loop: train, study, focus, technique, passive, drill, circle status, circle.", path_text)
+            self.assertIn("Circle 5 rite is not open yet", path_text)
+            self.assertIn("Available boon", path_text)
+            character.execute_cmd("path")
 
             self.train_and_circle_to(character, 10)
             self.assertEqual(len(character.db.guild_perks), 10)
@@ -638,6 +654,21 @@ class DRCommandSmokeTests(TestCase):
             reloaded_rite = ObjectDB.objects.get(id=character.id)
             reloaded_rite_after = (reloaded_rite.db.skills[rite_skill_id]["rank"] * 5) + reloaded_rite.db.skills[rite_skill_id]["pool"]
             self.assertGreaterEqual(reloaded_rite_after, rite_after)
+            circle_ten_path = "\n".join(
+                guild_path_summary(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "circle": character.db.circle,
+                        "skills": character.db.skills,
+                        "guild_boons": character.db.guild_boons or [],
+                        "guild_capstones": character.db.guild_capstones or [],
+                        "room_guild_id": character.location.db.guild,
+                    }
+                )
+            )
+            self.assertIn("Circle 5+ rite", circle_ten_path)
+            self.assertIn("Circle 10 capstone available", circle_ten_path)
+            character.execute_cmd("guild path")
             boon_skill_id = GUILD_BOONS[guild_id]["skill"]
             boon_before = (character.db.skills[boon_skill_id]["rank"] * 5) + character.db.skills[boon_skill_id]["pool"]
             character.execute_cmd("boon")
