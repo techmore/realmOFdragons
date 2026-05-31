@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Combat maneuvers now attach a deduplicated persistent `RecoveryScript` whenever `jab`, `bash`, or `flee` creates roundtime.
+- Added smoke coverage proving attacks and flee start automatic recovery and repeated maneuvers do not duplicate recovery scripts.
 - Account-side character creation now validates names before object creation: names must be 3-30 characters, start with a letter, and use only letters, spaces, apostrophes, or hyphens.
 - Added account smoke coverage proving too-short, non-letter-starting, and punctuation-invalid character names are rejected.
 - Account-side character creation now rejects duplicate playable character names on the same account case-insensitively before creating an Evennia object.

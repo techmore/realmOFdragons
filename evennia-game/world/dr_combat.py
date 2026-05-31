@@ -43,6 +43,7 @@ ENEMIES = {
 RANGES = ("missile", "pole", "melee")
 STANCES = ("balanced", "offensive", "defensive")
 PRESSURE_SCRIPT_MARKER = "dr_combat_pressure"
+RECOVERY_SCRIPT_MARKER = "dr_recovery"
 
 
 def room_enemy_ids(room):
@@ -264,6 +265,23 @@ def ensure_combat_pressure(character):
     return script
 
 
+def recovery_scripts(character):
+    return [
+        script
+        for script in character.scripts.all()
+        if script.db.script_marker == RECOVERY_SCRIPT_MARKER
+    ]
+
+
+def ensure_recovery(character):
+    scripts = recovery_scripts(character)
+    if scripts:
+        return scripts[0]
+    script = create_script("typeclasses.scripts.RecoveryScript", obj=character, start_delay=True)
+    script.db.script_marker = RECOVERY_SCRIPT_MARKER
+    return script
+
+
 def stop_combat_pressure(character):
     for script in combat_pressure_scripts(character):
         script.stop()
@@ -430,6 +448,7 @@ def jab(character):
     vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
     character.db.balance = "recovering"
     character.db.roundtime = 1
+    ensure_recovery(character)
     skill_events = apply_combat_skill_gain(character, "small_edged")
     if vitality <= 0:
         enemy_obj.delete()
@@ -468,6 +487,7 @@ def bash(character):
     vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
     character.db.balance = "recovering"
     character.db.roundtime = 2
+    ensure_recovery(character)
     skill_events = apply_combat_skill_gain(character, "brawling")
     if vitality <= 0:
         enemy_obj.delete()
@@ -511,6 +531,7 @@ def flee(character):
     character.db.engagement = {"target": None, "range": None}
     character.db.balance = "recovering"
     character.db.roundtime = 1
+    ensure_recovery(character)
     stop_combat_pressure(character)
     return "You break away from combat and flee to missile range."
 
