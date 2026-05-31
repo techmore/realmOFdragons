@@ -95,6 +95,25 @@ def guild_ability_summary(guild_id, circle):
     return lines
 
 
+def use_guild_focus(character_state):
+    """Apply the active guild focus as a small primary-skill pulse."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    if guild_id == "commoner" or guild_id not in GUILDS:
+        return ["You have no guild focus yet. Visit a registrar and use `join guild`."]
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    skills = character_state.setdefault("skills", build_starter_skills())
+    primary_skill_id = primary_skill_for_guild(guild_id)
+    primary_skill = skills.get(primary_skill_id)
+    if not primary_skill:
+        return [f"Your {GUILDS[guild_id]} focus cannot find its primary skill."]
+    pulse = 1 + ((circle - 1) // 3)
+    events = apply_skill_pool_gain(skills, primary_skill_id, pulse)
+    events.append(f"You center your {GUILDS[guild_id]} focus through Circle {circle}, feeding {primary_skill['name']} by {pulse}.")
+    events.append("Use `abilities` to review your current guild unlocks.")
+    return events
+
+
 def next_circle_requirement(circle):
     """Return the prototype Circle requirement for the next Circle."""
 

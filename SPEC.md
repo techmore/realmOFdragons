@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added a concrete `focus` / `guild focus` command for joined characters, turning guild ability unlocks into a Circle-scaled primary-skill pulse instead of purely descriptive text.
+- Expanded all-guild Circle 10 smoke coverage to invoke guild focus for every guild and prove each focus increases that guild's primary skill progress.
 - Added command-first Dragon Realms help surfaces: account-side `account help` / `drhelp` and in-character `drhelp` / `commands`.
 - Help text now summarizes account creation, race selection, guild/circle progression, shops, inventory, and async combat commands, with account and character smoke coverage.
 - Crossing world build now initializes `shop_stock` and `shop_last_refresh` metadata on every shop room, so stock exists before the first shop command.

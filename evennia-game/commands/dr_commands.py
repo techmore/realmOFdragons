@@ -15,7 +15,7 @@ from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend
 from world.dr_economy import buy_item, equipment_text, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, sell_item, shop_talk, wear_item, wield_item
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
-from world.dr_progression import advance_circle, circle_status, guild_ability_summary, train_skill, unlocked_guild_perks
+from world.dr_progression import advance_circle, circle_status, guild_ability_summary, train_skill, unlocked_guild_perks, use_guild_focus
 from world.dr_world import DIRECTION_ALIASES, START_ROOM_ID, build_crossing_world, find_built_room
 
 
@@ -37,7 +37,7 @@ CHARACTER_HELP_TEXT = "\n".join(
     [
         "Dragon Realms commands:",
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
-        "Guilds/Circles: join guild, guild/perks, abilities, train, circle, circle status.",
+        "Guilds/Circles: join guild, guild/perks, abilities, focus, train, circle, circle status.",
         "Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.",
         "Shops: shop, shop talk, shop stock, shop refresh, buy <item>, sell <item>, inventory, hands, equipment.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, revive/stand.",
@@ -638,6 +638,32 @@ class CmdDRGuildAbilities(Command):
         guild_id = character.db.guild_id or "commoner"
         circle = int(character.db.circle or 1)
         character.msg("\n".join(guild_ability_summary(guild_id, circle)))
+
+
+class CmdDRGuildFocus(Command):
+    """
+    Use the active guild focus as a small primary-skill pulse.
+
+    Usage:
+      focus
+      guild focus
+    """
+
+    key = "focus"
+    aliases = ["guild focus"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        character = self.caller
+        state = {
+            "guild_id": character.db.guild_id or "commoner",
+            "circle": character.db.circle or 1,
+            "skills": character.db.skills or build_starter_skills(),
+        }
+        events = use_guild_focus(state)
+        character.db.skills = state["skills"]
+        character.msg("\n".join(events))
 
 
 class CmdDRTrain(Command):
