@@ -15,6 +15,33 @@ GUILD_CIRCLE_PERKS = {
     for guild_id, guild_name in GUILDS.items()
 }
 
+GUILD_TITLE_BASES = {
+    "barbarian": "Pit",
+    "bard": "Verse",
+    "cleric": "Votive",
+    "empath": "Clinic",
+    "moon_mage": "Star",
+    "necromancer": "Veiled",
+    "paladin": "Oath",
+    "ranger": "Trail",
+    "thief": "Shadow",
+    "trader": "Ledger",
+    "warrior_mage": "Elemental",
+}
+
+GUILD_TITLE_RANKS = {
+    1: "Novice",
+    2: "Apprentice",
+    3: "Initiate",
+    4: "Adept",
+    5: "Journeyman",
+    6: "Practitioner",
+    7: "Specialist",
+    8: "Veteran",
+    9: "Senior",
+    10: "Tenth-Circle",
+}
+
 GUILD_ABILITY_THEMES = {
     "barbarian": "martial focus and combat presence",
     "bard": "performance, lore, and group inspiration",
@@ -162,6 +189,34 @@ def guild_circle_perk(guild_id, circle):
     return GUILD_CIRCLE_PERKS.get(guild_id, {}).get(int(circle or 1), "Unaffiliated training milestone")
 
 
+def guild_title(guild_id, circle):
+    """Return a clean-room guild title for the current Circle."""
+
+    if guild_id == "commoner" or guild_id not in GUILDS:
+        return "Unaffiliated Commoner"
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(circle or 1)))
+    title_base = GUILD_TITLE_BASES.get(guild_id, "Guild")
+    rank = GUILD_TITLE_RANKS.get(circle, f"Circle {circle}")
+    return f"{rank} {title_base}"
+
+
+def guild_title_ladder(guild_id, circle):
+    """Return visible guild titles through the current Circle."""
+
+    if guild_id == "commoner" or guild_id not in GUILDS:
+        return ["You have no guild title yet. Visit a registrar and use `join guild`."]
+    max_circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(circle or 1)))
+    lines = [f"{GUILDS[guild_id]} titles through Circle {max_circle}:"]
+    for step in range(1, max_circle + 1):
+        marker = "current" if step == max_circle else "earned"
+        lines.append(f"- Circle {step}: {guild_title(guild_id, step)} ({marker}).")
+    if max_circle >= MAX_SUPPORTED_CIRCLE:
+        lines.append(f"Current title: {guild_title(guild_id, max_circle)}. Circle {MAX_SUPPORTED_CIRCLE} is the current supported title cap.")
+    else:
+        lines.append(f"Current title: {guild_title(guild_id, max_circle)}. Use `circle status` to work toward the next title.")
+    return lines
+
+
 def unlocked_guild_perks(guild_id, circle):
     """Return all guild milestones unlocked through the current Circle, capped to Circle 10."""
 
@@ -177,7 +232,7 @@ def guild_ability_summary(guild_id, circle):
     max_circle = min(10, max(1, int(circle or 1)))
     guild_name = GUILDS[guild_id]
     theme = GUILD_ABILITY_THEMES.get(guild_id, "guild training")
-    lines = [f"{guild_name} abilities through Circle {max_circle}:"]
+    lines = [f"{guild_name} abilities through Circle {max_circle}:", f"Current title: {guild_title(guild_id, max_circle)}."]
     for step in range(1, max_circle + 1):
         lines.append(f"- Circle {step}: {theme}; {guild_circle_perk(guild_id, step)}.")
     if guild_id in GUILD_BOONS:
@@ -227,6 +282,7 @@ def guild_path_summary(character_state):
     milestone = guild_circle_perk(guild_id, circle)
     lines = [
         f"{GUILDS[guild_id]} path at Circle {circle}.",
+        f"Current title: {guild_title(guild_id, circle)}.",
         f"Current milestone: {milestone}.",
         f"Primary training: {primary_skill['name']} rank {primary_skill.get('rank', 0)}.",
         "Core loop: train, study, focus, technique, passive, drill, circle status, circle.",
