@@ -904,6 +904,18 @@ Next priority:
 
 - Continue tightening combat parity by adding a command-level way to inspect active enemy stats and recovery state after each maneuver.
 
+Implementation Notes - 2026-05-31, Evennia Post-Maneuver Combat State
+
+Completed in the Evennia runtime:
+
+- Non-lethal `jab` and `bash` results now append a command-first combat state block with health, balance, roundtime, stance, condition, engagement range, enemy vitality, and suggested next command.
+- Lethal `jab` and `bash` results now suggest `loot corpse` after collapse/loot preview output.
+- Smoke coverage now asserts post-maneuver output exposes recovery roundtime, active enemy vitality, and the next recommended command.
+
+Next priority:
+
+- Audit remaining level-10 parity gaps around guild progression visibility, shop/NPC interactions, and account/character login flow.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:

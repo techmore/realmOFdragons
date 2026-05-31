@@ -228,6 +228,10 @@ def combat_status(character):
     return "\n".join(lines)
 
 
+def maneuver_status_text(character):
+    return "Combat state:\n" + combat_status(character)
+
+
 def retaliation_damage(character):
     stance_name = character.db.stance or "balanced"
     if stance_name == "defensive":
@@ -513,12 +517,22 @@ def jab(character):
         character.db.engagement = {"target": None, "range": None}
         stop_combat_pressure(character)
         loot_text = loot_preview(enemy)
-        parts = [f"You jab {enemy['name']} for {damage} damage. {enemy['name']} collapses.", *skill_events, loot_text]
+        parts = [
+            f"You jab {enemy['name']} for {damage} damage. {enemy['name']} collapses.",
+            *skill_events,
+            loot_text,
+            "Suggested next command: loot corpse.",
+        ]
         return "\n".join(parts)
 
     enemy_obj.db.vitality = vitality
     pressure = apply_enemy_retaliation(character, enemy)
-    parts = [f"You jab {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.", *skill_events, pressure]
+    parts = [
+        f"You jab {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.",
+        *skill_events,
+        pressure,
+        maneuver_status_text(character),
+    ]
     return "\n".join(parts)
 
 
@@ -554,12 +568,22 @@ def bash(character):
         character.db.engagement = {"target": None, "range": None}
         stop_combat_pressure(character)
         loot_text = loot_preview(enemy)
-        parts = [f"You bash {enemy['name']} for {damage} damage. {enemy['name']} collapses.", *skill_events, loot_text]
+        parts = [
+            f"You bash {enemy['name']} for {damage} damage. {enemy['name']} collapses.",
+            *skill_events,
+            loot_text,
+            "Suggested next command: loot corpse.",
+        ]
         return "\n".join(parts)
 
     enemy_obj.db.vitality = vitality
     pressure = apply_enemy_retaliation(character, enemy)
-    parts = [f"You bash {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.", *skill_events, pressure]
+    parts = [
+        f"You bash {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.",
+        *skill_events,
+        pressure,
+        maneuver_status_text(character),
+    ]
     return "\n".join(parts)
 
 

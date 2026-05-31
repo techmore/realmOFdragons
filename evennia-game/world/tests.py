@@ -6,7 +6,7 @@ from django.test import SimpleTestCase, TestCase
 from evennia.utils.create import create_account, create_object, create_script
 
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, appraise_enemy, combat_pressure_scripts, combat_status, corpse_objects, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
+from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scripts, combat_status, corpse_objects, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
 from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -529,7 +529,11 @@ class DRCommandSmokeTests(TestCase):
 
         character.execute_cmd("stance offensive")
         self.assertEqual(character.db.stance, "offensive")
-        character.execute_cmd("jab")
+        jab_text = jab(character)
+        self.assertIn("Combat state:", jab_text)
+        self.assertIn("Roundtime: 1", jab_text)
+        self.assertIn("Enemy vitality: 8/14.", jab_text)
+        self.assertIn("Suggested next command: wait.", jab_text)
         self.assertEqual(character.db.balance, "recovering")
         self.assertEqual(character.db.roundtime, 1)
         self.assertEqual(character.db.health, 27)
@@ -556,7 +560,9 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.health, 26)
         character.execute_cmd("health")
         character.execute_cmd("defend")
-        character.execute_cmd("bash")
+        bash_text = bash(character)
+        self.assertIn("collapses", bash_text)
+        self.assertIn("Suggested next command: loot corpse.", bash_text)
         self.assertEqual(character.db.engagement["target"], None)
         self.assertEqual(len(combat_pressure_scripts(character)), 0)
         self.assertEqual(character.db.health, 26)
