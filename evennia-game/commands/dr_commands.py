@@ -27,6 +27,8 @@ ACCOUNT_HELP_TEXT = "\n".join(
         "Dragon Realms account commands:",
         "create character <name> = <race> - create an unaffiliated Circle 1 character.",
         "characters / roster - list playable characters on this account.",
+        "puppet <name> - enter Crossing as that character.",
+        "Guilds are joined in-world after puppeting; do not choose a guild at account creation.",
         f"Races: {', '.join(RACES.values())}.",
     ]
 )
@@ -81,6 +83,32 @@ CHARACTER_HELP_TOPICS = {
     ),
 }
 CHARACTER_HELP_TOPICS["target"] = CHARACTER_HELP_TOPICS["targets"]
+
+
+def account_roster_text(account):
+    characters = list(account.characters.all())
+    if not characters:
+        return "\n".join(
+            [
+                "No characters yet.",
+                "Usage: create character <name> = <race name>",
+                f"Races: {', '.join(RACES.values())}.",
+                "Guilds are joined in-world at registrar rooms after you enter Crossing.",
+            ]
+        )
+    lines = [
+        "Characters:",
+        "Use `puppet <name>` to enter Crossing. Use `unpuppet` to return to this account roster.",
+    ]
+    for character in characters:
+        race_name = character.db.race_name or "Unchosen"
+        guild_name = character.db.guild_name or "Unaffiliated"
+        circle = character.db.circle or 1
+        location = character.location.key if character.location else "nowhere"
+        room_id = character.location.db.dr_room_id if character.location else "unknown"
+        lines.append(f"- {character.key}: {race_name}, {guild_name}, Circle {circle}, at {location} ({room_id}).")
+    lines.append("Next step: puppet a character, use `room`, then walk to a registrar and `join guild`.")
+    return "\n".join(lines)
 
 
 class CmdDRAccountHelp(Command):
@@ -180,7 +208,8 @@ class CmdDRAccountCreateCharacter(Command):
             "\n".join(
                 [
                     f"Created {character.key}, a {state['race_name']} unaffiliated Circle 1 character.",
-                    "Puppet this character to enter Crossing.",
+                    f"Use `puppet {character.key}` to enter Crossing.",
+                    "After entering, use `room` to inspect exits and visit a guild registrar to `join guild`.",
                 ]
             )
         )
@@ -202,18 +231,7 @@ class CmdDRAccountCharacters(Command):
 
     def func(self):
         account = self.account or self.caller
-        characters = list(account.characters.all())
-        if not characters:
-            account.msg("No characters yet. Usage: create character <name> = <race name>")
-            return
-        lines = ["Characters:"]
-        for character in characters:
-            race_name = character.db.race_name or "Unchosen"
-            guild_name = character.db.guild_name or "Unaffiliated"
-            circle = character.db.circle or 1
-            location = character.location.key if character.location else "nowhere"
-            lines.append(f"- {character.key}: {race_name}, {guild_name}, Circle {circle}, at {location}.")
-        account.msg("\n".join(lines))
+        account.msg(account_roster_text(account))
 
 
 class CmdDRScore(Command):

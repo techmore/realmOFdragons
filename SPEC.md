@@ -944,6 +944,20 @@ Next priority:
 
 - Audit account/character flow parity around roster use, puppeting expectations, and clean-room login documentation.
 
+Implementation Notes - 2026-05-31, Evennia Account Flow Guidance
+
+Completed in the Evennia runtime:
+
+- Account help now explicitly describes `puppet <name>` and states that guilds are joined in-world rather than during account creation.
+- Added reusable account roster text that shows character race, guild, Circle, room title, room id, and the next step to puppet, inspect `room`, and `join guild`.
+- Empty roster output now explains the `create character <name> = <race name>` flow and reinforces in-world guild joining.
+- Account creation success output now gives the exact `puppet <name>` command and the next in-world command path.
+- Smoke coverage now verifies account help and roster guidance for empty and created-character accounts.
+
+Next priority:
+
+- Run a completion-oriented Evennia parity audit against SPEC success criteria and close the highest-risk missing item found.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:

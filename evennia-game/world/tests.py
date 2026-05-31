@@ -5,6 +5,7 @@ Evennia migration smoke/unit tests for clean-room DR systems.
 from django.test import SimpleTestCase, TestCase
 from evennia.utils.create import create_account, create_object, create_script
 
+from commands.dr_commands import ACCOUNT_HELP_TEXT, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scripts, combat_status, corpse_objects, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
 from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk
@@ -31,10 +32,23 @@ class DRAccountCreationTests(TestCase):
         self.assertEqual(character.db.guild_name, "Unaffiliated")
         self.assertEqual(character.db.circle, 1)
         self.assertEqual(character.location.db.dr_room_id, START_ROOM_ID)
+        roster_text = account_roster_text(account)
+        self.assertIn("Use `puppet <name>` to enter Crossing.", roster_text)
+        self.assertIn("Aela: Elf, Unaffiliated, Circle 1", roster_text)
+        self.assertIn(f"({START_ROOM_ID})", roster_text)
+        self.assertIn("join guild", roster_text)
         account.execute_cmd("characters")
         account.execute_cmd("roster")
         account.execute_cmd("account help")
         account.execute_cmd("drhelp")
+
+    def test_account_help_and_empty_roster_explain_creation_and_puppeting(self):
+        account = create_account("EmptyRosterAccount", None, "test-password")
+        empty_roster_text = account_roster_text(account)
+        self.assertIn("create character <name> = <race name>", empty_roster_text)
+        self.assertIn("Guilds are joined in-world", empty_roster_text)
+        self.assertIn("puppet <name>", ACCOUNT_HELP_TEXT)
+        self.assertIn("do not choose a guild at account creation", ACCOUNT_HELP_TEXT)
 
     def test_account_roster_lists_multiple_characters(self):
         account = create_account("RosterAccount", None, "test-password")
