@@ -130,6 +130,13 @@ You walk into the Reed-Choked Culvert.
 > shop
 The Culvert Cache offers field_bandage, torch, and travel_rations for the deeper brush path.
 
+> forage
+You part the reeds around the culvert and find wild_herbs.
+Outdoorsmanship and Perception gain field experience.
+
+> get wild_herbs
+You pick up the wild_herbs.
+
 > buy field_bandage
 You buy a field bandage.
 
@@ -147,6 +154,9 @@ Right hand: practice blade.
 
 > sell practice blade
 You sell a practice blade.
+
+> sell wild_herbs
+You sell gathered wild herbs at the provisioner counter.
 \`\`\`
 
 ## Asynchronous range-based combat
@@ -218,6 +228,7 @@ You pick up the dropped item.
 - Crossing movement: \`DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room\`.
 - Shops/items/equipment: \`DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh\` and \`test_wield_wear_and_equipment_commands\`.
 - Beginner content breadth: all-room, all-shop, and all-enemy smoke covers the Reed-Choked Culvert, Culvert Cache, and Reed Snake.
+- Fieldcraft: \`DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills\`.
 - Wound care: \`DRCommandSmokeTests.test_tend_defaults_to_field_bandage_and_treats_bleeding\` and \`test_field_bandage_treats_combat_bleeding\`.
 - Hunting harvest: \`DRCommandSmokeTests.test_skin_corpse_creates_pelt_and_trains_hunting_skills\`.
 - Async range combat: \`DRCommandSmokeTests.test_scan_target_advance_range_and_retreat_commands\`, combat pressure tests, bleeding tests, recovery tests, corpse/loot tests, and all-enemy command loop smoke.

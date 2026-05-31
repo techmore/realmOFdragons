@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Updated the generated Evennia smoke transcript so the user journey includes `forage`, `get wild_herbs`, and selling gathered herbs.
 - Added `forage` / `gather` / `search` fieldcraft for beginner trail and hunting rooms, producing physical `wild_herbs` and training Outdoorsmanship plus Perception.
 - Added smoke coverage proving forage objects can be found, picked up, and sold through the shop economy while advancing survival skills.
 - Updated the generated Evennia smoke transcript so the combat loop shows `skin corpse`, `get rough_pelt`, and hunting harvest coverage.
