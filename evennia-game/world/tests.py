@@ -10,7 +10,7 @@ from evennia.utils.create import create_account, create_object, create_script
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
-from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item
+from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_path_summary, guild_title, guild_title_ladder, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_technique
@@ -947,6 +947,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Marta trades: torch, travel_rations, wild_herbs.", shop_talk(character.location))
         self.assertIn("Available stock: torch, travel_rations, wild_herbs.", buy_item(character, ""))
         self.assertIn("I do not have small_blade for sale", buy_item(character, "small_blade"))
+        self.assertIn("- 100 trias", wallet_text(character))
+        character.execute_cmd("wallet")
         character.execute_cmd("shop")
         character.execute_cmd("shop talk")
         character.execute_cmd("shop stock")
@@ -968,9 +970,11 @@ class DRCommandSmokeTests(TestCase):
             ]
         )
         self.assertEqual(character.db.wallet["trias"], 95)
+        self.assertIn("- 95 trias", wallet_text(character))
 
         character.execute_cmd("inventory")
         character.execute_cmd("hands")
+        character.execute_cmd("money")
         character.execute_cmd("sell torch")
         self.assertNotIn("torch", character.db.inventory)
         self.assertEqual(character.location.db.shop_stock, ("torch", "travel_rations", "wild_herbs"))
@@ -982,6 +986,8 @@ class DRCommandSmokeTests(TestCase):
             ]
         )
         self.assertEqual(character.db.wallet["trias"], 97)
+        self.assertIn("- 97 trias", wallet_text(character))
+        character.execute_cmd("coins")
 
     def test_shop_tasks_reward_travel_and_trade_skills(self):
         character = self.make_character("Shop Task Smoke")

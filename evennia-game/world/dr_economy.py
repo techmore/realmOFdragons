@@ -186,6 +186,23 @@ def set_coins(wallet, amount):
     return wallet
 
 
+def wallet_text(character):
+    """Return a command-first wallet summary."""
+
+    ensure_economy_state(character)
+    wallet = character.db.wallet or {}
+    return "\n".join(
+        [
+            "Wallet:",
+            f"- {int(wallet.get('plat', 0) or 0)} plat",
+            f"- {int(wallet.get('trias', 0) or 0)} trias",
+            f"- {int(wallet.get('lucan', 0) or 0)} lucan",
+            f"- {int(wallet.get('silk', 0) or 0)} silk",
+            "Use `shop`, `buy <item>`, `sell <item>`, or `task request` to work with coin.",
+        ]
+    )
+
+
 def ensure_economy_state(character):
     if not character.db.wallet:
         character.db.wallet = {"plat": 0, "trias": 100, "lucan": 0, "silk": 0}

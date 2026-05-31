@@ -12,7 +12,7 @@ from evennia.utils.create import create_object
 
 from world.dr_data import ATTRIBUTES, GUILDS, RACES, SKILLSETS, build_starter_skills
 from world.dr_combat import advance, appraise_enemy, bash, combat_status, defend, flee, health_text, jab, loot_corpse, range_status, respawn_room_enemies, rest, retreat, revive, room_enemy_ids, scan_room, skin_corpse, stance, target_enemy, wait_recover
-from world.dr_economy import appraise_item, buy_item, complete_shop_task, drop_item, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wear_item, wield_item
+from world.dr_economy import appraise_item, buy_item, complete_shop_task, drop_item, equipment_text, forage_room, format_shop, format_shop_stock, get_item, hands_text, inventory_text, refresh_shop_stock, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text, wear_item, wield_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes
 from world.dr_progression import advance_circle, circle_status, experience_summary, guild_ability_summary, guild_path_summary, guild_title, guild_title_ladder, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_capstone, use_guild_drill, use_guild_focus, use_guild_passive, use_guild_practice, use_guild_rite, use_guild_technique
@@ -39,7 +39,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
         "Guilds/Circles: registrar, join guild, guild/perks, title, experience, abilities, guild path, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
         "Movement: room/exits/where, survey, then use direction names or aliases like n, sw, u, d.",
-        "Shops/Fieldcraft: shop, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
+        "Shops/Fieldcraft: shop, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
         "Combat: scan, target <enemy>, appraise target, range, advance, retreat, combat, stance, jab/attack, bash, defend, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
         "Focused help: help progression, help room, help scan, help targets, help combat.",
     ]
@@ -1179,6 +1179,25 @@ class CmdDRSell(Command):
 
     def func(self):
         self.caller.msg(sell_item(self.caller, self.args))
+
+
+class CmdDRWallet(Command):
+    """
+    Show carried coin.
+
+    Usage:
+      wallet
+      money
+      coins
+    """
+
+    key = "wallet"
+    aliases = ["money", "coins"]
+    locks = "cmd:all()"
+    help_category = "Dragon Realms"
+
+    def func(self):
+        self.caller.msg(wallet_text(self.caller))
 
 
 class CmdDRForage(Command):
