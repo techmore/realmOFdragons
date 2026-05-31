@@ -10,7 +10,7 @@ from evennia.utils.create import create_account, create_object, create_script
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, health_text, hurl, jab, maneuver_guide, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
-from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
+from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, talk_shopkeeper, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_MENTORS, GUILD_PASSIVES, GUILD_RITES, GUILD_SIGNATURES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_history_summary, guild_path_summary, guild_plan_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_mentor, use_guild_milestone, use_guild_passive, use_guild_perk, use_guild_practice, use_guild_signature, use_guild_technique
@@ -635,6 +635,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("rest", CHARACTER_HELP_TEXT)
         self.assertIn("rest - recover roundtime", CHARACTER_HELP_TOPICS["combat"])
         self.assertIn("study", CHARACTER_HELP_TEXT)
+        self.assertIn("ask <keeper>", CHARACTER_HELP_TEXT)
         character.execute_cmd("drhelp")
         character.execute_cmd("help progression")
         character.execute_cmd("help room")
@@ -1449,8 +1450,15 @@ class DRCommandSmokeTests(TestCase):
             talk_text = shop_talk(character.location)
             self.assertIn(shop["dialogue"], talk_text)
             self.assertIn("trades:", talk_text)
+            direct_talk = talk_shopkeeper(character.location, shop["keeper"])
+            self.assertIn(f"You speak with {shop['keeper']}", direct_talk)
+            self.assertIn(shop["dialogue"], direct_talk)
+            self.assertIn("task request", direct_talk)
+            self.assertIn("Accepted stock:", direct_talk)
             character.execute_cmd("shop")
             character.execute_cmd("shop talk")
+            character.execute_cmd("talk")
+            character.execute_cmd(f"ask {shop['keeper']}")
             character.execute_cmd("shop stock")
 
             for item_id in shop["stock"]:

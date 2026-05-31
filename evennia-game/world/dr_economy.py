@@ -388,6 +388,27 @@ def shop_talk(room):
     )
 
 
+def talk_shopkeeper(room, requested=""):
+    """Return NPC-style shopkeeper dialogue for direct talk/ask commands."""
+
+    shop = current_shop(room)
+    if not shop:
+        return "There is no shopkeeper here."
+    requested = (requested or "").strip().lower()
+    keeper = shop["keeper"].lower()
+    shop_name = shop["name"].lower()
+    if requested and requested not in ("shopkeeper", "keeper", "merchant", "vendor", "shop") and requested not in keeper and requested not in shop_name:
+        return f'{shop["keeper"]} says, "I am here at {shop["name"]}. Ask me about stock, tasks, or supplies."'
+    return "\n".join(
+        [
+            f"You speak with {shop['keeper']} at {shop['name']}.",
+            shop["dialogue"],
+            f"{shop['keeper']} says, \"Use `shop stock`, `buy <item>`, `sell <item>`, or `task request` if I have work.\"",
+            f"Accepted stock: {accepted_stock_text(shop)}.",
+        ]
+    )
+
+
 def task_status(character):
     task = dict(character.db.active_task or {})
     if not task:

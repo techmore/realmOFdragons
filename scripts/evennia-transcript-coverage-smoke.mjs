@@ -31,7 +31,7 @@ const requiredTokens = [
   'Reed Blind Tackle Box',
   'Reed blind tally',
   'reed_heron',
-  '> shop stock',
+  '> talk',
   '> task request',
   '> task complete',
   '> forage',

@@ -162,6 +162,9 @@ Commands: shop talk, shop stock, buy <item>, sell <item>.
 > shop talk
 The shopkeeper explains the counter's trade goods and beginner supplies.
 
+> talk
+You speak with the shopkeeper, who explains stock, tasks, and supplies.
+
 > shop stock
 Current stock lists carried room-backed inventory.
 
