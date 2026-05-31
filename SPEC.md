@@ -1018,6 +1018,18 @@ Next priority:
 
 - Continue the SPEC completion audit by collecting the remaining success-criteria evidence into a concise audit note and fixing any last concrete gap found.
 
+Implementation Notes - 2026-05-31, Evennia Parity Audit Artifact
+
+Completed in the Evennia runtime:
+
+- Added `EVENNIA_PARITY_AUDIT.md` mapping every SPEC success criterion to current command, builder, unit, and script smoke evidence.
+- The audit records residual risks separately from proven smoke coverage so remaining work stays explicit instead of implied.
+- Current strongest residual risks are map-fidelity depth, guild-specific flavor beyond Circle 10 milestone progression, Evennia browser/telnet transcript coverage, and security/persistence hardening review.
+
+Next priority:
+
+- Close the highest-value residual user-facing gap by adding a `help progression` topic that summarizes race creation, puppeting, registrar joining, training, circling, hunting, shops, and recovery.
+
 Implementation Notes - 2026-05-06, Current Status Priority Index
 
 Completed in the current Node/React prototype:
