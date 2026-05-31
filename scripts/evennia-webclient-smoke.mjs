@@ -30,6 +30,8 @@ from django.test import Client
 match = resolve("/webclient/")
 response = Client().get("/webclient/")
 body = response.content.decode("utf-8", errors="replace").lower()
+required_tokens = ("webclient", "websocket", "evennia", "input", "connect")
+missing_tokens = [token for token in required_tokens if token not in body]
 payload = {
     "path": "/webclient/",
     "url_name": match.url_name,
@@ -38,9 +40,13 @@ payload = {
     "resolved": True,
     "status_code": response.status_code,
     "webclient_markup": "webclient" in body,
+    "websocket_bootstrap": "websocket" in body,
+    "command_input_markup": "input" in body,
+    "connect_action_markup": "connect" in body,
+    "missing_tokens": missing_tokens,
 }
 print(json.dumps(payload, sort_keys=True))
-if response.status_code >= 400 or "webclient" not in body:
+if response.status_code >= 400 or missing_tokens:
     raise SystemExit(1)
 `;
 

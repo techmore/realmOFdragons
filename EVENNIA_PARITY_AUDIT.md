@@ -146,11 +146,11 @@ Status: Proven by automated test command.
 
 Evidence:
 - `npm run check:evennia` compiles Evennia command/typeclass/world modules and runs `evennia test --settings settings.py world`.
-- `npm run check:evennia` also runs `scripts/evennia-webclient-smoke.mjs`, proving the Evennia Django `/webclient/` route resolves through the local webclient URL configuration and renders a webclient page through Django's test client.
+- `npm run check:evennia` also runs `scripts/evennia-webclient-smoke.mjs`, proving the Evennia Django `/webclient/` route resolves through the local webclient URL configuration and renders webclient, websocket bootstrap, command input, and connect-action markup through Django's test client.
 - The current suite contains command and builder smoke for all criteria above.
 
 Residual risk:
-- `EVENNIA_SMOKE_TRANSCRIPT.md` covers the terminal-style command path through current guild rites and the Flooded Towpath branch, and `npm run check:evennia` proves command behavior plus webclient route/render availability. Full live-browser login/playthrough automation is still not represented in this audit.
+- `EVENNIA_SMOKE_TRANSCRIPT.md` covers the terminal-style command path through current guild rites and the Flooded Towpath branch, and `npm run check:evennia` proves command behavior plus webclient route/render availability with browser-client boot markup. Full live-browser login/playthrough automation is still not represented in this audit.
 
 ## Highest remaining parity risks
 

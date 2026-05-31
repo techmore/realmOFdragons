@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Strengthened the Evennia webclient smoke to require websocket bootstrap, command input, and connect-action markup in the rendered `/webclient/` page.
 - Added a Towpath Supply Shelf shop task that sends players back to the Canal Edge Pack Stand, with smoke coverage proving reward, task completion, and Trading progress.
 - Refreshed the generated Evennia command transcript so the documented terminal/Telnet path includes `rite`, Circle 5 guild exercises, Flooded Towpath, Towpath Supply Shelf, Canal Newt, and towpath forage.
 - Added the Flooded Towpath beyond the Silted Canal Edge with a Canal Newt enemy, towpath supply shelf, forage support, and data smoke coverage.
