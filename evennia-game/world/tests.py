@@ -843,6 +843,11 @@ class DRCommandSmokeTests(TestCase):
         task_text = request_shop_task(character)
         self.assertIn("Culvert Cache", task_text)
         self.assertIn("Active task", task_status(character))
+        reloaded_task_runner = ObjectDB.objects.get(id=character.id)
+        self.assertEqual(reloaded_task_runner.db.active_task["name"], "South road supply note")
+        self.assertEqual(reloaded_task_runner.db.active_task["destination"], "crossing-RV02-007")
+        self.assertEqual(reloaded_task_runner.db.active_task["reward"], 9)
+        self.assertIn("South road supply note", task_status(reloaded_task_runner))
         self.assertIn("not the task destination", complete_shop_task(character))
         self.walk_to_room(character, "crossing-RV02-007")
         wallet_before = character.db.wallet["trias"]

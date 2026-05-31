@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added shop task reload smoke proving active task name, destination, reward, and status text persist after a database reload before completion.
 - Added `survey` / `search room` as a command-first room affordance summary covering exits, guild registrars, shops, shop tasks, forage, enemies, and visible objects.
 - Strengthened the Evennia webclient smoke to require websocket bootstrap, command input, and connect-action markup in the rendered `/webclient/` page.
 - Added a Towpath Supply Shelf shop task that sends players back to the Canal Edge Pack Stand, with smoke coverage proving reward, task completion, and Trading progress.
