@@ -56,6 +56,7 @@ Evidence:
 - The all-guild Circle 10 smoke reloads after `focus`, `technique`, `passive`, `drill`, and `practice`, proving guild ability skill pulses persist before final boon/cap checks.
 - The all-guild smoke verifies `passive` / `guild passive` for every guild, with distinct passive identities and Circle-scaled skill progress.
 - The all-guild smoke verifies `drill` / `guild drill` at each guild registrar, training both guild primary and distinct support skills through Circle-scaled practice.
+- The all-guild smoke verifies Circle 5+ `rite` / `guild rite` at each guild registrar, adding another distinct per-guild ability layer with reload-proven skill persistence.
 - `DRCommandSmokeTests.test_circle_requires_own_guild_registrar_room_command` verifies circling is registrar-gated.
 - `DRCommandSmokeTests.test_joined_training_requires_own_guild_registrar_room_command` verifies training is own-registrar-gated.
 - `DRCommandSmokeTests.test_circle_status_guides_unaffiliated_and_ready_characters` verifies status guidance for unaffiliated and ready-to-circle states.
@@ -153,7 +154,7 @@ Residual risk:
 ## Highest remaining parity risks
 
 - Original-map fidelity: current Crossing is an expanding clean-room scaffold with canonical-style districts, hunting/shop/guild affordances, and beginner supply placement, not a full original Crossing clone.
-- Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, distinct `technique` support-skill behavior, registrar-gated `drill` and `practice`, and once-per-Circle persistent `boon` rewards, but these are clean-room mechanics rather than full original guild ability systems.
+- Guild-specific flavor: all guilds now expose Circle 1-10 ability summaries, shared primary-skill `focus`, distinct `technique` support-skill behavior, passive training, registrar-gated `drill`, `practice`, Circle 5+ `rite`, and once-per-Circle persistent `boon` rewards, but these are clean-room mechanics rather than full original guild ability systems.
 - Study/read now gives non-combat Scholarship progress in study halls and reinforces guild primary learning at a character's own registrar.
 - Browser webclient parity: command-first runtime is Evennia-backed, a generated terminal-style transcript exists, and the Evennia `/webclient/` route/render path is smoke-tested; full live-browser login/playthrough polish may still live in the legacy frontend.
 - Persistence/security hardening: Evennia account creation, early guild progression, all-guild Circle 10 milestones/boons, engaged combat/bleeding, and economy/equipment state now have database reload smoke for core state, but this audit did not do a broader security review beyond command behavior.

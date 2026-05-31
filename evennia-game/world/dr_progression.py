@@ -85,6 +85,20 @@ GUILD_DRILLS = {
     "warrior_mage": {"name": "Spark Pattern", "skill": "targeted_magic", "text": "connects elemental reserve to aimed battle focus"},
 }
 
+GUILD_RITES = {
+    "barbarian": {"name": "Circle of Iron", "skill": "expertise", "text": "turns controlled fury into disciplined readiness"},
+    "bard": {"name": "Conservatory Call", "skill": "performance", "text": "sets guild memory into a performed cadence"},
+    "cleric": {"name": "Votive Keeping", "skill": "theurgy", "text": "binds devotional repetition to practical resolve"},
+    "empath": {"name": "Quiet Ward", "skill": "empathy", "text": "centers care before it becomes crisis"},
+    "moon_mage": {"name": "Measured Conjunction", "skill": "astrology", "text": "matches observation with careful prediction"},
+    "necromancer": {"name": "Sealed Formula", "skill": "thanatology", "text": "keeps dangerous study ordered and private"},
+    "paladin": {"name": "Vigil Oath", "skill": "conviction", "text": "sets protection into repeated oath practice"},
+    "ranger": {"name": "Path Memory", "skill": "instinct", "text": "lays trail signs into reflex and recall"},
+    "thief": {"name": "Shadow Ledger", "skill": "stealth", "text": "counts exits, angles, and silence before movement"},
+    "trader": {"name": "Market Rite", "skill": "trading", "text": "ties negotiation discipline to practical accounting"},
+    "warrior_mage": {"name": "Elemental Binding", "skill": "summoning", "text": "contains force before directing it outward"},
+}
+
 STUDY_ROOMS = {
     "crossing-GU02-001": {"name": "Arcane Study Hall", "skill": "arcana", "text": "You study public notes on basic magical theory"},
     "crossing-GU12-001": {"name": "Moon Mage Observatory", "skill": "astrology", "text": "You study careful star tables and timing marks"},
@@ -161,6 +175,9 @@ def guild_ability_summary(guild_id, circle):
     if guild_id in GUILD_DRILLS:
         drill = GUILD_DRILLS[guild_id]
         lines.append(f"Registrar drill: {drill['name']} supports {SKILLS[drill['skill']]}. Use `drill` at your registrar.")
+    if guild_id in GUILD_RITES and max_circle >= 5:
+        rite = GUILD_RITES[guild_id]
+        lines.append(f"Circle rite: {rite['name']} supports {SKILLS[rite['skill']]}. Use `rite` at your registrar from Circle 5.")
     if max_circle >= MAX_SUPPORTED_CIRCLE:
         lines.append(f"Circle {MAX_SUPPORTED_CIRCLE} is the current supported ability cap.")
     else:
@@ -273,6 +290,42 @@ def use_guild_practice(character_state):
     events = [f"You practice before the {GUILDS[guild_id]} registrar."]
     events.extend(use_guild_focus(character_state))
     events.extend(use_guild_technique(character_state))
+    return events
+
+
+def use_guild_rite(character_state):
+    """Perform a Circle 5+ guild rite at the character's own registrar."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    rite = GUILD_RITES.get(guild_id)
+    if not rite:
+        return ["You need to join a guild before performing a guild rite."]
+    if room_guild_id != guild_id:
+        return ["Guild rites require your own registrar. Use `circle status` to find the right room."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    if circle < 5:
+        return ["Guild rites open at Circle 5. Keep training and circling with your registrar."]
+
+    skills = character_state.setdefault("skills", build_starter_skills())
+    primary_skill_id = primary_skill_for_guild(guild_id)
+    rite_skill_id = rite["skill"]
+    primary_skill = skills.get(primary_skill_id)
+    rite_skill = skills.get(rite_skill_id)
+    if not primary_skill:
+        return [f"{rite['name']} cannot find {primary_skill_id} training."]
+    if not rite_skill:
+        return [f"{rite['name']} cannot find {rite_skill_id} training."]
+
+    primary_pulse = 1 + ((circle - 1) // 6)
+    rite_pulse = 2 + ((circle - 1) // 4)
+    events = apply_skill_pool_gain(skills, primary_skill_id, primary_pulse)
+    events.extend(apply_skill_pool_gain(skills, rite_skill_id, rite_pulse))
+    events.append(
+        f"{rite['name']} {rite['text']}, training {primary_skill['name']} by {primary_pulse} and {rite_skill['name']} by {rite_pulse}."
+    )
+    events.append("Guild rites are Circle 5+ registrar exercises for deeper guild identity.")
     return events
 
 
