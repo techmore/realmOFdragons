@@ -13,7 +13,7 @@ from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, 
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_history_summary, guild_path_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_practice, use_guild_technique
+from world.dr_progression import GUILD_BOONS, GUILD_CAPSTONES, GUILD_CIRCLE_PERK_NAMES, GUILD_DRILLS, GUILD_PASSIVES, GUILD_RITES, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, experience_summary, guild_ability_summary, guild_circle_perk, guild_history_summary, guild_path_summary, guild_title, guild_title_ladder, milestone_skill_for_guild_circle, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_drill, use_guild_focus, use_guild_milestone, use_guild_passive, use_guild_perk, use_guild_practice, use_guild_technique
 from world.dr_world import DIRECTION_ALIASES, ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, forage_guide, guild_guide, guild_registrar_rooms, hunting_guide, shop_guide, survey_room, task_guide, travel_guide, validate_world_graph
 
 
@@ -831,6 +831,28 @@ class DRCommandSmokeTests(TestCase):
             reloaded_milestone = ObjectDB.objects.get(id=character.id)
             reloaded_milestone_after = (reloaded_milestone.db.skills[milestone_skill_id]["rank"] * 5) + reloaded_milestone.db.skills[milestone_skill_id]["pool"]
             self.assertGreaterEqual(reloaded_milestone_after, milestone_command_after)
+            perk_before = (character.db.skills[milestone_skill_id]["rank"] * 5) + character.db.skills[milestone_skill_id]["pool"]
+            perk_text = "\n".join(
+                use_guild_perk(
+                    {
+                        "guild_id": character.db.guild_id,
+                        "circle": character.db.circle,
+                        "skills": character.db.skills,
+                        "room_guild_id": character.location.db.guild,
+                    }
+                )
+            )
+            self.assertIn(GUILD_CIRCLE_PERK_NAMES[guild_id][character.db.circle - 1], perk_text)
+            self.assertIn("Circle 10", perk_text)
+            perk_after = (character.db.skills[milestone_skill_id]["rank"] * 5) + character.db.skills[milestone_skill_id]["pool"]
+            self.assertGreater(perk_after, perk_before)
+            character.execute_cmd("perk")
+            character.execute_cmd("circle perk")
+            perk_command_after = (character.db.skills[milestone_skill_id]["rank"] * 5) + character.db.skills[milestone_skill_id]["pool"]
+            self.assertGreater(perk_command_after, perk_after)
+            reloaded_perk = ObjectDB.objects.get(id=character.id)
+            reloaded_perk_after = (reloaded_perk.db.skills[milestone_skill_id]["rank"] * 5) + reloaded_perk.db.skills[milestone_skill_id]["pool"]
+            self.assertGreaterEqual(reloaded_perk_after, perk_command_after)
             primary_skill_id = primary_skill_for_guild(guild_id)
             focus_before = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
             character.execute_cmd("focus")

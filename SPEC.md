@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `perk` / `circle perk` as a registrar-gated action for invoking the current earned guild Circle milestone, with all-guild Circle 10 smoke proving mapped milestone skill gains and reload persistence.
 - Added `maneuvers` / `combat tactics` as a command-first combat guide that lists range-appropriate attacks, setup moves, defenses, equipment hints, and current aimed/feinted/defensive states.
 - Added `feint` / `fake` as a melee setup maneuver that trains Tactics, marks the next jab or bash for bonus damage, and surfaces feint state in combat/range feedback.
 - Added `block` / `shield block` as a shield defensive maneuver that trains Shield Usage plus Tactics, sets a blocking balance state, and stops the next close enemy pressure.

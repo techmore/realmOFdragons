@@ -612,6 +612,31 @@ def use_guild_milestone(character_state):
     return events
 
 
+def use_guild_perk(character_state):
+    """Invoke the character's current earned Circle perk at their registrar."""
+
+    guild_id = character_state.get("guild_id") or "commoner"
+    room_guild_id = character_state.get("room_guild_id")
+    if guild_id == "commoner" or guild_id not in GUILDS:
+        return ["You need to join a guild before using Circle perks."]
+    if room_guild_id != guild_id:
+        return ["Circle perk practice requires your own registrar. Use `guilds` or `circle status` to find the right room."]
+
+    circle = min(MAX_SUPPORTED_CIRCLE, max(1, int(character_state.get("circle") or 1)))
+    skills = character_state.setdefault("skills", build_starter_skills())
+    skill_id = milestone_skill_for_guild_circle(guild_id, circle)
+    skill = skills.get(skill_id)
+    if not skill:
+        return [f"Your Circle {circle} perk cannot find {skill_id} training."]
+
+    perk_name = GUILD_CIRCLE_PERK_NAMES[guild_id][circle - 1]
+    pulse = 2 + ((circle - 1) // 4)
+    events = apply_skill_pool_gain(skills, skill_id, pulse)
+    events.append(f"You invoke {perk_name}, applying your Circle {circle} {GUILDS[guild_id]} perk to {skill['name']} by {pulse}.")
+    events.append("Use `guild history` to review earned perks and `milestone` for formal milestone practice.")
+    return events
+
+
 def use_guild_passive(character_state):
     """Reinforce a guild's passive Circle-scaled training identity."""
 
