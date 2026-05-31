@@ -236,6 +236,7 @@ class DRWorldTests(SimpleTestCase):
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-006"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-008"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-013"))
+        self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-014"))
         self.assertEqual(find_path(START_ROOM_ID, "crossing-RV02-009"), ["south", "south", "west"])
 
     def test_task_guide_lists_routes_rewards_and_destinations(self):
@@ -253,9 +254,13 @@ class DRWorldTests(SimpleTestCase):
         self.assertIn("Crossing Town Green (crossing-TG01-001): here.", town_guide)
         self.assertIn("Mossy Spillway Steps (crossing-RV02-013): go south, south, east, east, east, east, east, south, east, east.", town_guide)
         self.assertIn("enemies: rv-spillway-eel", town_guide)
+        self.assertIn("Weir Watch Platform (crossing-RV02-014): go south, south, east, east, east, east, east, south, east, east, east.", town_guide)
+        self.assertIn("enemies: rv-weir-otter", town_guide)
         self.assertIn("guild: Barbarian Guild", town_guide)
         self.assertIn("shop: Spillway Rope Hook", town_guide)
         self.assertIn("task: Spillway rope count", town_guide)
+        self.assertIn("shop: Weir Watch Kit", town_guide)
+        self.assertIn("task: Weir hook report", town_guide)
 
 
 class DRWorldBuilderTests(TestCase):
@@ -346,6 +351,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertEqual(sluice.db.targets, ("rv-sluice-rat",))
         spillway = find_built_room("crossing-RV02-013")
         self.assertEqual(spillway.db.targets, ("rv-spillway-eel",))
+        weir = find_built_room("crossing-RV02-014")
+        self.assertEqual(weir.db.targets, ("rv-weir-otter",))
 
     def test_built_shopkeeper_npcs(self):
         build_crossing_world()
@@ -523,6 +530,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("Brushline Forage Fork", town_hunting)
         self.assertIn("go south, south, east", town_hunting)
         self.assertIn("rv-sluice-rat", town_hunting)
+        self.assertIn("rv-weir-otter", town_hunting)
         character.execute_cmd("hunting")
         town_shops = shop_guide(character.location)
         self.assertIn("Crossing shops and tasks:", town_shops)
@@ -530,6 +538,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("here; task: South road supply note", town_shops)
         self.assertIn("Sluice Yard Crate", town_shops)
         self.assertIn("field_bandage, torch, travel_rations", town_shops)
+        self.assertIn("Weir Watch Kit", town_shops)
         character.execute_cmd("shops")
         town_guilds = guild_guide(character.location)
         self.assertIn("Crossing guild registrars:", town_guilds)
@@ -543,6 +552,7 @@ class DRCommandSmokeTests(TestCase):
         self.assertIn("South Gate Trailhead", town_forage)
         self.assertIn("wild_herbs; go south, south", town_forage)
         self.assertIn("Sluice Yard", town_forage)
+        self.assertIn("Weir Watch Platform", town_forage)
         self.assertIn("Suggested loop: travel, survey, forage", town_forage)
         character.execute_cmd("forage guide")
         self.walk_to_room(character, "crossing-RV02-002")

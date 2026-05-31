@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added the Weir Watch Platform beyond the Mossy Spillway Steps with a Weir Otter enemy, Weir Watch Kit shop, forage support, shop task, and smoke assertions.
 - Expanded all-guild Circle 10 smoke to reload after `milestone` / `guild lesson`, proving named guild milestone skill gains persist across database reloads.
 - Added `journey` / `next steps` / `todo` / `status` as a compact current-state guide covering location, route guidance, active shop tasks, guild next steps, combat state, and economy/fieldcraft prompts.
 - Added `routes` / `travel guide` / `map` as a command-first all-room Crossing route guide listing every configured room, path from the current room, and guild/shop/task/forage/enemy markers.

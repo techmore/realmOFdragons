@@ -140,8 +140,14 @@ ROOMS = {
     "crossing-RV02-013": {
         "title": "Mossy Spillway Steps",
         "desc": "Slippery spillway steps descend beside green stone, tangled rope, and dark canal runoff.",
-        "exits": {"west": "crossing-RV02-012"},
+        "exits": {"west": "crossing-RV02-012", "east": "crossing-RV02-014"},
         "targets": ("rv-spillway-eel",),
+    },
+    "crossing-RV02-014": {
+        "title": "Weir Watch Platform",
+        "desc": "A creaking timber platform overlooks a narrow weir where canal foam catches on old hooks.",
+        "exits": {"west": "crossing-RV02-013"},
+        "targets": ("rv-weir-otter",),
     },
     "crossing-GU01-001": {
         "title": "Martial Practice Hall",

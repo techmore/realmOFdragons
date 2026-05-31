@@ -136,6 +136,12 @@ SHOPS = {
         "dialogue": "Brakka says, 'The spillway steps are slick. Keep a light high and a wrap dry.'",
         "stock": ("field_bandage", "wild_herbs", "torch"),
     },
+    "crossing-RV02-014": {
+        "name": "Weir Watch Kit",
+        "keeper": "Lessa",
+        "dialogue": "Lessa says, 'The weir looks quiet until the foam moves against the current.'",
+        "stock": ("field_bandage", "travel_rations", "wild_herbs"),
+    },
 }
 
 FORAGE_ROOMS = {
@@ -149,6 +155,7 @@ FORAGE_ROOMS = {
     "crossing-RV02-011": {"item": "wild_herbs", "text": "You pry useful greens from cracks in the ruined lockworks and find wild_herbs."},
     "crossing-RV02-012": {"item": "wild_herbs", "text": "You search damp crate seams in the sluice yard and find wild_herbs."},
     "crossing-RV02-013": {"item": "wild_herbs", "text": "You search moss between spillway stones and find wild_herbs."},
+    "crossing-RV02-014": {"item": "wild_herbs", "text": "You check the damp planks of the weir platform and find wild_herbs."},
 }
 
 SHOP_TASKS = {
@@ -181,6 +188,12 @@ SHOP_TASKS = {
         "destination": "crossing-RV02-012",
         "reward": 8,
         "text": "Brakka asks you to carry a rope count back to the Sluice Yard Crate.",
+    },
+    "crossing-RV02-014": {
+        "name": "Weir hook report",
+        "destination": "crossing-RV02-013",
+        "reward": 8,
+        "text": "Lessa asks you to bring a hook report back to the Spillway Rope Hook.",
     },
 }
 

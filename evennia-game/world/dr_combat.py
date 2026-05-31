@@ -94,6 +94,13 @@ ENEMIES = {
         "description": "A dark eel twists through spillway runoff and lashes at movement near the steps.",
         "loot": {"trias": 5, "items": ("wild_herbs",)},
     },
+    "rv-weir-otter": {
+        "name": "Weir Otter",
+        "vitality": 21,
+        "aggression": "clever",
+        "description": "A sleek otter darts along the weir timbers and snaps with surprising force.",
+        "loot": {"trias": 5, "items": ("field_bandage",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")
