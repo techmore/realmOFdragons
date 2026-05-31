@@ -374,6 +374,37 @@ def wear_item(character, item_id):
     return f"You wear {item['name']} from your {source}."
 
 
+def use_item(character, item_id):
+    """Use a carried consumable item."""
+
+    ensure_economy_state(character)
+    item_id = (item_id or "").strip().lower().replace(" ", "_")
+    if not item_id:
+        return "Use what?"
+    item = ITEMS.get(item_id)
+    if not item:
+        return f'Unknown item "{item_id}".'
+    if item_id != "field_bandage":
+        return f"{item['name']} has no immediate use."
+
+    inventory = list(character.db.inventory or [])
+    if item_id not in inventory or not carried_item_objects(character, item_id):
+        return f"You are not carrying {item['name']}."
+    max_health = int(character.db.max_health or 30)
+    current_health = int(character.db.health if character.db.health is not None else max_health)
+    if current_health >= max_health:
+        return "You are already at full health."
+
+    healed = min(8, max_health - current_health)
+    character.db.health = current_health + healed
+    inventory.remove(item_id)
+    character.db.inventory = inventory
+    objects = carried_item_objects(character, item_id)
+    if objects:
+        objects[0].delete()
+    return f"You bind the worst cuts with {item['name']} and recover {healed} health."
+
+
 def inventory_text(character):
     ensure_economy_state(character)
     inventory = character.db.inventory or []

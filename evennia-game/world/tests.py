@@ -8,7 +8,7 @@ from evennia.utils.create import create_account, create_object, create_script
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, combat_pressure_scripts, combat_status, corpse_objects, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room
-from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk
+from world.dr_economy import ITEMS, SHOPS, buy_item, format_shop, sell_item, shop_talk, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_TECHNIQUES, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks, use_guild_focus, use_guild_technique
@@ -737,6 +737,26 @@ class DRCommandSmokeTests(TestCase):
             ]
         )
         character.execute_cmd("equipment")
+
+    def test_field_bandage_use_recovers_health_and_consumes_item(self):
+        character = self.make_character("Bandage Smoke")
+        self.walk_to_room(character, "crossing-RV02-006")
+        character.db.health = 17
+        character.db.max_health = 30
+        character.execute_cmd("buy field_bandage")
+        self.assertIn("field_bandage", character.db.inventory)
+        bandage_text = use_item(character, "field_bandage")
+        self.assertIn("recover 8 health", bandage_text)
+        self.assertEqual(character.db.health, 25)
+        self.assertNotIn("field_bandage", character.db.inventory)
+        self.assertFalse(
+            [
+                obj
+                for obj in character.contents
+                if obj.db.object_type == "item" and obj.db.item_id == "field_bandage"
+            ]
+        )
+        character.execute_cmd("use field_bandage")
 
     def test_shop_data_has_stock_and_dialogue(self):
         self.assertGreaterEqual(len(SHOPS), 4)

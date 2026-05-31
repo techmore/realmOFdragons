@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `use <item>` for carried consumables, starting with `field_bandage` healing and item consumption.
+- Added smoke coverage proving a bought field bandage restores health, leaves pack inventory, and deletes its carried item object.
 - Added a Drainage Trail Peddler shop counter to the new Root-Tangled Drainage hunting room.
 - Added `field_bandage` beginner stock with all-shop buy/sell/refresh smoke coverage.
 - Added the Root-Tangled Drainage as an additional beginner Crossing hunting room connected from Low Ridge Rabbit Run.
