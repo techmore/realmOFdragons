@@ -371,6 +371,8 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.balance, "recovering")
         self.assertEqual(character.db.roundtime, 1)
         self.assertEqual(character.db.health, 27)
+        self.assertEqual(character.db.skills["small_edged"]["pool"], 2)
+        self.assertEqual(character.db.skills["tactics"]["pool"], 1)
         beetle = next(
             obj
             for obj in character.location.contents
@@ -455,6 +457,26 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("target rv-mud-beetle")
         self.assertEqual(character.db.engagement["target"], "rv-mud-beetle")
         self.assertEqual(len(combat_pressure_scripts(character)), 1)
+
+    def test_race_attributes_and_weapon_skill_modify_combat_damage(self):
+        character = self.make_character("Attribute Combat Smoke")
+        character.db.race = "gor_tog"
+        character.db.race_name = "Gor'Tog"
+        character.db.attributes = RACE_STARTING_ATTRIBUTES["gor_tog"]
+        character.db.skills["brawling"]["rank"] = 10
+        self.walk_to_room(character, "crossing-RV02-003")
+        character.execute_cmd("target rv-boarlet")
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
+        character.execute_cmd("bash")
+        boarlet = next(
+            obj
+            for obj in character.location.contents
+            if obj.db.npc_type == "enemy" and obj.db.enemy_id == "rv-boarlet"
+        )
+        self.assertEqual(boarlet.db.vitality, 10)
+        self.assertEqual(character.db.skills["brawling"]["pool"], 2)
+        self.assertEqual(character.db.skills["tactics"]["pool"], 1)
 
     def test_recovery_and_respawn_scripts_tick_existing_helpers(self):
         character = self.make_character("Script Smoke")

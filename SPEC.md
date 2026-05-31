@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Combat damage now derives from character attributes and weapon skill rank: `jab` uses agility plus Small Edged, while `bash` uses strength plus Brawling.
+- Combat maneuvers now feed skill pools for the relevant attack skill plus Tactics, making Crossing combat contribute to level-10 progression state instead of only mutating enemy vitality.
+- Added smoke coverage proving race attributes and weapon skill rank modify combat damage and that combat maneuvers award skill-pool progress.
 - Added race-derived starting attributes for all 11 canonical races using the public DR attribute order: strength, reflex, agility, charisma, discipline, wisdom, intelligence, and stamina.
 - Race selection now applies mechanical starting attributes during both account-prompt creation and in-character creation, and `score` displays the current attribute spread.
 - Added smoke coverage proving account-created characters receive race-specific attributes and that all canonical race choices populate the expected starting attributes.

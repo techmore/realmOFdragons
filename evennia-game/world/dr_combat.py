@@ -6,6 +6,8 @@ from evennia import create_object
 from evennia.utils.create import create_script
 
 from world.dr_economy import ITEMS, coins, set_coins
+from world.dr_data import build_starter_attributes, build_starter_skills
+from world.dr_progression import apply_skill_pool_gain
 
 ENEMIES = {
     "rv-wolf-cub": {
@@ -135,6 +137,33 @@ def retaliation_damage(character):
     if stance_name == "offensive":
         return 3
     return 2
+
+
+def attribute_value(character, attribute):
+    attributes = character.db.attributes or build_starter_attributes()
+    return int(attributes.get(attribute, 10) or 10)
+
+
+def skill_rank(character, skill_id):
+    skills = character.db.skills or build_starter_skills()
+    skill = skills.get(skill_id, {})
+    return int(skill.get("rank", 0) or 0)
+
+
+def maneuver_damage(character, maneuver):
+    if maneuver == "jab":
+        return 4 + attribute_value(character, "agility") // 5 + skill_rank(character, "small_edged") // 10
+    if maneuver == "bash":
+        return 8 + attribute_value(character, "strength") // 5 + skill_rank(character, "brawling") // 10
+    return 1
+
+
+def apply_combat_skill_gain(character, skill_id):
+    skills = character.db.skills or build_starter_skills()
+    events = apply_skill_pool_gain(skills, skill_id, 2)
+    events.extend(apply_skill_pool_gain(skills, "tactics", 1))
+    character.db.skills = skills
+    return events
 
 
 def apply_enemy_retaliation(character, enemy):
@@ -341,21 +370,24 @@ def jab(character):
         stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
-    damage = 6
+    damage = maneuver_damage(character, "jab")
     vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
     character.db.balance = "recovering"
     character.db.roundtime = 1
+    skill_events = apply_combat_skill_gain(character, "small_edged")
     if vitality <= 0:
         enemy_obj.delete()
         create_corpse(character.location, target_id, enemy)
         character.db.engagement = {"target": None, "range": None}
         stop_combat_pressure(character)
         loot_text = loot_preview(enemy)
-        return f"You jab {enemy['name']} for {damage} damage. {enemy['name']} collapses.\n{loot_text}"
+        parts = [f"You jab {enemy['name']} for {damage} damage. {enemy['name']} collapses.", *skill_events, loot_text]
+        return "\n".join(parts)
 
     enemy_obj.db.vitality = vitality
     pressure = apply_enemy_retaliation(character, enemy)
-    return f"You jab {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.\n{pressure}"
+    parts = [f"You jab {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.", *skill_events, pressure]
+    return "\n".join(parts)
 
 
 def bash(character):
@@ -376,21 +408,24 @@ def bash(character):
         stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
-    damage = 10
+    damage = maneuver_damage(character, "bash")
     vitality = int(enemy_obj.db.vitality or enemy.get("vitality", 1)) - damage
     character.db.balance = "recovering"
     character.db.roundtime = 2
+    skill_events = apply_combat_skill_gain(character, "brawling")
     if vitality <= 0:
         enemy_obj.delete()
         create_corpse(character.location, target_id, enemy)
         character.db.engagement = {"target": None, "range": None}
         stop_combat_pressure(character)
         loot_text = loot_preview(enemy)
-        return f"You bash {enemy['name']} for {damage} damage. {enemy['name']} collapses.\n{loot_text}"
+        parts = [f"You bash {enemy['name']} for {damage} damage. {enemy['name']} collapses.", *skill_events, loot_text]
+        return "\n".join(parts)
 
     enemy_obj.db.vitality = vitality
     pressure = apply_enemy_retaliation(character, enemy)
-    return f"You bash {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.\n{pressure}"
+    parts = [f"You bash {enemy['name']} for {damage} damage. It has {vitality} vitality remaining.", *skill_events, pressure]
+    return "\n".join(parts)
 
 
 def stance(character, requested):
