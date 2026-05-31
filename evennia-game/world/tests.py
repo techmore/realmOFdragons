@@ -8,7 +8,7 @@ from evennia.utils.create import create_account, create_object, create_script
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
 from world.dr_combat import ENEMIES, appraise_enemy, bash, bleeding_scripts, combat_pressure_scripts, combat_status, corpse_objects, health_text, jab, recovery_scripts, respawn_room_enemies, room_enemy_ids, scan_room, skin_corpse
-from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOPS, appraise_item, buy_item, forage_room, format_shop, repair_item, sell_item, shop_talk, use_item
+from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, forage_room, format_shop, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
 from world.dr_progression import GUILD_BOONS, GUILD_TECHNIQUES, STUDY_ROOMS, advance_circle, circle_status, guild_ability_summary, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, study_room, train_skill, unlocked_guild_perks, use_guild_boon, use_guild_focus, use_guild_practice, use_guild_technique
@@ -707,6 +707,28 @@ class DRCommandSmokeTests(TestCase):
             ]
         )
         self.assertEqual(character.db.wallet["trias"], 97)
+
+    def test_shop_tasks_reward_travel_and_trade_skills(self):
+        character = self.make_character("Shop Task Smoke")
+        self.assertIn(START_ROOM_ID, SHOP_TASKS)
+        task_text = request_shop_task(character)
+        self.assertIn("Culvert Cache", task_text)
+        self.assertIn("Active task", task_status(character))
+        self.assertIn("not the task destination", complete_shop_task(character))
+        self.walk_to_room(character, "crossing-RV02-007")
+        wallet_before = character.db.wallet["trias"]
+        trading_before = character.db.skills["trading"]["pool"]
+        appraisal_before = character.db.skills["appraisal"]["pool"]
+        athletics_before = character.db.skills["athletics"]["pool"]
+        complete_text = complete_shop_task(character)
+        self.assertIn("Shop task complete", complete_text)
+        self.assertGreater(character.db.wallet["trias"], wallet_before)
+        self.assertGreater(character.db.skills["trading"]["pool"], trading_before)
+        self.assertGreater(character.db.skills["appraisal"]["pool"], appraisal_before)
+        self.assertGreater(character.db.skills["athletics"]["pool"], athletics_before)
+        self.assertIsNone(character.db.active_task)
+        character.execute_cmd("task request")
+        character.execute_cmd("task complete")
 
     def test_shopkeepers_reject_untraded_items_and_missing_carried_items(self):
         character = self.make_character("Shop Refusal Smoke")

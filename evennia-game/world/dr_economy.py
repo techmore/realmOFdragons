@@ -109,6 +109,21 @@ FORAGE_ROOMS = {
     "crossing-RV02-007": {"item": "wild_herbs", "text": "You part the reeds around the culvert and find wild_herbs."},
 }
 
+SHOP_TASKS = {
+    "crossing-TG01-001": {
+        "name": "South road supply note",
+        "destination": "crossing-RV02-007",
+        "reward": 9,
+        "text": "Marta asks you to carry a supply note to the Culvert Cache.",
+    },
+    "crossing-RV02-007": {
+        "name": "Culvert stock tally",
+        "destination": "crossing-TG01-001",
+        "reward": 9,
+        "text": "Oren asks you to report a culvert stock tally back to the Town Green Provisioner.",
+    },
+}
+
 
 def coins(wallet):
     wallet = wallet or {}
@@ -255,6 +270,48 @@ def shop_talk(room):
             f"{shop['keeper']} trades: {accepted_stock_text(shop)}.",
         ]
     )
+
+
+def task_status(character):
+    task = dict(character.db.active_task or {})
+    if not task:
+        return "You have no active shop task. Use `task request` at a shop counter."
+    return f"Active task: {task['name']}. Destination: {task['destination']}. Reward: {task['reward']} trias."
+
+
+def request_shop_task(character):
+    ensure_economy_state(character)
+    if character.db.active_task:
+        return task_status(character)
+    room_id = character.location.db.dr_room_id if character.location else ""
+    task = SHOP_TASKS.get(room_id)
+    shop = current_shop(character.location)
+    if not task or not shop:
+        return "There is no shop task available here."
+    character.db.active_task = dict(task)
+    return "\n".join([task["text"], task_status(character), "Suggested next command: travel to the destination and use `task complete`."])
+
+
+def complete_shop_task(character):
+    ensure_economy_state(character)
+    task = dict(character.db.active_task or {})
+    if not task:
+        return "You have no active shop task to complete."
+    room_id = character.location.db.dr_room_id if character.location else ""
+    if room_id != task.get("destination"):
+        return f"This is not the task destination. Go to {task.get('destination')}."
+    reward = int(task.get("reward", 0) or 0)
+    character.db.wallet = set_coins(character.db.wallet, coins(character.db.wallet) + reward)
+    skills = character.db.skills or {}
+    events = apply_skill_pool_gain(skills, "trading", 2)
+    events.extend(apply_skill_pool_gain(skills, "appraisal", 1))
+    events.extend(apply_skill_pool_gain(skills, "athletics", 1))
+    character.db.skills = skills
+    character.db.active_task = None
+    lines = [f"You complete {task['name']} and earn {reward} trias."]
+    lines.extend(events)
+    lines.append("Shop task complete.")
+    return "\n".join(lines)
 
 
 def buy_item(character, item_id):

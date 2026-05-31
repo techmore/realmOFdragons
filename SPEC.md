@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `task` / `job` shopkeeper work with request/status/complete flow, travel destination checks, coin rewards, and Trading/Appraisal/Athletics training.
+- Added smoke coverage proving shop tasks persist while traveling, reject wrong-room completion, reward completion, and clear active task state.
 - Updated the generated Evennia smoke transcript so registrar progression includes `study`.
 - Added `study` / `read` for public study rooms and a character's own guild registrar, training Scholarship plus room/guild-appropriate skills.
 - Added smoke coverage proving public Arcane Study Hall study trains Scholarship/Arcana and registrar study reinforces guild primary skill progress.
