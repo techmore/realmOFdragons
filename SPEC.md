@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `maneuvers` / `combat tactics` as a command-first combat guide that lists range-appropriate attacks, setup moves, defenses, equipment hints, and current aimed/feinted/defensive states.
 - Added `feint` / `fake` as a melee setup maneuver that trains Tactics, marks the next jab or bash for bonus damage, and surfaces feint state in combat/range feedback.
 - Added `block` / `shield block` as a shield defensive maneuver that trains Shield Usage plus Tactics, sets a blocking balance state, and stops the next close enemy pressure.
 - Added `parry` / `block weapon` as a held-weapon defensive maneuver that trains Parry Ability plus Tactics, sets a parrying balance state, and turns aside the next close enemy pressure.

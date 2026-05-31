@@ -9,7 +9,7 @@ from evennia.utils.create import create_account, create_object, create_script
 
 from commands.dr_commands import ACCOUNT_HELP_TEXT, CHARACTER_HELP_TEXT, CHARACTER_HELP_TOPICS, account_roster_text, journey_summary
 from world.dr_data import GUILDS, RACES, RACE_STARTING_ATTRIBUTES, SKILLSETS, build_starter_skills
-from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, health_text, hurl, jab, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
+from world.dr_combat import ENEMIES, aim, appraise_enemy, apply_enemy_pressure, bash, bleeding_scripts, block, combat_pressure_scripts, combat_status, corpse_objects, dodge, feint, health_text, hurl, jab, maneuver_guide, parry, recovery_scripts, respawn_room_enemies, rest, room_enemy_ids, scan_room, skin_corpse
 from world.dr_economy import FORAGE_ROOMS, ITEMS, SHOP_TASKS, SHOPS, appraise_item, buy_item, complete_shop_task, drop_item, forage_room, format_shop, remove_item, repair_item, request_shop_task, sell_item, shop_talk, task_status, use_item, wallet_text
 from world.dr_guilds import join_guild, registrar_text
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
@@ -1527,6 +1527,11 @@ class DRCommandSmokeTests(TestCase):
         scan_text = scan_room(character.location)
         self.assertIn("fair difficulty", scan_text)
         self.assertIn("Suggested next command", scan_text)
+        opening_guide = maneuver_guide(character)
+        self.assertIn("Target: none.", opening_guide)
+        self.assertIn("scan", opening_guide)
+        self.assertIn("target <enemy id>", opening_guide)
+        character.execute_cmd("maneuvers")
         character.execute_cmd("scan")
         appraise_text = appraise_enemy(character, "rv-wolf-cub")
         self.assertIn("Difficulty: fair.", appraise_text)
@@ -1537,15 +1542,37 @@ class DRCommandSmokeTests(TestCase):
         self.assertEqual(character.db.engagement["range"], "missile")
         self.assertEqual(len(combat_pressure_scripts(character)), 1)
         self.assertIn("Suggested next command: advance.", combat_status(character))
+        missile_guide = maneuver_guide(character)
+        self.assertIn("Target: Wolf Cub at missile range.", missile_guide)
+        self.assertIn("aim", missile_guide)
+        self.assertIn("hurl / throw", missile_guide)
+        self.assertIn("advance", missile_guide)
+        self.assertIn("retreat", missile_guide)
+        character.execute_cmd("combat tactics")
 
         character.execute_cmd("appraise target")
         character.execute_cmd("combat")
         character.execute_cmd("range")
         character.execute_cmd("advance")
         self.assertEqual(character.db.engagement["range"], "pole")
+        pole_guide = maneuver_guide(character)
+        self.assertIn("Target: Wolf Cub at pole range.", pole_guide)
+        self.assertIn("expect close pressure", pole_guide)
+        self.assertIn("retreat", pole_guide)
         character.execute_cmd("advance")
         self.assertEqual(character.db.engagement["range"], "melee")
         self.assertIn("Suggested next command: jab or bash.", combat_status(character))
+        melee_guide = maneuver_guide(character)
+        self.assertIn("Target: Wolf Cub at melee range.", melee_guide)
+        self.assertIn("feint / fake", melee_guide)
+        self.assertIn("jab / attack", melee_guide)
+        self.assertIn("dodge / evade", melee_guide)
+        self.assertIn("parry", melee_guide)
+        self.assertIn("block / shield block", melee_guide)
+        self.assertIn("wield small_blade", melee_guide)
+        self.assertIn("leather_shield", melee_guide)
+        character.execute_cmd("tactics guide")
+        character.execute_cmd("moves")
         character.execute_cmd("retreat")
         self.assertEqual(character.db.engagement["range"], "pole")
         character.execute_cmd("retreat")

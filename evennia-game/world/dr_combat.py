@@ -305,6 +305,110 @@ def combat_status(character):
     return "\n".join(lines)
 
 
+def maneuver_guide(character):
+    """Return command-first combat options for the current range and state."""
+
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return "\n".join(
+            [
+                "Combat maneuvers:",
+                "State: incapacitated.",
+                "- revive / stand: recover enough to act.",
+                "- rest: also recovers from incapacitation.",
+            ]
+        )
+
+    lines = ["Combat maneuvers:"]
+    roundtime = int(character.db.roundtime or 0)
+    if roundtime > 0:
+        lines.append(f"Recovery: wait / recover for {roundtime} pulse before another maneuver.")
+    if character.db.bleeding:
+        inventory = tuple(character.db.inventory or ())
+        if "field_bandage" in inventory:
+            lines.append("Wounds: use field_bandage or tend to stop bleeding.")
+        else:
+            lines.append("Wounds: retreat, buy field_bandage, then tend.")
+
+    engagement = dict(character.db.engagement or {})
+    target_id = engagement.get("target")
+    range_band = engagement.get("range")
+    if not target_id:
+        lines.extend(
+            [
+                "Target: none.",
+                "- scan: find enemies in this room.",
+                "- appraise <enemy id>: read vitality, loot signs, difficulty, and range.",
+                "- target <enemy id>: start combat at missile range.",
+                "- combat / prompt: show health, balance, roundtime, and engagement.",
+            ]
+        )
+        return "\n".join(lines)
+
+    enemy = ENEMIES.get(target_id, {"name": target_id})
+    lines.append(f"Target: {enemy['name']} at {range_band or 'unknown'} range.")
+    lines.append("- range: show the current engagement band.")
+    lines.append("- stance balanced/offensive/defensive: tune damage and incoming pressure.")
+
+    if range_band == "missile":
+        lines.extend(
+            [
+                "- aim: set up a stronger hurl.",
+                "- hurl / throw: attack now from range.",
+                "- advance: close to pole range.",
+                "- retreat: break engagement from missile range.",
+            ]
+        )
+    elif range_band == "pole":
+        lines.extend(
+            [
+                "- aim: set up a stronger hurl before the enemy is fully close.",
+                "- hurl / throw: attack from pole range, but expect close pressure.",
+                "- advance: close to melee range for jab, bash, feint, and defenses.",
+                "- retreat: step back to missile range.",
+            ]
+        )
+    elif range_band == "melee":
+        lines.extend(
+            [
+                "- feint / fake: set up the next jab or bash.",
+                "- jab / attack: fast melee strike.",
+                "- bash: heavier melee strike.",
+                "- dodge / evade: avoid the next close pressure.",
+                "- parry: turn aside pressure with a held weapon.",
+                "- block / shield block: stop pressure with a shield.",
+                "- defend: recover balance and set defensive stance.",
+                "- flee: break engagement with roundtime.",
+            ]
+        )
+    else:
+        lines.append("- advance or retreat: recover a known range band.")
+
+    if engagement.get("aimed"):
+        lines.append("Set state: aim is ready; your next hurl is stronger.")
+    if engagement.get("feinted"):
+        lines.append("Set state: feint is ready; your next jab or bash is stronger.")
+    if character.db.balance == "dodging":
+        lines.append("Defensive state: ready to dodge the next close pressure.")
+    if character.db.balance == "parrying":
+        lines.append("Defensive state: ready to parry the next close pressure.")
+    if character.db.balance == "blocking":
+        lines.append("Defensive state: ready to block the next close pressure.")
+
+    hands = dict(character.db.hands or {})
+    worn = list((character.db.equipment or {}).get("worn", []))
+    held_weapon_id = hands.get("right") or hands.get("left")
+    held_weapon = ITEMS.get(held_weapon_id or "")
+    if range_band == "melee" and (not held_weapon or held_weapon.get("slot") not in ("right", "held")):
+        lines.append("Equipment hint: wield small_blade before using parry.")
+    has_shield = hands.get("left") == "leather_shield" or hands.get("right") == "leather_shield" or "leather_shield" in worn
+    if range_band == "melee" and not has_shield:
+        lines.append("Equipment hint: wear or wield leather_shield before using block.")
+
+    lines.append("Use combat / prompt for health, enemy vitality, and the suggested next command.")
+    return "\n".join(lines)
+
+
 def maneuver_status_text(character):
     return "Combat state:\n" + combat_status(character)
 
@@ -598,7 +702,7 @@ def target_enemy(character, enemy_id):
     enemy = ENEMIES.get(enemy_id)
     if not enemy:
         return f'Unknown enemy "{enemy_id}".'
-    character.db.engagement = {"target": enemy_id, "range": "missile", "aimed": False}
+    character.db.engagement = {"target": enemy_id, "range": "missile", "aimed": False, "feinted": False}
     ensure_combat_pressure(character)
     return f"You target {enemy['name']} at missile range."
 
@@ -700,7 +804,7 @@ def retreat(character):
         return "You are not engaged."
     current = engagement.get("range") or "missile"
     if current == "missile":
-        character.db.engagement = {"target": None, "range": None, "aimed": False}
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
         stop_combat_pressure(character)
         return "You retreat and break engagement."
     next_range = RANGES[RANGES.index(current) - 1]
@@ -726,7 +830,7 @@ def jab(character):
     enemy = ENEMIES.get(target_id, {"name": target_id})
     enemy_obj = find_enemy_object(character.location, target_id)
     if not enemy_obj:
-        character.db.engagement = {"target": None, "range": None, "aimed": False}
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
         stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
@@ -743,7 +847,7 @@ def jab(character):
     if vitality <= 0:
         enemy_obj.delete()
         create_corpse(character.location, target_id, enemy)
-        character.db.engagement = {"target": None, "range": None, "aimed": False}
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
         stop_combat_pressure(character)
         loot_text = loot_preview(enemy)
         parts = [
@@ -783,7 +887,7 @@ def bash(character):
     enemy = ENEMIES.get(target_id, {"name": target_id})
     enemy_obj = find_enemy_object(character.location, target_id)
     if not enemy_obj:
-        character.db.engagement = {"target": None, "range": None, "aimed": False}
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
         stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
@@ -800,7 +904,7 @@ def bash(character):
     if vitality <= 0:
         enemy_obj.delete()
         create_corpse(character.location, target_id, enemy)
-        character.db.engagement = {"target": None, "range": None, "aimed": False}
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
         stop_combat_pressure(character)
         loot_text = loot_preview(enemy)
         parts = [
@@ -840,7 +944,7 @@ def hurl(character):
     enemy = ENEMIES.get(target_id, {"name": target_id})
     enemy_obj = find_enemy_object(character.location, target_id)
     if not enemy_obj:
-        character.db.engagement = {"target": None, "range": None}
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
         stop_combat_pressure(character)
         return f"{enemy['name']} is no longer here."
 
@@ -856,7 +960,7 @@ def hurl(character):
     if vitality <= 0:
         enemy_obj.delete()
         create_corpse(character.location, target_id, enemy)
-        character.db.engagement = {"target": None, "range": None, "aimed": False}
+        character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
         stop_combat_pressure(character)
         loot_text = loot_preview(enemy)
         parts = [
@@ -986,7 +1090,7 @@ def flee(character):
     engagement = dict(character.db.engagement or {})
     if not engagement.get("target"):
         return "You are not engaged."
-    character.db.engagement = {"target": None, "range": None}
+    character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
     character.db.balance = "recovering"
     character.db.roundtime = 1
     ensure_recovery(character)
@@ -1016,7 +1120,7 @@ def revive(character):
     character.db.health = max(1, int(character.db.max_health or 30) // 2)
     character.db.balance = "balanced"
     character.db.roundtime = 0
-    character.db.engagement = {"target": None, "range": None}
+    character.db.engagement = {"target": None, "range": None, "aimed": False, "feinted": False}
     return f"You recover enough to stand. Health: {character.db.health}/{character.db.max_health}."
 
 
