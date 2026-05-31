@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added `block` / `shield block` as a shield defensive maneuver that trains Shield Usage plus Tactics, sets a blocking balance state, and stops the next close enemy pressure.
 - Added `parry` / `block weapon` as a held-weapon defensive maneuver that trains Parry Ability plus Tactics, sets a parrying balance state, and turns aside the next close enemy pressure.
 - Added `dodge` / `evade` as a defensive combat maneuver that trains Evasion plus Tactics, sets a dodging balance state, and reduces the next close enemy pressure.
 - Added `aim` / `steady` as a ranged combat setup command that marks the next missile/pole `hurl` for bonus damage, consumes the aim state, and surfaces aimed status in combat/range feedback.

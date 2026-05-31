@@ -349,6 +349,9 @@ def apply_combat_skill_gain(character, skill_id):
 
 
 def apply_enemy_retaliation(character, enemy):
+    if character.db.balance == "blocking":
+        character.db.balance = "balanced"
+        return f"You block {enemy['name']}'s pressure with your shield."
     if character.db.balance == "parrying":
         character.db.balance = "balanced"
         return f"You parry {enemy['name']}'s pressure aside with your weapon."
@@ -897,6 +900,33 @@ def parry(character):
         f"You set {held_weapon['name']} to parry the next close press.",
         *skill_events,
         "The next close enemy pressure against you can be turned aside.",
+    ]
+    return "\n".join(lines)
+
+
+def block(character):
+    ensure_engagement(character)
+    if character.db.incapacitated:
+        return "You are incapacitated and cannot block."
+    if int(character.db.roundtime or 0) > 0:
+        return f"You are still recovering for {character.db.roundtime} pulse."
+    engagement = dict(character.db.engagement or {})
+    if not engagement.get("target"):
+        return "Block what? Target an enemy first."
+    hands = dict(character.db.hands or {})
+    worn = list((character.db.equipment or {}).get("worn", []))
+    has_shield = hands.get("left") == "leather_shield" or hands.get("right") == "leather_shield" or "leather_shield" in worn
+    if not has_shield:
+        return "You need a shield held or worn to block. Try `wear leather_shield` or `wield leather_shield` first."
+    character.db.stance = "defensive"
+    character.db.balance = "blocking"
+    character.db.roundtime = 1
+    ensure_recovery(character)
+    skill_events = apply_combat_skill_gain(character, "shield_usage")
+    lines = [
+        "You set your shield to block the next close press.",
+        *skill_events,
+        "The next close enemy pressure against you can be stopped by your shield.",
     ]
     return "\n".join(lines)
 
