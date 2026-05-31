@@ -39,7 +39,7 @@ CHARACTER_HELP_TEXT = "\n".join(
         "Identity: score, attributes/stats, skills, race, reroll attributes.",
         "Guilds/Circles: guilds, registrar, join guild, guild/perks, guild history, title, experience, abilities, guild path, guild plan, mentor, perk, signature, milestone, focus, technique, passive, drill, practice, rite, boon, capstone, study, train, circle, circle status.",
         "Movement: journey, room/exits/where, survey, routes, hunting, then use direction names or aliases like n, sw, u, d.",
-        "Shops/Fieldcraft: shops, tasks, forage guide, shop, talk, ask <keeper>, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
+        "Shops/Fieldcraft: shops, tasks, forage guide, shop, talk, ask <keeper>, ask stock, ask task, ask trade, wallet, task request/status/complete, appraise <item>, shop talk, shop stock, shop refresh, buy <item>, sell <item>, forage, get/drop, use <item>, tend/treat, inventory, hands, equipment, wield, wear, remove/stow, repair.",
         "Combat: scan, target <enemy>, appraise target, maneuvers/combat tactics, range, advance, retreat, combat, stance, aim, hurl/throw, feint, jab/attack, bash, defend, dodge, parry, block, flee, wait/recover, rest, skin corpse, loot corpse, revive/stand.",
         "Focused help: help progression, help room, help scan, help targets, help combat.",
     ]
@@ -91,7 +91,7 @@ CHARACTER_HELP_TOPICS = {
             "2. In Crossing: use journey, room/exits/where, survey, and routes, then walk with directions or aliases like n, sw, u, d.",
             "3. Join in-world: visit a guild registrar, use registrar for guidance, then use join guild. Guilds are not chosen during account creation.",
             "4. Train and circle: use guild path, guild plan, title, experience, train, study, mentor, perk, signature, milestone, passive, drill, practice, boon, capstone, skills, circle status, circle, abilities, focus, and technique at your own guild registrar through Circle 10.",
-            "5. Gear up and work: use shop, task request/status/complete, appraise <item>, shop talk, shop stock, buy <item>, sell <item>, get/drop, use <item>, tend/treat wounds, inventory, hands, equipment, wield, wear, remove/stow, and repair.",
+            "5. Gear up and work: use shop, ask stock, ask task, ask trade, task request/status/complete, appraise <item>, shop talk, shop stock, buy <item>, sell <item>, get/drop, use <item>, tend/treat wounds, inventory, hands, equipment, wield, wear, remove/stow, and repair.",
             "6. Hunt and forage: walk to beginner hunting rooms, forage, scan, appraise <enemy>, target <enemy>, advance to melee, then jab or bash.",
             "7. Recover and harvest: use combat/prompt, wait/recover/rest for roundtime, defend or flee as needed, revive/stand/rest if incapacitated, then skin corpse, loot corpse, and get dropped items after a kill.",
         ]
@@ -1451,6 +1451,9 @@ class CmdDRTalk(Command):
       talk
       talk <keeper>
       ask <keeper>
+      ask stock
+      ask task
+      ask trade
     """
 
     key = "talk"

@@ -397,7 +397,50 @@ def talk_shopkeeper(room, requested=""):
     requested = (requested or "").strip().lower()
     keeper = shop["keeper"].lower()
     shop_name = shop["name"].lower()
+    topic = requested
+    for marker in (keeper, shop_name, "shopkeeper", "keeper", "merchant", "vendor", "shop"):
+        topic = topic.replace(marker, " ")
+    topic = " ".join(topic.split())
+
+    if any(word in topic for word in ("stock", "supply", "supplies", "goods", "wares", "inventory")):
+        stock = current_stock(room)
+        lines = [
+            f"{shop['keeper']} lists current stock at {shop['name']}:",
+        ]
+        if stock:
+            for item_id in stock:
+                item = ITEMS[item_id]
+                lines.append(f"- {item_id}: {item['name']} ({item['price']} trias)")
+        else:
+            lines.append("- empty; use `shop refresh` if the keeper should restock.")
+        lines.append("Use `buy <item>`, `sell <item>`, or `shop stock`.")
+        return "\n".join(lines)
+
+    if any(word in topic for word in ("task", "tasks", "job", "jobs", "work", "delivery")):
+        room_id = room.db.dr_room_id if room else ""
+        task = SHOP_TASKS.get(room_id)
+        if not task:
+            return f'{shop["keeper"]} says, "No shop task is open here right now. Ask about stock or supplies instead."'
+        return "\n".join(
+            [
+                f"{shop['keeper']} describes available work at {shop['name']}:",
+                f"- {task['name']}: {task['text']}",
+                f"- Destination: {task['destination']}. Reward: {task['reward']} trias.",
+                "Use `task request`, travel to the destination, then `task complete`.",
+            ]
+        )
+
+    if any(word in topic for word in ("buy", "sell", "trade", "trading", "price", "prices")):
+        return "\n".join(
+            [
+                f'{shop["keeper"]} says, "I trade in {accepted_stock_text(shop)}."',
+                "Use `shop stock` to see current goods, `buy <item>` to purchase, and `sell <item>` to trade carried goods back.",
+            ]
+        )
+
     if requested and requested not in ("shopkeeper", "keeper", "merchant", "vendor", "shop") and requested not in keeper and requested not in shop_name:
+        return f'{shop["keeper"]} says, "I am here at {shop["name"]}. Ask me about stock, tasks, or supplies."'
+    if topic:
         return f'{shop["keeper"]} says, "I am here at {shop["name"]}. Ask me about stock, tasks, or supplies."'
     return "\n".join(
         [

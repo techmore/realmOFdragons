@@ -158,6 +158,12 @@ The shopkeeper explains the counter's trade goods and beginner supplies.
 > talk
 You speak with the shopkeeper, who explains stock, tasks, and supplies.
 
+> ask stock
+The shopkeeper lists current stock and explains `buy <item>` and `sell <item>`.
+
+> ask task
+The shopkeeper describes available work and suggests `task request`, travel, and `task complete`.
+
 > shop stock
 Current stock lists carried room-backed inventory.
 
