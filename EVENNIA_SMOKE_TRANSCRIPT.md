@@ -187,6 +187,13 @@ You bash wolf_cub with strength and Brawling behind the strike.
 The enemy collapses.
 A lootable corpse remains.
 
+> skin corpse
+You skin the corpse and prepare a rough_pelt.
+Skinning and Outdoorsmanship gain field experience.
+
+> get rough_pelt
+You pick up the rough_pelt.
+
 > loot corpse
 You search the corpse and recover coins or beginner loot.
 
@@ -205,4 +212,5 @@ You pick up the dropped item.
 - Shops/items/equipment: `DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh` and `test_wield_wear_and_equipment_commands`.
 - Beginner content breadth: all-room, all-shop, and all-enemy smoke covers the Reed-Choked Culvert, Culvert Cache, and Reed Snake.
 - Wound care: `DRCommandSmokeTests.test_tend_defaults_to_field_bandage_and_treats_bleeding` and `test_field_bandage_treats_combat_bleeding`.
+- Hunting harvest: `DRCommandSmokeTests.test_skin_corpse_creates_pelt_and_trains_hunting_skills`.
 - Async range combat: `DRCommandSmokeTests.test_scan_target_advance_range_and_retreat_commands`, combat pressure tests, bleeding tests, recovery tests, corpse/loot tests, and all-enemy command loop smoke.
