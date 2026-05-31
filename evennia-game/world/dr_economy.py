@@ -106,11 +106,18 @@ SHOPS = {
         "dialogue": "Vessa says, 'Past the culvert, everything is wet enough to slow you down.'",
         "stock": ("field_bandage", "travel_rations", "wild_herbs"),
     },
+    "crossing-RV02-009": {
+        "name": "Orchard Verge Basket",
+        "keeper": "Merrin",
+        "dialogue": "Merrin says, 'Crows are bold near the old trees. Carry food and keep your hands clear.'",
+        "stock": ("travel_rations", "wild_herbs", "torch"),
+    },
 }
 
 FORAGE_ROOMS = {
     "crossing-RV02-001": {"item": "wild_herbs", "text": "You search the trailhead verge and find wild_herbs."},
     "crossing-RV02-002": {"item": "wild_herbs", "text": "You sort through the brushline and find wild_herbs."},
+    "crossing-RV02-009": {"item": "wild_herbs", "text": "You search under the old orchard verge and find wild_herbs."},
     "crossing-RV02-005": {"item": "wild_herbs", "text": "You check the low ridge grasses and find wild_herbs."},
     "crossing-RV02-007": {"item": "wild_herbs", "text": "You part the reeds around the culvert and find wild_herbs."},
     "crossing-RV02-008": {"item": "wild_herbs", "text": "You search the canal edge silt and find wild_herbs."},

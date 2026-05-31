@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added the Old Orchard Verge west of South Gate Trailhead with an Orchard Crow enemy, orchard shop basket, forage support, and all-room/all-enemy smoke coverage.
 - Updated the generated Evennia smoke transcript so guild progression help and the walkthrough include `drill` before registrar practice.
 - Added `drill` / `guild drill` as registrar-gated per-guild Circle-scaled practice that trains both primary and distinct support skills across all 11 guilds.
 - Strengthened the Evennia webclient smoke so it now renders `/webclient/` through Django's test client and requires webclient markup, not just URL resolution.

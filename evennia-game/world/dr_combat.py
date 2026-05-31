@@ -59,6 +59,13 @@ ENEMIES = {
         "description": "A hand-sized spider skitters over wet silt and broken reeds.",
         "loot": {"trias": 4, "items": ("wild_herbs",)},
     },
+    "rv-orchard-crow": {
+        "name": "Orchard Crow",
+        "vitality": 13,
+        "aggression": "sharp-eyed",
+        "description": "A black crow hops between fallen fruit and snaps at anything too close.",
+        "loot": {"trias": 2, "items": ("wild_herbs",)},
+    },
 }
 
 RANGES = ("missile", "pole", "melee")

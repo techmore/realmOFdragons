@@ -146,6 +146,7 @@ class DRWorldTests(SimpleTestCase):
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-005"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-006"))
         self.assertTrue(find_path(START_ROOM_ID, "crossing-RV02-008"))
+        self.assertEqual(find_path(START_ROOM_ID, "crossing-RV02-009"), ["south", "south", "west"])
 
 
 class DRWorldBuilderTests(TestCase):
@@ -202,6 +203,8 @@ class DRWorldBuilderTests(TestCase):
         self.assertEqual(drainage.db.targets, ("rv-ditch-rat",))
         canal_edge = find_built_room("crossing-RV02-008")
         self.assertEqual(canal_edge.db.targets, ("rv-marsh-spider",))
+        orchard = find_built_room("crossing-RV02-009")
+        self.assertEqual(orchard.db.targets, ("rv-orchard-crow",))
 
     def test_built_shopkeeper_npcs(self):
         build_crossing_world()

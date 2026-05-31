@@ -69,7 +69,13 @@ ROOMS = {
     "crossing-RV02-001": {
         "title": "South Gate Trailhead",
         "desc": "A gate marker stands near the road where foragers move in and out.",
-        "exits": {"north": "crossing-RV01-001", "east": "crossing-RV02-002"},
+        "exits": {"north": "crossing-RV01-001", "east": "crossing-RV02-002", "west": "crossing-RV02-009"},
+    },
+    "crossing-RV02-009": {
+        "title": "Old Orchard Verge",
+        "desc": "A neglected orchard edge leans over the trailhead, scattering fallen fruit and twig nests.",
+        "exits": {"east": "crossing-RV02-001"},
+        "targets": ("rv-orchard-crow",),
     },
     "crossing-RV02-002": {
         "title": "Brushline Forage Fork",
