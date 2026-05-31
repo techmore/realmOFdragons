@@ -119,6 +119,9 @@ class RecoveryScript(Script):
         from world.dr_combat import wait_recover
 
         wait_recover(self.obj)
+        if int(self.obj.db.roundtime or 0) <= 0:
+            self.stop()
+            self.delete()
 
 
 class RoomRespawnScript(Script):

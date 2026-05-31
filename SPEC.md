@@ -39,6 +39,8 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- `RecoveryScript` now stops and deletes itself once roundtime reaches zero, preventing stale async recovery tickers from accumulating on balanced characters.
+- Added smoke coverage for both direct recovery ticks and command-created recovery scripts cleaning themselves up after recovery.
 - Combat maneuvers now attach a deduplicated persistent `RecoveryScript` whenever `jab`, `bash`, or `flee` creates roundtime.
 - Added smoke coverage proving attacks and flee start automatic recovery and repeated maneuvers do not duplicate recovery scripts.
 - Account-side character creation now validates names before object creation: names must be 3-30 characters, start with a letter, and use only letters, spaces, apostrophes, or hyphens.

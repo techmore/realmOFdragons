@@ -569,10 +569,11 @@ class DRCommandSmokeTests(TestCase):
         character = self.make_character("Script Smoke")
         character.db.roundtime = 1
         character.db.balance = "recovering"
-        recovery_script = create_script("typeclasses.scripts.RecoveryScript", obj=character)
+        recovery_script = create_script("typeclasses.scripts.RecoveryScript", obj=character, start_delay=True)
         recovery_script.at_repeat()
         self.assertEqual(character.db.roundtime, 0)
         self.assertEqual(character.db.balance, "balanced")
+        self.assertFalse(recovery_script.pk)
 
         self.walk_to_room(character, "crossing-RV02-005")
         for obj in list(character.location.contents):
@@ -637,6 +638,14 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("advance")
         character.execute_cmd("jab")
         self.assertEqual(len(recovery_scripts(character)), 1)
+        recovery_script = recovery_scripts(character)[0]
+        recovery_script.at_repeat()
+        self.assertEqual(character.db.roundtime, 0)
+        self.assertEqual(character.db.balance, "balanced")
+        self.assertEqual(len(recovery_scripts(character)), 0)
+        character.execute_cmd("target rv-boarlet")
+        character.execute_cmd("advance")
+        character.execute_cmd("advance")
         character.execute_cmd("defend")
         character.execute_cmd("bash")
         self.assertEqual(len(recovery_scripts(character)), 1)
