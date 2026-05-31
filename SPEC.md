@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Expanded all-guild Circle 10 smoke to reload after focus, technique, passive, drill, and practice, proving guild ability skill gains persist.
 - Added bleeding persistence smoke proving untreated bleeding, health, engagement target, prompt guidance, persistent bleeding script, and follow-up bleed tick survive database reload.
 - Expanded all-guild Circle 10 smoke to reload every guild character after reaching Circle 10 and after claiming Circle 10 boon, proving final guild, Circle, registrar location, perks, and boon records persist.
 - Added economy/equipment persistence smoke proving wallet, hands, worn gear, maintained condition, inventory, physical item objects, and fieldcraft skill gains survive database reload after buying, wearing, repairing, foraging, and pickup.

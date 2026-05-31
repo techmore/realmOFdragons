@@ -53,6 +53,7 @@ Evidence:
 - `DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands` uses `join guild`, repeated `train`, and repeated `circle` to advance every guild to Circle 10.
 - The smoke verifies Circle 1 milestone unlock, Circle 10 cap, ten unlocked milestones, and final Circle 10 state for each guild.
 - The all-guild Circle 10 smoke reloads each character after reaching Circle 10 and after claiming its Circle 10 boon, proving final guild, Circle, registrar location, ten milestone perks, and boon records persist.
+- The all-guild Circle 10 smoke reloads after `focus`, `technique`, `passive`, `drill`, and `practice`, proving guild ability skill pulses persist before final boon/cap checks.
 - The all-guild smoke verifies `passive` / `guild passive` for every guild, with distinct passive identities and Circle-scaled skill progress.
 - The all-guild smoke verifies `drill` / `guild drill` at each guild registrar, training both guild primary and distinct support skills through Circle-scaled practice.
 - `DRCommandSmokeTests.test_circle_requires_own_guild_registrar_room_command` verifies circling is registrar-gated.

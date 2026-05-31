@@ -536,29 +536,44 @@ class DRCommandSmokeTests(TestCase):
             character.execute_cmd("guild focus")
             focus_after = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
             self.assertGreater(focus_after, focus_before)
+            reloaded_focus = ObjectDB.objects.get(id=character.id)
+            reloaded_focus_after = (reloaded_focus.db.skills[primary_skill_id]["rank"] * 5) + reloaded_focus.db.skills[primary_skill_id]["pool"]
+            self.assertGreaterEqual(reloaded_focus_after, focus_after)
             technique_skill_id = GUILD_TECHNIQUES[guild_id]["skill"]
             technique_before = (character.db.skills[technique_skill_id]["rank"] * 5) + character.db.skills[technique_skill_id]["pool"]
             character.execute_cmd("technique")
             character.execute_cmd("guild technique")
             technique_after = (character.db.skills[technique_skill_id]["rank"] * 5) + character.db.skills[technique_skill_id]["pool"]
             self.assertGreater(technique_after, technique_before)
+            reloaded_technique = ObjectDB.objects.get(id=character.id)
+            reloaded_technique_after = (reloaded_technique.db.skills[technique_skill_id]["rank"] * 5) + reloaded_technique.db.skills[technique_skill_id]["pool"]
+            self.assertGreaterEqual(reloaded_technique_after, technique_after)
             passive_skill_id = GUILD_PASSIVES[guild_id]["skill"]
             passive_before = (character.db.skills[passive_skill_id]["rank"] * 5) + character.db.skills[passive_skill_id]["pool"]
             character.execute_cmd("passive")
             character.execute_cmd("guild passive")
             passive_after = (character.db.skills[passive_skill_id]["rank"] * 5) + character.db.skills[passive_skill_id]["pool"]
             self.assertGreater(passive_after, passive_before)
+            reloaded_passive = ObjectDB.objects.get(id=character.id)
+            reloaded_passive_after = (reloaded_passive.db.skills[passive_skill_id]["rank"] * 5) + reloaded_passive.db.skills[passive_skill_id]["pool"]
+            self.assertGreaterEqual(reloaded_passive_after, passive_after)
             drill_skill_id = GUILD_DRILLS[guild_id]["skill"]
             drill_before = (character.db.skills[drill_skill_id]["rank"] * 5) + character.db.skills[drill_skill_id]["pool"]
             character.execute_cmd("drill")
             character.execute_cmd("guild drill")
             drill_after = (character.db.skills[drill_skill_id]["rank"] * 5) + character.db.skills[drill_skill_id]["pool"]
             self.assertGreater(drill_after, drill_before)
+            reloaded_drill = ObjectDB.objects.get(id=character.id)
+            reloaded_drill_after = (reloaded_drill.db.skills[drill_skill_id]["rank"] * 5) + reloaded_drill.db.skills[drill_skill_id]["pool"]
+            self.assertGreaterEqual(reloaded_drill_after, drill_after)
             practice_before = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
             character.execute_cmd("practice")
             character.execute_cmd("guild practice")
             practice_after = (character.db.skills[primary_skill_id]["rank"] * 5) + character.db.skills[primary_skill_id]["pool"]
             self.assertGreater(practice_after, practice_before)
+            reloaded_practice = ObjectDB.objects.get(id=character.id)
+            reloaded_practice_after = (reloaded_practice.db.skills[primary_skill_id]["rank"] * 5) + reloaded_practice.db.skills[primary_skill_id]["pool"]
+            self.assertGreaterEqual(reloaded_practice_after, practice_after)
             boon_skill_id = GUILD_BOONS[guild_id]["skill"]
             boon_before = (character.db.skills[boon_skill_id]["rank"] * 5) + character.db.skills[boon_skill_id]["pool"]
             character.execute_cmd("boon")
