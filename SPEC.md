@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Updated the generated Evennia smoke transcript so registrar progression includes `study`.
 - Added `study` / `read` for public study rooms and a character's own guild registrar, training Scholarship plus room/guild-appropriate skills.
 - Added smoke coverage proving public Arcane Study Hall study trains Scholarship/Arcana and registrar study reinforces guild primary skill progress.
 - Updated the generated Evennia smoke transcript so the shop/fieldcraft path includes `appraise wild_herbs`.

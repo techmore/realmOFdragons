@@ -84,6 +84,9 @@ Next step: train expertise.
 Expertise improves to rank 1.
 You drill Expertise.
 
+> study
+You study Barbarian Guild registrar notes, reinforcing Scholarship and Expertise.
+
 > focus
 You center your Barbarian Guild focus through Circle 1, feeding Expertise by 1.
 
@@ -232,7 +235,7 @@ You pick up the dropped item.
 - Race-only unaffiliated Circle 1 starts: `DRAccountCreationTests.test_account_create_character_supports_all_races_as_circle_one_commoners`.
 - Registrar-only guild joining and Circle 10 progression: `DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands`.
 - Registrar guidance: the all-guild command smoke invokes `registrar` and `ask registrar` before and after joining every guild.
-- Guild focus, technique, practice, and boon behavior: the all-guild Circle 10 command smoke invokes `focus`, `guild focus`, `technique`, `guild technique`, `practice`, `guild practice`, `boon`, and `guild boon`.
+- Guild focus, technique, practice, study, and boon behavior: the all-guild Circle 10 command smoke invokes progression commands and dedicated study smoke covers public study rooms plus registrar reading.
 - Crossing movement: `DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room`.
 - Shops/items/equipment: `DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh` and `test_wield_wear_and_equipment_commands`.
 - Gear upkeep: `DRCommandSmokeTests.test_wield_wear_and_equipment_commands` covers repair and equipment condition.
