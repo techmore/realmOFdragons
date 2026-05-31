@@ -856,6 +856,18 @@ Next priority:
 
 - Add a lightweight target details panel or command output that explains what vitality/aggression mean for beginner players.
 
+Implementation Notes - 2026-05-31, Evennia Progression Help Topic
+
+Completed in the Evennia runtime:
+
+- Added `help progression` as an end-to-end text-first guide from account creation through puppeting, room navigation, guild registrar joining, training, circling to Circle 10, shops, hunting, combat, recovery, and corpse looting.
+- General character help now advertises `help progression` before the narrower room/scan/target/combat help topics.
+- Smoke coverage now exercises `help progression` with the existing focused help suite.
+
+Next priority:
+
+- Add an Evennia terminal/telnet transcript or command-runner smoke if tooling is available; otherwise continue guild-specific flavor/perk work.
+
 Implementation Notes - 2026-05-31, Evennia Direction Aliases
 
 Completed in the Evennia runtime:

@@ -347,6 +347,7 @@ class DRCommandSmokeTests(TestCase):
     def test_focused_text_help_topics_cover_movement_and_combat(self):
         character = self.make_character("Focused Help Smoke")
         character.execute_cmd("drhelp")
+        character.execute_cmd("help progression")
         character.execute_cmd("help room")
         character.execute_cmd("help scan")
         character.execute_cmd("help targets")
