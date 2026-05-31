@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added clean-room guild Circle 1-10 milestone data for every canonical guild and surfaced the current milestone in `circle` status.
+- Joining a guild now unlocks the Circle 1 guild milestone, and advancing Circles persists unlocked guild milestones through Circle 10.
+- Expanded all-guild Circle 10 command smoke to verify each guild accumulates ten milestone unlocks by Circle 10.
 - Added original-style pre-guild attribute reroll support with `reroll attributes`, `reroll attributes <seed>`, and aliases for `roll attributes` / `roll stats`.
 - Attribute rerolls vary the selected race baseline by a small deterministic range for tests and are blocked after guild joining or Circle advancement.
 - Added smoke/unit coverage for seeded race rerolls, command-level rerolling before guild joining, and reroll rejection after guild affiliation.

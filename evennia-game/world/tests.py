@@ -10,7 +10,7 @@ from world.dr_combat import ENEMIES, combat_pressure_scripts, corpse_objects, re
 from world.dr_economy import ITEMS, SHOPS
 from world.dr_guilds import join_guild
 from world.dr_identity import choose_race, normalize_race_token, reroll_attributes, roll_race_attributes
-from world.dr_progression import advance_circle, primary_skill_for_guild, resolve_skill_id, train_skill
+from world.dr_progression import advance_circle, guild_circle_perk, primary_skill_for_guild, resolve_skill_id, train_skill, unlocked_guild_perks
 from world.dr_world import ROOMS, START_ROOM_ID, build_crossing_world, find_built_room, find_path, guild_registrar_rooms, validate_world_graph
 
 
@@ -260,8 +260,11 @@ class DRCommandSmokeTests(TestCase):
             character.execute_cmd("join guild")
             self.assertEqual(character.db.guild_id, guild_id)
             self.assertEqual(character.db.guild_name, guild_name)
+            self.assertEqual(character.db.guild_perks, [guild_circle_perk(guild_id, 1)])
 
             self.train_and_circle_to(character, 10)
+            self.assertEqual(len(character.db.guild_perks), 10)
+            self.assertEqual(character.db.guild_perks[-1], guild_circle_perk(guild_id, 10))
 
     def test_shop_buy_sell_inventory_and_hands_commands(self):
         character = self.make_character("Economy Smoke")
@@ -624,7 +627,9 @@ class DRProgressionTests(SimpleTestCase):
         state = {"guild_id": "barbarian", "guild_name": "Barbarian Guild", "circle": 1, "skills": skills}
         events = advance_circle(state)
         self.assertIn("You advance to Circle 2.", events)
+        self.assertIn("Milestone unlocked: Barbarian Guild Circle 2 recognition.", events)
         self.assertEqual(state["circle"], 2)
+        self.assertEqual(state["guild_perks"], unlocked_guild_perks("barbarian", 2))
 
 
 class DRIdentityTests(SimpleTestCase):

@@ -352,6 +352,7 @@ class CmdDRJoinGuild(Command):
             character.db.guild_id = state["guild_id"]
             character.db.guild_name = state["guild_name"]
             character.db.circle = state["circle"]
+            character.db.guild_perks = state["guild_perks"]
         character.msg("\n".join(result["events"]))
 
 
@@ -398,10 +399,12 @@ class CmdDRCircle(Command):
             "guild_name": character.db.guild_name or "Unaffiliated",
             "circle": character.db.circle or 1,
             "skills": character.db.skills or build_starter_skills(),
+            "guild_perks": character.db.guild_perks or [],
         }
         events = advance_circle(state)
         character.db.circle = state["circle"]
         character.db.skills = state["skills"]
+        character.db.guild_perks = state.get("guild_perks", character.db.guild_perks or [])
         character.msg("\n".join(events))
 
 

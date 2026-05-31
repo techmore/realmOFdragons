@@ -2,7 +2,16 @@
 Progression helpers for the Evennia Dragon Realms migration.
 """
 
-from world.dr_data import GUILD_PRIMARY_SKILLS, SKILLS, build_starter_skills
+from world.dr_data import GUILDS, GUILD_PRIMARY_SKILLS, SKILLS, build_starter_skills
+
+
+GUILD_CIRCLE_PERKS = {
+    guild_id: {
+        circle: f"{guild_name} Circle {circle} recognition"
+        for circle in range(1, 11)
+    }
+    for guild_id, guild_name in GUILDS.items()
+}
 
 
 def normalize_skill_token(value):
@@ -37,6 +46,19 @@ def primary_skill_for_guild(guild_id):
     """Return the guild primary skill id, with commoner fallback."""
 
     return GUILD_PRIMARY_SKILLS.get(guild_id, "athletics")
+
+
+def guild_circle_perk(guild_id, circle):
+    """Return the clean-room milestone text for a guild Circle."""
+
+    return GUILD_CIRCLE_PERKS.get(guild_id, {}).get(int(circle or 1), "Unaffiliated training milestone")
+
+
+def unlocked_guild_perks(guild_id, circle):
+    """Return all guild milestones unlocked through the current Circle, capped to Circle 10."""
+
+    max_circle = min(10, max(1, int(circle or 1)))
+    return [guild_circle_perk(guild_id, step) for step in range(1, max_circle + 1)]
 
 
 def next_circle_requirement(circle):
@@ -99,6 +121,7 @@ def circle_status(character_state):
         f"You are Circle {circle} in {guild_name}.",
         f"Next Circle {requirement['next_circle']}: total skill ranks {total_skill_ranks(skills)}/{requirement['total_ranks']}.",
         f"{primary_skill['name']} rank {primary_skill.get('rank', 0)}/{requirement['primary_rank']}.",
+        f"Current milestone: {guild_circle_perk(guild_id, circle)}.",
     ]
 
 
@@ -125,4 +148,6 @@ def advance_circle(character_state):
     if can_circle(character_state):
         character_state["circle"] = int(character_state.get("circle") or 1) + 1
         events.append(f"You advance to Circle {character_state['circle']}.")
+        events.append(f"Milestone unlocked: {guild_circle_perk(character_state.get('guild_id'), character_state['circle'])}.")
+        character_state["guild_perks"] = unlocked_guild_perks(character_state.get("guild_id"), character_state["circle"])
     return events
