@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Refreshed the generated Evennia command transcript so the documented terminal/Telnet path includes `rite`, Circle 5 guild exercises, Flooded Towpath, Towpath Supply Shelf, Canal Newt, and towpath forage.
 - Added the Flooded Towpath beyond the Silted Canal Edge with a Canal Newt enemy, towpath supply shelf, forage support, and data smoke coverage.
 - Added Circle 5+ `rite` / `guild rite` registrar exercises for every guild, with all-guild smoke proving distinct rite skill gains and reload persistence.
 - Expanded all-guild Circle 10 smoke to reload after focus, technique, passive, drill, and practice, proving guild ability skill gains persist.

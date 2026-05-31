@@ -48,7 +48,7 @@ You become Aela at Crossing Town Green.
 > drhelp
 Dragon Realms commands:
 Identity: score, attributes/stats, skills, race, reroll attributes.
-Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, passive, drill, practice, boon, study, train, circle, circle status.
+Guilds/Circles: registrar, join guild, guild/perks, abilities, focus, technique, passive, drill, practice, rite, boon, study, train, circle, circle status.
 Movement: room/exits/where, then use direction names or aliases like n, sw, u, d.
 
 > room
@@ -110,14 +110,21 @@ Pit Exchange turns close pressure into controlled force, training Expertise by 1
 You practice Barbarian Guild forms before the registrar.
 Expertise and Tactics gain guild practice.
 
+> circle
+You train and advance through the registrar to Circle 5.
+Barbarian Guild Circle 5 recognition.
+
+> rite
+Circle of Iron turns controlled fury into disciplined readiness, training Expertise and Expertise.
+Guild rites are Circle 5+ registrar exercises for deeper guild identity.
+
 > boon
-Battle Temper hardens your battle presence, granting a Circle 1 boon to Expertise.
+Battle Temper hardens your battle presence, granting a Circle 5 boon to Expertise.
 This boon is now recorded on your guild progression.
 
 > circle
-You are Circle 1 in Barbarian Guild.
-You advance to Circle 2.
-Barbarian Guild Circle 2 recognition.
+You train and advance through normal commands to Circle 10.
+Circle 10 is the current supported ability cap.
 \`\`\`
 
 ## Shops, physical items, hands, and equipment
@@ -177,6 +184,20 @@ marsh_spider is here at missile range.
 
 > forage
 You search the canal edge silt and find wild_herbs.
+Outdoorsmanship and Perception gain field experience.
+
+> east
+You walk into the Flooded Towpath.
+
+> shop
+The Towpath Supply Shelf offers field_bandage, torch, and wild_herbs along the old canal.
+
+> scan
+You scan the area.
+canal_newt is here at missile range.
+
+> forage
+You check moss along the flooded towpath and find wild_herbs.
 Outdoorsmanship and Perception gain field experience.
 
 > get wild_herbs
@@ -284,11 +305,11 @@ You pick up the dropped item.
 - Race-only unaffiliated Circle 1 starts: \`DRAccountCreationTests.test_account_create_character_supports_all_races_as_circle_one_commoners\`.
 - Registrar-only guild joining and Circle 10 progression: \`DRCommandSmokeTests.test_all_guilds_join_and_reach_circle_ten_through_commands\`.
 - Registrar guidance: the all-guild command smoke invokes \`registrar\` and \`ask registrar\` before and after joining every guild.
-- Guild focus, technique, practice, study, and boon behavior: the all-guild Circle 10 command smoke invokes progression commands and dedicated study smoke covers public study rooms plus registrar reading.
+- Guild focus, technique, passive, drill, practice, Circle 5+ rite, study, and boon behavior: the all-guild Circle 10 command smoke invokes progression commands and dedicated study smoke covers public study rooms plus registrar reading.
 - Crossing movement: \`DRCommandSmokeTests.test_command_exits_can_walk_to_every_crossing_room\`.
 - Shops/items/equipment: \`DRCommandSmokeTests.test_all_configured_shops_support_dialogue_buy_sell_and_refresh\` and \`test_wield_wear_and_equipment_commands\`.
 - Gear upkeep: \`DRCommandSmokeTests.test_wield_wear_and_equipment_commands\` covers repair and equipment condition.
-- Beginner content breadth: all-room, all-shop, and all-enemy smoke covers the Reed-Choked Culvert, Culvert Cache, and Reed Snake.
+- Beginner content breadth: all-room, all-shop, and all-enemy smoke covers the Reed-Choked Culvert, Culvert Cache, Reed Snake, Silted Canal Edge, Old Orchard Verge, Flooded Towpath, Marsh Spider, Orchard Crow, and Canal Newt.
 - Fieldcraft: \`DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills\`.
 - Item appraisal: \`DRCommandSmokeTests.test_forage_creates_gatherable_and_trains_survival_skills\` covers \`appraise wild_herbs\`.
 - Wound care: \`DRCommandSmokeTests.test_tend_defaults_to_field_bandage_and_treats_bleeding\` and \`test_field_bandage_treats_combat_bleeding\`.
