@@ -39,6 +39,7 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Added an automated Evennia terminal transcript coverage smoke that requires the command-first artifact to include account creation, guild joining/circling, current guild perk commands, shop/task/forage flow, Canal Bank Narrows content, and async combat maneuvers.
 - Added the Canal Bank Narrows beyond the Weir Watch Platform with a Bank Mink enemy, Canal Bank Supply Tin shop, forage support, shop task, and targeted route/content smoke assertions.
 - Added `perk` / `circle perk` as a registrar-gated action for invoking the current earned guild Circle milestone, with all-guild Circle 10 smoke proving mapped milestone skill gains and reload persistence.
 - Added `maneuvers` / `combat tactics` as a command-first combat guide that lists range-appropriate attacks, setup moves, defenses, equipment hints, and current aimed/feinted/defensive states.

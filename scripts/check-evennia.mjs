@@ -28,3 +28,4 @@ run('compile', venvPython, ['-m', 'compileall', 'evennia-game/commands', 'evenni
 run('tests', venvEvennia, ['test', '--settings', 'settings.py', 'world'], { cwd: join(root, 'evennia-game') });
 run('webclient route smoke', 'node', ['scripts/evennia-webclient-smoke.mjs']);
 run('transcript freshness smoke', 'node', ['scripts/evennia-transcript-fresh-smoke.mjs']);
+run('transcript coverage smoke', 'node', ['scripts/evennia-transcript-coverage-smoke.mjs']);
