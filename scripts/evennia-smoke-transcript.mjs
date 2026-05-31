@@ -145,8 +145,18 @@ You deliver South road supply note for the shopkeepers.
 You earn 9 trias.
 Trading, Appraisal, and Athletics gain practical experience.
 
+> east
+You walk into the Silted Canal Edge.
+
+> shop
+The Canal Edge Pack Stand offers field_bandage, travel_rations, and wild_herbs near the wet canal path.
+
+> scan
+You scan the area.
+marsh_spider is here at missile range.
+
 > forage
-You part the reeds around the culvert and find wild_herbs.
+You search the canal edge silt and find wild_herbs.
 Outdoorsmanship and Perception gain field experience.
 
 > get wild_herbs
