@@ -147,6 +147,7 @@ class DRCommandSmokeTests(TestCase):
         )
         character.db.guild_id = "commoner"
         character.db.guild_name = "Unaffiliated"
+        character.db.creation_complete = True
         character.db.circle = 1
         character.db.skills = build_starter_skills()
         character.db.wallet = {"plat": 0, "trias": 100, "lucan": 0, "silk": 0}
@@ -200,6 +201,27 @@ class DRCommandSmokeTests(TestCase):
         character.execute_cmd("join guild")
         self.assertEqual(character.db.guild_id, "commoner")
         self.assertEqual(character.db.guild_name, "Unaffiliated")
+
+    def test_new_character_must_choose_race_before_joining_guild(self):
+        build_crossing_world()
+        start = find_built_room(START_ROOM_ID)
+        character = create_object(
+            "typeclasses.characters.Character",
+            key="Creation Smoke",
+            location=start,
+            home=start,
+        )
+        self.assertFalse(character.db.creation_complete)
+        self.assertEqual(character.db.race, None)
+        self.walk_to_room(character, guild_registrar_rooms()["barbarian"])
+
+        character.execute_cmd("join guild")
+        self.assertEqual(character.db.guild_id, "commoner")
+        character.execute_cmd("race elf")
+        self.assertTrue(character.db.creation_complete)
+        self.assertEqual(character.db.race, "elf")
+        character.execute_cmd("join guild")
+        self.assertEqual(character.db.guild_id, "barbarian")
 
     def test_all_guilds_join_and_reach_circle_ten_through_commands(self):
         registrars = guild_registrar_rooms()

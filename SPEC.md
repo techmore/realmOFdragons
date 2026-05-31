@@ -39,6 +39,9 @@ Authoritative current priority for agents and automation. Historical `Next prior
 
 Completed current slice:
 
+- Made Evennia character creation state explicit: new characters start with race unchosen and `creation_complete = False`.
+- `race <race>` now completes creation for one of the 11 canonical races, while keeping the character unaffiliated and Circle 1.
+- `join guild` now rejects incomplete characters until race creation is complete; smoke coverage proves race must be chosen before registrar joining.
 - Promoted shop purchases and room pickups into physical Evennia `Item` objects carried by the character.
 - Updated sell/wield/wear/get flows to require and preserve object-backed item ownership while still maintaining the current pack/hands/equipment summaries.
 - Added smoke coverage proving bought, wielded, worn, picked-up, and sold items have corresponding physical object state.

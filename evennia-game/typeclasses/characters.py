@@ -33,8 +33,9 @@ class Character(ObjectParent, DefaultCharacter):
         """
 
         super().at_object_creation()
-        self.db.race = "human"
-        self.db.race_name = "Human"
+        self.db.race = None
+        self.db.race_name = "Unchosen"
+        self.db.creation_complete = False
         self.db.guild_id = "commoner"
         self.db.guild_name = "Unaffiliated"
         self.db.circle = 1

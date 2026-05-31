@@ -51,8 +51,8 @@ Recommendation:
 
 Status:
 
-- Partially implemented after this audit: added `race` / `choose race` command and pure identity tests proving all 11 canonical races can be selected only while unaffiliated at Circle 1.
-- Remaining work: wire this into Evennia's account/character creation flow so race selection is required before normal play.
+- Partially implemented after this audit: added `race` / `choose race` command, pure identity tests proving all 11 canonical races can be selected only while unaffiliated at Circle 1, explicit `creation_complete` state, unchosen race defaults, and command smoke proving guild joining is blocked until race creation is complete.
+- Remaining work: wire this into Evennia's account/character creation menu so race selection is presented immediately during account/character creation rather than as the first in-game command.
 
 ### P0 - Crossing map is not ported to Evennia
 

@@ -31,7 +31,7 @@ class CmdDRScore(Command):
 
     def func(self):
         character = self.caller
-        race_name = character.db.race_name or "Human"
+        race_name = character.db.race_name or "Unchosen"
         guild_name = character.db.guild_name or "Unaffiliated"
         circle = character.db.circle or 1
         wallet = character.db.wallet or {"plat": 0, "trias": 0, "lucan": 0, "silk": 0}
@@ -111,8 +111,8 @@ class CmdDRRace(Command):
     def func(self):
         character = self.caller
         state = {
-            "race": character.db.race or "human",
-            "race_name": character.db.race_name or "Human",
+            "race": character.db.race,
+            "race_name": character.db.race_name or "Unchosen",
             "guild_id": character.db.guild_id or "commoner",
             "guild_name": character.db.guild_name or "Unaffiliated",
             "circle": character.db.circle or 1,
@@ -124,6 +124,7 @@ class CmdDRRace(Command):
             character.db.guild_id = state["guild_id"]
             character.db.guild_name = state["guild_name"]
             character.db.circle = state["circle"]
+            character.db.creation_complete = True
         character.msg("\n".join(result["events"]))
 
 
@@ -142,6 +143,9 @@ class CmdDRJoinGuild(Command):
 
     def func(self):
         character = self.caller
+        if not character.db.creation_complete:
+            character.msg("Choose a race before joining a guild. Usage: race <race name>")
+            return
         room = character.location
         state = {
             "guild_id": character.db.guild_id or "commoner",
