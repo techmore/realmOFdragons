@@ -37,6 +37,13 @@ The existing Node/React prototype is now a reference implementation, not the tar
 
 Authoritative current priority for agents and automation. Historical `Next priority` entries below are implementation-log breadcrumbs and may be stale.
 
+Security maintenance, 2026-10-27: the reference Node server lockfile updates
+`proxy-addr` from 2.0.7 to 2.0.8 for GHSA-jqcg-44mw-7w3h. The server TypeScript
+build and six unit suites passed with package lifecycle scripts disabled.
+On an isolated Python 3.12 Evennia environment, all 93 world tests and the
+webclient and transcript checks passed; a loopback Telnet client connected and
+received a banner. No live game was changed. Five other npm audit findings remain.
+
 Completed current slice:
 
 - Added Circle 7+ `challenge` / `guild challenge` registrar trials for every guild, with distinct challenge names, late-beginner skill reinforcement, command help, all-guild Circle 10 smoke coverage, transcript coverage, and persistence validation.
